@@ -1,0 +1,82 @@
+﻿<Window x:Class="CAOGAttendeeProject.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CAOGAttendeeProject"
+        mc:Ignorable="d"
+        Title="CAOG Attendee Manager" Height="500" Width="1000">
+
+    <DockPanel>
+        <!--Menu Bar-->
+
+        <StackPanel DockPanel.Dock="Top">
+            <Menu>
+                <MenuItem Header="_File" Name="mnuFile">
+                    <MenuItem Header="Open..."/>
+                    <Separator/>
+                    <MenuItem Header="Exit" Name="mnuItemExit" Click="mnuItemExit_Click"/>
+                </MenuItem>
+                <MenuItem Header="_Edit"/>
+                <MenuItem Header="_View">
+                    <MenuItem Header="Charts..." Name="mnuItemCharts" Click="mnuItemCharts_Click"/>
+                </MenuItem>
+            </Menu>
+
+            <!--Toolbar-->
+
+            <ToolBarPanel>
+                <ToolBar VerticalAlignment="Top">
+                    <Label Name="lblSearch" Width="42" Height="22" FontSize="10" VerticalAlignment="Center">Search...</Label>
+                    <TextBox Name="txtSearch" Width="200" BorderBrush="#2E86C1" TextChanged="txtSearch_TextChanged" ></TextBox>
+                    
+                
+                    
+
+                </ToolBar>
+            </ToolBarPanel>
+        </StackPanel>
+
+
+        <!--Left Panel construction-->
+        <StackPanel DockPanel.Dock="Left" Width="200">
+            <Calendar Name="DatePick" SelectionMode="SingleDate" Loaded="DatePick_Loaded" DisplayDateChanged="DatePick_DisplayDateChanged" SelectedDatesChanged="DatePick_SelectedDateChanged"></Calendar>
+            <GroupBox Header="Filter by:" BorderBrush="#2E86C1" HorizontalAlignment="Left" Width="190">
+                <StackPanel>
+                    <CheckBox Margin="0,10,0,0" Name="chkAttended" Checked="chkAttended_Checked" Unchecked="chkAttended_Unchecked">Atended</CheckBox>
+                    <CheckBox Name="chkFollowup" Checked="chkFollowup_Checked" Unchecked="chkFollowup_Unchecked">Follow-Up</CheckBox>
+                    <CheckBox Name="chkResponded" Checked="chkResponded_Checked" Unchecked="chkResponded_Unchecked">Responded</CheckBox>
+                </StackPanel>
+            </GroupBox>
+            <TextBlock >Add Attendee:</TextBlock>
+            <TextBlock TextWrapping="Wrap">(John Smith, Date(mm/dd/yyyy), Attended, Last Attended)</TextBlock>
+            <StackPanel Orientation="Horizontal">
+                <TextBox Name="txtbox_addAttendee" HorizontalAlignment="Left" Width="160" TextChanged="txtbox_addAttendee_TextChanged"/>
+                <Button Name="btn_AddAttendee" Click="btn_AddAttendee_Click" IsEnabled="False" BorderBrush="#2E86C1">Add</Button>
+            </StackPanel>
+        </StackPanel>
+        
+
+
+        <Grid DockPanel.Dock="Bottom" Margin="2" Background="LightCoral" ShowGridLines="True">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <DataGrid Name="dataGrid" CanUserSortColumns="False" CanUserReorderColumns="False" ItemsSource="{Binding }" MouseDoubleClick="dataGridQ1_MouseDoubleClick"/>
+
+
+
+
+        </Grid>
+
+
+    </DockPanel>
+
+
+</Window>
