@@ -223,7 +223,7 @@ namespace CAOGAttendeeProject
         {
             // create Database from Excel Sheet
             //m_constr = "Data Source=caogserver.database.windows.net;Initial Catalog=caogattendeedb;User ID=sqladmin;Password=ASdfGH12#$";
-            m_constr = "Server=tcp:caogserver.database.windows.net,1433;Initial Catalog=TestDb2;Persist Security Info=False;User ID=sqladmin;Password=ASdfGH12#$;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30";
+            m_constr = m_credentials;
 
             using (var db = new ModelDb(m_constr))
             {
