@@ -48,12 +48,18 @@
                     <CheckBox Name="chkResponded" Checked="chkResponded_Checked" Unchecked="chkResponded_Unchecked">Responded</CheckBox>
                 </StackPanel>
             </GroupBox>
-            <TextBlock >Add Attendee:</TextBlock>
+
+                
+            <Button Name="btnAttendeeList" Click="btnAttendeeList_Click">Connection List</Button>
+            <Button Name="btnApplyChanges" Click="btnApplyChanges_Click">Apply Changes to DB</Button>
+            <!--
+            <TextBlock>Atten:</TextBlock>  
             <TextBlock TextWrapping="Wrap">(John Smith, Date(mm/dd/yyyy), Attended, Last Attended)</TextBlock>
             <StackPanel Orientation="Horizontal">
                 <TextBox Name="txtbox_addAttendee" HorizontalAlignment="Left" Width="160" TextChanged="txtbox_addAttendee_TextChanged"/>
                 <Button Name="btn_AddAttendee" Click="btn_AddAttendee_Click" IsEnabled="False" BorderBrush="#2E86C1">Add</Button>
             </StackPanel>
+            -->
         </StackPanel>
         
 
@@ -68,7 +74,7 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid Name="dataGrid" CanUserSortColumns="False" CanUserReorderColumns="False" ItemsSource="{Binding }" MouseDoubleClick="dataGridQ1_MouseDoubleClick"/>
+            <DataGrid Name="dataGrid" CanUserSortColumns="False" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseDoubleClick="dataGridQ1_MouseDoubleClick" />
 
 
 
