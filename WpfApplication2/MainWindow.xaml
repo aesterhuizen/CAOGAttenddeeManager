@@ -74,7 +74,7 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid Name="dataGrid" CanUserSortColumns="False" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseDoubleClick="dataGridQ1_MouseDoubleClick" />
+            <DataGrid Name="dataGrid" CanUserSortColumns="False" CanUserReorderColumns="False" ItemsSource="{Binding}" KeyUp="dataGrid_KeyUp" MouseDoubleClick="dataGridQ1_MouseDoubleClick" />
 
 
 

@@ -38,6 +38,7 @@ namespace CAOGAttendeeProject
         public int AttendeeId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public int HasThreeConsequitiveFollowUps { get; set; }
         public virtual List<Attendance_Info> AttendanceList { get; set; }
 
         
@@ -48,9 +49,8 @@ namespace CAOGAttendeeProject
 
         public int Attendance_InfoId { get; set; }
         public int AttendeeId { get; set; }
-        //public virtual Attendee Attendee { get; set; }
-        private bool HasThreeConsequitiveFollowUps { get; set; }
-
+        public virtual Attendee Attendee { get; set; }
+        
         public DateTime Last_Attended { get; set; }
         public DateTime Date { get; set; }
         public string Status { get; set; }
