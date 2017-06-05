@@ -29,9 +29,9 @@
                 <ToolBar VerticalAlignment="Top">
                     <Label Name="lblSearch" Width="42" Height="22" FontSize="10" VerticalAlignment="Center">Search...</Label>
                     <TextBox Name="txtSearch" Width="200" BorderBrush="#2E86C1" TextChanged="txtSearch_TextChanged" ></TextBox>
-                    
-                
-                    
+
+
+
 
                 </ToolBar>
             </ToolBarPanel>
@@ -41,17 +41,22 @@
         <!--Left Panel construction-->
         <StackPanel DockPanel.Dock="Left" Width="200">
             <Calendar Name="DatePick" SelectionMode="SingleDate" Loaded="DatePick_Loaded" DisplayDateChanged="DatePick_DisplayDateChanged" SelectedDatesChanged="DatePick_SelectedDateChanged"></Calendar>
-            <GroupBox Header="Filter by:" BorderBrush="#2E86C1" HorizontalAlignment="Left" Width="190">
+            <GroupBox Header="Filter by:" Margin="0,0,10,0" BorderBrush="#2E86C1" HorizontalAlignment="Left" Width="190">
                 <StackPanel>
-                    <CheckBox Margin="0,10,0,0" Name="chkAttended" Checked="chkAttended_Checked" Unchecked="chkAttended_Unchecked">Atended</CheckBox>
+                    <!--<CheckBox Name="chkDateFiler" Checked="chkDateFiler_Checked" Unchecked="chkDateFiler_Unchecked">Date</CheckBox>-->
+                    <CheckBox Name="chkAttended" Checked="chkAttended_Checked" Unchecked="chkAttended_Unchecked">Atended</CheckBox>
                     <CheckBox Name="chkFollowup" Checked="chkFollowup_Checked" Unchecked="chkFollowup_Unchecked">Follow-Up</CheckBox>
                     <CheckBox Name="chkResponded" Checked="chkResponded_Checked" Unchecked="chkResponded_Unchecked">Responded</CheckBox>
                 </StackPanel>
             </GroupBox>
+            <StackPanel Orientation="Horizontal">
+                <ToggleButton x:Name="btnAttendeeList" Width="95" ClickMode="Press" Click="btnAttendeeList_Click" Content="Connection List"/>
+                <ToggleButton x:Name="btnFollowUp" Width="95" Click="btnFollowUp_Click" Content="FollowUp Mode"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <Button Name="btnApplyChanges" Click="btnApplyChanges_Click">Apply Changes to DB</Button>
+            </StackPanel>
 
-                
-            <Button Name="btnAttendeeList" Click="btnAttendeeList_Click">Connection List</Button>
-            <Button Name="btnApplyChanges" Click="btnApplyChanges_Click">Apply Changes to DB</Button>
             <!--
             <TextBlock>Atten:</TextBlock>  
             <TextBlock TextWrapping="Wrap">(John Smith, Date(mm/dd/yyyy), Attended, Last Attended)</TextBlock>
@@ -61,7 +66,7 @@
             </StackPanel>
             -->
         </StackPanel>
-        
+
 
 
         <Grid DockPanel.Dock="Bottom" Margin="2" Background="LightCoral" ShowGridLines="True">
@@ -74,7 +79,7 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid Name="dataGrid" CanUserSortColumns="False" CanUserReorderColumns="False" ItemsSource="{Binding}" KeyUp="dataGrid_KeyUp" MouseDoubleClick="dataGridQ1_MouseDoubleClick" />
+            <DataGrid Name="dataGrid" CanUserSortColumns="True" CanUserReorderColumns="True" AutoGenerateColumns="True" ItemsSource="{Binding}" MouseDoubleClick="dataGridQ1_MouseDoubleClick" />
 
 
 
