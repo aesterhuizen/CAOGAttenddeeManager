@@ -30,10 +30,7 @@ namespace CAOGAttendeeProject
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-
-
-
-
+  
     public partial class MainWindow : Window
     {
 
@@ -59,7 +56,7 @@ namespace CAOGAttendeeProject
                     string line;
                     while ((line = sr.ReadLine()) != null)
                     {
-                        m_credentials = line;
+                        m_constr = line;
                     }
 
                 }
@@ -81,8 +78,8 @@ namespace CAOGAttendeeProject
             // FlagAttendeeForBacklog();
 
             Display_Database_in_Grid();
-            
            
+
 
 
 
@@ -95,20 +92,20 @@ namespace CAOGAttendeeProject
         //private string m_AttendeeID = "";
 
 
-       
+
+        //CheckBox ListChkBox = new CheckBox();
         private DataSet m_DataSet = new DataSet();
+        private SqlConnection m_mySqlConnection = null;
         private string m_constr = "";
         private string m_FirstName = "";
         private string m_LastName = "";
-        private string m_defaultSqlStr = "";
+      
         private bool m_NonChecked = true;
         DateTime m_DateSelected;
         private bool m_isAttendedChecked = false;
         private bool m_isFollowupChecked = false;
         private bool m_isRespondedChecked = false;
         private bool m_dateIsValid = false;
-        private string m_credentials = "";
-        private SqlConnection m_mySqlConnection = null;
         private bool m_modeIsInListView = false;
         private bool m_filterByDate = false;
 
@@ -144,7 +141,7 @@ namespace CAOGAttendeeProject
         
         private void clear_attendee_backlog()
         {
-            m_constr = m_credentials;
+           
             using (var db = new ModelDb(m_constr))
             {
 
@@ -165,8 +162,8 @@ namespace CAOGAttendeeProject
 
             //solution
 
-            m_constr = m_credentials;
-            int counter = 0;
+           
+           
             
 
             using (var db = new ModelDb(m_constr))
@@ -231,7 +228,7 @@ namespace CAOGAttendeeProject
 
 
 
-            m_constr = m_credentials;
+          
 
 
             using (var db = new ModelDb(m_constr))
@@ -287,7 +284,7 @@ namespace CAOGAttendeeProject
         {
             // create Database from Excel Sheet
          
-            m_constr = m_credentials;
+          
 
             using (var db = new ModelDb(m_constr))
             {
@@ -489,16 +486,18 @@ namespace CAOGAttendeeProject
         private void Display_Database_in_Grid()
         {
             InitDataSet();
+            
             dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
             
+            //dataGrid.Columns[0].Visibility = Visibility.Hidden;
         } // end  private void Display_Database_in_Grid()
 
-  
+
         private void InitDataSet()
         {
 
             // default dataview from database
-            m_constr = m_credentials;
+          
             //string mysqlstring = "SELECT Attendees.FirstName,Attendees.LastName, Attendance_Info.Date, Attendance_Info.Status " +
             //                "FROM Attendees " +
             //                "INNER JOIN Attendance_Info " +
@@ -508,42 +507,20 @@ namespace CAOGAttendeeProject
             //string sqlAttendees = "SELECT Attendees.AttendeeId, Attendees.HasThreeConsequitiveFollowUps, Attendees.FirstName,Attendees.LastName FROM Attendees ORDER BY Attendees.FirstName ASC";
             //string sqlAttendee_Info = "SELECT * FROM Attendance_Info";
 
-            SqlConnection myConnection = new SqlConnection(m_constr);
+            m_mySqlConnection = new SqlConnection(m_constr);
 
-            m_mySqlConnection = myConnection;
             
+
 
 
             DataTable Default_Data_Table = new DataTable("DefaultTable");
 
             try
             {
+                m_mySqlConnection.Open();
 
-                //myConnection.Open();
-                //Console.WriteLine($"Database Successfully opened!");
-
-                //SqlDataAdapter myAdapter1 = new SqlDataAdapter(sqlAttendees, myConnection);
-                //SqlDataAdapter myAdapter2 = new SqlDataAdapter(sqlAttendee_Info, myConnection);
-                //SqlDataAdapter myAdapter3 = new SqlDataAdapter(mysqlstring, myConnection);
-                //DataTable dt1 = new DataTable("AttendeesTbl");
-                //DataTable dt2 = new DataTable("AttendanceTbl");
-                //DataTable dt3 = new DataTable("DefaultTbl");
-
-                //DataSet ds = new DataSet();
-
-                //myAdapter1.Fill(dt1);
-                //myAdapter2.Fill(dt2);
-                //myAdapter3.Fill(dt3);
-
-                //ds.Tables.Add(dt1);
-                //ds.Tables.Add(dt2);
-                //ds.Tables.Add(dt3);
-
-                // m_DataSet = ds;
-
-
-
-                //myConnection.Close();
+                Console.WriteLine("\nDatabase Sucessfully Opened!\n");
+                
 
                 using (var db = new ModelDb(m_constr))
                 {
@@ -551,9 +528,9 @@ namespace CAOGAttendeeProject
                     var queryAttendees = from AttendeeRec in db.Attendees
                                          select AttendeeRec;
 
-
-                    Default_Data_Table.Columns.Add(new DataColumn("First Name"));
-                    Default_Data_Table.Columns.Add(new DataColumn("Last Name"));
+                    Default_Data_Table.Columns.Add(new DataColumn("AttendeeId"));
+                    Default_Data_Table.Columns.Add(new DataColumn("FirstName"));
+                    Default_Data_Table.Columns.Add(new DataColumn("LastName"));
                     Default_Data_Table.Columns.Add(new DataColumn("Date Last Attended"));
                     Default_Data_Table.Columns.Add(new DataColumn("Status"));
 
@@ -561,8 +538,9 @@ namespace CAOGAttendeeProject
                     foreach (var AttendeeRec in queryAttendees)
                     {
                         DataRow dr = Default_Data_Table.NewRow();
-                        dr["First Name"] = AttendeeRec.FirstName;
-                        dr["Last Name"] = AttendeeRec.LastName;
+                        dr["AttendeeId"] = AttendeeRec.AttendeeId;
+                        dr["FirstName"] = AttendeeRec.FirstName;
+                        dr["LastName"] = AttendeeRec.LastName;
 
 
                         var queryLastDateAttended = (from DateRec in AttendeeRec.AttendanceList
@@ -581,21 +559,50 @@ namespace CAOGAttendeeProject
                             
                         Default_Data_Table.Rows.Add(dr);
                     }
-
+                    Default_Data_Table.AcceptChanges();
                     m_DataSet.Tables.Add(Default_Data_Table);
 
 
+
+
                 }
+
+                //DataTable dt = new DataTable();
+                //int Xnum = 100;
+                //int Ynum = 100;
+
+                //for (int i = 0; i < Xnum; i++)
+                //    dt.Columns.Add(i.ToString(), typeof(Thing));
+
+                //for (int i = 0; i < Ynum; i++)
+                //    dt.Rows.Add();
+
+                //for (int x = 0; x < Xnum; ++x)
+                //{
+                //    for (int y = 0; y < Ynum; ++y)
+                //    {
+                //        dt.Rows[y][x] = new Thing("Cell " + x.ToString() + ", " + y.ToString(), -1);
+                //    }
+                //}
+                //dataGrid.DataContext = dt;
+
+
+
                 //---------------Make AttendeeList Table-------------------------------------------------------------------
                 DataTable AttendeeListTable = new DataTable("AttendeeListTable");
-                string date = DatePick.DisplayDate.ToString("MM-dd-yyyy");
+                            
+               // m_ListChkBox.Checked += new RoutedEventHandler(AttendeeListchkBox_CheckedChanged);
+                
 
-                AttendeeListTable.Columns.Add(new DataColumn("First Name"));
-                AttendeeListTable.Columns.Add(new DataColumn("Last Name"));
+                string date = DateCalendar.DisplayDate.ToString("MM-dd-yyyy");
+
+                AttendeeListTable.Columns.Add(new DataColumn("AttendeeId"));
+                AttendeeListTable.Columns.Add(new DataColumn("FirstName"));
+                AttendeeListTable.Columns.Add(new DataColumn("LastName"));
                 AttendeeListTable.Columns.Add(new DataColumn("Date"));
-                AttendeeListTable.Columns.Add(new DataColumn("Attended", typeof(bool)));
+                AttendeeListTable.Columns.Add(new DataColumn("Attended", typeof(bool) ));
 
-
+                
 
                 foreach (DataRow dr in m_DataSet.Tables["DefaultTable"].Rows)
                 {
@@ -603,38 +610,43 @@ namespace CAOGAttendeeProject
                     DataRow drNewAttendeeListRec = AttendeeListTable.NewRow();
 
 
-                    drNewAttendeeListRec["First Name"] = dr["First Name"];
-                    drNewAttendeeListRec["Last Name"] = dr["Last Name"];
+                    drNewAttendeeListRec["AttendeeId"] = dr["AttendeeId"];
+                    drNewAttendeeListRec["FirstName"] = dr["FirstName"];
+                    drNewAttendeeListRec["LastName"] = dr["LastName"];
                     drNewAttendeeListRec["Date"] = date;
                     drNewAttendeeListRec["Attended"] = false;
                     AttendeeListTable.Rows.Add(drNewAttendeeListRec);
                 }
-
+             
+                
+                AttendeeListTable.AcceptChanges();
                 m_DataSet.Tables.Add(AttendeeListTable);
 
 
-                //dataGrid.DataContext = AttendeeListTable;
-                //dataGrid.Columns[0].Visibility = Visibility.Hidden;
-                //m_modeIsInListView = true;
-               
 
-            }
+
+    }
             
             catch (Exception ex)
             {
                 Console.WriteLine($"Error occurred when performing database operation: {ex}");
             }
 
-
+            
 
 
         }
 
+        private void AttendeeListchkBox_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            var chkbox = sender as CheckBox;
 
+            if (chkbox.IsChecked == true)
+               btnApplyChanges.IsEnabled = true;
+            else
+                btnApplyChanges.IsEnabled = false;
 
-
-
-
+        }
         private void chkResponded_Checked(object sender, RoutedEventArgs e)
         {
 
@@ -787,16 +799,7 @@ namespace CAOGAttendeeProject
         private void dataGridQ1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             
-                var grid = sender as DataGrid;
-                IList<DataGridCellInfo> CellV = grid.SelectedCells;
-
-                DataRowView RowView = (DataRowView)CellV[0].Item;
-
-                m_FirstName = RowView.Row[0].ToString();
-                m_LastName = RowView.Row[1].ToString();
-
-                WndAttendeeInfo AttendeeInfoWindow = new WndAttendeeInfo(m_FirstName, m_LastName, m_mySqlConnection);
-                AttendeeInfoWindow.Show();
+               
             
         }
 
@@ -815,18 +818,103 @@ namespace CAOGAttendeeProject
 
         }
 
+        private void DisplayResultInNewTable(DataRow[] foundRows)
+        {
+            DataTable ResultTable = new DataTable("ResultsTable");
+
+            ResultTable.Columns.Add(new DataColumn("AttendeeId"));
+            ResultTable.Columns.Add(new DataColumn("FirstName"));
+            ResultTable.Columns.Add(new DataColumn("LastName"));
+            ResultTable.Columns.Add(new DataColumn("Date"));
+            ResultTable.Columns.Add(new DataColumn("Attended", typeof(bool) ));
+
+            for (int i = 0; i < foundRows.Length; i++)
+            {
+                ResultTable.ImportRow(foundRows[i]);
+            }
+            dataGrid.DataContext = ResultTable;
+            dataGrid.Columns[0].Visibility = Visibility.Hidden;
+        }
+
+        private void UpdateAttendeeListTableWithModifiedRows(DataTable table)
+        {
+
+            DataTable dt = m_DataSet.Tables["AttendeeListTable"];
+            string AttendeeId;
+            int Idx= 0 , rowIdx = 0;
+            string[] aryAttendeeIdsModified = new string[m_DataSet.Tables["AttendeeListTable"].Rows.Count]; 
+
+            //populate lstUpdateIdx with attendeeId that need to be updated
+            foreach (DataRow dr in table.Rows)
+            {
+                AttendeeId = dr["AttendeeId"].ToString() ;
+                aryAttendeeIdsModified[Idx] = AttendeeId;
+                Idx++;
+            }
+
+            Idx = 0;
+            //update AttendeeListTable's AttendeeIds
+            foreach (DataRow drAttendeeTable in m_DataSet.Tables["AttendeeListTable"].Rows)
+            {
+                
+                if (drAttendeeTable.ItemArray[0].ToString() == aryAttendeeIdsModified[Idx])
+                {
+                    m_DataSet.Tables["AttendeeListTable"].Rows[rowIdx]["Attended"] = true;
+                    Idx++;
+                }
+                rowIdx++;
+            }
+
+            m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
+
+
+        }
         private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
+           
             string query = "";
+
+            
+
             if (txtSearch.Text == "")
             {
-                dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
-                m_modeIsInListView = true;
+                if (m_modeIsInListView)
+                {
+                    dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+                    if (m_DataSet.HasChanges() )
+                    {
+                      m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
+
+                    }
+
+
+
+                    DataTable dt = dataGrid.DataContext as DataTable;
+                    DataView dv = new DataView(dt, dt.DefaultView.RowFilter = "FirstName LIKE '*'", "FirstName DESC",DataViewRowState.CurrentRows);
+                    dataGrid.Columns[0].Visibility = Visibility.Hidden;
+                }
+
+                else
+                {
+                    dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
+                    dataGrid.Columns[0].Visibility = Visibility.Hidden;
+                }
+
                 return;
             }
-            else
+
+            if (m_modeIsInListView)
             {
-                m_modeIsInListView = false;
+                dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+                if (m_DataSet.HasChanges())
+                {
+                   
+                    m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
+                }
+                
+                (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "FirstName LIKE '%" + txtSearch.Text + "%' OR LastName LIKE '%" + txtSearch.Text + "%'";
+            
+                return;
             }
             if (m_dateIsValid)
             {
@@ -935,10 +1023,7 @@ namespace CAOGAttendeeProject
             }
             
 
-            if (txtSearch.Text != "")
-            {
-
-            }
+            
             dataGrid.DataContext = dt;
 
 
@@ -1093,7 +1178,7 @@ namespace CAOGAttendeeProject
         }
 
      
-        private void DatePick_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        private void DateCalendar_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
             var calender = sender as Calendar;
             string query = "";
@@ -1198,7 +1283,7 @@ namespace CAOGAttendeeProject
 
 
 
-        private void DatePick_DisplayDateChanged(object sender, CalendarDateChangedEventArgs e)
+        private void DateCalendar_DisplayDateChanged(object sender, CalendarDateChangedEventArgs e)
         {
             var calendar = sender as Calendar;
             DateTime date = calendar.DisplayDate;
@@ -1228,7 +1313,7 @@ namespace CAOGAttendeeProject
 
         }
 
-        private void DatePick_Loaded(object sender, RoutedEventArgs e)
+        private void DateCalendar_Loaded(object sender, RoutedEventArgs e)
         {
 
             var calendar = sender as Calendar;
@@ -1264,7 +1349,7 @@ namespace CAOGAttendeeProject
         private void btnAttendeeList_Click(object sender, RoutedEventArgs e)
         {
             dataGrid.DataContext = m_DataSet.Tables["AttendeeListTable"];
-            
+           // dataGrid.Columns[0].Visibility = Visibility.Hidden;
             btnFollowUp.IsChecked = false;
             btnAttendeeList.IsChecked = true;
 
@@ -1283,7 +1368,14 @@ namespace CAOGAttendeeProject
         {
             m_modeIsInListView = true;
             chkAttended.IsChecked = false;
-            //chkDateFiler.IsChecked = false;
+            if (m_dateIsValid)
+            {
+                chkDateFiler.IsChecked = true;
+            }
+            else
+            {
+                chkDateFiler.IsChecked = false;
+            }
             chkFollowup.IsChecked = false;
             chkResponded.IsChecked = false;
 
@@ -1354,6 +1446,7 @@ namespace CAOGAttendeeProject
         {
             dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
             m_modeIsInListView = false;
+
             btnAttendeeList.IsChecked = false;
             btnFollowUp.IsChecked = true;
 
@@ -1379,11 +1472,111 @@ namespace CAOGAttendeeProject
 
 
         }
-    
+
+        private void btnFollowUp_Checked(object sender, RoutedEventArgs e)
+        {
+            Enable_Filters();
+
+        }
+        private void Enable_Filters()
+        {
+            chkAttended.IsEnabled = true;
+            chkFollowup.IsEnabled = true;
+            chkResponded.IsEnabled = true;
+        }
+
+        private void dataGrid_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            var grid = sender as DataGrid;
+            IList<DataGridCellInfo> CellV = grid.SelectedCells;
+
+            DataRowView RowView = (DataRowView)CellV[0].Item;
+
+            m_FirstName = RowView.Row[0].ToString();
+            m_LastName = RowView.Row[1].ToString();
+
+            WndAttendeeInfo AttendeeInfoWindow = new WndAttendeeInfo(m_FirstName, m_LastName, m_mySqlConnection);
+            AttendeeInfoWindow.Show();
+        }
+
+        private void chkDateFiler_Checked(object sender, RoutedEventArgs e)
+        {
+            m_filterByDate = true;
+            if (m_dateIsValid)
+            {
+               // DateCalendar.SelectedDatesChanged
+                
+               // SelectionChangedEventArgs e = new SelectionChangedEventArgs(,0,0)
+               // DateCalendar_SelectedDateChanged(DateCalendar, re)
+            }
+        }
+
+        private void chkDateFiler_Unchecked(object sender, RoutedEventArgs e)
+        {
+            m_filterByDate = false;
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            m_mySqlConnection.Close();
+        }
+
      
+        private void dataGrid_LayoutUpdated(object sender, EventArgs e)
+        {
+            //dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+            //foreach (DataRow dr in (dataGrid.DataContext as DataTable).Rows)
+            //{
+            //    if (dr.ItemArray[4].ToString() == "True")
+            //    {
+            //        Console.WriteLine("Checkbox is true!");
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine("Checkbox is false!");
+            //    }
+            //}
+            DataTable dt = dataGrid.DataContext as DataTable;
+            if (m_DataSet.HasChanges())
+            {
+                btnApplyChanges.IsEnabled = true;
+            }
+            
+            
+            
+        }
 
-      
+        private void dataGrid_MouseEnter(object sender, MouseEventArgs e)
+        {
+            
+        }
 
+        private void btnPreviousRec_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnNextRec_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnFirstRec_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnNewRec_Click(object sender, RoutedEventArgs e)
+        {
+            dataGrid.Focus();
+            //dataGrid.sele
+
+        }
+
+        private void btnLastRec_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     } // end MainWindow
 } 
 
