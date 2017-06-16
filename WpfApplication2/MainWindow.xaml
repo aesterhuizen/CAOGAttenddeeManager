@@ -57,7 +57,8 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" ToolTip="Current Date attendee attended church">
+                        <ComboBox Margin="0,0,0,0" IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" GotFocus="cmbDate_GotFocus" LostFocus="cmbDate_LostFocus" KeyUp="cmbDate_KeyUp" ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
+                            <!--<ComboBox IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" ToolTip="Current Date attendee attended church">-->
                             <Calendar Name="DateCalendar" SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" DisplayDateChanged="DateCalendar_DisplayDateChanged" SelectedDatesChanged="DateCalendar_SelectedDateChanged"></Calendar>
                         </ComboBox>
                         <CheckBox Grid.Row="1" Grid.Column="0" Margin="0,4,0,0" Name="chkDateFilter" Checked="chkDateFiler_Checked" Unchecked="chkDateFiler_Unchecked" FontSize="10">Date</CheckBox>

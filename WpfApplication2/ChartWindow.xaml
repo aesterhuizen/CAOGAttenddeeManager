@@ -7,7 +7,7 @@
         xmlns:chartingToolkit="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         x:Class="CAOGAttendeeProject.ChartWindow"
         mc:Ignorable="d"
-        Title="Attendee Chart" Height="500" Width="1000"
+        Title="Attendee Chart" Height="600" Width="1200"
         Loaded="Window_Loaded"
         Closed="Window_Closed">
 
@@ -21,18 +21,18 @@
             </Ribbon.ApplicationMenu>
             <RibbonTab Header="Home">
                
-                <RibbonGroup Header="Date Range" Width="180">
+                <RibbonGroup Header="Date Range" Width="200">
                     
                     <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                         <Label Name="lblDateStart" Content="Start Date:" FontSize="10" />
-                        <ComboBox Width="110" Margin="0,0,0,0" Name="cmbStartDate" IsEditable="True" ToolTip="Current Date attendee attended church">
+                        <ComboBox Width="130" Margin="0,0,0,0" Name="cmbStartDate" IsEditable="True" GotFocus="cmbStartDate_GotFocus" LostFocus="cmbStartDate_LostFocus" KeyDown="cmbStartDate_KeyDown" KeyUp="cmbStartDate_KeyUp" ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
                             <Calendar Name="DateStartCalendar" SelectionMode="SingleDate" Loaded="DateStartCalendar_Loaded" DisplayDateChanged="DateStartCalendar_DisplayDateChanged" SelectedDatesChanged="DateStartCalendar_SelectedDatesChanged"></Calendar>
                         </ComboBox>
                     </StackPanel>
                     
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                         <Label Name="lblDateEnd" Content="End Date: " FontSize="10" />
-                        <ComboBox Width="110" Margin="0,0,0,0" Name="cmbEndDate" IsEditable="True" ToolTip="Current Date attendee attended church">
+                        <ComboBox Width="130" Margin="0,0,0,0" Name="cmbEndDate" IsEditable="True" GotFocus="cmbEndDate_GotFocus" LostFocus="cmbEndDate_LostFocus" KeyUp="cmbEndDate_KeyUp" ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
                             <Calendar Name="DateEndCalendar" SelectionMode="SingleDate" Loaded="DateEndCalendar_Loaded"  DisplayDateChanged="DateEndCalendar_DisplayDateChanged" SelectedDatesChanged="DateEndCalendar_SelectedDatesChanged"></Calendar>
                         </ComboBox>
                     </StackPanel>

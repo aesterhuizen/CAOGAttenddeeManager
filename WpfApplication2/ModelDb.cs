@@ -51,8 +51,8 @@ namespace CAOGAttendeeProject
         public int AttendeeId { get; set; }
         public virtual Attendee Attendee { get; set; }
         
-        public DateTime Last_Attended { get; set; }
-        public DateTime Date { get; set; }
+        public string Last_Attended { get; set; }
+        public string Date { get; set; }
         public string Status { get; set; }
 
         
