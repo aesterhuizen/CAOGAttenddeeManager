@@ -361,7 +361,7 @@ namespace CAOGAttendeeProject
                     {
                         btnPlot.IsEnabled = false;
                         MessageBox.Show("Invalid end date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-                        Console.WriteLine($"{ex}");
+                      
 
                     }
                 }
@@ -397,7 +397,7 @@ namespace CAOGAttendeeProject
                 {
                     btnPlot.IsEnabled = false;
                     MessageBox.Show("Invalid end date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-                    Console.WriteLine($"{ex}");
+                   
                    
                 }
             }

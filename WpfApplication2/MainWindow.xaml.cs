@@ -905,7 +905,8 @@ namespace CAOGAttendeeProject
                 if (m_filterByDate == false && m_isAttendedChecked == false && m_isFollowupChecked == false && m_isRespondedChecked == false)
                 {
                     m_NonChecked = true;
-                    dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
+                    
+                    (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "[First Name] LIKE '*'";
                     dataGrid.Columns[0].Visibility = Visibility.Hidden;
                     return;
                 }
@@ -921,8 +922,8 @@ namespace CAOGAttendeeProject
                     }
 
 
-                    DataTable dt = dataGrid.DataContext as DataTable;
-                    DataView dv = new DataView(dt, dt.DefaultView.RowFilter = "[First Name] LIKE '*'", "[First Name] DESC", DataViewRowState.CurrentRows);
+                    
+                    (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "[First Name] LIKE '*'";
                     dataGrid.Columns[0].Visibility = Visibility.Hidden;
                     return;
                 }
@@ -951,6 +952,8 @@ namespace CAOGAttendeeProject
                 string date = m_DateSelected.ToString("MM-dd-yyyy");
                 if (m_filterByDate && m_dateIsValid)
                 {
+                    
+
                     query = (txtSearch.Text == "") ? "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
                              "FROM Attendees " +
                              "INNER JOIN Attendance_Info " +
@@ -1035,7 +1038,8 @@ namespace CAOGAttendeeProject
                 }
                 else
                 {
-                    (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "[First Name] LIKE '%" + txtSearch.Text + "%' OR [Last Name] LIKE '%" + txtSearch.Text + "%'";
+                    DataTable dt = dataGrid.DataContext as DataTable;
+                    DataView dv = new DataView(dt,dt.DefaultView.RowFilter = "[First Name] LIKE '%" + txtSearch.Text + "%' OR [Last Name] LIKE '%" + txtSearch.Text + "%'","[First Name] DESC",DataViewRowState.CurrentRows);
                     return;
                 }
             }
@@ -1827,6 +1831,7 @@ namespace CAOGAttendeeProject
                         {
                             m_dateIsValid = false;
                             cmbDate.Text = "Date is invalid.";
+                            
 
                         }
                     }
@@ -1948,6 +1953,8 @@ namespace CAOGAttendeeProject
             if (cmbDate.Text == "")
                 cmbDate.Text = "Select or type date";
         }
+
+      
     } // end MainWindow
 } 
 

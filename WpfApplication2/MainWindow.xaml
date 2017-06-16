@@ -9,16 +9,16 @@
         Loaded="Window_Loaded"
         Closed="Window_Closed">
 
-   
+
     <DockPanel>
-        
+
         <Ribbon DockPanel.Dock="Top" Title="Attendee Manager">
             <Ribbon.ApplicationMenu>
                 <RibbonApplicationMenu Label="File">
                     <RibbonApplicationMenuItem Header="Exit" Click="RibbonApplicationMenuItem_Click_Exit" ImageSource="Resources\Exit.ico"/>
                 </RibbonApplicationMenu>
-            </Ribbon.ApplicationMenu> 
-            <RibbonTab Header="Home">
+            </Ribbon.ApplicationMenu>
+            <RibbonTab Header="Home" Margin="2,-1,-2,1">
                 <RibbonGroup Header="Search">
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
@@ -35,13 +35,13 @@
                                       SmallImageSource="Resources\NewRec.ico" 
                                       Click="btnNewRec_Click" 
                                       ToolTip="Apply all changes made to the database"/>
-                            
+
                             <RibbonButton x:Name="btnApplyChanges" 
                                       Label="Apply Changes" 
                                       SmallImageSource="Resources\ApplyChanges.ico" 
                                       Click="btnApplyChanges_Click" 
                                       ToolTip="Apply all changes made to the database"/>
-                           
+
                         </StackPanel>
                     </StackPanel>
                 </RibbonGroup>
@@ -66,30 +66,31 @@
                         <CheckBox Grid.Row="2" Grid.Column="0" Margin="0,4,0,0" Name="chkFollowup" Checked="chkFollowup_Checked" Unchecked="chkFollowup_Unchecked" FontSize="10">Follow-Up</CheckBox>
                         <CheckBox Grid.Row="2" Grid.Column="1" Margin="0,4,0,0" Name="chkResponded" Checked="chkResponded_Checked" Unchecked="chkResponded_Unchecked" FontSize="10">Responded</CheckBox>
                     </Grid>
-                                        
+
 
                 </RibbonGroup>
-                <RibbonGroup Header="View" Width="120">
-                        <RibbonToggleButton x:Name="btnAttendeeList" Label="Attendee List" 
+                <RibbonGroup Header="View" Width="122" Margin="0,1">
+
+                    <RibbonToggleButton x:Name="btnAttendeeList" Width="96" Label="Attendee List" 
                                       SmallImageSource="Resources\Checklist2.ico" 
                                       Height="22" 
                                       Click="btnAttendeeList_Click" 
-                                      ToolTip="Allows the user to  check add church attendees for the day." />
-                        
-                        <RibbonToggleButton x:Name="btnFollowUp" Label="Filter Mode" 
+                                      ToolTip="Allows the user to  check add church attendees for the day." HorizontalAlignment="Left" VerticalAlignment="Top" />
+
+                    <RibbonToggleButton x:Name="btnFollowUp" Margin="0,0,-10,0" Width="96" Label="Filter Mode" 
                                       SmallImageSource="Resources\FilterAdd.ico" 
                                       Height="22" 
                                       Click="btnFollowUp_Click" 
-                                      ToolTip="Allows the user to filter church attendees by using the filter options"/>
+                                      ToolTip="Allows the user to filter church attendees by using the filter options" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 
-                        <RibbonButton x:Name="btnChart" Label="Charts" 
+                    <RibbonButton x:Name="btnChart" Width="96" Label="Charts"  
                                       SmallImageSource="Resources\Chart2.ico" 
                                       Height="22" 
                                       Click="btnChart_Click" 
-                                      ToolTip="Allows the user to  check add church attendees for the day." />
-                
+                                      ToolTip="Allows the user to  check add church attendees for the day." HorizontalAlignment="Left" VerticalAlignment="Top" />
+
                 </RibbonGroup>
-                
+
             </RibbonTab>
         </Ribbon>
 
