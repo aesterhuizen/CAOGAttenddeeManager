@@ -1,10 +1,84 @@
-﻿<Window x:Class="CAOGAttendeeProject.ChartWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WpfApplication2"
+        xmlns:local="clr-namespace:CAOGAttendeeProject"
+        xmlns:chartingToolkit="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
+        x:Class="CAOGAttendeeProject.ChartWindow"
         mc:Ignorable="d"
-        Title="Attendee Chart" Height="300" Width="300">
-    
+        Title="Attendee Chart" Height="500" Width="1000"
+        Loaded="Window_Loaded"
+        Closed="Window_Closed">
+
+    <DockPanel>
+
+        <Ribbon DockPanel.Dock="Top" Title="Attendee Charts">
+            <Ribbon.ApplicationMenu>
+                <RibbonApplicationMenu Label="File">
+                    <RibbonApplicationMenuItem Header="Exit" Click="RibbonApplicationMenuItem_Click_Exit" ImageSource="Resources\Exit.ico"/>
+                </RibbonApplicationMenu>
+            </Ribbon.ApplicationMenu>
+            <RibbonTab Header="Home">
+               
+                <RibbonGroup Header="Date Range" Width="180">
+                    
+                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                        <Label Name="lblDateStart" Content="Start Date:" FontSize="10" />
+                        <ComboBox Width="110" Margin="0,0,0,0" Name="cmbStartDate" IsEditable="True" ToolTip="Current Date attendee attended church">
+                            <Calendar Name="DateStartCalendar" SelectionMode="SingleDate" Loaded="DateStartCalendar_Loaded" DisplayDateChanged="DateStartCalendar_DisplayDateChanged" SelectedDatesChanged="DateStartCalendar_SelectedDatesChanged"></Calendar>
+                        </ComboBox>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Label Name="lblDateEnd" Content="End Date: " FontSize="10" />
+                        <ComboBox Width="110" Margin="0,0,0,0" Name="cmbEndDate" IsEditable="True" ToolTip="Current Date attendee attended church">
+                            <Calendar Name="DateEndCalendar" SelectionMode="SingleDate" Loaded="DateEndCalendar_Loaded"  DisplayDateChanged="DateEndCalendar_DisplayDateChanged" SelectedDatesChanged="DateEndCalendar_SelectedDatesChanged"></Calendar>
+                        </ComboBox>
+                    </StackPanel>
+                    
+                </RibbonGroup>
+                <RibbonGroup Header="Actions" Width="70">
+                    <RibbonButton Label="Plot" Name="btnPlot" SmallImageSource="Resources\Chart2.ico" Click="btnPlot_Click"/>
+                </RibbonGroup>
+                <!--<RibbonGroup Header="View" Width="100">
+                    <StackPanel Margin="0,0,0,0">
+                        <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                           
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="35"/>
+                        </Grid.ColumnDefinitions>
+
+                       <RibbonToggleButton HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0" x:Name="btnBarChart"
+                                      SmallImageSource="Resources\Chart2.ico" 
+                                      Click="btnBarChart_Click"
+                                      ToolTip="Shows data in Colunm chart" />
+
+                       <RibbonToggleButton HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1" x:Name="btnLineChart"  
+                                      SmallImageSource="Resources\LineChart.ico" 
+                                      Click="btnLineChart_Click"
+                                      ToolTip="Shows data in a Line Chart"/>
+
+                        </Grid>
+                    </StackPanel>
+                </RibbonGroup>-->
+                
+                
+            </RibbonTab>
+        </Ribbon>
+
+          <chartingToolkit:Chart DockPanel.Dock="Bottom" Name="AttendeeChart" Title="Attendee: Attended/Responded/FolloUp Chart">
+
+            <chartingToolkit:ColumnSeries Title="Attended" DependentValuePath="Value" IndependentValuePath="Key" ItemsSource="{Binding [0]}" DataContext="{Binding}"/>
+            <chartingToolkit:ColumnSeries Title="FollowUp" Background="#003366" DependentValuePath="Value" IndependentValuePath="Key" ItemsSource="{Binding [1]}" DataContext="{Binding}"/>
+            <chartingToolkit:ColumnSeries Title="Responded" Background="#FFF68F" DependentValuePath="Value" IndependentValuePath="Key" ItemsSource="{Binding [2]}" DataContext="{Binding}"/>
+            
+        </chartingToolkit:Chart>
+        
+    </DockPanel>
+
 </Window>
