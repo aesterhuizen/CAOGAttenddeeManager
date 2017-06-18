@@ -172,19 +172,12 @@ namespace CAOGAttendeeProject
             else
             {
 
-                m_StartDateSelected = date;
+               // m_StartDateSelected = date;
 
 
-                if (date.DayOfWeek == DayOfWeek.Sunday)
-                {
-                    m_StartDateIsValid = true;
-                    cmbStartDate.Text = date.ToString("MM-dd-yyyy");
-                }
-                else
-                {
                     m_StartDateIsValid = false;
                     cmbStartDate.Text = "Select or type date";
-                }
+
                 Add_Blackout_Dates(ref calendar);
             }
 
@@ -203,19 +196,12 @@ namespace CAOGAttendeeProject
             else
             {
 
-                m_EndDateSelected = date;
+               // m_EndDateSelected = date;
 
 
-                if (date.DayOfWeek == DayOfWeek.Sunday)
-                {
-                    m_EndDateIsValid = true;
-                    cmbEndDate.Text = date.ToString("MM-dd-yyyy");
-                }
-                else
-                {
-                    m_EndDateIsValid = false;
+                m_EndDateIsValid = false;
                     cmbEndDate.Text = "Select or type date";
-                }
+              
                 Add_Blackout_Dates(ref calendar);
             }
 
@@ -301,24 +287,39 @@ namespace CAOGAttendeeProject
 
             Regex pattern = new Regex(@"^[0-9]{2}-[0-9]{2}-[0-9]{4}");
 
-            if (!pattern.IsMatch(cmbStartDate.Text) || !pattern.IsMatch(cmbEndDate.Text) )
+            if ( !(pattern.IsMatch(cmbStartDate.Text) ||  pattern.IsMatch(cmbEndDate.Text)) )
             {
                 MessageBox.Show("Date is in the wrong format. ex. (mm-dd-yyyy)", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
 
             }
             else
             {
+                if (m_StartDateIsValid && !m_EndDateIsValid)
+                {
+                    m_EndDateSelected = m_StartDateSelected;
+
+                }
+                else if (!m_StartDateIsValid && m_EndDateIsValid)
+                {
+                    m_StartDateSelected = m_EndDateSelected;
+
+                }
+                else if (m_StartDateIsValid && m_EndDateIsValid)
+                {
 
 
-                if (m_StartDateSelected > m_EndDateSelected)
-                {
-                    MessageBoxResult mr = MessageBox.Show("Start date cannot be greater than end date.", "Date range error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    if (m_StartDateSelected > m_EndDateSelected)
+                    {
+                        MessageBoxResult mr = MessageBox.Show("Start date cannot be greater than end date.", "Date range error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+
                 }
-                else
-                {
-                    showColumnChart();
-                }
+
+                showColumnChart();
+
+
             }
+            
 
         }
 
@@ -341,7 +342,8 @@ namespace CAOGAttendeeProject
                btnPlot.IsEnabled = true;
 
            
-
+             if (e.Key == Key.Enter)
+            {
                 Regex pattern = new Regex(@"^[0-9]{2}-[0-9]{2}-[0-9]{4}");
 
                 if (pattern.IsMatch(cmbStartDate.Text))
@@ -352,19 +354,32 @@ namespace CAOGAttendeeProject
                     string day = splitstr[1];
                     string year = splitstr[2];
 
+                
 
                     try
                     {
                         m_StartDateSelected = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day));
+                        m_StartDateIsValid = true;
+                        btnPlot_Click(sender, e);
                     }
                     catch (Exception ex)
                     {
                         btnPlot.IsEnabled = false;
-                        MessageBox.Show("Invalid end date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-                      
+                        m_StartDateIsValid = false;
+                        MessageBox.Show("Invalid start date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
+
 
                     }
                 }
+                else
+                {
+                    btnPlot.IsEnabled = false;
+                    m_StartDateIsValid = false;
+                    MessageBox.Show("Invalid snd date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                
+            }
+                
                
            
         }
@@ -377,30 +392,42 @@ namespace CAOGAttendeeProject
                 btnPlot.IsEnabled = true;
 
          
-         
-            
-            Regex pattern = new Regex(@"^[0-9]{2}-[0-9]{2}-[0-9]{4}");
+         if (e.Key == Key.Enter)
+         {
+                Regex pattern = new Regex(@"^[0-9]{2}-[0-9]{2}-[0-9]{4}");
 
-            if (pattern.IsMatch(cmbEndDate.Text))
-            {
-                string text = pattern.Match(cmbEndDate.Text).ToString();
-                string[] splitstr = text.Split('-');
-                string month = splitstr[0];
-                string day = splitstr[1];
-                string year = splitstr[2];
-
-                try
+                if (pattern.IsMatch(cmbEndDate.Text))
                 {
-                    m_EndDateSelected = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day));
+                    string text = pattern.Match(cmbEndDate.Text).ToString();
+                    string[] splitstr = text.Split('-');
+                    string month = splitstr[0];
+                    string day = splitstr[1];
+                    string year = splitstr[2];
+
+                    try
+                    {
+                        m_EndDateSelected = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day));
+                        m_EndDateIsValid = true;
+                        btnPlot_Click(sender,e);
+                    }
+                    catch (Exception ex)
+                    {
+                        btnPlot.IsEnabled = false;
+                        m_EndDateIsValid = false;
+                        MessageBox.Show("Invalid end date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
+
+
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
                     btnPlot.IsEnabled = false;
+                    m_EndDateIsValid = false;
                     MessageBox.Show("Invalid end date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-                   
-                   
                 }
             }
+            
+         
           
 
         

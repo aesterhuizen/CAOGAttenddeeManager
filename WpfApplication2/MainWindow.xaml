@@ -45,7 +45,7 @@
                         </StackPanel>
                     </StackPanel>
                 </RibbonGroup>
-                <RibbonGroup Header="Filter by" Width="170">
+                <RibbonGroup Header="Filter options" Width="170">
 
                     <Grid Margin="0,2,0,0" Width="150" Height="70">
                         <Grid.RowDefinitions>
@@ -57,7 +57,7 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Margin="0,0,0,0" IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" GotFocus="cmbDate_GotFocus" LostFocus="cmbDate_LostFocus" KeyUp="cmbDate_KeyUp" ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
+                        <ComboBox Margin="0,0,0,0" BorderBrush="#2E86C1" IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" GotFocus="cmbDate_GotFocus" LostFocus="cmbDate_LostFocus" KeyUp="cmbDate_KeyUp" ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
                             <!--<ComboBox IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" ToolTip="Current Date attendee attended church">-->
                             <Calendar Name="DateCalendar" SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" DisplayDateChanged="DateCalendar_DisplayDateChanged" SelectedDatesChanged="DateCalendar_SelectedDateChanged"></Calendar>
                         </ComboBox>
@@ -75,7 +75,7 @@
                                       SmallImageSource="Resources\Checklist2.ico" 
                                       Height="22" 
                                       Click="btnAttendeeList_Click" 
-                                      ToolTip="Allows the user to  check add church attendees for the day." HorizontalAlignment="Left" VerticalAlignment="Top" />
+                                      ToolTip="Allows the user to  check off or add new church attendees for the day display in the date dropdown box." HorizontalAlignment="Left" VerticalAlignment="Top" />
 
                     <RibbonToggleButton x:Name="btnFollowUp" Margin="0,0,-10,0" Width="96" Label="Filter Mode" 
                                       SmallImageSource="Resources\FilterAdd.ico" 
