@@ -103,7 +103,7 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid Name="dataGrid" CanUserAddRows="True" CanUserDeleteRows="False" CanUserSortColumns="False" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" SelectionChanged="dataGrid_SelectionChanged" />
+            <DataGrid Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" SelectionChanged="dataGrid_SelectionChanged" />
         </Grid>
 
 

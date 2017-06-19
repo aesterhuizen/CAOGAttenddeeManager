@@ -25,7 +25,7 @@
                     
                     <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                         <Label Name="lblDateStart" Content="Start Date:" FontSize="10" />
-                        <ComboBox Width="130" Margin="0,0,0,0" Name="cmbStartDate" IsEditable="True" GotFocus="cmbStartDate_GotFocus" LostFocus="cmbStartDate_LostFocus" KeyDown="cmbStartDate_KeyDown" KeyUp="cmbStartDate_KeyUp" ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
+                        <ComboBox Width="130" Margin="0,0,0,0" Name="cmbStartDate" IsEditable="True" GotFocus="cmbStartDate_GotFocus" LostFocus="cmbStartDate_LostFocus" KeyUp="cmbStartDate_KeyUp" ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
                             <Calendar Name="DateStartCalendar" SelectionMode="SingleDate" Loaded="DateStartCalendar_Loaded" DisplayDateChanged="DateStartCalendar_DisplayDateChanged" SelectedDatesChanged="DateStartCalendar_SelectedDatesChanged"></Calendar>
                         </ComboBox>
                     </StackPanel>

@@ -51,7 +51,9 @@ namespace CAOGAttendeeProject
             var dates = new List<DateTime>();
 
 
+        
 
+        
 
             for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
             {
@@ -64,50 +66,50 @@ namespace CAOGAttendeeProject
 
             }
 
+           
+                foreach (var d in dates)
+                {
 
-            foreach (var d in dates)
-            {
+                    string date = d.ToString("MM-dd-yyyy");
 
-                string date = d.ToString("MM-dd-yyyy");
+                    var queryAllAttendeesAttended_Per_Date = (from AttendanceAttendedRec in m_db.Attendance_Info
+                                                              where AttendanceAttendedRec.Date == date
+                                                             && AttendanceAttendedRec.Status == "Attended"
+                                                              select AttendanceAttendedRec).ToArray();
 
-                var queryAllAttendeesAttended_Per_Date = (from AttendanceAttendedRec in m_db.Attendance_Info
-                                                          where AttendanceAttendedRec.Date == date
-                                                         && AttendanceAttendedRec.Status == "Attended"
-                                                          select AttendanceAttendedRec).ToArray();
+                    var queryAllAttendeesFollowUp_Per_Date = (from AttendanceFollowUpRecs in m_db.Attendance_Info
+                                                              where AttendanceFollowUpRecs.Date == date
+                                                              && AttendanceFollowUpRecs.Status == "Follow-Up"
+                                                              select AttendanceFollowUpRecs).ToArray();
 
-                var queryAllAttendeesFollowUp_Per_Date = (from AttendanceFollowUpRecs in m_db.Attendance_Info
-                                                          where AttendanceFollowUpRecs.Date == date
-                                                          && AttendanceFollowUpRecs.Status == "Follow-Up"
-                                                          select AttendanceFollowUpRecs).ToArray();
-
-                var queryAllAttendeesResponded_Per_Date = (from AttendanceRespondedRecs in m_db.Attendance_Info
-                                                           where AttendanceRespondedRecs.Date == date
-                                                           && AttendanceRespondedRecs.Status == "Responded"
-                                                           select AttendanceRespondedRecs).ToArray();
-
-
-                int AttendedSum = (queryAllAttendeesAttended_Per_Date.Length != 0) ?
-                    queryAllAttendeesAttended_Per_Date.Count() : 0;
-
-                int FollowUpSum = (queryAllAttendeesFollowUp_Per_Date.Length != 0) ?
-                    queryAllAttendeesFollowUp_Per_Date.Count() : 0;
-
-                int RespondedSum = (queryAllAttendeesResponded_Per_Date.Length != 0) ?
-                    queryAllAttendeesResponded_Per_Date.Count() : 0;
-
-                kvpAttended.Add(new KeyValuePair<string, int>(date, AttendedSum));
-                kvpFollowUp.Add(new KeyValuePair<string, int>(date, FollowUpSum));
-                kvpResponded.Add(new KeyValuePair<string, int>(date, RespondedSum));
+                    var queryAllAttendeesResponded_Per_Date = (from AttendanceRespondedRecs in m_db.Attendance_Info
+                                                               where AttendanceRespondedRecs.Date == date
+                                                               && AttendanceRespondedRecs.Status == "Responded"
+                                                               select AttendanceRespondedRecs).ToArray();
 
 
-            }
+                    int AttendedSum = (queryAllAttendeesAttended_Per_Date.Length != 0) ?
+                        queryAllAttendeesAttended_Per_Date.Count() : 0;
 
-            ChartData.Add(kvpAttended);
-            ChartData.Add(kvpFollowUp);
-            ChartData.Add(kvpResponded);
+                    int FollowUpSum = (queryAllAttendeesFollowUp_Per_Date.Length != 0) ?
+                        queryAllAttendeesFollowUp_Per_Date.Count() : 0;
 
+                    int RespondedSum = (queryAllAttendeesResponded_Per_Date.Length != 0) ?
+                        queryAllAttendeesResponded_Per_Date.Count() : 0;
+
+                    kvpAttended.Add(new KeyValuePair<string, int>(date, AttendedSum));
+                    kvpFollowUp.Add(new KeyValuePair<string, int>(date, FollowUpSum));
+                    kvpResponded.Add(new KeyValuePair<string, int>(date, RespondedSum));
+
+
+                }
+
+                ChartData.Add(kvpAttended);
+                ChartData.Add(kvpFollowUp);
+                ChartData.Add(kvpResponded);
+           
             return ChartData;
-        }
+   }
 
         private void showColumnChart()
         {
@@ -287,41 +289,117 @@ namespace CAOGAttendeeProject
 
             Regex pattern = new Regex(@"^[0-9]{2}-[0-9]{2}-[0-9]{4}");
 
-            if ( !(pattern.IsMatch(cmbStartDate.Text) ||  pattern.IsMatch(cmbEndDate.Text)) )
+            if (cmbStartDate.Text != "Select or type date")
             {
-                MessageBox.Show("Date is in the wrong format. ex. (mm-dd-yyyy)", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-
-            }
-            else
-            {
-                if (m_StartDateIsValid && !m_EndDateIsValid)
-                {
-                    m_EndDateSelected = m_StartDateSelected;
-
-                }
-                else if (!m_StartDateIsValid && m_EndDateIsValid)
-                {
-                    m_StartDateSelected = m_EndDateSelected;
-
-                }
-                else if (m_StartDateIsValid && m_EndDateIsValid)
+                if (pattern.IsMatch(cmbStartDate.Text))
                 {
 
 
-                    if (m_StartDateSelected > m_EndDateSelected)
+                    string text = pattern.Match(cmbStartDate.Text).ToString();
+                    string[] splitstr = text.Split('-');
+                    string month = splitstr[0];
+                    string day = splitstr[1];
+                    string year = splitstr[2];
+
+
+
+                    try
                     {
-                        MessageBoxResult mr = MessageBox.Show("Start date cannot be greater than end date.", "Date range error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        m_StartDateSelected = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day));
+                        m_StartDateIsValid = true;
+
                     }
+                    catch (Exception ex)
+                    {
+                        btnPlot.IsEnabled = false;
+                        m_StartDateIsValid = false;
+                        MessageBox.Show("Invalid date format. Date format must be in the form (mm-dd-yyyy)", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
 
+                    }
                 }
+                else
+                {
+                    btnPlot.IsEnabled = false;
+                    m_StartDateIsValid = false;
+                    MessageBox.Show("Invalid date format. Date format must be in the form (mm-dd-yyyy)", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
 
-                showColumnChart();
+            if (cmbEndDate.Text != "Select or type date")
+            {
+
+                if (pattern.IsMatch(cmbEndDate.Text))
+                {
+                    string text = pattern.Match(cmbEndDate.Text).ToString();
+                    string[] splitstr = text.Split('-');
+                    string month = splitstr[0];
+                    string day = splitstr[1];
+                    string year = splitstr[2];
+
+
+
+
+                    try
+                    {
+                        m_EndDateSelected = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day));
+                        m_EndDateIsValid = true;
+
+                    }
+                    catch (Exception ex)
+                    {
+                        btnPlot.IsEnabled = false;
+                        m_EndDateIsValid = false;
+                        MessageBox.Show("Invalid date format. Date format must be in the form (mm-dd-yyyy)", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+
+                    }
+                }
+                else
+                {
+                    btnPlot.IsEnabled = false;
+                    m_EndDateIsValid = false;
+                    MessageBox.Show("Invalid date format. Date format must be in the form (mm-dd-yyyy)", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
 
 
             }
-            
 
-        }
+        
+            if (m_StartDateIsValid && !m_EndDateIsValid)
+            {
+                m_EndDateSelected = m_StartDateSelected;
+
+            }
+            else if (!m_StartDateIsValid && m_EndDateIsValid)
+            {
+                m_StartDateSelected = m_EndDateSelected;
+
+            }
+            else if (m_StartDateIsValid && m_EndDateIsValid)
+            {
+
+
+                if (m_StartDateSelected > m_EndDateSelected)
+                {
+                    MessageBoxResult mr = MessageBox.Show("Start date cannot be greater than end date.", "Date range error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                TimeSpan tspan = m_EndDateSelected - m_StartDateSelected;
+
+                if (tspan.Days > 375 )
+                {
+                    MessageBoxResult mr = MessageBox.Show("End date too far into the future. Maximum timespan is 1 year", "Date range error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+            }
+
+            showColumnChart();
+
+    }
 
         private void Window_Closed(object sender, EventArgs e)
         {
@@ -344,40 +422,9 @@ namespace CAOGAttendeeProject
            
              if (e.Key == Key.Enter)
             {
-                Regex pattern = new Regex(@"^[0-9]{2}-[0-9]{2}-[0-9]{4}");
 
-                if (pattern.IsMatch(cmbStartDate.Text))
-                {
-                    string text = pattern.Match(cmbStartDate.Text).ToString();
-                    string[] splitstr = text.Split('-');
-                    string month = splitstr[0];
-                    string day = splitstr[1];
-                    string year = splitstr[2];
+                btnPlot_Click(sender, e);   
 
-                
-
-                    try
-                    {
-                        m_StartDateSelected = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day));
-                        m_StartDateIsValid = true;
-                        btnPlot_Click(sender, e);
-                    }
-                    catch (Exception ex)
-                    {
-                        btnPlot.IsEnabled = false;
-                        m_StartDateIsValid = false;
-                        MessageBox.Show("Invalid start date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-
-
-                    }
-                }
-                else
-                {
-                    btnPlot.IsEnabled = false;
-                    m_StartDateIsValid = false;
-                    MessageBox.Show("Invalid snd date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                
             }
                 
                
@@ -394,43 +441,11 @@ namespace CAOGAttendeeProject
          
          if (e.Key == Key.Enter)
          {
-                Regex pattern = new Regex(@"^[0-9]{2}-[0-9]{2}-[0-9]{4}");
 
-                if (pattern.IsMatch(cmbEndDate.Text))
-                {
-                    string text = pattern.Match(cmbEndDate.Text).ToString();
-                    string[] splitstr = text.Split('-');
-                    string month = splitstr[0];
-                    string day = splitstr[1];
-                    string year = splitstr[2];
-
-                    try
-                    {
-                        m_EndDateSelected = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day));
-                        m_EndDateIsValid = true;
-                        btnPlot_Click(sender,e);
-                    }
-                    catch (Exception ex)
-                    {
-                        btnPlot.IsEnabled = false;
-                        m_EndDateIsValid = false;
-                        MessageBox.Show("Invalid end date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-
-
-                    }
-                }
-                else
-                {
-                    btnPlot.IsEnabled = false;
-                    m_EndDateIsValid = false;
-                    MessageBox.Show("Invalid end date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
+                btnPlot_Click(sender, e);
+        }
             
-         
-          
-
-        
+  
   }
 
         private void cmbStartDate_GotFocus(object sender, RoutedEventArgs e)
@@ -456,10 +471,5 @@ namespace CAOGAttendeeProject
                 cmbEndDate.Text = "Select or type date";
         }
 
-        private void cmbStartDate_KeyDown(object sender, KeyEventArgs e)
-        {
-            //if (cmbStartDate.Text == "Select date")
-
-        }
     }
 }
