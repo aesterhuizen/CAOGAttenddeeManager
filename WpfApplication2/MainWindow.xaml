@@ -28,21 +28,14 @@
                             <TextBox Name="txtSearch" Width="200" Height="21" BorderBrush="#2E86C1" TextChanged="txtSearch_TextChanged" ToolTip="Attendee Search" ></TextBox>
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" Margin="6,10,0,0">
-                            <RibbonButton x:Name="btnNewRec"
-                                      Height="20"    
-                                      Label="New Attendee" 
-                                      SmallImageSource="Resources\NewRec.ico" 
-                                      Click="btnNewRec_Click" 
-                                      ToolTip="Apply all changes made to the database"/>
-
-                            <RibbonButton x:Name="btnApplyChanges" 
+                        
+                           <RibbonButton Margin="0,4,0,0" x:Name="btnApplyChanges" 
                                       Label="Apply Changes" 
                                       SmallImageSource="Resources\ApplyChanges.ico" 
                                       Click="btnApplyChanges_Click" 
                                       ToolTip="Apply all changes made to the database"/>
 
-                        </StackPanel>
+                        
                     </StackPanel>
                 </RibbonGroup>
                 <RibbonGroup Header="Filter options" Width="170">
@@ -57,9 +50,9 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Margin="0,0,0,0" BorderBrush="#2E86C1" IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" GotFocus="cmbDate_GotFocus" LostFocus="cmbDate_LostFocus" KeyUp="cmbDate_KeyUp" ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
+                        <ComboBox Margin="0,0,0,0" BorderBrush="#2E86C1" IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" MouseLeftButtonUp="cmbDate_MouseLeftButtonUp" GotFocus="cmbDate_GotFocus" LostFocus="cmbDate_LostFocus" KeyUp="cmbDate_KeyUp" ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
                             <!--<ComboBox IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" ToolTip="Current Date attendee attended church">-->
-                            <Calendar Name="DateCalendar" SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" DisplayDateChanged="DateCalendar_DisplayDateChanged" SelectedDatesChanged="DateCalendar_SelectedDateChanged"></Calendar>
+                            <Calendar Name="DateCalendar"  SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" DisplayDateChanged="DateCalendar_DisplayDateChanged" SelectedDatesChanged="DateCalendar_SelectedDateChanged"></Calendar>
                         </ComboBox>
                         <CheckBox Grid.Row="1" Grid.Column="0" Margin="0,4,0,0" Name="chkDateFilter" Checked="chkDateFiler_Checked" Unchecked="chkDateFiler_Unchecked" FontSize="10">Date</CheckBox>
                         <CheckBox Grid.Row="1" Grid.Column="1" Margin="0,4,0,0" Name="chkAttended" Checked="chkAttended_Checked" Unchecked="chkAttended_Unchecked" FontSize="10">Atended</CheckBox>
@@ -75,7 +68,7 @@
                                       SmallImageSource="Resources\Checklist2.ico" 
                                       Height="22" 
                                       Click="btnAttendeeList_Click" 
-                                      ToolTip="Allows the user to  check off or add new church attendees for the day display in the date dropdown box." HorizontalAlignment="Left" VerticalAlignment="Top" />
+                                      ToolTip="Allows the user to  check off or add new church attendees for the day display in the date dropdown box." HorizontalAlignment="Left" VerticalAlignment="Top" Checked="btnAttendeeList_Checked" />
 
                     <RibbonToggleButton x:Name="btnFollowUp" Margin="0,0,-10,0" Width="96" Label="Filter Mode" 
                                       SmallImageSource="Resources\FilterAdd.ico" 
@@ -103,7 +96,7 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" SelectionChanged="dataGrid_SelectionChanged" />
+            <DataGrid Name="dataGrid" CanUserAddRows="True" CanUserDeleteRows="True" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" SelectionChanged="dataGrid_SelectionChanged" />
         </Grid>
 
 
