@@ -38,35 +38,10 @@
                     </StackPanel>
                     
                 </RibbonGroup>
-                <RibbonGroup Header="Actions" Width="70">
-                    <RibbonButton Label="Plot" Name="btnPlot" SmallImageSource="Resources\Chart2.ico" Click="btnPlot_Click"/>
+                <RibbonGroup Header="Actions" Width="80">
+                    <RibbonButton Margin="0,3,0,0" Label="Plot" Name="btnPlot" SmallImageSource="Resources\Chart2.ico" Click="btnPlot_Click"/>
+                   
                 </RibbonGroup>
-                <!--<RibbonGroup Header="View" Width="100">
-                    <StackPanel Margin="0,0,0,0">
-                        <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                           
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="35"/>
-                            <ColumnDefinition Width="35"/>
-                        </Grid.ColumnDefinitions>
-
-                       <RibbonToggleButton HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0" x:Name="btnBarChart"
-                                      SmallImageSource="Resources\Chart2.ico" 
-                                      Click="btnBarChart_Click"
-                                      ToolTip="Shows data in Colunm chart" />
-
-                       <RibbonToggleButton HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1" x:Name="btnLineChart"  
-                                      SmallImageSource="Resources\LineChart.ico" 
-                                      Click="btnLineChart_Click"
-                                      ToolTip="Shows data in a Line Chart"/>
-
-                        </Grid>
-                    </StackPanel>
-                </RibbonGroup>-->
-                
                 
             </RibbonTab>
         </Ribbon>
@@ -74,8 +49,10 @@
           <chartingToolkit:Chart DockPanel.Dock="Bottom" Name="AttendeeChart" Title="Attendee: Attended/Responded/FolloUp Chart">
 
             <chartingToolkit:ColumnSeries Title="Attended" DependentValuePath="Value" IndependentValuePath="Key" ItemsSource="{Binding [0]}" DataContext="{Binding}"/>
-            <chartingToolkit:ColumnSeries Title="FollowUp" Background="#003366" DependentValuePath="Value" IndependentValuePath="Key" ItemsSource="{Binding [1]}" DataContext="{Binding}"/>
-            <chartingToolkit:ColumnSeries Title="Responded" Background="#FFF68F" DependentValuePath="Value" IndependentValuePath="Key" ItemsSource="{Binding [2]}" DataContext="{Binding}"/>
+            <chartingToolkit:ColumnSeries Title="FollowUp" DependentValuePath="Value"  IndependentValuePath="Key" ItemsSource="{Binding [1]}" DataContext="{Binding}"/>
+            <chartingToolkit:ColumnSeries Title="Responded" DependentValuePath="Value" IndependentValuePath="Key" ItemsSource="{Binding [2]}" DataContext="{Binding}"/>
+    
+
             
         </chartingToolkit:Chart>
         

@@ -471,5 +471,9 @@ namespace CAOGAttendeeProject
                 cmbEndDate.Text = "Select or type date";
         }
 
+        private void btnLinePlot_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

@@ -931,7 +931,7 @@ namespace CAOGAttendeeProject
                 //}
 
 
-                if (m_modeIsInListView)
+                if (m_modeIsInListView && dataGrid.DataContext == m_DataSet.Tables["AttendeeList"])
                 {
                     dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
 
@@ -1120,6 +1120,10 @@ namespace CAOGAttendeeProject
                 dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
                 dataGrid.Columns[0].Visibility = Visibility.Hidden;
                 dataGrid.Columns[1].Visibility = Visibility.Hidden;
+            }
+            else if (query == "")
+            {
+                // Do nothing
             }
             else
             {
@@ -1487,47 +1491,46 @@ namespace CAOGAttendeeProject
    
         private void btnAttendeeList_Click(object sender, RoutedEventArgs e)
         {
-            // save current data table
-            m_modeIsInListView = true;
-            m_modelIsInFollowUpView = false;
-           // m_tempFollowUpModeTable = dataGrid.DataContext as DataTable;
-
-            dataGrid.DataContext = m_DataSet.Tables["AttendeeListTable"];
-
-            txtSearch.Text = "";
-            UpdateAttendeeListTableWithDateFilter();
-
-            m_DataSet.AcceptChanges();
-
-            foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
+           if (m_modelIsInFollowUpView)
             {
-                if (dr.ItemArray[4].ToString() == "True")
+               
+                m_modeIsInListView = true;
+                m_modelIsInFollowUpView = false;
+
+                btnFollowUp.IsChecked = false;
+                btnAttendeeList.IsChecked = true;
+
+               
+               
+
+                txtSearch.Text = "";
+                
+                UpdateAttendeeListTableWithDateFilter();
+
+                m_DataSet.AcceptChanges();
+
+                foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
                 {
-                    btnApplyChanges.IsEnabled = true;
-                    break;
+                    if (dr.ItemArray[4].ToString() == "True")
+                    {
+                        btnApplyChanges.IsEnabled = true;
+                        break;
+                    }
                 }
+
+                if (m_DataSet.HasChanges())
+                    btnApplyChanges.IsEnabled = true;
+
+                Uncheck_All_Filters_Except_Date();
+                Disable_Filters();
+
+                dataGrid.DataContext = m_DataSet.Tables["AttendeeListTable"];
+                dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
+                dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
+
+               
             }
-
-            if (m_DataSet.HasChanges())
-                btnApplyChanges.IsEnabled = true;
-
-
             
-
-            btnFollowUp.IsChecked = false;
-            btnAttendeeList.IsChecked = true;
-
-     
-            Uncheck_All_Filters_Except_Date();
-            Disable_Filters();
-
-
-
-
-
-
-            dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
-            dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
         }
 
         private void Disable_Filters()
@@ -1543,6 +1546,7 @@ namespace CAOGAttendeeProject
 
             chkFollowup.IsChecked = false;
             chkResponded.IsChecked = false;
+            chkAttended.IsChecked = false;
 
         }
 
@@ -1668,32 +1672,36 @@ namespace CAOGAttendeeProject
 
         private void btnFollowUp_Click(object sender, RoutedEventArgs e)
         {
+            if (m_modeIsInListView)
+            {
+                // commit datagrid edits and return DataContext to show all records
+                dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+                (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "FirstLastName LIKE '*'";
 
-            // commit datagrid edits and return DataContext to show all records
-            dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
-            (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "FirstLastName LIKE '*'";
+                // btnFollowUp.IsChecked = true;
+                m_modelIsInFollowUpView = true;
+                m_modeIsInListView = false;
+
+                btnApplyChanges.IsEnabled = false;
+                btnAttendeeList.IsChecked = false;
+
+                Uncheck_All_Filters();
+                Enable_Filters();
 
 
-            // btnFollowUp.IsChecked = true;
-            m_modelIsInFollowUpView = true;
-            m_modeIsInListView = false;
-            btnApplyChanges.IsEnabled = false;
-            btnAttendeeList.IsChecked = false;
+                txtSearch.Text = "";
+                dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
 
-            Enable_Filters();
-          
-
-            txtSearch.Text = "";
-            dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
-            
-                //dataGrid.DataContext = m_tempFollowUpModeTable;
-
-            //if (m_tempFollowUpModeTable.Columns.Contains("AttendeeId") )
-            //{
+                
                 dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
                 dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
-            //}
-            
+                
+            }
+
+
+
+
+
 
         }
 
@@ -1727,11 +1735,18 @@ namespace CAOGAttendeeProject
             chkAttended.IsEnabled = true;
             chkFollowup.IsEnabled = true;
             chkResponded.IsEnabled = true;
-          
+            
+            
 
         }
 
-
+        private void Uncheck_All_Filters()
+        {
+            chkFollowup.IsChecked = false;
+            chkResponded.IsChecked = false;
+            chkAttended.IsChecked = false;
+            chkDateFilter.IsChecked = false;
+        }
         private void dataGrid_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
             var grid = sender as DataGrid;
