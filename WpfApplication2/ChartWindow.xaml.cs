@@ -101,7 +101,7 @@ namespace CAOGAttendeeProject
                     kvpFollowUp.Add(new KeyValuePair<string, int>(date, FollowUpSum));
                     kvpResponded.Add(new KeyValuePair<string, int>(date, RespondedSum));
 
-
+                    
                 }
 
                 ChartData.Add(kvpAttended);
@@ -389,7 +389,7 @@ namespace CAOGAttendeeProject
                 }
                 TimeSpan tspan = m_EndDateSelected - m_StartDateSelected;
 
-                if (tspan.Days > 375 )
+                if (tspan.Days > 365 )
                 {
                     MessageBoxResult mr = MessageBox.Show("End date too far into the future. Maximum timespan is 1 year", "Date range error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
