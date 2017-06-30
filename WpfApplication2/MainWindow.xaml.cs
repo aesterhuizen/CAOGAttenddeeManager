@@ -41,7 +41,7 @@ namespace CAOGAttendeeProject
             // Clear_DB_Tables();
             //open file with database credentials
 
-
+            
             var executingPath = Directory.GetCurrentDirectory();
 
 
@@ -105,14 +105,13 @@ namespace CAOGAttendeeProject
 
 
         private ModelDb m_db;
+        bool m_isAllFiltersDisabled = false;
         private DataSet m_DataSet = new DataSet();
         private SqlConnection m_mySqlConnection = null;
-        private DataTable m_tempFollowUpModeTable;
         private string m_constr = "";
+        private string m_query = "";
         private string m_FirstName = "";
         private string m_LastName = "";
-
-        private bool m_NonChecked = true;
         private DateTime m_DateSelected;
         private bool m_isAttendedChecked = false;
         private bool m_isFollowupChecked = false;
@@ -121,6 +120,7 @@ namespace CAOGAttendeeProject
         private bool m_modeIsInListView = false;
         private bool m_modelIsInFollowUpView = true;
         private bool m_filterByDate = false;
+        private int m_NewAttendeeId = 0;
 
         private void Clear_DB_Tables()
         {
@@ -495,7 +495,12 @@ namespace CAOGAttendeeProject
         {
             InitDataSet();
 
+          
             dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
+            (dataGrid.DataContext as DataTable).DefaultView.Sort = "FirstLastName ASC";
+
+            dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
+            dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
 
         } // end  private void Display_Database_in_Grid()
 
@@ -514,7 +519,7 @@ namespace CAOGAttendeeProject
             //string sqlAttendees = "SELECT Attendees.AttendeeId, Attendees.HasThreeConsequitiveFollowUps, Attendees.FirstName,Attendees.LastName FROM Attendees ORDER BY Attendees.FirstName ASC";
             //string sqlAttendee_Info = "SELECT * FROM Attendance_Info";
 
-            m_mySqlConnection = new SqlConnection(m_constr);
+            
 
 
 
@@ -522,169 +527,204 @@ namespace CAOGAttendeeProject
 
             DataTable Default_Data_Table = new DataTable("DefaultTable");
 
-            try
-            {
-
-                var queryAttendees = from AttendeeRec in m_db.Attendees
-                                     select AttendeeRec;
-
-                Default_Data_Table.Columns.Add(new DataColumn("AttendeeId"));
-                Default_Data_Table.Columns.Add(new DataColumn("FirstLastName"));
-                Default_Data_Table.Columns.Add(new DataColumn("First Name"));
-                Default_Data_Table.Columns.Add(new DataColumn("Last Name"));
-                Default_Data_Table.Columns.Add(new DataColumn("Date Last Attended"));
-                Default_Data_Table.Columns.Add(new DataColumn("Status"));
-
-
-                foreach (var AttendeeRec in queryAttendees)
+                            
+                try
                 {
 
-                    DataRow dr = Default_Data_Table.NewRow();
-                    dr["AttendeeId"] = AttendeeRec.AttendeeId;
-                    dr["FirstLastName"] = AttendeeRec.FirstName + " " + AttendeeRec.LastName;
+                    var queryAttendees = from AttendeeRec in m_db.Attendees
+                                         select AttendeeRec;
 
-                    dr["First Name"] = AttendeeRec.FirstName;
-                    dr["Last Name"] = AttendeeRec.LastName;
+                    Default_Data_Table.Columns.Add(new DataColumn("AttendeeId") );
+                    Default_Data_Table.Columns.Add(new DataColumn("FirstLastName") );
+                    Default_Data_Table.Columns.Add(new DataColumn("First Name") );
+                    Default_Data_Table.Columns.Add(new DataColumn("Last Name") );
+                    Default_Data_Table.Columns.Add(new DataColumn("Date Last Attended") );
+                    Default_Data_Table.Columns.Add(new DataColumn("Status") );
+
+                    Default_Data_Table.Columns["AttendeeId"].Unique = true;
+
+                DataColumn[] primaryKeyCol = new DataColumn[1];
+                primaryKeyCol[0] = Default_Data_Table.Columns[0];
+                Default_Data_Table.PrimaryKey = primaryKeyCol;
+
+                    foreach (var AttendeeRec in queryAttendees)
+                    {
+                        m_NewAttendeeId = AttendeeRec.AttendeeId;
+                        DataRow dr = Default_Data_Table.NewRow();
+
+                        dr["AttendeeId"] = AttendeeRec.AttendeeId;
+                        dr["FirstLastName"] = AttendeeRec.FirstName + " " + AttendeeRec.LastName;
+
+                        dr["First Name"] = AttendeeRec.FirstName;
+                        dr["Last Name"] = AttendeeRec.LastName;
+
+
+                        dr["Date Last Attended"] = AttendeeRec.AttendanceList[0].Last_Attended;
+                        dr["Status"] = AttendeeRec.AttendanceList[0].Status;
+
+
+                        Default_Data_Table.Rows.Add(dr);
+                    }
+
                     
+                    Default_Data_Table.AcceptChanges();
+                    m_DataSet.Tables.Add(Default_Data_Table);
+                m_NewAttendeeId += 1;
 
-                    dr["Date Last Attended"] = AttendeeRec.AttendanceList[0].Last_Attended;
-                    dr["Status"] = AttendeeRec.AttendanceList[0].Status;
+                    //-------------------------------Make AttendeeList Table-------------------------------------------------------------------
+
+                    DataTable AttendeeListTable = new DataTable("AttendeeListTable");
+                    AttendeeListTable.RowChanging += new DataRowChangeEventHandler(RowChanging);
+
+                    string date;
+                    // m_ListChkBox.Checked += new RoutedEventHandler(AttendeeListchkBox_CheckedChanged);
 
 
-                    Default_Data_Table.Rows.Add(dr);
+                    if (m_filterByDate && m_dateIsValid)
+                        date = DateCalendar.DisplayDate.ToString("MM-dd-yyyy");
+                    else
+                        date = "Date Not Valid";
+
+
+                    AttendeeListTable.Columns.Add(new DataColumn("AttendeeId"));
+                    AttendeeListTable.Columns.Add(new DataColumn("FirstLastName"));
+                    AttendeeListTable.Columns.Add(new DataColumn("First Name"));
+                    AttendeeListTable.Columns.Add(new DataColumn("Last Name"));
+                    AttendeeListTable.Columns.Add(new DataColumn("Date"));
+                    AttendeeListTable.Columns.Add(new DataColumn("Attended", typeof(bool)));
+
+
+
+                    foreach (DataRow dr in m_DataSet.Tables["DefaultTable"].Rows)
+                    {
+
+                        DataRow drNewAttendeeListRec = AttendeeListTable.NewRow();
+
+
+                        drNewAttendeeListRec["AttendeeId"] = dr["AttendeeId"];
+                        drNewAttendeeListRec["FirstLastName"] = dr["FirstLastName"];
+
+                        drNewAttendeeListRec["First Name"] = dr["First Name"];
+                        drNewAttendeeListRec["Last Name"] = dr["Last Name"];
+                        drNewAttendeeListRec["Date"] = date;
+                        drNewAttendeeListRec["Attended"] = false;
+                        AttendeeListTable.Rows.Add(drNewAttendeeListRec);
+                    }
+
+
+                    AttendeeListTable.AcceptChanges();
+                    m_DataSet.Tables.Add(AttendeeListTable);
+
+                    //---------------------Make Attendees Table-------------------------------------------------------------------------------------
+
+
+                    //DataTable AttendeesTable = new DataTable("AttendeesTable");
+
+                    //AttendeesTable.Columns.Add(new DataColumn("AttendeeId"));
+                    //AttendeesTable.Columns.Add(new DataColumn("First Name"));
+                    //AttendeesTable.Columns.Add(new DataColumn("Last Name"));
+                    //AttendeesTable.Columns.Add(new DataColumn("HasThreeConsequativeFollowUps"));
+
+
+
+
+                    //foreach (var AttendeesRec in queryAttendees)
+                    //{
+
+                    //    DataRow drNewAttendeeRec = AttendeesTable.NewRow();
+
+
+                    //    drNewAttendeeRec["AttendeeId"] = AttendeesRec.AttendeeId;
+                    //    drNewAttendeeRec["First Name"] = AttendeesRec.FirstName;
+                    //    drNewAttendeeRec["Last Name"] = AttendeesRec.LastName;
+                    //    drNewAttendeeRec["HasThreeConsequativeFollowUps"] = AttendeesRec.HasThreeConsequitiveFollowUps;
+
+                    //    AttendeesTable.Rows.Add(drNewAttendeeRec);
+                    //}
+
+
+                    //AttendeesTable.AcceptChanges();
+                    //m_DataSet.Tables.Add(AttendeesTable);
+
+
+                    //-Setup AttendanceInfo Table----------------------------------------------------------------------------------------------------------
+
+                    //var queryAttendanceInfo = from attInfo in m_db.Attendance_Info
+                    //                          select attInfo;
+
+                    //DataTable AttendanceInfoTable = new DataTable("AttendanceInfoTable");
+
+                    //AttendanceInfoTable.Columns.Add(new DataColumn("AttendeeId"));
+                    //AttendanceInfoTable.Columns.Add(new DataColumn("Date Last Attended", typeof(DateTime)));
+                    //AttendanceInfoTable.Columns.Add(new DataColumn("Date", typeof(DateTime)));
+                    //AttendanceInfoTable.Columns.Add(new DataColumn("Status"));
+
+
+
+                    //foreach (var AttendanceRec in queryAttendanceInfo)
+                    //{
+
+                    //    DataRow drNewAttendanceRec = AttendanceInfoTable.NewRow();
+
+
+                    //    drNewAttendanceRec["AttendeeId"] = AttendanceRec.AttendeeId;
+                    //    drNewAttendanceRec["Date Last Attended"] = AttendanceRec.Last_Attended;
+                    //    drNewAttendanceRec["Date"] = AttendanceRec.Date;
+                    //    drNewAttendanceRec["Status"] = AttendanceRec.Status;
+
+                    //    AttendanceInfoTable.Rows.Add(drNewAttendanceRec);
+                    //}
+
+
+                    //AttendanceInfoTable.AcceptChanges();
+                    //m_DataSet.Tables.Add(AttendanceInfoTable);
+
+
                 }
-
-
-                Default_Data_Table.AcceptChanges();
-                m_DataSet.Tables.Add(Default_Data_Table);
-
-
-                //-------------------------------Make AttendeeList Table-------------------------------------------------------------------
-
-                DataTable AttendeeListTable = new DataTable("AttendeeListTable");
-                string date;
-                // m_ListChkBox.Checked += new RoutedEventHandler(AttendeeListchkBox_CheckedChanged);
-
-
-                if (m_filterByDate && m_dateIsValid)
-                    date = DateCalendar.DisplayDate.ToString("MM-dd-yyyy");
-                else
-                    date = "Date Not Valid";
-
-
-                AttendeeListTable.Columns.Add(new DataColumn("AttendeeId"));
-                AttendeeListTable.Columns.Add(new DataColumn("FirstLastName"));
-                AttendeeListTable.Columns.Add(new DataColumn("First Name"));
-                AttendeeListTable.Columns.Add(new DataColumn("Last Name"));
-                AttendeeListTable.Columns.Add(new DataColumn("Date"));
-                AttendeeListTable.Columns.Add(new DataColumn("Attended", typeof(bool)));
-
-
-                //DataGridCheckBoxColumn checkcol = new DataGridCheckBoxColumn();
-                //dataGrid.Columns.Add(checkcol);
-                //CheckBox chkbox = new CheckBox();
-                //checkcol.Header = chkbox;
-
-
-                //chkbox.Checked += new RoutedEventHandler(cb_Checked);
-                //chkbox.Unchecked += new RoutedEventHandler(cb_Unchecked);
-
-                foreach (DataRow dr in m_DataSet.Tables["DefaultTable"].Rows)
+                catch (Exception ex)
                 {
-
-                    DataRow drNewAttendeeListRec = AttendeeListTable.NewRow();
-
-
-                    drNewAttendeeListRec["AttendeeId"] = dr["AttendeeId"];
-                    drNewAttendeeListRec["FirstLastName"] = dr["FirstLastName"];
-
-                    drNewAttendeeListRec["First Name"] = dr["First Name"];
-                    drNewAttendeeListRec["Last Name"] = dr["Last Name"];
-                    drNewAttendeeListRec["Date"] = date;
-                    drNewAttendeeListRec["Attended"] = false;
-                    AttendeeListTable.Rows.Add(drNewAttendeeListRec);
+                    Console.WriteLine($"Error occurred when performing database operation: {ex}");
                 }
 
-
-                AttendeeListTable.AcceptChanges();
-                m_DataSet.Tables.Add(AttendeeListTable);
-
-                //---------------------Make Attendees Table-------------------------------------------------------------------------------------
-
-
-                //DataTable AttendeesTable = new DataTable("AttendeesTable");
-
-                //AttendeesTable.Columns.Add(new DataColumn("AttendeeId"));
-                //AttendeesTable.Columns.Add(new DataColumn("First Name"));
-                //AttendeesTable.Columns.Add(new DataColumn("Last Name"));
-                //AttendeesTable.Columns.Add(new DataColumn("HasThreeConsequativeFollowUps"));
-
-
-
-
-                //foreach (var AttendeesRec in queryAttendees)
-                //{
-
-                //    DataRow drNewAttendeeRec = AttendeesTable.NewRow();
-
-
-                //    drNewAttendeeRec["AttendeeId"] = AttendeesRec.AttendeeId;
-                //    drNewAttendeeRec["First Name"] = AttendeesRec.FirstName;
-                //    drNewAttendeeRec["Last Name"] = AttendeesRec.LastName;
-                //    drNewAttendeeRec["HasThreeConsequativeFollowUps"] = AttendeesRec.HasThreeConsequitiveFollowUps;
-
-                //    AttendeesTable.Rows.Add(drNewAttendeeRec);
-                //}
-
-
-                //AttendeesTable.AcceptChanges();
-                //m_DataSet.Tables.Add(AttendeesTable);
-
-
-                //-Setup AttendanceInfo Table----------------------------------------------------------------------------------------------------------
-
-                //var queryAttendanceInfo = from attInfo in m_db.Attendance_Info
-                //                          select attInfo;
-
-                //DataTable AttendanceInfoTable = new DataTable("AttendanceInfoTable");
-
-                //AttendanceInfoTable.Columns.Add(new DataColumn("AttendeeId"));
-                //AttendanceInfoTable.Columns.Add(new DataColumn("Date Last Attended", typeof(DateTime)));
-                //AttendanceInfoTable.Columns.Add(new DataColumn("Date", typeof(DateTime)));
-                //AttendanceInfoTable.Columns.Add(new DataColumn("Status"));
-
-
-
-                //foreach (var AttendanceRec in queryAttendanceInfo)
-                //{
-
-                //    DataRow drNewAttendanceRec = AttendanceInfoTable.NewRow();
-
-
-                //    drNewAttendanceRec["AttendeeId"] = AttendanceRec.AttendeeId;
-                //    drNewAttendanceRec["Date Last Attended"] = AttendanceRec.Last_Attended;
-                //    drNewAttendanceRec["Date"] = AttendanceRec.Date;
-                //    drNewAttendanceRec["Status"] = AttendanceRec.Status;
-
-                //    AttendanceInfoTable.Rows.Add(drNewAttendanceRec);
-                //}
-
-
-                //AttendanceInfoTable.AcceptChanges();
-                //m_DataSet.Tables.Add(AttendanceInfoTable);
-
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error occurred when performing database operation: {ex}");
-            }
-
-
+            
 
 
         }
 
+        private void RowChanging(object sender, DataRowChangeEventArgs e)
+        {
+
+
+            //if (m_DataSet.HasChanges(DataRowState.Modified) )
+            //{
+            //        btnApplyChanges.IsEnabled = true;
+            //}
+            //else
+            //{
+            //    btnApplyChanges.IsEnabled = false;
+            //}
+            //if (e.Row.HasVersion(DataRowVersion.Original) )
+            //{
+
+            //    btnApplyChanges.IsEnabled = false;
+            //    if (e.Row.HasVersion(DataRowVersion.Original)) { Console.WriteLine($"Original value = {e.Row["Attended", DataRowVersion.Original]}"); }
+            //    if (e.Row.HasVersion(DataRowVersion.Proposed)) { Console.WriteLine($"Proposed value = {e.Row["Attended", DataRowVersion.Proposed]}"); }
+            //    if (original == proposed )
+            //    {
+
+            //    }
+
+            //}
+            //else
+            //{
+            //    btnApplyChanges.IsEnabled = true;
+
+            //    if (e.Row.HasVersion(DataRowVersion.Original)) { Console.WriteLine($"Original value = {e.Row["Attended", DataRowVersion.Original]}"); }
+            //    if (e.Row.HasVersion(DataRowVersion.Proposed)) { Console.WriteLine($"Proposed value = {e.Row["Attended", DataRowVersion.Proposed]}"); }
+            //}
+
+
+        }
       
         private void chkResponded_Checked(object sender, RoutedEventArgs e)
         {
@@ -700,7 +740,7 @@ namespace CAOGAttendeeProject
             m_isRespondedChecked = true;
             string date = m_DateSelected.ToString("MM-dd-yyyy");
             string query = "";
-            m_NonChecked = false;
+           
 
             if (m_filterByDate && m_dateIsValid)
             {
@@ -736,7 +776,7 @@ namespace CAOGAttendeeProject
 
             }
 
-            UpdateDataGrid(query);
+           UpdateDataGrid(query);
 
 
 
@@ -757,7 +797,7 @@ namespace CAOGAttendeeProject
             m_isFollowupChecked = true;
             string date = m_DateSelected.ToString("MM-dd-yyyy");
             string query = "";
-            m_NonChecked = false;
+           
 
             if (m_filterByDate && m_dateIsValid)
             {
@@ -792,7 +832,7 @@ namespace CAOGAttendeeProject
                            "WHERE Attendance_Info.Status='Follow-Up' " +
                            "AND Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'";
             }
-            UpdateDataGrid(query);
+           UpdateDataGrid(query);
 
         }
 
@@ -810,7 +850,7 @@ namespace CAOGAttendeeProject
             string query = "";
             chkResponded.IsChecked = false;
             chkFollowup.IsChecked = false;
-            m_NonChecked = false;
+          
             m_isAttendedChecked = true;
             string date = m_DateSelected.ToString("MM-dd-yyyy");
 
@@ -855,7 +895,7 @@ namespace CAOGAttendeeProject
                            "AND Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'";
             }
 
-           UpdateDataGrid(query);
+          UpdateDataGrid(query);
 
         }
 
@@ -912,6 +952,17 @@ namespace CAOGAttendeeProject
 
 
         //}
+
+        private void Disable_Filters()
+        {
+            chkAttended.IsEnabled = false;
+            chkFollowup.IsEnabled = false;
+            chkResponded.IsEnabled = false;
+            chkDateFilter.IsEnabled = false;
+            cmbDate.IsEnabled = false;
+            m_isAllFiltersDisabled = true;
+
+        }
         private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
             //if in followUp view, use query database else if in model list view filter table
@@ -921,17 +972,10 @@ namespace CAOGAttendeeProject
 
             if (txtSearch.Text == "")
             {
-                //if (m_modeIsInListView && m_filterByDate == false && m_isAttendedChecked == false && m_isFollowupChecked == false && m_isRespondedChecked == false)
-                //{
-                //    m_NonChecked = true;
+                Enable_Filters();    
 
-                //    (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "[First Name] LIKE '*'";
-                //   // dataGrid.Columns[0].Visibility = Visibility.Hidden;
-                //    return;
-                //}
-
-
-                if (m_modeIsInListView && dataGrid.DataContext == m_DataSet.Tables["AttendeeList"])
+                
+                if (m_modeIsInListView && dataGrid.DataContext == m_DataSet.Tables["AttendeeListTable"])
                 {
                     dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
 
@@ -940,112 +984,13 @@ namespace CAOGAttendeeProject
                         m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
 
                     }
-
-
-                    // filter all records which is which is the Default Table
-                    (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "FirstLastName LIKE '*'";
-                    //dataGrid.Columns[0].Visibility = Visibility.Hidden;
+                    // show all records
+                    (dataGrid.DataContext as DataTable).DefaultView.RowFilter = String.Empty;
                     return;
                 }
                 else if (m_modelIsInFollowUpView)
                 {
-                    query = (m_filterByDate && m_dateIsValid) ? "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
-                            "FROM Attendees " +
-                            "INNER JOIN Attendance_Info " +
-                            "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
-                            "WHERE Attendance_Info.Date='" + date + "'" :
-
-                            "ShowDefaultTable";
-
-
-                    if (m_isAttendedChecked)
-                    {
-                        query = (m_filterByDate && m_dateIsValid) ? "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
-                        "FROM Attendees " +
-                        "INNER JOIN Attendance_Info " +
-                        "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
-                        "WHERE Attendance_Info.Status='Attended' AND Attendance_Info.Date='" + date + "'" :
-
-                        "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
-                        "FROM Attendees " +
-                        "INNER JOIN Attendance_Info " +
-                        "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
-                        "WHERE Attendance_Info.Status = 'Attended'";
-
-                    }
-                    else if (m_isFollowupChecked)
-                    {
-                        query = (m_filterByDate && m_dateIsValid) ? "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
-                        "FROM Attendees " +
-                        "INNER JOIN Attendance_Info " +
-                        "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
-                        "WHERE Attendance_Info.Status='Follow-Up' AND Attendance_Info.Date='" + date + "'" :
-
-                        "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
-                        "FROM Attendees " +
-                        "INNER JOIN Attendance_Info " +
-                        "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
-                        "WHERE Attendance_Info.Status = 'Follow-Up'";
-
-                    }
-                    else if (m_isRespondedChecked)
-                    {
-                        query = (m_filterByDate && m_dateIsValid) ? "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
-                        "FROM Attendees " +
-                        "INNER JOIN Attendance_Info " +
-                        "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
-                        "WHERE Attendance_Info.Status='Responded' AND Attendance_Info.Date='" + date + "'" :
-
-                        "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
-                        "FROM Attendees " +
-                        "INNER JOIN Attendance_Info " +
-                        "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
-                        "WHERE Attendance_Info.Status='Responded'";
-
-                    }
-                }
                     
- //----------------------Textbox search has text-----------------------------------------------------------------------------------
-            }
-            else  
-            {
-
-                if (m_modeIsInListView)
-                {
-                    dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
-                    if (m_DataSet.HasChanges())
-                    {
-
-                        m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
-                    }
-                    //Do normal row filtering if none of the above conditions are true
-                    (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
-                    return;
-                }
-                else if (m_modelIsInFollowUpView)
-                {
-                    if (m_filterByDate && m_dateIsValid)
-                    {
-                        query = "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
-                            "FROM Attendees " +
-                            "INNER JOIN Attendance_Info " +
-                            "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
-                            "WHERE Attendance_Info.Date='" + date + "' " +
-                            "AND Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'";
-                        
-                       
-                    }
-                    else
-                    {
-                        //if no filter options do a regular search
-                        query = "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
-                            "FROM Attendees " +
-                            "INNER JOIN Attendance_Info " +
-                            "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
-                            "WHERE Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'";
-
-                    }
-
                     if (m_isAttendedChecked)
                     {
                         query = (m_filterByDate && m_dateIsValid) ?
@@ -1099,11 +1044,122 @@ namespace CAOGAttendeeProject
                         "AND Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'";
 
                     }
+                    else if (m_filterByDate && m_dateIsValid)
+                    {
+                        query = "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
+                            "FROM Attendees " +
+                            "INNER JOIN Attendance_Info " +
+                            "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
+                            "WHERE Attendance_Info.Date='" + date + "' " +
+                            "AND Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'";
 
-              
+
+                    }
+                    else
+                    {
+                        (dataGrid.DataContext as DataTable).DefaultView.RowFilter = String.Empty;
+                    }
+
                 }
-               
-              
+
+                //----------------------Textbox search has text-----------------------------------------------------------------------------------
+            }
+            else  
+            {
+
+                Disable_Filters();
+
+                if (m_modeIsInListView)
+                {
+                    dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+                    if (m_DataSet.HasChanges())
+                    {
+
+                        m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
+                    }
+                    //Do normal row filtering if none of the above conditions are true
+                    (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+                    //(dataGrid.DataContext as DataTable).DefaultView.Sort = "FirstLastName ASC";
+                    return;
+                }
+                else if (m_modelIsInFollowUpView)
+                {
+                   
+                   
+                    if (m_isAttendedChecked)
+                    {
+                        query = (m_filterByDate && m_dateIsValid) ?
+                            "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
+                            "FROM Attendees " +
+                            "INNER JOIN Attendance_Info " +
+                            "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
+                            "WHERE Attendance_Info.Status='Attended' AND Attendance_Info.Date='" + date + "' " +
+                            "AND Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'" :
+
+                            "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
+                            "FROM Attendees " +
+                            "INNER JOIN Attendance_Info " +
+                            "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
+                            "WHERE Attendance_Info.Status = 'Attended' " +
+                            "AND Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'";
+
+
+                    }
+                    else if (m_isFollowupChecked)
+                    {
+                        query = (m_filterByDate && m_dateIsValid) ? "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
+                        "FROM Attendees " +
+                        "INNER JOIN Attendance_Info " +
+                        "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
+                        "WHERE Attendance_Info.Status='Attended' AND Attendance_Info.Date='" + date + "' " +
+                        "AND Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'" :
+
+                        "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
+                        "FROM Attendees " +
+                        "INNER JOIN Attendance_Info " +
+                        "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
+                        "WHERE Attendance_Info.Status = 'Follow-Up' " +
+                        "AND Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'";
+
+                    }
+                    else if (m_isRespondedChecked)
+                    {
+                        query = (m_filterByDate && m_dateIsValid) ? "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
+                        "FROM Attendees " +
+                        "INNER JOIN Attendance_Info " +
+                        "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
+                        "WHERE Attendance_Info.Status='Attended' AND Attendance_Info.Date='" + date + "' " +
+                        "AND Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'" :
+
+                        "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
+                        "FROM Attendees " +
+                        "INNER JOIN Attendance_Info " +
+                        "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
+                        "WHERE Attendance_Info.Status = 'Responded' " +
+                        "AND Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'";
+
+                    }
+                    else if (m_filterByDate && m_dateIsValid)
+                    {
+                        query = "SELECT Attendees.FirstName, Attendees.LastName, Attendance_Info.Status,Attendance_Info.Date " +
+                            "FROM Attendees " +
+                            "INNER JOIN Attendance_Info " +
+                            "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
+                            "WHERE Attendance_Info.Date='" + date + "' " +
+                            "AND Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'";
+
+
+                    }
+                    else
+                    {
+                        (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+                    }
+
+
+                        
+                }
+
+
 
             }    
             
@@ -1118,12 +1174,14 @@ namespace CAOGAttendeeProject
             if (query == "ShowDefaultTable")
             {
                 dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
+               // (dataGrid.DataContext as DataTable).DefaultView.Sort = "FirstLastName ASC";
                 dataGrid.Columns[0].Visibility = Visibility.Hidden;
                 dataGrid.Columns[1].Visibility = Visibility.Hidden;
             }
             else if (query == "")
             {
-                // Do nothing
+                // do nothing
+                
             }
             else
             {
@@ -1162,7 +1220,7 @@ namespace CAOGAttendeeProject
         private void chkAttended_Unchecked(object sender, RoutedEventArgs e)
         {
             string query = "";
-            m_NonChecked = true;
+           
             m_isAttendedChecked = false;
 
             //if (m_filterByDate == false && m_isAttendedChecked == false && m_isFollowupChecked == false && m_isRespondedChecked == false)
@@ -1207,7 +1265,7 @@ namespace CAOGAttendeeProject
                            "WHERE Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'";
             }
 
-            UpdateDataGrid(query);
+           UpdateDataGrid(query);
 
         }
 
@@ -1215,7 +1273,7 @@ namespace CAOGAttendeeProject
         {
             string query = "";
             m_isFollowupChecked = false;
-            m_NonChecked = true;
+           
             string date = m_DateSelected.ToString("MM-dd-yyyy");
 
             //if (m_filterByDate == false && m_isAttendedChecked == false && m_isFollowupChecked == false && m_isRespondedChecked == false)
@@ -1260,7 +1318,7 @@ namespace CAOGAttendeeProject
                            "WHERE Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'";
             }
 
-            UpdateDataGrid(query);
+           UpdateDataGrid(query);
 
         }
 
@@ -1268,7 +1326,7 @@ namespace CAOGAttendeeProject
         {
             string query = "";
             m_isRespondedChecked = false;
-            m_NonChecked = true;
+           
             string date = m_DateSelected.ToString("MM-dd-yyyy");
 
             //if (m_filterByDate == false && m_isAttendedChecked == false && m_isFollowupChecked == false && m_isRespondedChecked == false)
@@ -1313,7 +1371,7 @@ namespace CAOGAttendeeProject
                            "WHERE Attendees.FirstName LIKE '%" + txtSearch.Text + "%'" + " OR " + "Attendees.LastName LIKE '%" + txtSearch.Text + "%'";
             }
 
-            UpdateDataGrid(query);
+           UpdateDataGrid(query);
 
         }
 
@@ -1423,7 +1481,7 @@ namespace CAOGAttendeeProject
 
                 }
             }
-            UpdateDataGrid(query);
+          UpdateDataGrid(query);
             cmbDate.Text = date;
         }
 
@@ -1493,21 +1551,26 @@ namespace CAOGAttendeeProject
         {
            if (m_modelIsInFollowUpView)
             {
-               
+                // return datagrid's datacontext to sholl all records
+                (dataGrid.DataContext as DataTable).DefaultView.RowFilter = String.Empty;
+                //(dataGrid.DataContext as DataTable).DefaultView.Sort = "FirstLastName ASC";
+
                 m_modeIsInListView = true;
                 m_modelIsInFollowUpView = false;
 
                 btnFollowUp.IsChecked = false;
                 btnAttendeeList.IsChecked = true;
 
+              
                
                
 
-                txtSearch.Text = "";
+                if (txtSearch.Text != "")
+                    txtSearch.Text = "";
                 
                 UpdateAttendeeListTableWithDateFilter();
 
-                m_DataSet.AcceptChanges();
+               // m_DataSet.AcceptChanges();
 
                 foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
                 {
@@ -1518,13 +1581,21 @@ namespace CAOGAttendeeProject
                     }
                 }
 
-                if (m_DataSet.HasChanges())
-                    btnApplyChanges.IsEnabled = true;
+                //if (m_DataSet.HasChanges())
+                //    btnApplyChanges.IsEnabled = true;
+                //else
+                //    btnApplyChanges.IsEnabled = false; FIXME
 
                 Uncheck_All_Filters_Except_Date();
-                Disable_Filters();
+                Disable_All_Filters_Except_Date();
+
+               
+                dataGrid.CanUserAddRows = true;
+                dataGrid.CanUserDeleteRows = true;
 
                 dataGrid.DataContext = m_DataSet.Tables["AttendeeListTable"];
+                (dataGrid.DataContext as DataTable).DefaultView.Sort = "FirstLastName ASC";
+
                 dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
                 dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
 
@@ -1533,16 +1604,11 @@ namespace CAOGAttendeeProject
             
         }
 
-        private void Disable_Filters()
-        {
-            chkAttended.IsEnabled = false;
-            chkFollowup.IsEnabled = false;
-            chkResponded.IsEnabled = false;
-        }
+      
         private void Uncheck_All_Filters_Except_Date()
         {
-            m_modeIsInListView = true;
-            chkAttended.IsChecked = false;
+           
+           
 
             chkFollowup.IsChecked = false;
             chkResponded.IsChecked = false;
@@ -1550,18 +1616,27 @@ namespace CAOGAttendeeProject
 
         }
 
+        private void Disable_All_Filters_Except_Date()
+        {
+            chkAttended.IsEnabled = false;
+            chkResponded.IsEnabled = false;
+            chkFollowup.IsEnabled = false;
+
+        }
         private void btnApplyChanges_Click(object sender, RoutedEventArgs e)
         {
             
             if (m_filterByDate && m_dateIsValid && m_modeIsInListView)
             {
+                Cursor = Cursors.Wait;
+
                 // add all attendee status and date to database
-                btnApplyChanges.IsEnabled = false;
+             //   btnApplyChanges.IsEnabled = false; FIXME
                 string date = m_DateSelected.ToString("MM-dd-yyyy");
              
                 // save data grid edits to dataset
                 dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
-                dataGrid.EndInit();
+               
                
                 //check if there is a record already with the same date
                 var queryDateAlreadyExist = from AttendeeListRec in m_db.Attendance_Info
@@ -1573,8 +1648,9 @@ namespace CAOGAttendeeProject
 
                     MessageBoxResult mbRecExist = MessageBox.Show("A Record with the same date exist. Please select a unique date.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
                     return;
+                
                 }
-
+              
 
                 foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
                 {
@@ -1598,21 +1674,30 @@ namespace CAOGAttendeeProject
                         {
                             // Add a new Attendee to the database
                             Attendee newAttendeeRec = new Attendee();
-                            newAttendeeRec.FirstName = dr["First Name"].ToString();
-                            newAttendeeRec.LastName = dr["Last Name"].ToString();
+                            Attendance_Info newAttInfoRec = new Attendance_Info();
+
+                            
+
+                            newAttendeeRec.AttendeeId = m_NewAttendeeId;
+                            newAttendeeRec.FirstName = dr["First Name"].ToString().Trim();
+                            newAttendeeRec.LastName = dr["Last Name"].ToString().Trim();
                             newAttendeeRec.HasThreeConsequitiveFollowUps = 0;
 
-                            newAttendeeRec.AttendanceList[0].AttendeeId = int.Parse(dr["AttendeeId"].ToString());
 
-                            newAttendeeRec.AttendanceList[0].Date = dr["Date"].ToString();
-                            newAttendeeRec.AttendanceList[0].Last_Attended = dr["Date"].ToString();
 
-                            if (dr.ItemArray[4].ToString() == "True")
-                                newAttendeeRec.AttendanceList[0].Status = "Attended";
+                            newAttInfoRec.AttendeeId = m_NewAttendeeId;
+                            newAttInfoRec.Date = date;
+                            newAttInfoRec.Last_Attended = date;
+
+                            if (dr.ItemArray[5].ToString() == "True")
+                                newAttInfoRec.Status = "Attended";
                             else
-                                newAttendeeRec.AttendanceList[0].Status = "Not Attended";
+                                newAttInfoRec.Status = "Not Attended";
 
+                            newAttendeeRec.AttendanceList.Add(newAttInfoRec);
                             m_db.Attendees.Add(newAttendeeRec);
+                            m_NewAttendeeId += 1;
+                            
                         }
                         
 
@@ -1620,14 +1705,14 @@ namespace CAOGAttendeeProject
                     // user checked the attended box next to an existing attendee already in the database
                     else if (dr.RowState == DataRowState.Modified)
                     {
-                        if (dr.ItemArray[4].ToString() == "True")
+                        if (dr.ItemArray[5].ToString() == "True")
                         {
                      
                             Attendance_Info newRecord = new Attendance_Info { };
 
                             newRecord.AttendeeId = int.Parse(dr["AttendeeId"].ToString());
 
-                            newRecord.Date = dr["Date"].ToString();
+                            newRecord.Date = date;
 
                             var queryAttDateLastAttended = (from AttInfo in m_db.Attendance_Info
                                                    where AttInfo.AttendeeId == newRecord.AttendeeId
@@ -1652,6 +1737,10 @@ namespace CAOGAttendeeProject
                 }
 
                 m_db.SaveChanges();
+             
+                InitDataSet();
+                dataGrid.DataContext = m_DataSet.Tables["AttendeeListTable"];
+              
                 MessageBox.Show("Changes Saved!");
 
 
@@ -1663,12 +1752,12 @@ namespace CAOGAttendeeProject
                 MessageBoxResult mb = MessageBox.Show("Date not valid, select correct date", "Date Invalid", MessageBoxButton.OK, MessageBoxImage.Stop);
             }
 
+            Cursor = Cursors.Arrow;
 
         }
 
 
-
-
+      
 
         private void btnFollowUp_Click(object sender, RoutedEventArgs e)
         {
@@ -1676,23 +1765,30 @@ namespace CAOGAttendeeProject
             {
                 // commit datagrid edits and return DataContext to show all records
                 dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
-                (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "FirstLastName LIKE '*'";
+                //reset dataContext sow all records
+                (dataGrid.DataContext as DataTable).DefaultView.RowFilter = String.Empty;
+                (dataGrid.DataContext as DataTable).DefaultView.Sort = "FirstLastName ASC";
+
 
                 // btnFollowUp.IsChecked = true;
                 m_modelIsInFollowUpView = true;
                 m_modeIsInListView = false;
 
-                btnApplyChanges.IsEnabled = false;
+               // btnApplyChanges.IsEnabled = false; FIXME
                 btnAttendeeList.IsChecked = false;
+                
 
                 Uncheck_All_Filters();
                 Enable_Filters();
 
 
-                txtSearch.Text = "";
-                dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
+                if (txtSearch.Text != "" )
+                   txtSearch.Text = "";
 
-                
+                dataGrid.CanUserAddRows = false;
+                dataGrid.CanUserDeleteRows = false;
+                dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
+                (dataGrid.DataContext as DataTable).DefaultView.Sort = "FirstLastName ASC";
                 dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
                 dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
                 
@@ -1735,8 +1831,8 @@ namespace CAOGAttendeeProject
             chkAttended.IsEnabled = true;
             chkFollowup.IsEnabled = true;
             chkResponded.IsEnabled = true;
-            
-            
+            chkDateFilter.IsEnabled = true;
+            m_isAllFiltersDisabled = false; 
 
         }
 
@@ -1752,14 +1848,17 @@ namespace CAOGAttendeeProject
             var grid = sender as DataGrid;
             IList<DataGridCellInfo> CellV = grid.SelectedCells;
 
+            if (CellV.Count != 0)
+            {
+                DataRowView RowView = (DataRowView)CellV[0].Item;
 
-            DataRowView RowView = (DataRowView)CellV[0].Item;
+                m_FirstName = RowView.Row[2].ToString();
+                m_LastName = RowView.Row[3].ToString();
 
-            m_FirstName = RowView.Row[1].ToString();
-            m_LastName = RowView.Row[2].ToString();
-
-            WndAttendeeInfo AttendeeInfoWindow = new WndAttendeeInfo(m_FirstName, m_LastName, m_mySqlConnection);
-            AttendeeInfoWindow.Show();
+                WndAttendeeInfo AttendeeInfoWindow = new WndAttendeeInfo(m_FirstName, m_LastName, m_mySqlConnection);
+                AttendeeInfoWindow.Show();
+            }
+            
         }
 
         private void chkDateFiler_Checked(object sender, RoutedEventArgs e)
@@ -1865,7 +1964,7 @@ namespace CAOGAttendeeProject
 
                 }
 
-                UpdateDataGrid(query);
+               UpdateDataGrid(query);
             }
         }
 
@@ -1956,7 +2055,7 @@ namespace CAOGAttendeeProject
 
             }
            
-            UpdateDataGrid(query);
+           UpdateDataGrid(query);
 
 
         }
@@ -1969,35 +2068,27 @@ namespace CAOGAttendeeProject
 
         private void dataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //if (m_modeIsInListView)
-            //{
-
-              
-            //    foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
-            //    {
-                 
-            //        dr.BeginEdit();
-            //        if (dr.HasVersion(DataRowVersion.Proposed) )
-            //        {
-            //            btnApplyChanges.IsEnabled = true;
-            //            Console.WriteLine($"Original value = {dr["Attended", DataRowVersion.Original]}");
-            //            Console.WriteLine($"Proposed value = {dr["Attended", DataRowVersion.Proposed]}");
-
-            //            if (dr["Attended",DataRowVersion.Original].ToString() == dr["Attended", DataRowVersion.Proposed].ToString() )
-            //            {
-            //                btnApplyChanges.IsEnabled = false;
-            //            }
-                    
-            //            break;
-            //        }
-
-                    
+            var grid = sender as DataGrid;
+            IList<DataGridCellInfo> CellV = grid.SelectedCells;
 
 
-            //    }
+            foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
+            {
+                if (dr.RowState == DataRowState.Added)
+                {
+                   
+                   
+                        dr["FirstLastName"] = dr["First Name"].ToString() + dr["Last Name"].ToString();
+                   
+                   
 
+                }
+            }
 
-            //}
+           // DataRowView RowView = (DataRowView)CellV[;
+
+          //  m_FirstName = RowView.Row[1].ToString();
+          //  m_LastName = RowView.Row[2].ToString();
 
 
         }
@@ -2008,7 +2099,7 @@ namespace CAOGAttendeeProject
             btnFollowUp.IsChecked = true;
 
            
-            btnApplyChanges.IsEnabled = false;
+            // btnApplyChanges.IsEnabled = false; FIXME
             btnAttendeeList.IsChecked = false;
             chkDateFilter.IsChecked = false;
             m_dateIsValid = false;
@@ -2016,9 +2107,9 @@ namespace CAOGAttendeeProject
 
             cmbDate.IsEnabled = false;
 
-
             dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
             dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
+
 
 
         }
@@ -2207,9 +2298,72 @@ namespace CAOGAttendeeProject
 
         private void dataGrid_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-
+            Console.WriteLine("DataContext Changed!");
         }
 
+        private void dataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            var grid = sender as DataGrid;
+            DataGridCellInfo current_cell = grid.CurrentCell;
+
+
+            if (current_cell.Column.ToString() == "Date" )
+            {
+           //     current_cell = m_DateSelected.ToString("MM-dd-yyyy");
+
+            }
+        }
+
+        private void dataGrid_CurrentCellChanged(object sender, EventArgs e)
+        {
+
+            var grid = sender as DataGrid;
+            IList<DataGridCellInfo> CellV = grid.SelectedCells;
+
+            
+           // if (CellV.Count == 0)
+
+           // DataRowView RowView = (DataRowView)CellV[;
+
+            //  m_FirstName = RowView.Row[1].ToString();
+            //  m_LastName = RowView.Row[2].ToString();
+
+
+
+            //if (dataGrid.CurrentCell.Column.Header.ToString() == "Date")
+            //{
+                
+                
+            //        string date = m_DateSelected.ToString("MM-dd-yyyy");
+            //        DataRowView drv = (DataRowView)CellV[4].Item;
+                    
+                   
+
+                    
+                
+            //}
+        }
+
+        private void dataGrid_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
+                {
+                    if (dr.RowState == DataRowState.Added)
+                    {
+                        
+                        
+                            dr["FirstLastName"] = dr["First Name"].ToString() + dr["Last Name"].ToString();
+                        
+                        
+
+                        // dr.AcceptChanges();
+
+                    }
+                }
+            }
+        }
     } // end MainWindow
 } 
 

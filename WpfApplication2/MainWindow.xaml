@@ -96,7 +96,12 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid Name="dataGrid" CanUserAddRows="True" CanUserDeleteRows="True" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" DataContextChanged="dataGrid_DataContextChanged" SelectionChanged="dataGrid_SelectionChanged">
+            <DataGrid Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="True" 
+                      CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
+                      DataContextChanged="dataGrid_DataContextChanged" SelectionMode="Single"  
+                      SelectedCellsChanged="dataGrid_SelectedCellsChanged" 
+                      SelectionChanged="dataGrid_SelectionChanged" CurrentCellChanged="dataGrid_CurrentCellChanged"
+                      KeyUp="dataGrid_KeyUp">
                 <!-- <DataGrid Name="dataGrid" CanUserAddRows="True" CanUserDeleteRows="True" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" DataContextChanged="dataGrid_DataContextChanged" SelectionChanged="dataGrid_SelectionChanged">
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn IsThreeState="False" Binding="{Binding, UpdateSourceTrigger=PropertyChanged}"></DataGridCheckBoxColumn>
