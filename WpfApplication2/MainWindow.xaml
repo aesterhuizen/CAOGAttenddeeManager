@@ -28,14 +28,21 @@
                             <TextBox Name="txtSearch" Width="200" Height="21" BorderBrush="#2E86C1" TextChanged="txtSearch_TextChanged" ToolTip="Attendee Search" ></TextBox>
                         </StackPanel>
 
-                        
-                           <RibbonButton Margin="0,4,0,0" x:Name="btnApplyChanges" 
+                        <StackPanel Orientation="Horizontal" Margin="1,4,0,0">
+
+                            <RibbonButton Margin="0,0,0,0" x:Name="btnNewRec" 
+                                      Label="New Attendee" 
+                                      SmallImageSource="Resources\NewRec.ico" 
+                                      Click="btnNewRec_Click" 
+                                      ToolTip="Add new church attendee to the database"/>
+                            <RibbonButton Margin="0,0,0,0" x:Name="btnApplyChanges" 
                                       Label="Apply Changes" 
                                       SmallImageSource="Resources\ApplyChanges.ico" 
                                       Click="btnApplyChanges_Click" 
                                       ToolTip="Apply all changes made to the database"/>
 
-                        
+                       
+                        </StackPanel>
                     </StackPanel>
                 </RibbonGroup>
                 <RibbonGroup Header="Filter options" Width="170">
