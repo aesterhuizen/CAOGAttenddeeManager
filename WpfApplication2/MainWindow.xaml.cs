@@ -74,7 +74,7 @@ namespace CAOGAttendeeProject
                 m_db = new ModelDb(m_constr);
                 m_mySqlConnection = new SqlConnection(m_constr);
 
-               // GenerateDBFollowUps();
+                GenerateDBFollowUps();
                 InitDataSet();
                 // CreateDatabase_FromXLSX();
                 
@@ -106,11 +106,11 @@ namespace CAOGAttendeeProject
 
 
         private ModelDb m_db;
-        bool m_isAllFiltersDisabled = false;
+       
         private DataSet m_DataSet = new DataSet();
         private SqlConnection m_mySqlConnection = null;
         private string m_constr = "";
-        private string m_query = "";
+       
         private string m_FirstName = "";
         private string m_LastName = "";
         private DateTime m_DateSelected;
@@ -239,63 +239,98 @@ namespace CAOGAttendeeProject
 
 
 
-
-
+       
+            bool bHasChanges = false;
 
             // get current time
             DateTime curdate = DateTime.Now;
+            TimeSpan timespanSinceDate;
 
-            while (curdate.DayOfWeek != DayOfWeek.Sunday)
-            {
-                curdate = curdate.AddDays(1);
-            }
-           
+            ////get previous
+            //while (curdate.DayOfWeek != DayOfWeek.Sunday)
+            //{
+            //    curdate = curdate.AddDays(-1);
+            //}
 
-            var queryAttendees = from AttendeeRec in m_db.Attendees
-                                 select AttendeeRec;
+            
+
+            
 
 
-            foreach (var AttendeeRec in queryAttendees)
-            {
+                var queryAttendees = from AttendeeRec in m_db.Attendees
+                                     select AttendeeRec;
 
-                if (AttendeeRec.HasThreeConsequitiveFollowUps != 1)
+
+                foreach (var AttendeeRec in queryAttendees)
                 {
 
-                    var queryLastDateAttended = (from DateRec in AttendeeRec.AttendanceList
-                                                 orderby DateRec.Last_Attended ascending
-                                                 select DateRec).ToList().LastOrDefault();
-                    
-                    if (queryLastDateAttended != null)
+                    if (AttendeeRec.HasThreeConsequitiveFollowUps != 1)
                     {
+                    
 
-                        string[] arydate = queryLastDateAttended.Last_Attended.Split('-');
-                        string year = arydate[2];
-                        string month = arydate[0];
-                        string day = arydate[1];
+                         var lastRec = (from DateRec in AttendeeRec.AttendanceList
+                                                             orderby DateRec.Date ascending
+                                                             select DateRec).ToList().LastOrDefault();
 
-                        DateTime LastAttendedDate = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day));
+                         timespanSinceDate = curdate - lastRec.Date;
+                  
+                        if (lastRec.Status == "Follow-Up" &&  timespanSinceDate.Days <= 28)
+                        {
 
-                        TimeSpan timespanSinceLastAttended = curdate - LastAttendedDate;
+                        // do nothing
+                        //Attendee already have a followUp sent so do not generate another followup unil 28 days has
+                        //lapsed since the last followUp        
 
-                        if (timespanSinceLastAttended.Days > 2 /*Only a test */)
+
+                        }
+                        else if (lastRec.Status == "Follow-Up" && timespanSinceDate.Days > 28)
+                        {
+
+                                    Attendance_Info newfollowUpRecord = new Attendance_Info { };
+                                    newfollowUpRecord.AttendeeId = AttendeeRec.AttendeeId;
+                                    newfollowUpRecord.Date = curdate;
+                                    newfollowUpRecord.Last_Attended = lastRec.Last_Attended;
+                                    newfollowUpRecord.Status = "Follow-Up";
+
+                                    m_db.Attendance_Info.Add(newfollowUpRecord);
+                                    bHasChanges = true;
+                        
+                        }
+
+                        if (lastRec.Status == "Attended" && timespanSinceDate.Days <= 28)
+                        {
+
+                            //Do not generate a follow-up
+
+
+                        }
+                        else if (lastRec.Status == "Attended" && timespanSinceDate.Days > 28)
                         {
 
                             Attendance_Info newfollowUpRecord = new Attendance_Info { };
                             newfollowUpRecord.AttendeeId = AttendeeRec.AttendeeId;
-                            newfollowUpRecord.Date = curdate.ToString("MM-dd-yyyy");
-                            newfollowUpRecord.Last_Attended = month + "-" + day + "-" + year;
+                            newfollowUpRecord.Date = curdate;
+                            newfollowUpRecord.Last_Attended = lastRec.Last_Attended;
                             newfollowUpRecord.Status = "Follow-Up";
 
                             m_db.Attendance_Info.Add(newfollowUpRecord);
+                            bHasChanges = true;
+
                         }
+
+
+
+                } // end Has Three follow ups
+
+
+
+                } //end foreach
+            
+                    if(bHasChanges)
+                    {
+                            m_db.SaveChanges();
                     }
-                }
-
-              
-
-            }
-
-            m_db.SaveChanges();
+                
 
 
 
@@ -416,10 +451,10 @@ namespace CAOGAttendeeProject
                                     //att_infoID++;
 
                                     md = oleDataReader.GetName(col_index).ToString().Split('/');
-                                    string date = (new DateTime(int.Parse(year), int.Parse(md[0]), int.Parse(md[1])).ToString("MM-dd-yyyy"));
+                                    DateTime date = new DateTime(int.Parse(year), int.Parse(md[0]), int.Parse(md[1]));
                                     string[] arylstAttDate = oleDataReader[2].ToString().Split('.');
                                     string lstyear = "20" + arylstAttDate[2];
-                                    string lstAttendedDate = (new DateTime(int.Parse(lstyear), int.Parse(arylstAttDate[0]), int.Parse(arylstAttDate[1])).ToString("MM-dd-yyyy"));
+                                    DateTime lstAttendedDate = new DateTime(int.Parse(lstyear), int.Parse(arylstAttDate[0]), int.Parse(arylstAttDate[1]));
 
                                     //Attendee_Status.Attendance_InfoId = att_infoID;
                                     Attendee_Status.AttendeeId = attID;
@@ -436,11 +471,11 @@ namespace CAOGAttendeeProject
 
                                             churchAttendee.AttendanceList[attLst_Idx].Status = (oleDataReader[col_index].ToString() == "1") ? "Attended" : "Not Attended";
                                             attLst_Idx++;
-                                            HasThreeFollowUps--;
+                                            HasThreeFollowUps = 0;
                                             break;
 
                                         }
-                                    case 2: //Contacted
+                                    case 2: //FollowUp
                                         {
                                             if (oleDataReader[col_index + 1].ToString() == "1")
                                             {
@@ -461,7 +496,7 @@ namespace CAOGAttendeeProject
                                             {
                                                 churchAttendee.AttendanceList[attLst_Idx].Status = "Responded";
                                                 //churchAttendee.AttendanceList.Add(Attendee_Status);
-                                                HasThreeFollowUps--;
+                                                HasThreeFollowUps = 0;
                                                 attLst_Idx++;
                                             }
 
@@ -557,7 +592,7 @@ namespace CAOGAttendeeProject
                 primaryKeyCol[0] = Default_Data_Table.Columns[0];
                 Default_Data_Table.PrimaryKey = primaryKeyCol;
 
-                string dateLA = "";
+                DateTime dateLA;
                 string statusLA = "";
 
                     foreach (var AttendeeRec in queryAttendees)
@@ -567,13 +602,13 @@ namespace CAOGAttendeeProject
                                                  orderby DateRec.Last_Attended ascending
                                                  select DateRec).ToList().LastOrDefault();
 
-                        if (queryLastDateAttended != null)
-                        {
+                        
                              dateLA = queryLastDateAttended.Last_Attended;
                              statusLA = queryLastDateAttended.Status;
-                        }
 
-                    m_NewAttendeeId = AttendeeRec.AttendeeId;
+                        
+
+                        m_NewAttendeeId = AttendeeRec.AttendeeId;
                         DataRow dr = Default_Data_Table.NewRow();
 
                         dr["AttendeeId"] = AttendeeRec.AttendeeId;
@@ -583,7 +618,7 @@ namespace CAOGAttendeeProject
                         dr["Last Name"] = AttendeeRec.LastName;
 
 
-                        dr["Date Last Attended"] = dateLA;
+                        dr["Date Last Attended"] = dateLA.ToString("MM-dd-yyyy");
                         dr["Status"] = statusLA;
 
 
@@ -984,7 +1019,7 @@ namespace CAOGAttendeeProject
             chkResponded.IsEnabled = false;
             chkDateFilter.IsEnabled = false;
             cmbDate.IsEnabled = false;
-            m_isAllFiltersDisabled = true;
+            //m_isAllFiltersDisabled = true;
 
         }
         private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
@@ -1656,7 +1691,7 @@ namespace CAOGAttendeeProject
              
                 // add all attendee status and date to database
              //   btnApplyChanges.IsEnabled = false; FIXME
-                string date = m_DateSelected.ToString("MM-dd-yyyy");
+                
              
                 // save data grid edits to dataset
                 dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
@@ -1711,13 +1746,12 @@ namespace CAOGAttendeeProject
 
 
                             newAttInfoRec.AttendeeId = m_NewAttendeeId;
-                            newAttInfoRec.Date = date;
-                            newAttInfoRec.Last_Attended = date;
+                            newAttInfoRec.Date = m_DateSelected;
+                            newAttInfoRec.Last_Attended = m_DateSelected;
 
                             if (dr.ItemArray[5].ToString() == "True")
                                 newAttInfoRec.Status = "Attended";
-                            else
-                                newAttInfoRec.Status = "Not Attended";
+                           
 
                             newAttendeeRec.AttendanceList.Add(newAttInfoRec);
 
@@ -1739,8 +1773,8 @@ namespace CAOGAttendeeProject
                             Attendance_Info newRecord = new Attendance_Info { };
 
                             newRecord.AttendeeId = int.Parse(dr["AttendeeId"].ToString());
-                            newRecord.Date = date;
-                            newRecord.Last_Attended = date;
+                            newRecord.Date = m_DateSelected;
+                            newRecord.Last_Attended = m_DateSelected;
                             newRecord.Status = "Attended";
 
                             m_db.Attendance_Info.Add(newRecord);
@@ -1849,7 +1883,7 @@ namespace CAOGAttendeeProject
             chkFollowup.IsEnabled = true;
             chkResponded.IsEnabled = true;
             chkDateFilter.IsEnabled = true;
-            m_isAllFiltersDisabled = false; 
+            //m_isAllFiltersDisabled = false; 
 
         }
 
@@ -2375,20 +2409,23 @@ namespace CAOGAttendeeProject
            
             if (m_modeIsInListView)
             {
-                //first focus the grid
-                dataGrid.Focus();
-                //then create a new cell info, with the item we wish to edit and the column number of the cell we want in edit mode
-                DataGridCell dgcell = new DataGridCell();
-                
-                DataGridCellInfo cellInfo = new DataGridCellInfo(itemToSelect, dataGrid.Columns[2]);
-                //set the cell to be the active one
-                dataGrid.CurrentCell = cellInfo;
-                //scroll the item into view
-                dataGrid.ScrollIntoView(itemToSelect);
-                //begin the edit
-                dataGrid.BeginEdit();
+                ////first focus the grid
+                //dataGrid.Focus();
+                ////then create a new cell info, with the item we wish to edit and the column number of the cell we want in edit mode
+                //DataGridCell dgcell = new DataGridCell();
+                //dgcell.
+                //DataGridCellInfo cellInfo = new DataGridCellInfo(itemToSelect, dataGrid.Columns[2]);
+                ////set the cell to be the active one
+                //dataGrid.CurrentCell = cellInfo;
+                ////scroll the item into view
+                //dataGrid.ScrollIntoView(itemToSelect);
+                ////begin the edit
+                //dataGrid.BeginEdit();
+                //dataGrid.SelectedItem = 
+                //dataGrid.ScrollIntoView(dataGrid.Items[dataGrid.Items.Count - 1]); //scroll to last
+                //dataGrid.UpdateLayout();
+                //dataGrid.ScrollIntoView(dataGrid.SelectedItem);
 
-                
             }
                 
         }

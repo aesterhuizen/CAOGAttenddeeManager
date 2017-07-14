@@ -73,17 +73,17 @@ namespace CAOGAttendeeProject
                     string date = d.ToString("MM-dd-yyyy");
 
                     var queryAllAttendeesAttended_Per_Date = (from AttendanceAttendedRec in m_db.Attendance_Info
-                                                              where AttendanceAttendedRec.Date == date
+                                                              where AttendanceAttendedRec.Date == d
                                                              && AttendanceAttendedRec.Status == "Attended"
                                                               select AttendanceAttendedRec).ToArray();
 
                     var queryAllAttendeesFollowUp_Per_Date = (from AttendanceFollowUpRecs in m_db.Attendance_Info
-                                                              where AttendanceFollowUpRecs.Date == date
+                                                              where AttendanceFollowUpRecs.Date == d
                                                               && AttendanceFollowUpRecs.Status == "Follow-Up"
                                                               select AttendanceFollowUpRecs).ToArray();
 
                     var queryAllAttendeesResponded_Per_Date = (from AttendanceRespondedRecs in m_db.Attendance_Info
-                                                               where AttendanceRespondedRecs.Date == date
+                                                               where AttendanceRespondedRecs.Date == d
                                                                && AttendanceRespondedRecs.Status == "Responded"
                                                                select AttendanceRespondedRecs).ToArray();
 
