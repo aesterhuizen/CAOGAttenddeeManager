@@ -1,1 +1,2 @@
 # CAOGAttendeeProject
+# Program to keep track of church attendees in order to generate follow-up flags when attendee misses 3 # weeks of church service, an insentive to follow up with them and invite them back.
