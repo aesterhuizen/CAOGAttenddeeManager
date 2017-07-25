@@ -45,33 +45,36 @@ namespace CAOGAttendeeProject
             var executingPath = Directory.GetCurrentDirectory();
 
 
-            if (File.Exists($"{executingPath}\\credentials.txt"))
-            {
-
-                var fs = new FileStream($"{executingPath}\\credentials.txt", FileMode.Open, FileAccess.Read);
-                using (var sr = new StreamReader(fs, Encoding.ASCII))
-                {
-                    string line;
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        m_constr = line;
-                    }
-
-                }
-
-
-
-            }
-            else
-            {
-
-                Console.WriteLine("Cannot connect to Database, credential file does not exist!");
-                return;
-            }
+           
 
 
             try
             {
+
+                if (File.Exists($"{executingPath}\\credentials.txt"))
+                {
+
+                    var fs = new FileStream($"{executingPath}\\credentials.txt", FileMode.Open, FileAccess.Read);
+                    using (var sr = new StreamReader(fs, Encoding.ASCII))
+                    {
+                        string line;
+                        while ((line = sr.ReadLine()) != null)
+                        {
+                            m_constr = line;
+                        }
+
+                    }
+
+
+
+                }
+                else
+                {
+
+                    Console.WriteLine("Cannot connect to Database, credential file does not exist!");
+                    return;
+                }
+
                 m_db = new ModelDb(m_constr);
                 m_mySqlConnection = new SqlConnection(m_constr);
 
@@ -237,8 +240,7 @@ namespace CAOGAttendeeProject
 
 
 
-            //m_constr = "Data Source=(localdb)\\MSSQLLocalDB;AttachDbFilename=C:\\Program Files\\Microsoft SQL Server\\MSSQL13.SQLEXPRESS\\MSSQL\\DATA\\Database.mdf;Integrated Security=True;Connect Timeout=30";
-            //InitDataSet();
+          
 
 
 
@@ -269,15 +271,16 @@ namespace CAOGAttendeeProject
 
                     if (AttendeeRec.HasThreeConsequitiveFollowUps != 1)
                     {
-                    
 
-                         var lastRec = (from DateRec in AttendeeRec.AttendanceList
-                                                             orderby DateRec.Date ascending
-                                                             select DateRec).ToList().LastOrDefault();
 
-                         timespanSinceDate = curdate - lastRec.Date;
+                    var lastRec = (from DateRec in AttendeeRec.AttendanceList
+                                   orderby DateRec.Date ascending
+                                   select DateRec).ToList();
+                         
+
+                         timespanSinceDate = curdate - lastRec[lastRec.Count-1].Date;
                   
-                        if (lastRec.Status == "Follow-Up" &&  timespanSinceDate.Days <= 28)
+                        if ( (lastRec[lastRec.Count - 1].Status == "Follow-Up" || lastRec[lastRec.Count - 1].Status == "Attended" ) &&  timespanSinceDate.Days <= 28)
                         {
 
                         // do nothing
@@ -286,13 +289,13 @@ namespace CAOGAttendeeProject
 
 
                         }
-                        else if (lastRec.Status == "Follow-Up" && timespanSinceDate.Days > 28)
+                        else if ( (lastRec[lastRec.Count - 1].Status == "Follow-Up" || lastRec[lastRec.Count - 1].Status == "Attended" ) && timespanSinceDate.Days > 28)
                         {
 
                                     Attendance_Info newfollowUpRecord = new Attendance_Info { };
                                     newfollowUpRecord.AttendeeId = AttendeeRec.AttendeeId;
                                     newfollowUpRecord.Date = curdate;
-                                    newfollowUpRecord.Last_Attended = lastRec.Last_Attended;
+                                    newfollowUpRecord.Last_Attended = lastRec[lastRec.Count - 1].Last_Attended;
                                     newfollowUpRecord.Status = "Follow-Up";
 
                                     m_db.Attendance_Info.Add(newfollowUpRecord);
@@ -300,26 +303,13 @@ namespace CAOGAttendeeProject
                         
                         }
 
-                        if (lastRec.Status == "Attended" && timespanSinceDate.Days <= 28)
-                        {
-
-                            //Do not generate a follow-up
-
-
-                        }
-                        else if (lastRec.Status == "Attended" && timespanSinceDate.Days > 28)
-                        {
-
-                            Attendance_Info newfollowUpRecord = new Attendance_Info { };
-                            newfollowUpRecord.AttendeeId = AttendeeRec.AttendeeId;
-                            newfollowUpRecord.Date = curdate;
-                            newfollowUpRecord.Last_Attended = lastRec.Last_Attended;
-                            newfollowUpRecord.Status = "Follow-Up";
-
-                            m_db.Attendance_Info.Add(newfollowUpRecord);
-                            bHasChanges = true;
-
-                        }
+                        
+                        // flag attendee if havinging 3 consequitive follow-ups
+                            if ( lastRec[lastRec.Count-1].Status == "Follow-Up" && lastRec[lastRec.Count - 2].Status == "Follow-Up" && lastRec[lastRec.Count - 3].Status == "Follow-Up")
+                            {
+                                AttendeeRec.HasThreeConsequitiveFollowUps = 1;
+                                bHasChanges = true;
+                            }
 
 
 
