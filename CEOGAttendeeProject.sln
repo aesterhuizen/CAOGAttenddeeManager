@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CAOGAttendeeProject", "WpfApplication2\CAOGAttendeeProject.csproj", "{EF1007E3-AE7C-4EBA-911B-7EB8D45DCC07}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CAOGAttendeeProject", "CAOGAttendeeManager\CAOGAttendeeProject.csproj", "{EF1007E3-AE7C-4EBA-911B-7EB8D45DCC07}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wpf_Experiments", "..\Wpf_Experiments\Wpf_Experiments.csproj", "{E01D89B3-BB1E-42A7-8CFE-A84D0930BFED}"
 EndProject
