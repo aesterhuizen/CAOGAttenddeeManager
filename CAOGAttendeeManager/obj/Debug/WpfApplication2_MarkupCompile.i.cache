@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\aesterh\Documents\Visual Studio 2015\Projects\CAOGAttendeeManager\WpfApplication2\obj\Debug\
+C:\Users\aesterh\Documents\Visual Studio 2015\Projects\CAOGAttendeeManager\CAOGAttendeeManager\obj\Debug\
 WpfApplication2
 none
 false
 DEBUG;TRACE
-C:\Users\aesterh\Documents\Visual Studio 2015\Projects\CAOGAttendeeManager\WpfApplication2\App.xaml
+C:\Users\aesterh\Documents\Visual Studio 2015\Projects\CAOGAttendeeManager\CAOGAttendeeManager\App.xaml
 3560886547
 
 11-548501883
 25-487321248
 ChartWindow.xaml;MainWindow.xaml;WndAtendeeInfo.xaml;
 
-False
+True
 
