@@ -6,95 +6,153 @@
         xmlns:local="clr-namespace:CAOGAttendeeProject"
         mc:Ignorable="d"
         Title="CAOG Attendee Manager" Height="500" Width="1000"
-        Loaded="Window_Loaded"
-        Closed="Window_Closed">
+        Loaded="Window_Loaded">
 
 
     <DockPanel>
 
-        <Ribbon DockPanel.Dock="Top" Title="Attendee Manager">
+        <Ribbon DockPanel.Dock="Top" Title="Attendee Manager" SelectionChanged="Ribbon_SelectionChanged">
             <Ribbon.ApplicationMenu>
                 <RibbonApplicationMenu Label="File">
                     <RibbonApplicationMenuItem Header="Exit" Click="RibbonApplicationMenuItem_Click_Exit" ImageSource="Resources\Exit.ico"/>
                 </RibbonApplicationMenu>
             </Ribbon.ApplicationMenu>
-            <RibbonTab Header="Home" Margin="2,-1,-2,1">
+            <!-- Home Tab ############################################################################################-->
+            <RibbonTab Name="tabHome" Header="Attendance">
                 <RibbonGroup Header="Search">
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal">
-                            <Label Name="lblSearch">
-                                <Image Source="Resources\Search.ico" Height="15"></Image>
-                            </Label>
-                            <TextBox Name="txtSearch" Width="200" Height="21" BorderBrush="#2E86C1" TextChanged="txtSearch_TextChanged" ToolTip="Attendee Search" ></TextBox>
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="1,4,0,0">
-
-                            <RibbonButton Margin="0,0,0,0" x:Name="btnNewRec" 
+                    <RibbonTextBox Name="txtSearch" SmallImageSource="Resources\Search.ico" Text=""
+                                   TextBoxWidth="160"
+                                   TextChanged="txtSearch_TextChanged" 
+                                   ToolTip="Attendee Search" />
+                    <!--  <RibbonButton Margin="0,0,0,0" x:Name="btnNewRec" 
                                       Label="New Attendee" 
                                       SmallImageSource="Resources\NewRec.ico" 
                                       Click="btnNewRec_Click" 
                                       ToolTip="Add new church attendee to the database"/>
-                            <RibbonButton Margin="0,0,0,0" x:Name="btnApplyChanges" 
-                                      Label="Apply Changes" 
-                                      SmallImageSource="Resources\ApplyChanges.ico" 
-                                      Click="btnApplyChanges_Click" 
-                                      ToolTip="Apply all changes made to the database"/>
-
-                       
-                        </StackPanel>
-                    </StackPanel>
+                            -->
+                  
                 </RibbonGroup>
-                <RibbonGroup Header="Filter options" Width="170">
+                <RibbonGroup Header="Filter options" Width="180">
 
-                    <Grid Margin="0,2,0,0" Width="150" Height="70">
+                    <Grid Height="70">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
+                            <RowDefinition/>
+                            <RowDefinition Height="25"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Margin="0,0,0,0" BorderBrush="#2E86C1" IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" GotFocus="cmbDate_GotFocus" LostFocus="cmbDate_LostFocus"  KeyUp="cmbDate_KeyUp" ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
-                            <!--<ComboBox IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" ToolTip="Current Date attendee attended church">-->
+                        <ComboBox Width="150" IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" 
+                                        GotFocus="cmbDate_GotFocus" 
+                                        LostFocus="cmbDate_LostFocus"  
+                                        KeyUp="cmbDate_KeyUp" 
+                                        ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
+                            
                             <Calendar Name="DateCalendar"  SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" DisplayDateChanged="DateCalendar_DisplayDateChanged" SelectedDatesChanged="DateCalendar_SelectedDateChanged"></Calendar>
                         </ComboBox>
-                        <CheckBox Grid.Row="1" Grid.Column="0" Margin="0,4,0,0" Name="chkDateFilter" Checked="chkDateFiler_Checked" Unchecked="chkDateFiler_Unchecked" FontSize="10">Date</CheckBox>
-                        <CheckBox Grid.Row="1" Grid.Column="1" Margin="0,4,0,0" Name="chkAttended" Checked="chkAttended_Checked" Unchecked="chkAttended_Unchecked" FontSize="10">Atended</CheckBox>
-                        <CheckBox Grid.Row="2" Grid.Column="0" Margin="0,4,0,0" Name="chkFollowup" Checked="chkFollowup_Checked" Unchecked="chkFollowup_Unchecked" FontSize="10">Follow-Up</CheckBox>
-                        <CheckBox Grid.Row="2" Grid.Column="1" Margin="0,4,0,0" Name="chkResponded" Checked="chkResponded_Checked" Unchecked="chkResponded_Unchecked" FontSize="10">Responded</CheckBox>
+                        <RibbonCheckBox Grid.Row="1" Grid.Column="0" Label="Date" Name="chkDateFilter" Checked="chkDateFiler_Checked" Unchecked="chkDateFiler_Unchecked" FontSize="10" Margin="-22,0,0,0"/>
+                        <RibbonCheckBox Grid.Row="1" Grid.Column="1" Label="Attended" Name="chkAttended" Checked="chkAttended_Checked" Unchecked="chkAttended_Unchecked" FontSize="10" Margin="-8,0,0,0" />
+                        <RibbonCheckBox Grid.Row="2" Grid.Column="0" Label="Follow-Up" Name="chkFollowup" Checked="chkFollowup_Checked" Unchecked="chkFollowup_Unchecked" FontSize="10" Margin="0,0,0,0"/>
+                        <RibbonCheckBox Grid.Row="2" Grid.Column="1" Label="Responded" Name="chkResponded" Checked="chkResponded_Checked" Unchecked="chkResponded_Unchecked" FontSize="10" Margin="0,0,0,0"/>
+                        
                     </Grid>
 
 
                 </RibbonGroup>
-                <RibbonGroup Header="View" Width="122" Margin="0,1">
+                <RibbonGroup Header="View">
 
-                    <RibbonToggleButton x:Name="btnAttendeeList" Width="96" Label="Attendee List" 
+                  <!--  <RibbonToggleButton x:Name="btnAttendeeList" Width="96" Label="Attendee List" 
                                       SmallImageSource="Resources\Checklist2.ico" 
                                       Height="22" 
                                       Click="btnAttendeeList_Click" 
                                       ToolTip="Allows the user to  check off or add new church attendees for the day display in the date dropdown box." HorizontalAlignment="Left" VerticalAlignment="Top"/>
-
-                    <RibbonToggleButton x:Name="btnFollowUp" Margin="0,0,-10,0" Width="96" Label="Filter Mode" 
+                    -->
+                   <!-- <RibbonToggleButton x:Name="btnFollowUp" Margin="0,0,-10,0" Width="96" Label="Filter Mode" 
                                       SmallImageSource="Resources\FilterAdd.ico" 
                                       Height="22" 
                                       Click="btnFollowUp_Click" 
                                       ToolTip="Allows the user to filter church attendees by using the filter options" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-
-                    <RibbonButton x:Name="btnChart" Width="96" Label="Charts"  
-                                      SmallImageSource="Resources\Chart2.ico" 
-                                      Height="22" 
+                    -->
+                    <RibbonButton x:Name="btnChart" Label="Charts"  
+                                      LargeImageSource="Resources\Chart2.ico" 
                                       Click="btnChart_Click" 
                                       ToolTip="Allows the user to  check add church attendees for the day." HorizontalAlignment="Left" VerticalAlignment="Top" />
 
                 </RibbonGroup>
 
             </RibbonTab>
+            <!--Attendee List Tab #######################################################################################-->
+            <RibbonTab Name="tabAttendeeList" Header="Attendee Check List">
+
+                <RibbonGroup Header="Search">
+                    <RibbonTextBox Name="alisttxtSearch" SmallImageSource="Resources\Search.ico" Text=""
+                                   TextBoxWidth="160"
+                                   TextChanged="alisttxtSearch_TextChanged" 
+                                   ToolTip="Attendee Search" />
+
+                    <!--  <RibbonButton Margin="0,0,0,0" x:Name="btnNewRec" 
+                                      Label="New Attendee" 
+                                      SmallImageSource="Resources\NewRec.ico" 
+                                      Click="btnNewRec_Click" 
+                                      ToolTip="Add new church attendee to the database"/>
+                            -->
+
+
+
+
+                      
+                </RibbonGroup>
+                <RibbonGroup Header="Date" >
+
+
+                    <ComboBox Width="150" IsEditable="True" Name="alistcmbDate" 
+                                    GotFocus="alistcmbDate_GotFocus" 
+                                    LostFocus="alistcmbDate_LostFocus" 
+                                    KeyUp="alistcmbDate_KeyUp" 
+                                    ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
+                        
+                        <Calendar Name="alistDateCalendar"  
+                                  SelectionMode="SingleDate" 
+                                  Loaded="alistDateCalendar_Loaded" 
+                                  DisplayDateChanged="alistDateCalendar_DisplayDateChanged" 
+                                  SelectedDatesChanged="alistDateCalendar_SelectedDatesChanged"/>
+                    </ComboBox>
+
+
+                </RibbonGroup>
+                <RibbonGroup Header="Table Operations">
+                    
+                
+                <RibbonToggleButton x:Name="btnNewRec" 
+                                  Width="150"
+                                  Label="Insert\New Attendee    " 
+                                  SmallImageSource="Resources\NewRec.ico" 
+                                  Click="btnNewRec_Click" 
+                                  ToolTip="Insert a new Attendee into the database." HorizontalAlignment="Left" VerticalAlignment="Top"/>
+
+                <RibbonButton x:Name="btnSaveUpdate" 
+                                  Width="150"
+                                  Label="Save\Update" 
+                                  SmallImageSource="Resources\ApplyChanges.ico" 
+                                  Click="btnApplyChanges_Click" 
+                                  ToolTip="Save all change to the database"/>
+
+                    <RibbonButton x:Name="btnPrint" 
+                                  Width="150"
+                                  Label="Print Table" 
+                                  SmallImageSource="Resources\Print.ico" 
+                                  Click="btnPrint_Click" 
+                                  ToolTip="Print this table"/>
+                    
+                </RibbonGroup>
+
+            </RibbonTab>
+            <!-- End AttendeeList #########################################################################-->
         </Ribbon>
 
-        <Grid DockPanel.Dock="Bottom" Margin="2" Background="LightCoral" ShowGridLines="True" >
+        <Grid DockPanel.Dock="Bottom" Margin="2" ShowGridLines="True" >
             <Grid.RowDefinitions>
                 <RowDefinition/>
             </Grid.RowDefinitions>
@@ -103,9 +161,12 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="True" 
-                      CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
-                      DataContextChanged="dataGrid_DataContextChanged" SelectionMode="Single"  
+            <DataGrid Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" 
+                      CanUserReorderColumns="False" ItemsSource="{Binding}" 
+                      MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
+                      MouseLeftButtonUp="dataGrid_MouseLeftButtonUp"
+                      DataContextChanged="dataGrid_DataContextChanged"
+                      SelectionMode="Single"  
                       SelectedCellsChanged="dataGrid_SelectedCellsChanged" 
                       SelectionChanged="dataGrid_SelectionChanged" CurrentCellChanged="dataGrid_CurrentCellChanged"
                       KeyUp="dataGrid_KeyUp">

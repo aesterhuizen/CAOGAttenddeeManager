@@ -2,6 +2,6 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Project</StartAction>
-    <StartProgram>C:\Users\aesterh\Documents\Visual Studio 2015\Projects\CAOGAttendeeManager\WpfApplication2\bin\Debug\WpfApplication2.exe</StartProgram>
+    <StartProgram>C:\Users\aesterh\Documents\Visual Studio 2015\Projects\CAOGAttendeeManager\CAOGAttendeeManager\bin\Debug\CAOGAttendeeManager.exe</StartProgram>
   </PropertyGroup>
 </Project>
