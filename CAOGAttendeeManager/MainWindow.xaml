@@ -45,12 +45,14 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <ComboBox Width="150" IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" 
-                                        GotFocus="cmbDate_GotFocus" 
-                                        LostFocus="cmbDate_LostFocus"  
-                                        KeyUp="cmbDate_KeyUp" 
-                                        ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
-                            
-                            <Calendar Name="DateCalendar"  SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" DisplayDateChanged="DateCalendar_DisplayDateChanged" SelectedDatesChanged="DateCalendar_SelectedDateChanged"></Calendar>
+                                        
+                                        ToolTip="Date attendee attended church in the format (mm-dd-yyyy). Press Enter when done.">
+
+                            <Calendar Name="DateCalendar"  SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" 
+                                      DisplayDateChanged="DateCalendar_DisplayDateChanged" 
+                                      SelectedDatesChanged="DateCalendar_SelectedDateChanged"/>
+
+
                         </ComboBox>
                         <RibbonCheckBox Grid.Row="1" Grid.Column="0" Label="Date" Name="chkDateFilter" Checked="chkDateFiler_Checked" Unchecked="chkDateFiler_Unchecked" FontSize="10" Margin="-22,0,0,0"/>
                         <RibbonCheckBox Grid.Row="1" Grid.Column="1" Label="Attended" Name="chkAttended" Checked="chkAttended_Checked" Unchecked="chkAttended_Unchecked" FontSize="10" Margin="-8,0,0,0" />
@@ -147,7 +149,10 @@
                                   ToolTip="Print this table"/>
                     
                 </RibbonGroup>
-
+              <!--  <RibbonGroup Header="Save Status">
+                    <TextBlock Name="txtSaveStatus" Width="120"/>
+                </RibbonGroup>
+                -->
             </RibbonTab>
             <!-- End AttendeeList #########################################################################-->
         </Ribbon>
@@ -164,19 +169,16 @@
             <DataGrid Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" 
                       CanUserReorderColumns="False" ItemsSource="{Binding}" 
                       MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
-                      MouseLeftButtonUp="dataGrid_MouseLeftButtonUp"
-                      DataContextChanged="dataGrid_DataContextChanged"
                       SelectionMode="Single"  
-                      SelectedCellsChanged="dataGrid_SelectedCellsChanged" 
-                      SelectionChanged="dataGrid_SelectionChanged" CurrentCellChanged="dataGrid_CurrentCellChanged"
-                      KeyUp="dataGrid_KeyUp">
-                <!-- <DataGrid Name="dataGrid" CanUserAddRows="True" CanUserDeleteRows="True" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" DataContextChanged="dataGrid_DataContextChanged" SelectionChanged="dataGrid_SelectionChanged">
+                      SelectionChanged="dataGrid_SelectionChanged"/>
+
+            <!-- <DataGrid Name="dataGrid" CanUserAddRows="True" CanUserDeleteRows="True" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" DataContextChanged="dataGrid_DataContextChanged" SelectionChanged="dataGrid_SelectionChanged">
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn IsThreeState="False" Binding="{Binding, UpdateSourceTrigger=PropertyChanged}"></DataGridCheckBoxColumn>
                     
                 </DataGrid.Columns>
             -->
-            </DataGrid>
+            
 
 
 

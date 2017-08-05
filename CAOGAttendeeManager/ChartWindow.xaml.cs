@@ -409,31 +409,36 @@ namespace CAOGAttendeeProject
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             btnPlot.IsEnabled = false;
+            cmbStartDate.Text = "Select or type date.";
+            cmbEndDate.Text = "Select or type date.";
+
         }
 
         private void cmbStartDate_KeyUp(object sender, KeyEventArgs e)
         {
 
-            if (cmbStartDate.Text == "" && cmbEndDate.Text == "Select or type date")
+          
+
+            if (cmbStartDate.Text == "")
                btnPlot.IsEnabled = false;
             else
                btnPlot.IsEnabled = true;
 
-           
-             if (e.Key == Key.Enter)
+
+            if (e.Key == Key.Enter)
             {
 
-                btnPlot_Click(sender, e);   
+                btnPlot_Click(sender, e);
 
             }
-                
-               
-           
+
+
+
         }
 
   private void cmbEndDate_KeyUp(object sender, KeyEventArgs e)
   {
-            if (cmbStartDate.Text == "Select or type date" && cmbEndDate.Text == "")
+            if (cmbEndDate.Text == "")
                 btnPlot.IsEnabled = false;
             else
                 btnPlot.IsEnabled = true;
@@ -471,9 +476,6 @@ namespace CAOGAttendeeProject
                 cmbEndDate.Text = "Select or type date";
         }
 
-        private void btnLinePlot_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
+        
     }
 }
