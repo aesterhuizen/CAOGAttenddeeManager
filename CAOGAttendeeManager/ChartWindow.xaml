@@ -21,29 +21,28 @@
             </Ribbon.ApplicationMenu>
             <RibbonTab Header="Plot" >
                
-                <RibbonGroup Header="Date Range" Width="220">
+                <RibbonGroup Header="Date Range" Width="200">
                     <StackPanel Orientation="Horizontal">
-                    <Label>Start Date:</Label>
-                        <ComboBox  Width="140" Name="cmbStartDate" IsEditable="True" 
-                                        GotFocus="cmbStartDate_GotFocus" 
-                                        LostFocus="cmbStartDate_LostFocus" 
-                                        KeyUp="cmbStartDate_KeyUp" 
-                                        ToolTip="Date attendee attended church in the format (mm-dd-yyyy). Press Enter when done">
-                            <Calendar Name="DateStartCalendar" SelectionMode="SingleDate" Loaded="DateStartCalendar_Loaded" DisplayDateChanged="DateStartCalendar_DisplayDateChanged" SelectedDatesChanged="DateStartCalendar_SelectedDatesChanged"></Calendar>
-                        </ComboBox>
-                    </StackPanel>
+                        <Label>Start date:</Label>
+                        <TextBox   Width="110" Height="20" Name="txtStartDate"  
+                                        TextChanged="txtStartDate_TextChanged"
+                                        IsReadOnly="True"/>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                        <Label>End Date:</Label>
-                        <ComboBox Margin="4,0,0,0" Width="140" x:Name="cmbEndDate" IsEditable="True" 
-                                        GotFocus="cmbEndDate_GotFocus" 
-                                        LostFocus="cmbEndDate_LostFocus" 
-                                        KeyUp="cmbEndDate_KeyUp" 
-                                        ToolTip="Date attendee attended church in the format (mm-dd-yyyy). Press Enter when done" >
-                            <Calendar x:Name="DateEndCalendar" SelectionMode="SingleDate" Loaded="DateEndCalendar_Loaded"  DisplayDateChanged="DateEndCalendar_DisplayDateChanged" SelectedDatesChanged="DateEndCalendar_SelectedDatesChanged"/>
-                        </ComboBox>
 
                     </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Width="200">
+                        <Label>End date:</Label>
+                        <TextBox Margin ="5,0,0,0" Width="110" Height="20" Name="txtEndDate"  
+                                        TextChanged="txtEndDate_TextChanged"
+                                        IsReadOnly="True"
+                                        />
+                    </StackPanel>
+                    
+                    
+
+                    
+
                 </RibbonGroup>
                 <RibbonGroup Header="Actions">
                     <RibbonButton Label="Plot" Name="btnPlot" LargeImageSource="Resources\Chart2.ico" Click="btnPlot_Click"/>
@@ -52,8 +51,16 @@
                 
             </RibbonTab>
         </Ribbon>
-
-          <chartingToolkit:Chart DockPanel.Dock="Bottom" Name="AttendeeChart" Title="Attendee: Attended/Responded/FolloUp Chart">
+        <StackPanel DockPanel.Dock="left">
+            <Calendar x:Name="DatesRangeCalendar" 
+                      SelectionMode="MultipleRange" 
+                      Loaded="DatesRangeCalendar_Loaded"  
+                      DisplayDateChanged="DatesRangeCalendar_DisplayDateChanged" 
+                      SelectedDatesChanged="DatesRangeCalendar_SelectedDatesChanged"
+                      ToolTip="Hold mouse button down while dragging to select date range or press Ctrl while selecting to select individule dates"/>
+            
+        </StackPanel>
+          <chartingToolkit:Chart DockPanel.Dock="Bottom" Name="AttendeeChart" Title="Attendee: Attended/Responded/FollowUp Chart">
 
             <chartingToolkit:ColumnSeries Title="Attended" DependentValuePath="Value" IndependentValuePath="Key" ItemsSource="{Binding [0]}" DataContext="{Binding}"/>
             <chartingToolkit:ColumnSeries Title="FollowUp" DependentValuePath="Value"  IndependentValuePath="Key" ItemsSource="{Binding [1]}" DataContext="{Binding}"/>

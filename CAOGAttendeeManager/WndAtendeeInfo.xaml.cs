@@ -27,7 +27,7 @@ namespace CAOGAttendeeProject
             
             //Load data from AttendeeId selected in MainWindow Grid
             
-            string query = "SELECT Attendees.FirstName,Attendees.LastName, Attendance_Info.Last_Attended, Attendance_Info.Date, Attendance_Info.Status " +
+            string query = "SELECT Attendees.FirstName,Attendees.LastName, Attendance_Info.Date, Attendance_Info.Status " +
                         "FROM Attendees INNER JOIN Attendance_Info " +
                         "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
                         "WHERE Attendees.FirstName='" + fname + "'" + " AND " + "Attendees.LastName='" + lname + "'" +
@@ -46,14 +46,9 @@ namespace CAOGAttendeeProject
 
             StatusTable.Columns.Add(new DataColumn("First Name"));
             StatusTable.Columns.Add(new DataColumn("Last Name"));
-            StatusTable.Columns.Add(new DataColumn("Date Last Attended"));
+           // StatusTable.Columns.Add(new DataColumn("Date Last Attended"));
             StatusTable.Columns.Add(new DataColumn("Date"));
             StatusTable.Columns.Add(new DataColumn("Status"));
-
-
-
-            string datefmt = "";
-
 
 
 
@@ -70,9 +65,9 @@ namespace CAOGAttendeeProject
                 newrow["Last Name"] = dr["LastName"];
                 newrow["Date"] = date.ToString("MM-dd-yyyy");
 
-                DateTime ldate = (DateTime)dr["Last_Attended"];
+               // DateTime ldate = (DateTime)dr["Last_Attended"];
 
-                newrow["Date Last Attended"] = ldate.ToString("MM-dd-yyyy");
+               // newrow["Date Last Attended"] = ldate.ToString("MM-dd-yyyy");
                 newrow["Status"] = dr["Status"];
 
 
@@ -84,8 +79,9 @@ namespace CAOGAttendeeProject
 
 
 
-            StatusTable.Columns[2].ColumnName = "Last Attended";
-
+            StatusTable.Columns[2].ColumnName = "Date";
+            //Swap FirstName and LastName
+            StatusTable.Columns[0].SetOrdinal(1);
            
             GrdAttendeeInfo.DataContext = StatusTable;
             GrdAttendeeInfo.ColumnWidth = 100;

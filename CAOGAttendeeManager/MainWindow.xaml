@@ -18,7 +18,7 @@
                 </RibbonApplicationMenu>
             </Ribbon.ApplicationMenu>
             <!-- Home Tab ############################################################################################-->
-            <RibbonTab Name="tabHome" Header="Attendance">
+            <RibbonTab Name="tabHome" Header="Active Attendence">
                 <RibbonGroup Header="Search">
                     <RibbonTextBox Name="txtSearch" SmallImageSource="Resources\Search.ico" Text=""
                                    TextBoxWidth="160"
@@ -34,35 +34,47 @@
                 </RibbonGroup>
                 <RibbonGroup Header="Filter options" Width="180">
 
-                    <Grid Height="70">
+                    <Grid Height="75">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition/>
-                            <RowDefinition Height="25"/>
+                        <RowDefinition Height="23"/>
+                        <RowDefinition Height="23"/>
+                        <RowDefinition Height="20"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Width="150" IsEditable="True" Name="cmbDate" Grid.Row="0" Grid.ColumnSpan="2" 
-                                        
-                                        ToolTip="Date attendee attended church in the format (mm-dd-yyyy). Press Enter when done.">
 
-                            <Calendar Name="DateCalendar"  SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" 
+
+                        <RibbonTextBox TextBoxWidth="120" SmallImageSource="Resources\CalDate.ico"  
+                                       Name="txtDate" Grid.Row="0" Grid.ColumnSpan="2" 
+                                        Keyboard.PreviewKeyDown="txtDate_KeyDown"
+                                        IsReadOnly="True"/>
+
+                        <!--<Calendar Name="DateCalendar"  SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" 
                                       DisplayDateChanged="DateCalendar_DisplayDateChanged" 
-                                      SelectedDatesChanged="DateCalendar_SelectedDateChanged"/>
-
-
-                        </ComboBox>
-                        <RibbonCheckBox Grid.Row="1" Grid.Column="0" Label="Date" Name="chkDateFilter" Checked="chkDateFiler_Checked" Unchecked="chkDateFiler_Unchecked" FontSize="10" Margin="-22,0,0,0"/>
-                        <RibbonCheckBox Grid.Row="1" Grid.Column="1" Label="Attended" Name="chkAttended" Checked="chkAttended_Checked" Unchecked="chkAttended_Unchecked" FontSize="10" Margin="-8,0,0,0" />
-                        <RibbonCheckBox Grid.Row="2" Grid.Column="0" Label="Follow-Up" Name="chkFollowup" Checked="chkFollowup_Checked" Unchecked="chkFollowup_Unchecked" FontSize="10" Margin="0,0,0,0"/>
-                        <RibbonCheckBox Grid.Row="2" Grid.Column="1" Label="Responded" Name="chkResponded" Checked="chkResponded_Checked" Unchecked="chkResponded_Unchecked" FontSize="10" Margin="0,0,0,0"/>
+                                      SelectedDatesChanged="DateCalendar_SelectedDateChanged"/>-->
+                                                    
+                        
+                        
+                        <RibbonCheckBox Grid.Row="1" Grid.Column="0" Label="Date"  Name="chkDateFilter" Checked="chkDateFiler_Checked" Unchecked="chkDateFiler_Unchecked" FontSize="10" HorizontalAlignment="Left" />
+                        <RibbonCheckBox Grid.Row="1" Grid.Column="1" Label="Attended" Name="chkAttended" Checked="chkAttended_Checked" Unchecked="chkAttended_Unchecked" FontSize="10" HorizontalAlignment="Left" />
+                        <RibbonCheckBox Grid.Row="2" Grid.Column="0" Label="Follow-Up" Name="chkFollowup" Checked="chkFollowup_Checked" Unchecked="chkFollowup_Unchecked" FontSize="10" HorizontalAlignment="Left"/>
+                        <RibbonCheckBox Grid.Row="2" Grid.Column="1" Label="Responded" Name="chkResponded" Checked="chkResponded_Checked" Unchecked="chkResponded_Unchecked" FontSize="10" HorizontalAlignment="Left"/>
                         
                     </Grid>
 
-
+                    
                 </RibbonGroup>
+               <!-- <RibbonGroup Header="Clipboard">
+                    <RibbonButton Name="btnCopy"
+                                  Label="Copy"
+                                  LargeImageSource="Resources\Copy.ico"
+                                  Click="btnCopy_Click" 
+                                  ToolTip="Copy the contents of data table to the clipboard"/>
+                   
+                </RibbonGroup>
+               -->
                 <RibbonGroup Header="View">
 
                   <!--  <RibbonToggleButton x:Name="btnAttendeeList" Width="96" Label="Attendee List" 
@@ -82,11 +94,39 @@
                                       Click="btnChart_Click" 
                                       ToolTip="Allows the user to  check add church attendees for the day." HorizontalAlignment="Left" VerticalAlignment="Top" />
 
+                    
                 </RibbonGroup>
-
+                                
+                
+                <RibbonGroup Header="Attendence Metrics" Width="200">
+                    <RibbonButton x:Name="btnProspect" Label="Prospect"  
+                                      LargeImageSource="Resources\UserRemove.ico" 
+                                      Click="btnProspect_Click" 
+                                      ToolTip="Mark attendee as prospect attendee"/>
+                    
+                    <StackPanel Orientation="Vertical" Margin="10,0,0,0" Width="110" Height="50">
+                        <StackPanel Orientation="Horizontal">
+                            <Label HorizontalAlignment="Left" Width="60">Active:</Label>
+                            <Label Margin="9,0,0,0" Name="lblAttendenceMetrics" Width="40" HorizontalAlignment="Left"></Label>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Width="60" HorizontalAlignment="Left">Prospect:</Label>
+                            <Label Margin="9,0,0,0" Name="lblProspectsMetrics" Width="40" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        
+                        
+                        
+                        
+                    </StackPanel>
+                    
+                    
+                </RibbonGroup>
+                
+                    
+                
             </RibbonTab>
             <!--Attendee List Tab #######################################################################################-->
-            <RibbonTab Name="tabAttendeeList" Header="Attendee Check List">
+            <RibbonTab Name="tabAttendeeList" Header="Attendee Prospect Check List" Margin="2,1,-2,-1">
 
                 <RibbonGroup Header="Search">
                     <RibbonTextBox Name="alisttxtSearch" SmallImageSource="Resources\Search.ico" Text=""
@@ -109,45 +149,41 @@
                 <RibbonGroup Header="Date" >
 
 
-                    <ComboBox Width="150" IsEditable="True" Name="alistcmbDate" 
-                                    GotFocus="alistcmbDate_GotFocus" 
-                                    LostFocus="alistcmbDate_LostFocus" 
-                                    KeyUp="alistcmbDate_KeyUp" 
-                                    ToolTip="Date attendee attended church in the format (mm-dd-yyyy)">
-                        
-                        <Calendar Name="alistDateCalendar"  
+                    <RibbonTextBox TextBoxWidth="120" Name="alisttxtDate" 
+                                    SmallImageSource="Resources\CalDate.ico"
+                                    Keyboard.PreviewKeyDown="alisttxtDate_KeyDown"
+                                    IsReadOnly="True"/>
+
+                    <!--<Calendar Name="alistDateCalendar"  
                                   SelectionMode="SingleDate" 
                                   Loaded="alistDateCalendar_Loaded" 
                                   DisplayDateChanged="alistDateCalendar_DisplayDateChanged" 
                                   SelectedDatesChanged="alistDateCalendar_SelectedDatesChanged"/>
-                    </ComboBox>
-
+                    </RibbonTextBox>
+                    -->
 
                 </RibbonGroup>
                 <RibbonGroup Header="Table Operations">
                     
                 
                 <RibbonToggleButton x:Name="btnNewRec" 
-                                  Width="150"
-                                  Label="Insert\New Attendee    " 
-                                  SmallImageSource="Resources\NewRec.ico" 
+                                  Label="New Attendee" 
+                                  SmallImageSource="Resources\NewRec.ico"
                                   Click="btnNewRec_Click" 
-                                  ToolTip="Insert a new Attendee into the database." HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                  ToolTip="Insert a new Attendee into the database." HorizontalAlignment="Left"/>
 
                 <RibbonButton x:Name="btnSaveUpdate" 
-                                  Width="150"
-                                  Label="Save\Update" 
-                                  SmallImageSource="Resources\ApplyChanges.ico" 
+                                  Label="Save Changes" 
+                                  SmallImageSource="Resources\ApplyChanges.ico"
                                   Click="btnApplyChanges_Click" 
-                                  ToolTip="Save all change to the database"/>
+                                  ToolTip="Save all change to the database" HorizontalAlignment="Left"/>
 
-                    <RibbonButton x:Name="btnPrint" 
-                                  Width="150"
+                 <!--   <RibbonButton x:Name="btnPrint" 
                                   Label="Print Table" 
-                                  SmallImageSource="Resources\Print.ico" 
+                                  SmallImageSource="Resources\Print.ico"
                                   Click="btnPrint_Click" 
-                                  ToolTip="Print this table"/>
-                    
+                                  ToolTip="Print this table" HorizontalAlignment="Left"/>
+                    -->
                 </RibbonGroup>
               <!--  <RibbonGroup Header="Save Status">
                     <TextBlock Name="txtSaveStatus" Width="120"/>
@@ -157,6 +193,12 @@
             <!-- End AttendeeList #########################################################################-->
         </Ribbon>
 
+        <StackPanel DockPanel.Dock="Left">
+            <Calendar Name="DateCalendar"  SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" 
+                                      DisplayDateChanged="DateCalendar_DisplayDateChanged" 
+                                      SelectedDatesChanged="DateCalendar_SelectedDateChanged"/>
+
+        </StackPanel>
         <Grid DockPanel.Dock="Bottom" Margin="2" ShowGridLines="True" >
             <Grid.RowDefinitions>
                 <RowDefinition/>
@@ -166,11 +208,21 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" 
-                      CanUserReorderColumns="False" ItemsSource="{Binding}" 
+            <DataGrid Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="False"
+                      ItemsSource="{Binding}" 
+                      CanUserReorderColumns="False"
                       MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
-                      SelectionMode="Single"  
-                      SelectionChanged="dataGrid_SelectionChanged"/>
+                      ClipboardCopyMode="IncludeHeader"
+                      SelectionMode="Extended"
+                      ColumnWidth="100" >
+                
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <EventSetter Event="Click"  Handler="dataGridHeader_Click" />
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+                
+            </DataGrid>
 
             <!-- <DataGrid Name="dataGrid" CanUserAddRows="True" CanUserDeleteRows="True" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" DataContextChanged="dataGrid_DataContextChanged" SelectionChanged="dataGrid_SelectionChanged">
                 <DataGrid.Columns>

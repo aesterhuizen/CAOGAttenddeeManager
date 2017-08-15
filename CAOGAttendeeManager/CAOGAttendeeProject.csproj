@@ -106,9 +106,7 @@
     <Compile Include="ChartWindow.xaml.cs">
       <DependentUpon>ChartWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="MainWindow.cs" />
     <Compile Include="ModelDb.cs" />
     <Compile Include="WndAtendeeInfo.xaml.cs">
       <DependentUpon>WndAtendeeInfo.xaml</DependentUpon>
@@ -165,27 +163,23 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\ApplyChanges.ico" />
-  </ItemGroup>
-  <ItemGroup>
+    <Resource Include="Resources\CalDate.ico" />
+    <Resource Include="Resources\Chart2.ico" />
+    <Resource Include="Resources\Checklist2.ico" />
+    <Resource Include="Resources\Exit.ico" />
+    <Resource Include="Resources\FilterAdd.ico" />
+    <Resource Include="Resources\NewRec.ico" />
+    <Resource Include="Resources\Print.ico" />
     <Resource Include="Resources\Search.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\NewRec.ico" />
+    <Resource Include="Resources\Copy.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\FilterAdd.ico" />
+    <Resource Include="Resources\UserRemove.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Checklist2.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Exit.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Chart2.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Print.ico" />
+    <Resource Include="Resources\splashscreen.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
