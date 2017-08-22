@@ -1,0 +1,15 @@
+﻿<Window x:Class="CAOGAttendeeManager.About"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CAOGAttendeeManager"
+        mc:Ignorable="d"
+        Title="About" Height="300" Width="300">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <Label Content="Attendee Manager v 1.2" HorizontalAlignment="Center" />
+            <Label Content="Anton Esterhuizen" HorizontalAlignment="Center" Margin="93,0"/>
+        </StackPanel>
+    </Grid>
+</Window>
