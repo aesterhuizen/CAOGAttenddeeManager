@@ -44,7 +44,19 @@ namespace CAOGAttendeeProject
         
     }
 
-    public class Attendance_Info
+    public class AttRecord
+    {
+           public int id;
+           public string fname;
+           public string lname;
+           public DateTime date;
+           public string status;
+            
+        
+       
+      }
+
+public class Attendance_Info
     {
 
         public int Attendance_InfoId { get; set; }
