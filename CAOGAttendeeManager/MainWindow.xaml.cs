@@ -103,7 +103,7 @@ namespace CAOGAttendeeProject
 
               // correctDBerrors();
 
-                if (m_dbContext.Attendees.Count() == 0)
+                if (m_dbContext.Attendees.Local.Count() == 0)
                 {
                     CreateDatabase_FromXLSX();
                     InitDataSet();
@@ -1420,6 +1420,7 @@ namespace CAOGAttendeeProject
             int i = -1;
 
             bool haschanges = false;
+            dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
 
             if (m_DataSet.HasChanges())
             {
@@ -1464,12 +1465,16 @@ namespace CAOGAttendeeProject
                                                  where inforec.AttendeeId == attid
                                                  select inforec).ToArray();
 
-                        for (int idx = 0; idx <= queryAttendeeInfo.Count() - 1; idx++)
+                        if (queryAttendeeInfo.Any())
                         {
-                            m_dbContext.Attendance_Info.Local.Remove(queryAttendeeInfo[idx]);
+
+
+                            for (int idx = 0; idx <= queryAttendeeInfo.Count() - 1; idx++)
+                            {
+                                m_dbContext.Attendance_Info.Local.Remove(queryAttendeeInfo[idx]);
+                            }
+
                         }
-
-
 
                         m_dbContext.Attendees.Local.Remove(Attrec);
 
@@ -1482,10 +1487,7 @@ namespace CAOGAttendeeProject
 
                 } // end foreach row
 
-                if (m_DataSet.HasChanges() )
-                {
-
-                    
+                                   
                     GenerateDBFollowUps();
                     m_dbContext.SaveChanges();
                     m_DataSet.Reset();
@@ -1494,7 +1496,7 @@ namespace CAOGAttendeeProject
                     InitDataSet();
                     Display_DefaultTable_in_Grid();
                     MessageBox.Show("Changes were saved succesfully.");
-                }
+               
 
                 Cursor = Cursors.Arrow;
             }
@@ -2410,7 +2412,7 @@ namespace CAOGAttendeeProject
 
                 Display_AttendeeListTable_in_Grid();
 
-                lblProspectslst.Content = m_DataSet.Tables["AttendeeListTable"].Rows.Count;
+                lblProspectsMetrics.Content = m_DataSet.Tables["AttendeeListTable"].Rows.Count;
 
 
 

@@ -21,27 +21,74 @@ namespace CAOGAttendeeProject
     /// </summary>
     public partial class WndAttendeeInfo : Window
     {
-        public WndAttendeeInfo(string fname,string lname, SqlConnection myConnection)
+        public WndAttendeeInfo(string fname, string lname, ModelDb dbcontext)
         {
             InitializeComponent();
-            
-            //Load data from AttendeeId selected in MainWindow Grid
-            
-            string query = "SELECT Attendees.FirstName,Attendees.LastName, Attendance_Info.Date, Attendance_Info.Status " +
-                        "FROM Attendees INNER JOIN Attendance_Info " +
-                        "ON Attendees.AttendeeId=Attendance_Info.AttendeeId " +
-                        "WHERE Attendees.FirstName='" + fname + "'" + " AND " + "Attendees.LastName='" + lname + "'" +
-                        "ORDER BY Date ASC";
+            IQueryable<AttRecord> querylinq;
 
-          
+            m_dbContext = dbcontext;
 
-            SqlDataAdapter myAdapter = new SqlDataAdapter(query, myConnection);
 
-            DataTable dt = new DataTable();
-            myAdapter.Fill(dt);
+            querylinq = from att in dbcontext.Attendees.Local.AsQueryable()
+
+                        join attinfo in dbcontext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                        where att.FirstName == lname && att.LastName == fname
+                        orderby attinfo.Date ascending
+                        select new AttRecord { id = attinfo.Attendance_InfoId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, status = attinfo.Status };
+
+
+
+
+
+
+
+            UpdateDataTable(querylinq);
+
+        }
+
+        private ModelDb m_dbContext;
+        private string m_query = "0";
+
+        private void btnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            Cursor = Cursors.Wait;
+            var row_select = GrdAttendeeInfo.SelectedItems;
+            if (row_select.Count != 0)
+            {
+
+
+                foreach (DataRow dr in row_select)
+                {
+                    int AttendeeInfoId = int.Parse(dr["AttendeeInfoId"].ToString());
+                    var queryAttendeeInfo = (from inforec in m_dbContext.Attendance_Info.Local
+                                             where inforec.Attendance_InfoId == AttendeeInfoId
+                                             select inforec).ToArray().FirstOrDefault();
+
+                    if (queryAttendeeInfo != null)
+                    {
+                        m_dbContext.Attendance_Info.Local.Remove(queryAttendeeInfo);
+
+                    }
+
+                    //m_dbContext.SaveChanges();
+                    Cursor = Cursors.Arrow;
+                    // UpdateDataTable(,m_query);
+                    MessageBox.Show("Attendee record removed successfully.", "Remove Record", MessageBoxButton.OK, MessageBoxImage.None);
+                }
+            }
+                           
+       }
+
+        private void UpdateDataTable(IQueryable<AttRecord> linqquery)
+        {
+            //SqlDataAdapter myAdapter = new SqlDataAdapter(query,m_sqlconnnection);
+
+            //DataTable dt = new DataTable();
+           // myAdapter.Fill(dt);
 
 
             DataTable StatusTable = new DataTable();
+            
 
 
             StatusTable.Columns.Add(new DataColumn("First Name"));
@@ -52,23 +99,16 @@ namespace CAOGAttendeeProject
 
 
 
-            foreach (DataRow dr in dt.Rows)
+            foreach (var rec in linqquery)
             {
 
                 DataRow newrow = StatusTable.NewRow();
 
-                DateTime date = (DateTime)dr["Date"];
-
-
-
-                newrow["First Name"] = dr["FirstName"];
-                newrow["Last Name"] = dr["LastName"];
-                newrow["Date"] = date.ToString("MM-dd-yyyy");
-
-               // DateTime ldate = (DateTime)dr["Last_Attended"];
-
-               // newrow["Date Last Attended"] = ldate.ToString("MM-dd-yyyy");
-                newrow["Status"] = dr["Status"];
+                newrow["AttendeeInfoId"] = rec.id;
+                newrow["First Name"] = rec.fname;
+                newrow["Last Name"] = rec.lname;
+                newrow["Date"] = rec.date.ToString("MM-dd-yyyy");
+                newrow["Status"] = rec.status;
 
 
                 StatusTable.Rows.Add(newrow);
@@ -79,17 +119,19 @@ namespace CAOGAttendeeProject
 
 
 
-            StatusTable.Columns[2].ColumnName = "Date";
-            //Swap FirstName and LastName
-            StatusTable.Columns[0].SetOrdinal(1);
-           
+
+            // StatusTable.Columns[2].ColumnName = "Date";
+
             GrdAttendeeInfo.DataContext = StatusTable;
             GrdAttendeeInfo.ColumnWidth = 100;
             
 
         }
 
+        private void GrdAttendeeInfo_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
 
+        }
     }
 
    

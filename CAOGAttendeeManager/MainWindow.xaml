@@ -14,6 +14,7 @@
         <Ribbon DockPanel.Dock="Top" Title="Attendee Manager" SelectionChanged="Ribbon_SelectionChanged">
             <Ribbon.ApplicationMenu>
                 <RibbonApplicationMenu Label="File">
+                    <RibbonApplicationMenuItem Header="About" Click="RibbonApplicationMenuItem_Click_About"/>
                     <RibbonApplicationMenuItem Header="Exit" Click="RibbonApplicationMenuItem_Click_Exit" ImageSource="Resources\Exit.ico"/>
                 </RibbonApplicationMenu>
             </Ribbon.ApplicationMenu>
@@ -75,6 +76,26 @@
                    
                 </RibbonGroup>
                -->
+                <RibbonGroup Header="Table Operations">
+
+                   <RibbonButton Name="btnSave"
+                                  Width="100"
+                                  Label="Save Changes"
+                                  SmallImageSource="Resources\save.ico"
+                                  Click="Save_Changes" />
+
+
+
+                    <!--<RibbonButton Name="btnDelete"
+                                  Width="100"
+                                  Label="Delete"
+                                  SmallImageSource="Resources\Delete.ico"
+                                  Click="DeleteRecord" 
+                                  ToolTip="Save all changes to the database"/>
+                    -->
+                        
+                </RibbonGroup>
+                
                 <RibbonGroup Header="View">
 
                   <!--  <RibbonToggleButton x:Name="btnAttendeeList" Width="96" Label="Attendee List" 
@@ -107,7 +128,10 @@
                     <StackPanel Orientation="Vertical" Margin="10,0,0,0" Width="110" Height="50">
                         <StackPanel Orientation="Horizontal">
                             <Label HorizontalAlignment="Left" Width="60">Active:</Label>
-                            <Label Margin="9,0,0,0" Name="lblAttendenceMetrics" Width="40" HorizontalAlignment="Left"></Label>
+                            <Label Margin="9,0,0,0" Name="lblAttendenceMetrics" 
+                                   Width="40" 
+                                   Content="{Binding ElementName=dataGrid, Path=Items.Count}"
+                                   HorizontalAlignment="Left"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Label Width="60" HorizontalAlignment="Left">Prospect:</Label>
@@ -172,13 +196,13 @@
                                   Click="btnNewRec_Click" 
                                   ToolTip="Insert a new Attendee into the database." HorizontalAlignment="Left"/>
 
-                <RibbonButton x:Name="btnSaveUpdate" 
-                                  Label="Save Changes" 
-                                  SmallImageSource="Resources\ApplyChanges.ico"
-                                  Click="btnApplyChanges_Click" 
-                                  ToolTip="Save all change to the database" HorizontalAlignment="Left"/>
+                    <RibbonButton x:Name="btnImportRecords" 
+                                  Label="Add Attendee to Active Attendence" 
+                                  SmallImageSource="Resources\Add.ico"
+                                  Click="ImportRows_Click" 
+                                  ToolTip="Add records to the active attendence list" HorizontalAlignment="Left"/>
 
-                 <!--   <RibbonButton x:Name="btnPrint" 
+                        <!--   <RibbonButton x:Name="btnPrint" 
                                   Label="Print Table" 
                                   SmallImageSource="Resources\Print.ico"
                                   Click="btnPrint_Click" 
@@ -208,7 +232,7 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="False"
+            <DataGrid Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="True"
                       ItemsSource="{Binding}" 
                       CanUserReorderColumns="False"
                       MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
@@ -216,12 +240,12 @@
                       SelectionMode="Extended"
                       ColumnWidth="100" >
                 
-                <DataGrid.ColumnHeaderStyle>
+              <!--  <DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader">
                         <EventSetter Event="Click"  Handler="dataGridHeader_Click" />
                     </Style>
                 </DataGrid.ColumnHeaderStyle>
-                
+                -->
             </DataGrid>
 
             <!-- <DataGrid Name="dataGrid" CanUserAddRows="True" CanUserDeleteRows="True" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" DataContextChanged="dataGrid_DataContextChanged" SelectionChanged="dataGrid_SelectionChanged">
