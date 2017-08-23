@@ -5,11 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CAOGAttendeeProject"
         mc:Ignorable="d"
-        Title="About" Height="300" Width="300">
+        Title="About" Height="300" Width="300"
+        WindowStyle="ToolWindow"
+        ResizeMode="NoResize">
     <Grid>
         <StackPanel Orientation="Vertical">
             <Label Content="Attendee Manager v 1.2" HorizontalAlignment="Center" />
-            <Label Content="Anton Esterhuizen" HorizontalAlignment="Center" Margin="93,0"/>
+            <Label Content="by Anton Esterhuizen" HorizontalAlignment="Center" Margin="78,0" Width="138"/>
         </StackPanel>
     </Grid>
 </Window>

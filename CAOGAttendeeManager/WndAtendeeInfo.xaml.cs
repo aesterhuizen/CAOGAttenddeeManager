@@ -120,13 +120,11 @@ namespace CAOGAttendeeProject
 
 
             // StatusTable.Columns[2].ColumnName = "Date";
-
+            //swap first name last name column
+            StatusTable.Columns[1].SetOrdinal(2);
             GrdAttendeeInfo.DataContext = StatusTable;
             GrdAttendeeInfo.ColumnWidth = 100;
-            if (GrdAttendeeInfo.Columns.Count > 1)
-            {
-                GrdAttendeeInfo.Columns[0].Visibility = Visibility.Hidden;
-            }
+            
             
 
 
@@ -135,6 +133,14 @@ namespace CAOGAttendeeProject
         private void GrdAttendeeInfo_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
 
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (GrdAttendeeInfo.Columns.Count > 1)
+            {
+                GrdAttendeeInfo.Columns[0].Visibility = Visibility.Hidden;
+            }
         }
     }
 

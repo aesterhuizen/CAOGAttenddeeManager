@@ -5,7 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CAOGAttendeeProject"
         mc:Ignorable="d"
-        Title="Attendee Information" Height="500" Width="700" Topmost="True">
+        Title="Attendee Information" 
+        Height="500" Width="700"
+        Loaded="Window_Loaded"
+        >
 
 
     <DockPanel>

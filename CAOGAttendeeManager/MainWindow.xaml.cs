@@ -101,7 +101,7 @@ namespace CAOGAttendeeProject
                 //  ChangedbVal();
 
 
-              // correctDBerrors();
+              //correctDBerrors();
 
                 if (m_dbContext.Attendees.Count() == 0)
                 {
@@ -112,6 +112,8 @@ namespace CAOGAttendeeProject
                 else
                 {
                     InitDataSet();
+                    m_DataSet.Tables["DefaultTable"].AcceptChanges();
+                    m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
                     Display_DefaultTable_in_Grid();
                 }
 
@@ -210,57 +212,73 @@ namespace CAOGAttendeeProject
 
         private void correctDBerrors()
         {
-            DateTime date = new DateTime(2017, 8, 13);
+            DateTime correcteddate = new DateTime(2017, 8, 20);
 
-            var queryAttendees = from AttendeeRec in m_dbContext.Attendees
+            var queryAttendees = from AttendeeRec in m_dbContext.Attendance_Info
+                                 where AttendeeRec.Status == "Follow-Up"
                                  select AttendeeRec;
 
             //var lstInfoRecs = from InfoRec in m_dbContextContext.Attendance_Info
             //                  where InfoRec.Date == date && InfoRec.Status == "Responded"
             //                  select InfoRec;
 
+
             foreach (var attrec in queryAttendees)
             {
-                var lstInfoRecs = (from InfoRec in attrec.AttendanceList
-                                   select InfoRec).ToArray();
+                //var lstInfoRecs = (from InfoRec in attrec.AttendanceList
+                //                   where InfoRec.Status == "Follow-Up"
+                //                   select InfoRec).ToArray().LastOrDefault();
 
-                
-                int count = lstInfoRecs.Count();
-                
+               
 
-                if (count >=2)
-                {
-                    for (int idx = 0; idx <= count - 1; idx++)
+                    string[] arydate = attrec.Date.ToString("MM-dd-yyyy").Split();
+                    string date = arydate[0];
+
+
+                    if (date == "08-23-2017")
                     {
-                        if (lstInfoRecs[idx].Date == date && lstInfoRecs[idx].Status == "Responded")
-                        {
-                            TimeSpan tspan = lstInfoRecs[idx].Date - lstInfoRecs[idx - 1].Date;
 
-
-                            if (tspan.Days < 22 && lstInfoRecs[idx - 1].Status == "Responded")
-                            {
-                                lstInfoRecs[idx].Status = "Attended";
-
-                            }
-                        }
-                        //if (lstInfoRecs[idx].Date == date && lstInfoRecs[idx].Status == "Responded")
-                        //{
-
-
-                        //    if (lstInfoRecs[idx+1].Status=="Responded" && lstInfoRecs[idx + 1].Status == "Responded")
-                        //    {
-                        //        m_dbContextContext.Attendance_Info.Remove(lstInfoRecs[idx + 1]);
-
-                        //    }
-                        //}
+                        attrec.Date = correcteddate;
 
                     }
-                } 
+             }
+
+                ////int count = lstInfoRecs.Count();
                 
-            }
+
+                //if (count >=2)
+                //{
+                //    for (int idx = 0; idx <= count - 1; idx++)
+                //    {
+                //        if (lstInfoRecs[idx].Date == date && lstInfoRecs[idx].Status == "Responded")
+                //        {
+                //            TimeSpan tspan = lstInfoRecs[idx].Date - lstInfoRecs[idx - 1].Date;
 
 
-            m_dbContext.SaveChanges();
+                //            if (tspan.Days < 22 && lstInfoRecs[idx - 1].Status == "Responded")
+                //            {
+                //                lstInfoRecs[idx].Status = "Attended";
+
+                //            }
+                //        }
+                //        //if (lstInfoRecs[idx].Date == date && lstInfoRecs[idx].Status == "Responded")
+                //        //{
+
+
+                //        //    if (lstInfoRecs[idx+1].Status=="Responded" && lstInfoRecs[idx + 1].Status == "Responded")
+                //        //    {
+                //        //        m_dbContextContext.Attendance_Info.Remove(lstInfoRecs[idx + 1]);
+
+                //        //    }
+                //        //}
+
+                //    }
+                //} 
+                
+           
+
+
+           m_dbContext.SaveChanges();
             Console.WriteLine("Done!");
 
         }
@@ -877,9 +895,7 @@ namespace CAOGAttendeeProject
                 Default_Data_Table.Columns[2].SetOrdinal(3);
                 AttendeeListTable.Columns[2].SetOrdinal(3);
 
-                AttendeeListTable.AcceptChanges();
-                Default_Data_Table.AcceptChanges();
-             
+                         
 
                 m_DataSet.Tables.Add(Default_Data_Table);
                 m_DataSet.Tables.Add(AttendeeListTable);
@@ -1040,6 +1056,7 @@ namespace CAOGAttendeeProject
             chkFollowup.IsEnabled = false;
             chkResponded.IsEnabled = false;
             chkDateFilter.IsEnabled = false;
+          
      
 
         }
@@ -1052,6 +1069,12 @@ namespace CAOGAttendeeProject
             if (txtSearch.Text == "")
             {
                 Enable_Filters();
+
+                if (m_filterByDate)
+                    DateCalendar.IsEnabled = true;
+                else
+                    DateCalendar.IsEnabled = false; 
+
                 (dataGrid.DataContext as DataTable).DefaultView.RowFilter = String.Empty;
               
                 //----------------------Textbox search has text-----------------------------------------------------------------------------------
@@ -1059,7 +1082,7 @@ namespace CAOGAttendeeProject
             else
             {
                 Disable_Filters();
-               
+                DateCalendar.IsEnabled = false;
                 (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
                
             }
@@ -1075,10 +1098,18 @@ namespace CAOGAttendeeProject
 
             if (query == "ShowDefaultTable")
             {
-                dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
+                if (m_DataSet.Tables["DefaultTable"].Rows.Count > 1)
+                {
+                    dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
+                }
+                
                 // (dataGrid.DataContext as DataTable).DefaultView.Sort = "FirstLastName ASC";
-                dataGrid.Columns[0].Visibility = Visibility.Hidden;
-                dataGrid.Columns[1].Visibility = Visibility.Hidden;
+                if (dataGrid.Columns.Count > 1)
+                {
+                    dataGrid.Columns[0].Visibility = Visibility.Hidden;
+                    dataGrid.Columns[1].Visibility = Visibility.Hidden;
+                }
+                
                 //lblAttendenceMetrics.Content = m_DataSet.Tables["DefaultTable"].Rows.Count;
 
             }
@@ -1135,8 +1166,12 @@ namespace CAOGAttendeeProject
 
 
                 dataGrid.DataContext = queryTable;
-                dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
-                dataGrid.Columns[1].Visibility = Visibility.Hidden; //LastFirstName
+                if (dataGrid.Columns.Count >1)
+                {
+                    dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
+                    dataGrid.Columns[1].Visibility = Visibility.Hidden; //LastFirstName
+                }
+                
 
 
 
@@ -1241,7 +1276,7 @@ namespace CAOGAttendeeProject
         {
             var calender = sender as Calendar;
 
-            Console.WriteLine($"{e.Source}");
+        
 
             IQueryable<AttRecord> querylinq;
 
@@ -1613,14 +1648,7 @@ namespace CAOGAttendeeProject
             }
         }
 
-        private void dataGrid_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Return)
-            {
-               
-
-            }
-        }
+      
         private void ImportRows_Click(object sender, RoutedEventArgs e)
         {
 
@@ -1669,7 +1697,7 @@ namespace CAOGAttendeeProject
                         {
 
 
-                            MessageBox.Show("A record with the same attendee and date already exist. Please select a unique name or date.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
+                            MessageBox.Show("A record with the same attendee and date already exist. Please select a unique name or date.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Error);
                             dataGrid.Focus();
                             dataGrid.SelectedIndex = m_DataSet.Tables["AttendeeListTable"].Rows.IndexOf(dr);
                             dataGrid.ScrollIntoView(dataGrid.Items[m_DataSet.Tables["AttendeeListTable"].Rows.IndexOf(dr)]);
@@ -1685,7 +1713,7 @@ namespace CAOGAttendeeProject
                         {
                             if (!m_alistdateIsValid)
                             {
-                                MessageBox.Show("Attendee date is not valid.", "Date invalid", MessageBoxButton.OK, MessageBoxImage.Stop);
+                                MessageBox.Show("Attendee date is not valid.", "Date invalid", MessageBoxButton.OK, MessageBoxImage.Error);
                                 dataGrid.Focus();
                                 dataGrid.SelectedIndex = m_DataSet.Tables["AttendeeListTable"].Rows.IndexOf(dr);
                                 dataGrid.ScrollIntoView(dataGrid.Items[m_DataSet.Tables["AttendeeListTable"].Rows.IndexOf(dr)]);
@@ -1777,7 +1805,8 @@ namespace CAOGAttendeeProject
                             m_dbContext.Attendees.Add(newAttendeeRec);
                             m_dbContext.Attendance_Info.Add(newAttInfoRec);
 
-                    haschanges = true;
+                           
+                            haschanges = true;
 
 
 
@@ -1825,9 +1854,9 @@ namespace CAOGAttendeeProject
                 
                      
                                 m_dbContext.Attendance_Info.Add(newRecord);
-                      
 
 
+                       
                         haschanges = true;
                      
 
@@ -1845,24 +1874,22 @@ namespace CAOGAttendeeProject
             {
 
 
-               
 
-                foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
-                {
-                    dr.ItemArray[5] = false;
-                }
-                m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
 
                 InitDefaultTable();
-               // Display_DefaultTable_in_Grid();
+                InitAttendeeListTable();
+                m_tempTable = m_DataSet.Tables["DefaultTable"];
+                Display_AttendeeListTable_in_Grid();
+               
+               
 
                 alisttxtSearch.Text = "";
-                MessageBox.Show("Records succesfully added to active attendence list.");
+                MessageBox.Show("Attendees succesfully added to active attendence list.","Attendee Added",MessageBoxButton.OK,MessageBoxImage.None);
 
             }
             else
             {
-                MessageBox.Show("No changes to records, no records exported to active attendee list.");
+                MessageBox.Show("No changes to prospect list, no attendees where added to active attendence list.","No Changes",MessageBoxButton.OK,MessageBoxImage.None);
             }
 
 
@@ -1874,6 +1901,56 @@ namespace CAOGAttendeeProject
 
         }
 
+        private void InitAttendeeListTable()
+        {
+           
+
+
+
+            if (m_DataSet.Tables.Contains("AttendeeListTable"))
+            {
+                m_DataSet.Tables["AttendeeListTable"].Clear();
+
+
+                var queryAttendees = from AttendeeRec in m_dbContext.Attendees.Local
+                                     select AttendeeRec;
+
+
+                foreach (var AttendeeRec in queryAttendees)
+                {
+
+                    if (AttendeeRec.Prospect == 0 || AttendeeRec.Prospect == 1)
+                    {
+
+                    
+
+
+                            m_NewAttendeeId = AttendeeRec.AttendeeId;
+
+                            DataRow nrow = m_DataSet.Tables["AttendeeListTable"].NewRow();
+
+                            nrow["AttendeeId"] = AttendeeRec.AttendeeId;
+                            nrow["FirstLastName"] = AttendeeRec.FirstName + " " + AttendeeRec.LastName;
+                            nrow["First Name"] = AttendeeRec.FirstName;
+                            nrow["Last Name"] = AttendeeRec.LastName;
+                            nrow["Date"] = (m_alistdateIsValid) ? m_alistDateSelected.ToString("MM-dd-yyyy") : "Date Not Valid.";
+                            nrow["Attended"] = false;
+
+                            m_DataSet.Tables["AttendeeListTable"].Rows.Add(nrow);
+
+
+                    
+
+                    }
+                } // end foreach
+            } // end foreach data defaulttable row
+
+            //  m_DataSet.Tables["DefaultTable"].AcceptChanges();
+            //m_DataSet.Tables["DefaultTable"].Columns[2].SetOrdinal(3);
+            //m_tempTable = m_DataSet.Tables["DefaultTable"];
+
+            lblProspectsMetrics.Content = m_DataSet.Tables["AttendeeListTable"].Rows.Count;
+        }
         private void InitDefaultTable()
         {
             string ldate = "";
@@ -1928,7 +2005,8 @@ namespace CAOGAttendeeProject
             } // end foreach data defaulttable row
 
             //  m_DataSet.Tables["DefaultTable"].AcceptChanges();
-            m_DataSet.Tables["DefaultTable"].Columns[2].SetOrdinal(3);
+            //m_DataSet.Tables["DefaultTable"].Columns[2].SetOrdinal(3);
+            //m_tempTable = m_DataSet.Tables["DefaultTable"];
 
                 lblProspectsMetrics.Content = m_DataSet.Tables["AttendeeListTable"].Rows.Count;
 
@@ -1968,7 +2046,7 @@ namespace CAOGAttendeeProject
             chkFollowup.IsEnabled = true;
             chkResponded.IsEnabled = true;
             chkDateFilter.IsEnabled = true;
-          
+            
 
         }
 
@@ -2017,7 +2095,7 @@ namespace CAOGAttendeeProject
             m_filterByDate = true;
             if (m_dateIsValid)
             {
-               // DateCalendar_SelectedDateChanged(null, SelectionChangedEventArgs);
+                DateCalendar_SelectedDateChanged(null, null);
                 txtDate.Text = m_DateSelected.ToString("MM-dd-yyyy");
 
             }
@@ -2099,7 +2177,7 @@ namespace CAOGAttendeeProject
             m_AttendanceView = true;
 
             Uncheck_All_Filters();
-            Enable_Filters();
+           
 
           
 
@@ -2121,19 +2199,23 @@ namespace CAOGAttendeeProject
 
             dataGrid.CanUserAddRows = false;
             //dataGrid.CanUserDeleteRows = false;
-            dataGrid.ToolTip = "Left mouse click to select attendee.\nRight mouse click to see more in depth attendance for the selected attendee.";
+
+            dataGrid.ToolTip = "Left mouse click to select attendee.\n\n" +
+                                  "Right mouse click to see selected attendee's attendence history.\n\n" +
+                                  "Select and press 'ESC' key to delete an attendee from the list.\n\n" +
+                                  "Only attendee name modifications will be saved.";
 
             // Display_DefaultTable_in_Grid();
 
 
-           
+
             lblProspectsMetrics.Content = m_DataSet.Tables["AttendeeListTable"].Rows.Count;
 
 
             if (dataGrid.Columns.Count > 1)
             {
-                dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
-                dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
+               dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
+               dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
 
             }
 
@@ -2221,19 +2303,15 @@ namespace CAOGAttendeeProject
 
 
 
-                        MessageBoxResult result = MessageBox.Show("Changes has been made but not saved yet, exit anyway?", "Save Changes...", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                        if (result == MessageBoxResult.No)
-                        {
-                            e.Cancel = true;
-
-                        }
-                        else
-                        {
-                          
-
-                            e.Cancel = false;
-
-                        }
+                        MessageBoxResult result = MessageBox.Show("Changes has been made but not saved yet. Save changes to database?", "Save Changes...", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        Save_Changes(null, null);
+                        e.Cancel = false;
+                    }
+                    else
+                        e.Cancel = false;
+                        
                     }
                 
 
@@ -2383,9 +2461,10 @@ namespace CAOGAttendeeProject
                     dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
                 }
 
-                  
-
-
+                if (!m_filterByDate)
+                {
+                    DateCalendar.IsEnabled = false;
+                }
                 m_alistView = false;
                 m_AttendanceView = true;
 
@@ -2400,11 +2479,11 @@ namespace CAOGAttendeeProject
                     {
                         dataGrid.DataContext = m_tempTable;
                     }
-                    
+
                 }
                 else
                 {
-                   
+
                     if (txtSearch.Text != "")
                     {
                         m_tempTable.DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
@@ -2414,19 +2493,41 @@ namespace CAOGAttendeeProject
                     {
                         Display_DefaultTable_in_Grid();
                     }
-                    
-                    
+
+
                 }
+
+                //WhichTableToShow();
+
+
+                //if (txtSearch.Text != "")
+                //{
+                //    m_tempTable.DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+                //    dataGrid.DataContext = m_tempTable;
+                //}
+                //else
+                //{
+                //    dataGrid.DataContext = m_tempTable;
+                //}
+
+
+
+
+
 
                 if (dataGrid.Columns.Count > 1)
                 {
-                   dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
-                   dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
+                  dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
+                  dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
                 }
 
                 dataGrid.CanUserAddRows = false;
-               // dataGrid.CanUserDeleteRows = false;
-                dataGrid.ToolTip = "Left mouse click to select attendee.\nRight mouse click to see more in depth attendance for the selected attendee.";
+                // dataGrid.CanUserDeleteRows = false;
+                dataGrid.ToolTip = "Left mouse click to select attendee.\n\n" +
+                                   "Right mouse click to see selected attendee's attendence history.\n\n" +
+                                   "Select and press 'ESC' key to delete an attendee from the list.\n\n" +
+                                   "Only attendee name modifications will be saved.";
+
                 lblProspectsMetrics.Content = m_DataSet.Tables["AttendeeListTable"].Rows.Count;
 
                 
@@ -2435,6 +2536,69 @@ namespace CAOGAttendeeProject
 
         }
 
+        private void WhichTableToShow()
+        {
+            string query = "0";
+            IQueryable<AttRecord> querylinq = null;
+
+            //if (chkDateFilter.IsChecked && chkAttended.IsChecked == false && chkFollowup.IsChecked == false & chkResponded.IsChecked == false)
+            //{
+            //    if (txtSearch.Text == "")
+            //    {
+            //        query = "ShowDefaultTable";
+            //    }
+            //    else
+            //    {
+            //        m_DataSet.Tables["DefaultTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+            //    }
+
+            //}
+
+            if (m_filterByDate && m_dateIsValid)
+            {
+
+
+                querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                            join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                            where attinfo.Date == m_DateSelected
+                            select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, status = attinfo.Status };
+
+
+
+                if (m_isAttendedChecked)
+                {
+                    querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                                join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                                where attinfo.Status == "Attended" && attinfo.Date == m_DateSelected
+                                select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, status = attinfo.Status };
+
+                }
+
+                if (m_isFollowupChecked)
+                {
+                    querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                                join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                                where attinfo.Status == "Follow-Up" && attinfo.Date == m_DateSelected
+                                select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, status = attinfo.Status };
+
+                }
+
+                if (m_isRespondedChecked)
+                {
+                    querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                                join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                                where attinfo.Status == "Responded" && attinfo.Date == m_DateSelected
+                                select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, status = attinfo.Status };
+
+
+
+                }
+
+            }
+
+
+            UpdateDataGrid(querylinq, query);
+        }
       
         private void btnProspect_Click(object sender, RoutedEventArgs e)
         {
@@ -2536,67 +2700,7 @@ namespace CAOGAttendeeProject
             }
         }
 
-        private void alisttxtDate_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-
-
-                Regex pattern = new Regex(@"^[0-9]{2}-[0-9]{2}-[0-9]{4}");
-
-                if (pattern.IsMatch(alisttxtDate.Text))
-                {
-                    string text = pattern.Match(alisttxtDate.Text).ToString();
-                    string[] splitstr = text.Split('-');
-                    string month = splitstr[0];
-                    string day = splitstr[1];
-                    string year = splitstr[2];
-
-
-                    try
-                    {
-                        m_alistDateSelected = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day));
-                        if (m_alistDateSelected.DayOfWeek == DayOfWeek.Sunday)
-                        {
-                            m_alistdateIsValid = true;
-                         
-                            UpdateAttendeeListTableWithDateFilter();
-                            dataGrid.DataContext = m_DataSet.Tables["AttendeeListTable"];
-                            DateCalendar.DisplayDate = m_alistDateSelected;
-                        }
-                        else
-                        {
-                            m_alistdateIsValid = false;
-
-                            MessageBox.Show("Date is not a Sunday.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-
-
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-
-                        MessageBox.Show("Invalid date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-                        Console.WriteLine($"{ex}");
-
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Date is in wrong format.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-
-        }
-        //private void dataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
-        //{
-        //    //var grid = sender as DataGrid;
-        //    //var cells = grid.SelectedCells;
-           
-           
-           
-        //    btnProspect.IsEnabled = true;
-        //}
+       
       
         //private void btnCopy_Click(object sender, RoutedEventArgs e)
         //{
@@ -2674,61 +2778,74 @@ namespace CAOGAttendeeProject
 
         }
 
-       
-           
- 
-
-    
-        private void txtDate_KeyDown(object sender, KeyEventArgs e)
+        private void RibbonButton_Click(object sender, RoutedEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            int i = 0;
+            foreach (DataRow dr in m_DataSet.Tables["DefaultTable"].Rows)
             {
 
+                Console.WriteLine($"Row {i} Lastname={dr["Last Name"]}, Firstname= {dr["First Name"]} rowstate={dr.RowState}");
 
-                Regex pattern = new Regex(@"^[0-9]{2}-[0-9]{2}-[0-9]{4}");
+                    i++;
 
-                if (pattern.IsMatch(txtDate.Text))
-                {
-                    string text = pattern.Match(txtDate.Text).ToString();
-                    string[] splitstr = text.Split('-');
-                    string month = splitstr[0];
-                    string day = splitstr[1];
-                    string year = splitstr[2];
-
-
-                    try
-                    {
-                        m_DateSelected = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day));
-                        if (m_DateSelected.DayOfWeek == DayOfWeek.Sunday)
-                        {
-                            m_dateIsValid = true;
-                          
-                            DateCalendar.DisplayDate = m_DateSelected;
-                            Update_Status();
-                        }
-                        else
-                        {
-                            m_dateIsValid = false;
-                            MessageBox.Show("Date is not a Sunday.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-
-
-
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-
-                        MessageBox.Show("Invalid date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-                       
-
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Date is in wrong format.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
             }
         }
+
+
+
+
+
+
+        //private void txtDate_KeyDown(object sender, KeyEventArgs e)
+        //{
+        //    if (e.Key == Key.Enter)
+        //    {
+
+
+        //        Regex pattern = new Regex(@"^[0-9]{2}-[0-9]{2}-[0-9]{4}");
+
+        //        if (pattern.IsMatch(txtDate.Text))
+        //        {
+        //            string text = pattern.Match(txtDate.Text).ToString();
+        //            string[] splitstr = text.Split('-');
+        //            string month = splitstr[0];
+        //            string day = splitstr[1];
+        //            string year = splitstr[2];
+
+
+        //            try
+        //            {
+        //                m_DateSelected = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day));
+        //                if (m_DateSelected.DayOfWeek == DayOfWeek.Sunday)
+        //                {
+        //                    m_dateIsValid = true;
+
+        //                    DateCalendar.DisplayDate = m_DateSelected;
+        //                    Update_Status();
+        //                }
+        //                else
+        //                {
+        //                    m_dateIsValid = false;
+        //                    MessageBox.Show("Date is not a Sunday.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
+
+
+
+        //                }
+        //            }
+        //            catch (Exception ex)
+        //            {
+
+        //                MessageBox.Show("Invalid date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
+
+
+        //            }
+        //        }
+        //        else
+        //        {
+        //            MessageBox.Show("Date is in wrong format.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
+        //        }
+        //    }
+        //}
     } // end MainWindow
 } 
 
