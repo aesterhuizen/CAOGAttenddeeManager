@@ -31,7 +31,7 @@ namespace CAOGAttendeeProject
 
             querylinq = from att in dbcontext.Attendees.Local.AsQueryable()
                         join attinfo in dbcontext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                        where att.FirstName == lname && att.LastName == fname
+                        where att.FirstName == fname && att.LastName == lname
                         orderby attinfo.Date ascending
                         select new AttRecord { id = attinfo.Attendance_InfoId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, status = attinfo.Status };
 
@@ -123,7 +123,12 @@ namespace CAOGAttendeeProject
 
             GrdAttendeeInfo.DataContext = StatusTable;
             GrdAttendeeInfo.ColumnWidth = 100;
+            if (GrdAttendeeInfo.Columns.Count > 1)
+            {
+                GrdAttendeeInfo.Columns[0].Visibility = Visibility.Hidden;
+            }
             
+
 
         }
 

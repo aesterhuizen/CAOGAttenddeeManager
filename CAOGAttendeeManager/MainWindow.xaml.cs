@@ -50,7 +50,7 @@ namespace CAOGAttendeeProject
 
             this.Closing += new System.ComponentModel.CancelEventHandler(ClosingApp);
             dataGrid.CopyingRowClipboardContent += new EventHandler<DataGridRowClipboardEventArgs>(CopyDataGridtoClipboard);
-         
+            
 
            
 
@@ -749,10 +749,11 @@ namespace CAOGAttendeeProject
             {
                 dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
                 (dataGrid.DataContext as DataTable).DefaultView.Sort = "[Last Name] ASC";
+               
                 if (dataGrid.Columns.Count > 1)
                 {
-                   // FIX ME dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
-                   // FIX ME dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
+                   dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
+                   dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
                 }
             }
 
@@ -873,8 +874,8 @@ namespace CAOGAttendeeProject
 
                 
                 // Swap FirstName and LastName  columns
-                //Default_Data_Table.Columns[2].SetOrdinal(3);
-                //AttendeeListTable.Columns[2].SetOrdinal(3);
+                Default_Data_Table.Columns[2].SetOrdinal(3);
+                AttendeeListTable.Columns[2].SetOrdinal(3);
 
                 AttendeeListTable.AcceptChanges();
                 Default_Data_Table.AcceptChanges();
@@ -1926,7 +1927,9 @@ namespace CAOGAttendeeProject
                 } // end foreach
             } // end foreach data defaulttable row
 
-              //  m_DataSet.Tables["DefaultTable"].AcceptChanges();
+            //  m_DataSet.Tables["DefaultTable"].AcceptChanges();
+            m_DataSet.Tables["DefaultTable"].Columns[2].SetOrdinal(3);
+
                 lblProspectsMetrics.Content = m_DataSet.Tables["AttendeeListTable"].Rows.Count;
 
          
@@ -2129,8 +2132,8 @@ namespace CAOGAttendeeProject
 
             if (dataGrid.Columns.Count > 1)
             {
-                //dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
-                //dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
+                dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
+                dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
 
             }
 
@@ -2417,8 +2420,8 @@ namespace CAOGAttendeeProject
 
                 if (dataGrid.Columns.Count > 1)
                 {
-                   //FIX ME dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
-                   //FIX ME dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
+                   dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
+                   dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
                 }
 
                 dataGrid.CanUserAddRows = false;
