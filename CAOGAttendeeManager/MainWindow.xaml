@@ -13,7 +13,7 @@
 
         <Ribbon DockPanel.Dock="Top" Title="Attendee Manager" SelectionChanged="Ribbon_SelectionChanged">
             <Ribbon.ApplicationMenu>
-                <RibbonApplicationMenu Label="File">
+                <RibbonApplicationMenu Label="File" SmallImageSource="Resources\FileCabinet.ico">
                     <RibbonApplicationMenuItem Header="About" Click="RibbonApplicationMenuItem_Click_About"/>
                     <RibbonApplicationMenuItem Header="Exit" Click="RibbonApplicationMenuItem_Click_Exit" ImageSource="Resources\Exit.ico"/>
                 </RibbonApplicationMenu>

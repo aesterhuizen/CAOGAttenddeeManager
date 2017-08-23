@@ -30,7 +30,6 @@ namespace CAOGAttendeeProject
 
 
             querylinq = from att in dbcontext.Attendees.Local.AsQueryable()
-
                         join attinfo in dbcontext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
                         where att.FirstName == lname && att.LastName == fname
                         orderby attinfo.Date ascending
@@ -88,9 +87,9 @@ namespace CAOGAttendeeProject
 
 
             DataTable StatusTable = new DataTable();
-            
 
 
+            StatusTable.Columns.Add(new DataColumn("AttendeeInfoId"));
             StatusTable.Columns.Add(new DataColumn("First Name"));
             StatusTable.Columns.Add(new DataColumn("Last Name"));
            // StatusTable.Columns.Add(new DataColumn("Date Last Attended"));
