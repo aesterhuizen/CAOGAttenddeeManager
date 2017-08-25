@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:CAOGAttendeeProject"
         mc:Ignorable="d"
         Title="CAOG Attendee Manager" Height="500" Width="1000"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        Closing="Window_Closing">
 
 
     <DockPanel>

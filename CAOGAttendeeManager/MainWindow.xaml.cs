@@ -48,7 +48,7 @@ namespace CAOGAttendeeProject
             this.Title = "CAOG Attendee Manager (Debug)";
 #endif
 
-            this.Closing += new System.ComponentModel.CancelEventHandler(ClosingApp);
+         
             dataGrid.CopyingRowClipboardContent += new EventHandler<DataGridRowClipboardEventArgs>(CopyDataGridtoClipboard);
             
 
@@ -1286,7 +1286,13 @@ namespace CAOGAttendeeProject
 
             if (calender == null)
             {
-                if (m_dateIsValid)
+                if (m_alistView)
+                {
+                    UpdateAttendeeListTableWithDateFilter();
+                    dataGrid.DataContext = m_DataSet.Tables["AttendeeListTable"];
+
+                }
+                else if (m_dateIsValid)
                 {
 
 
@@ -1327,7 +1333,7 @@ namespace CAOGAttendeeProject
                 }
 
             }
-            else
+            else if (calender.SelectedDate != null)
             {
                 DateTime datec = calender.SelectedDate.Value;
 
@@ -1525,13 +1531,7 @@ namespace CAOGAttendeeProject
                             Attendee.FirstName = dr["First Name"].ToString().Trim();
                         }               
 
-                        
-                            
-                            
-
-                        
-
-
+                
                     }
                     // deleted rec ------------------------------------------------------------------------------------------
                     else if (dr.RowState == DataRowState.Deleted)
@@ -1568,11 +1568,9 @@ namespace CAOGAttendeeProject
                                    
                     GenerateDBFollowUps();
                     m_dbContext.SaveChanges();
-                    //m_DataSet.Reset();
                     m_DataSet.Tables["DefaultTable"].AcceptChanges();
 
-                    //InitDataSet();
-                    //Display_DefaultTable_in_Grid();
+                
                     MessageBox.Show("Changes were saved succesfully.");
                
 
@@ -1711,6 +1709,17 @@ namespace CAOGAttendeeProject
                 {
                         if (dr.ItemArray[5].ToString() == "True")
                         {
+
+                            if (dr.ItemArray[2].ToString() == "" || dr.ItemArray[3].ToString() == "" || dr.ItemArray[4].ToString() == "" || dr.ItemArray[5].ToString() != "True")
+                            {
+                                MessageBox.Show("Please correct errors for attendee, check first name, last name, date and status is valid?", "Attendee Status", MessageBoxButton.OK, MessageBoxImage.Error);
+                                dataGrid.Focus();
+                                dataGrid.SelectedIndex = m_DataSet.Tables["AttendeeListTable"].Rows.IndexOf(dr);
+                                dataGrid.ScrollIntoView(dataGrid.Items[m_DataSet.Tables["AttendeeListTable"].Rows.IndexOf(dr)]);
+
+                                Cursor = Cursors.Arrow;
+                                return;
+                            }
                             if (!m_alistdateIsValid)
                             {
                                 MessageBox.Show("Attendee date is not valid.", "Date invalid", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1945,7 +1954,7 @@ namespace CAOGAttendeeProject
                 } // end foreach
             } // end foreach data defaulttable row
 
-            //  m_DataSet.Tables["DefaultTable"].AcceptChanges();
+             m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
             //m_DataSet.Tables["DefaultTable"].Columns[2].SetOrdinal(3);
             //m_tempTable = m_DataSet.Tables["DefaultTable"];
 
@@ -2288,35 +2297,7 @@ namespace CAOGAttendeeProject
             var currentCell = e.ClipboardRowContent[dataGrid.CurrentCell.Column.DisplayIndex];
             e.ClipboardRowContent.Add(currentCell);
         }
-        private void ClosingApp(Object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (m_NoCredFile)
-            {
-                e.Cancel = false;
-            }
-            else
-            {
-
-             
-                    if (m_DataSet.HasChanges())
-                    {
-
-
-
-                        MessageBoxResult result = MessageBox.Show("Changes has been made but not saved yet. Save changes to database?", "Save Changes...", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        Save_Changes(null, null);
-                        e.Cancel = false;
-                    }
-                    else
-                        e.Cancel = false;
-                        
-                    }
-                
-
-            }
-        }
+      
         private void btnChart_Click(object sender, RoutedEventArgs e)
         {
             ChartWindow wndCharts = new ChartWindow(m_dbContext);
@@ -2418,22 +2399,36 @@ namespace CAOGAttendeeProject
             if (tabAttendeeList.IsSelected)
             {
 
-
-                
-                (dataGrid.DataContext as DataTable).DefaultView.RowFilter = String.Empty;
-                m_tempTable = (DataTable)dataGrid.DataContext;
-                
-
                 m_alistView = true;
                 m_AttendanceView = false;
                 DateCalendar.IsEnabled = true;
 
+                (dataGrid.DataContext as DataTable).DefaultView.RowFilter = String.Empty;
+                m_tempTable = (DataTable)dataGrid.DataContext;
+
+
+
+
                 // alisttxtSearch.Text = "";
+
 
                 if (m_alistdateIsValid)
                 {
-                    UpdateAttendeeListTableWithDateFilter();
+                    DateCalendar.SelectedDates.Clear();
+                    alisttxtDate.Text = m_alistDateSelected.ToString("MM-dd-yyyy");
+                    DateCalendar.DisplayDate = m_alistDateSelected;
+                    DateCalendar.SelectedDate = m_alistDateSelected;
+                    
+                   // DateCalendar_SelectedDateChanged(null, null);
+
                 }
+                else
+                {
+                    DateCalendar.SelectedDates.Clear();
+                   // DateCalendar.SelectedDate = DateTime.Today;
+
+                }
+
                 // alisttxtDate.Text = "";
                 //  m_alistdateIsValid = false;
                 dataGrid.CanUserAddRows = true;
@@ -2455,6 +2450,10 @@ namespace CAOGAttendeeProject
             //--------Home Tab -----------------------------------------------------------------------------------------
             else if (tabHome.IsSelected)
             {
+
+                m_alistView = false;
+                m_AttendanceView = true;
+
                 // commit datagrid edits and return DataContext to show all records
                 if (dataGrid.Columns.Count > 1)
                 {
@@ -2465,10 +2464,26 @@ namespace CAOGAttendeeProject
                 {
                     DateCalendar.IsEnabled = false;
                 }
-                m_alistView = false;
-                m_AttendanceView = true;
 
-                if (m_dateIsValid || chkDateFilter.IsChecked == true || chkAttended.IsChecked == true || chkFollowup.IsChecked == true || chkResponded.IsChecked == true)
+                if (m_dateIsValid && m_filterByDate)
+                {
+                    DateCalendar.SelectedDates.Clear();
+                    txtDate.Text = m_DateSelected.ToString("MM-dd-yyyy");
+                    DateCalendar.DisplayDate = m_DateSelected;
+                    DateCalendar.SelectedDate = m_DateSelected;
+                    
+                   // DateCalendar_SelectedDateChanged(null, null);
+
+                }
+                else
+                {
+                    DateCalendar.SelectedDates.Clear();
+                   // DateCalendar.SelectedDate = DateTime.Today;
+                }
+
+
+
+                if (chkDateFilter.IsChecked == true || chkAttended.IsChecked == true || chkFollowup.IsChecked == true || chkResponded.IsChecked == true)
                 {
                     if (txtSearch.Text != "")
                     {
@@ -2497,19 +2512,7 @@ namespace CAOGAttendeeProject
 
                 }
 
-                //WhichTableToShow();
-
-
-                //if (txtSearch.Text != "")
-                //{
-                //    m_tempTable.DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
-                //    dataGrid.DataContext = m_tempTable;
-                //}
-                //else
-                //{
-                //    dataGrid.DataContext = m_tempTable;
-                //}
-
+            
 
 
 
@@ -2791,61 +2794,53 @@ namespace CAOGAttendeeProject
             }
         }
 
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            bool isAttendedStatusChecked = false;
+
+            if (m_NoCredFile)
+            {
+                e.Cancel = false;
+            }
+            else
+            {
+
+                foreach (DataRow dr in m_DataSet.Tables["DefaultTable"].Rows)
+                {
+                    if (dr.ItemArray[5].ToString() == "True")
+                    {
+                        isAttendedStatusChecked = true;
+                        break;
+
+                    }
+                    else
+                    {
+                        isAttendedStatusChecked = false;
+                    }
+                }
+
+                if (m_DataSet.HasChanges() || isAttendedStatusChecked)
+                {
 
 
 
+                    MessageBoxResult result = MessageBox.Show("Changes has been made but not saved yet. Save changes to database?", "Save Changes...", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        Save_Changes(null, null);
+                        e.Cancel = false;
+                    }
+                    else
+                        e.Cancel = false;
+
+                }
 
 
-        //private void txtDate_KeyDown(object sender, KeyEventArgs e)
-        //{
-        //    if (e.Key == Key.Enter)
-        //    {
+            }
+        }
 
 
-        //        Regex pattern = new Regex(@"^[0-9]{2}-[0-9]{2}-[0-9]{4}");
-
-        //        if (pattern.IsMatch(txtDate.Text))
-        //        {
-        //            string text = pattern.Match(txtDate.Text).ToString();
-        //            string[] splitstr = text.Split('-');
-        //            string month = splitstr[0];
-        //            string day = splitstr[1];
-        //            string year = splitstr[2];
-
-
-        //            try
-        //            {
-        //                m_DateSelected = new DateTime(int.Parse(year), int.Parse(month), int.Parse(day));
-        //                if (m_DateSelected.DayOfWeek == DayOfWeek.Sunday)
-        //                {
-        //                    m_dateIsValid = true;
-
-        //                    DateCalendar.DisplayDate = m_DateSelected;
-        //                    Update_Status();
-        //                }
-        //                else
-        //                {
-        //                    m_dateIsValid = false;
-        //                    MessageBox.Show("Date is not a Sunday.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-
-
-
-        //                }
-        //            }
-        //            catch (Exception ex)
-        //            {
-
-        //                MessageBox.Show("Invalid date.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-
-
-        //            }
-        //        }
-        //        else
-        //        {
-        //            MessageBox.Show("Date is in wrong format.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-        //        }
-        //    }
-        //}
+       
     } // end MainWindow
 } 
 

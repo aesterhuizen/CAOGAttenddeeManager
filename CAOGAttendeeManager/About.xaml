@@ -9,9 +9,9 @@
         WindowStyle="ToolWindow"
         ResizeMode="NoResize">
     <Grid>
-        <StackPanel Orientation="Vertical">
+        <StackPanel Orientation="Vertical" Margin="0,50,0,0">
             <Label Content="Attendee Manager v 1.2" HorizontalAlignment="Center" />
             <Label Content="by Anton Esterhuizen" HorizontalAlignment="Center" Margin="78,0" Width="138"/>
-        </StackPanel>
+       </StackPanel>
     </Grid>
 </Window>
