@@ -744,9 +744,9 @@ namespace CAOGAttendeeProject
 
             }
 
-
-            
-          
+            dataGrid.CanUserDeleteRows = false;
+            dataGrid.CanUserAddRows = true;
+            dataGrid.ToolTip = null;
         } // end  private void Display_Database_in_Grid()
 
         private void dataGrid_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -773,15 +773,20 @@ namespace CAOGAttendeeProject
                    dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
                 }
             }
-
             
-
+            dataGrid.CanUserDeleteRows = true;
+            dataGrid.CanUserAddRows = false;
+            dataGrid.ToolTip = "Left mouse click to select attendee.\n\n" +
+                                 "Right mouse click to see selected attendee's attendence history.\n\n" +
+                                 "Select and press the 'Delete' key to delete an attendee from the list.\n\n" +
+                                 "Only attendee name modifications will be saved.";
         } // end  private void Display_Database_in_Grid()
 
 
 
         private void InitDataSet()
         {
+           
 
             //--------------------- Make DEFAULT TABLE---------------------------------------------------------------------------
 
@@ -1100,17 +1105,10 @@ namespace CAOGAttendeeProject
             {
                 if (m_DataSet.Tables["DefaultTable"].Rows.Count > 1)
                 {
-                    dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
+                    Display_DefaultTable_in_Grid();
                 }
                 
-                // (dataGrid.DataContext as DataTable).DefaultView.Sort = "FirstLastName ASC";
-                if (dataGrid.Columns.Count > 1)
-                {
-                    dataGrid.Columns[0].Visibility = Visibility.Hidden;
-                    dataGrid.Columns[1].Visibility = Visibility.Hidden;
-                }
                 
-                //lblAttendenceMetrics.Content = m_DataSet.Tables["DefaultTable"].Rows.Count;
 
             }
             else if (query == "")
@@ -1164,6 +1162,9 @@ namespace CAOGAttendeeProject
                 queryTable.AcceptChanges();
                 m_DataSet.Tables.Add(queryTable);
 
+                dataGrid.CanUserDeleteRows = false;
+                dataGrid.CanUserAddRows = false;
+                dataGrid.ToolTip = null;
 
                 dataGrid.DataContext = queryTable;
                 if (dataGrid.Columns.Count > 1)
@@ -2204,7 +2205,7 @@ namespace CAOGAttendeeProject
 
 
             lblProspectsMetrics.Content = m_DataSet.Tables["AttendeeListTable"].Rows.Count;
-
+           
 
             if (dataGrid.Columns.Count > 1)
             {
@@ -2413,13 +2414,7 @@ namespace CAOGAttendeeProject
                    // DateCalendar.SelectedDate = DateTime.Today;
 
                 }
-
-                // alisttxtDate.Text = "";
-                //  m_alistdateIsValid = false;
-                dataGrid.CanUserAddRows = true;
-                dataGrid.CanUserDeleteRows = false;
-
-                dataGrid.ToolTip = null;
+            
 
                 Display_AttendeeListTable_in_Grid();
 
@@ -2474,10 +2469,14 @@ namespace CAOGAttendeeProject
                     {
                         m_DataSet.Tables["QueryTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
                         dataGrid.DataContext = m_DataSet.Tables["QueryTable"];
+                        dataGrid.CanUserDeleteRows = false;
+                        dataGrid.CanUserAddRows = false;
                     }
                     else
                     {
                         dataGrid.DataContext = m_DataSet.Tables["QueryTable"];
+                        dataGrid.CanUserDeleteRows = false;
+                        dataGrid.CanUserAddRows = false;
                     }
 
                 }
@@ -2488,11 +2487,14 @@ namespace CAOGAttendeeProject
                     {
                         m_DataSet.Tables["DefaultTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
                         dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
-                        
+                        dataGrid.CanUserDeleteRows = true;
+                        dataGrid.CanUserAddRows = false;
+
                     }
                     else
                     {
                         Display_DefaultTable_in_Grid();
+                       
                     }
 
 
@@ -2510,8 +2512,8 @@ namespace CAOGAttendeeProject
                   dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
                 }
 
+
                 dataGrid.CanUserAddRows = false;
-                dataGrid.CanUserDeleteRows = true;
                 dataGrid.ToolTip = "Left mouse click to select attendee.\n\n" +
                                    "Right mouse click to see selected attendee's attendence history.\n\n" +
                                    "Select and press the 'Delete' key to delete an attendee from the list.\n\n" +
@@ -2797,7 +2799,7 @@ namespace CAOGAttendeeProject
                     if (dr.ItemArray[5].ToString() == "True")
                     {
                         isAttendedStatusChecked = true;
-                        
+
                         break;
 
                     }
@@ -2813,7 +2815,7 @@ namespace CAOGAttendeeProject
                 if (m_DataSet.HasChanges() )
                     {
 
-                        MessageBoxResult result = MessageBox.Show("Changes has been made but not saved or added yet. Exit anyway?", "Save Changes...", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                        MessageBoxResult result = MessageBox.Show("Changes has been made but not saved or added yet, please add and save changes. Exit anyway?", "Save Changes...", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                         if (result == MessageBoxResult.OK)
                         {
                            // Save_Changes(null, null);
@@ -2830,7 +2832,12 @@ namespace CAOGAttendeeProject
 
 
             }
+
+        private void dataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
+    }
 
 
        

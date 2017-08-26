@@ -234,14 +234,14 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="True"
+            <DataGrid Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="False"
                       ItemsSource="{Binding}" 
                       CanUserReorderColumns="False"
                       MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
                       ClipboardCopyMode="IncludeHeader"
                       SelectionMode="Extended"
-                      ColumnWidth="100" 
-                      ToolTipService.ShowDuration="10000">
+                      ColumnWidth="120" 
+                      ToolTipService.ShowDuration="10000" SelectionChanged="dataGrid_SelectionChanged">
                 
                 
               <!--  <DataGrid.ColumnHeaderStyle>
