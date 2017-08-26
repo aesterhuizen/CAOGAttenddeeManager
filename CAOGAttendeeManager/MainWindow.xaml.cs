@@ -112,8 +112,7 @@ namespace CAOGAttendeeProject
                 else
                 {
                     InitDataSet();
-                    m_DataSet.Tables["DefaultTable"].AcceptChanges();
-                    m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
+                   
                     Display_DefaultTable_in_Grid();
                 }
 
@@ -902,9 +901,10 @@ namespace CAOGAttendeeProject
 
                 m_NewAttendeeId += 1;
 
-              
+                m_DataSet.Tables["DefaultTable"].AcceptChanges();
+                m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
 
-            
+
                 lblProspectsMetrics.Content = m_DataSet.Tables["AttendeeListTable"].Rows.Count;
 
 
@@ -1162,20 +1162,20 @@ namespace CAOGAttendeeProject
                 //Swap LastName and FirstName columns
                // queryTable.Columns[2].SetOrdinal(3);
                 queryTable.AcceptChanges();
-                m_DataSet.Tables.Add("QueryTable");
+                m_DataSet.Tables.Add(queryTable);
 
 
                 dataGrid.DataContext = queryTable;
-                if (dataGrid.Columns.Count >1)
+                if (dataGrid.Columns.Count > 1)
                 {
                     dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
                     dataGrid.Columns[1].Visibility = Visibility.Hidden; //LastFirstName
                 }
-                
 
 
 
-              
+
+
             }
 
         }
@@ -1887,7 +1887,7 @@ namespace CAOGAttendeeProject
 
                 InitDefaultTable();
                 InitAttendeeListTable();
-                m_tempTable = m_DataSet.Tables["DefaultTable"];
+               
                 Display_AttendeeListTable_in_Grid();
                
                
@@ -1954,9 +1954,8 @@ namespace CAOGAttendeeProject
                 } // end foreach
             } // end foreach data defaulttable row
 
-             m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
-            //m_DataSet.Tables["DefaultTable"].Columns[2].SetOrdinal(3);
-            //m_tempTable = m_DataSet.Tables["DefaultTable"];
+            m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
+
 
             lblProspectsMetrics.Content = m_DataSet.Tables["AttendeeListTable"].Rows.Count;
         }
@@ -2201,21 +2200,7 @@ namespace CAOGAttendeeProject
                 dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
             }
 
-            //reset dataContext sow all records
-            //(dataGrid.DataContext as DataTable).DefaultView.RowFilter = String.Empty;
-            //(dataGrid.DataContext as DataTable).DefaultView.Sort = "[Last Name] ASC";
-
-
-            dataGrid.CanUserAddRows = false;
-            //dataGrid.CanUserDeleteRows = false;
-
-            dataGrid.ToolTip = "Left mouse click to select attendee.\n\n" +
-                                  "Right mouse click to see selected attendee's attendence history.\n\n" +
-                                  "Select and press 'ESC' key to delete an attendee from the list.\n\n" +
-                                  "Only attendee name modifications will be saved.";
-
-            // Display_DefaultTable_in_Grid();
-
+                  
 
 
             lblProspectsMetrics.Content = m_DataSet.Tables["AttendeeListTable"].Rows.Count;
@@ -2403,8 +2388,8 @@ namespace CAOGAttendeeProject
                 m_AttendanceView = false;
                 DateCalendar.IsEnabled = true;
 
-                (dataGrid.DataContext as DataTable).DefaultView.RowFilter = String.Empty;
-                m_tempTable = (DataTable)dataGrid.DataContext;
+                //(dataGrid.DataContext as DataTable).DefaultView.RowFilter = String.Empty;
+                //m_tempTable = (DataTable)dataGrid.DataContext;
 
 
 
@@ -2416,7 +2401,7 @@ namespace CAOGAttendeeProject
                 {
                     DateCalendar.SelectedDates.Clear();
                     alisttxtDate.Text = m_alistDateSelected.ToString("MM-dd-yyyy");
-                    DateCalendar.DisplayDate = m_alistDateSelected;
+                   // DateCalendar.DisplayDate = m_alistDateSelected;
                     DateCalendar.SelectedDate = m_alistDateSelected;
                     
                    // DateCalendar_SelectedDateChanged(null, null);
@@ -2469,7 +2454,7 @@ namespace CAOGAttendeeProject
                 {
                     DateCalendar.SelectedDates.Clear();
                     txtDate.Text = m_DateSelected.ToString("MM-dd-yyyy");
-                    DateCalendar.DisplayDate = m_DateSelected;
+                   // DateCalendar.DisplayDate = m_DateSelected;
                     DateCalendar.SelectedDate = m_DateSelected;
                     
                    // DateCalendar_SelectedDateChanged(null, null);
@@ -2487,12 +2472,12 @@ namespace CAOGAttendeeProject
                 {
                     if (txtSearch.Text != "")
                     {
-                        m_tempTable.DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
-                        dataGrid.DataContext = m_tempTable;
+                        m_DataSet.Tables["QueryTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+                        dataGrid.DataContext = m_DataSet.Tables["QueryTable"];
                     }
                     else
                     {
-                        dataGrid.DataContext = m_tempTable;
+                        dataGrid.DataContext = m_DataSet.Tables["QueryTable"];
                     }
 
                 }
@@ -2501,8 +2486,9 @@ namespace CAOGAttendeeProject
 
                     if (txtSearch.Text != "")
                     {
-                        m_tempTable.DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
-                        dataGrid.DataContext = m_tempTable;
+                        m_DataSet.Tables["DefaultTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+                        dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
+                        
                     }
                     else
                     {
@@ -2525,10 +2511,10 @@ namespace CAOGAttendeeProject
                 }
 
                 dataGrid.CanUserAddRows = false;
-                // dataGrid.CanUserDeleteRows = false;
+                dataGrid.CanUserDeleteRows = true;
                 dataGrid.ToolTip = "Left mouse click to select attendee.\n\n" +
                                    "Right mouse click to see selected attendee's attendence history.\n\n" +
-                                   "Select and press 'ESC' key to delete an attendee from the list.\n\n" +
+                                   "Select and press the 'Delete' key to delete an attendee from the list.\n\n" +
                                    "Only attendee name modifications will be saved.";
 
                 lblProspectsMetrics.Content = m_DataSet.Tables["AttendeeListTable"].Rows.Count;
@@ -2804,12 +2790,14 @@ namespace CAOGAttendeeProject
             }
             else
             {
-
-                foreach (DataRow dr in m_DataSet.Tables["DefaultTable"].Rows)
+                   // save dataGrid edits
+                dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+                foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
                 {
                     if (dr.ItemArray[5].ToString() == "True")
                     {
                         isAttendedStatusChecked = true;
+                        
                         break;
 
                     }
@@ -2819,21 +2807,26 @@ namespace CAOGAttendeeProject
                     }
                 }
 
-                if (m_DataSet.HasChanges() || isAttendedStatusChecked)
-                {
+                if (!isAttendedStatusChecked)
+                    m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
 
-
-
-                    MessageBoxResult result = MessageBox.Show("Changes has been made but not saved yet. Save changes to database?", "Save Changes...", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                    if (result == MessageBoxResult.Yes)
+                if (m_DataSet.HasChanges() )
                     {
-                        Save_Changes(null, null);
-                        e.Cancel = false;
-                    }
-                    else
-                        e.Cancel = false;
 
+                        MessageBoxResult result = MessageBox.Show("Changes has been made but not saved or added yet. Exit anyway?", "Save Changes...", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                        if (result == MessageBoxResult.OK)
+                        {
+                           // Save_Changes(null, null);
+                            e.Cancel = false;
+                        }
+                        else
+                            e.Cancel = true;
+
+
+
+                    }
                 }
+                
 
 
             }
@@ -2842,7 +2835,7 @@ namespace CAOGAttendeeProject
 
        
     } // end MainWindow
-} 
+
 
 
 
