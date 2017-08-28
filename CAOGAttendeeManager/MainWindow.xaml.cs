@@ -2389,20 +2389,14 @@ namespace CAOGAttendeeProject
                 m_AttendanceView = false;
                 DateCalendar.IsEnabled = true;
 
-                //(dataGrid.DataContext as DataTable).DefaultView.RowFilter = String.Empty;
-                //m_tempTable = (DataTable)dataGrid.DataContext;
-
-
-
-
-                // alisttxtSearch.Text = "";
+               
 
 
                 if (m_alistdateIsValid)
                 {
                     DateCalendar.SelectedDates.Clear();
                     alisttxtDate.Text = m_alistDateSelected.ToString("MM-dd-yyyy");
-                   // DateCalendar.DisplayDate = m_alistDateSelected;
+                    DateCalendar.DisplayDate = m_alistDateSelected;
                     DateCalendar.SelectedDate = m_alistDateSelected;
                     
                    // DateCalendar_SelectedDateChanged(null, null);
@@ -2449,7 +2443,7 @@ namespace CAOGAttendeeProject
                 {
                     DateCalendar.SelectedDates.Clear();
                     txtDate.Text = m_DateSelected.ToString("MM-dd-yyyy");
-                   // DateCalendar.DisplayDate = m_DateSelected;
+                    DateCalendar.DisplayDate = m_DateSelected;
                     DateCalendar.SelectedDate = m_DateSelected;
                     
                    // DateCalendar_SelectedDateChanged(null, null);
