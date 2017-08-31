@@ -20,7 +20,7 @@
                 </RibbonApplicationMenu>
             </Ribbon.ApplicationMenu>
             <!-- Home Tab ############################################################################################-->
-            <RibbonTab Name="tabHome" Header="Active Attendence">
+            <RibbonTab Name="tabHome" Header="Active Attendance">
                 <RibbonGroup Header="Search">
                     <RibbonTextBox Name="txtSearch" SmallImageSource="Resources\Search.ico" Text=""
                                    TextBoxWidth="160"
@@ -78,12 +78,21 @@
                -->
                 <RibbonGroup Header="Table Operations">
 
-                   <RibbonButton Name="btnSave"
+                    <RibbonButton Name="btnSave"
                                   Width="100"
                                   Label="Save Changes"
                                   SmallImageSource="Resources\save.ico"
                                   Click="Save_Changes" 
-                                  ToolTip="Save all changes made to the database."/>
+                                  ToolTip="Save all changes made to the database and generate followups." Height="Auto" Margin="0,0,0,-22"/>
+                    <!--<RibbonButton.Template>
+                            <TextBlock TextWrapping="Wrap">Save Changes Generate Follow-Ups</TextBlock>
+                        </RibbonButton.Template>
+                    </RibbonButton>
+-->
+
+
+
+
 
 
 
@@ -120,7 +129,7 @@
                 </RibbonGroup>
                                 
                 
-                <RibbonGroup Header="Attendence Metrics" Width="200">
+                <RibbonGroup Header="Attendance Metrics" Width="200">
                     <RibbonButton x:Name="btnProspect" Label="Prospect"  
                                       LargeImageSource="Resources\UserRemove.ico" 
                                       Click="btnProspect_Click" 
