@@ -16,12 +16,16 @@
             <Ribbon.ApplicationMenu>
                 <RibbonApplicationMenu Label="File" SmallImageSource="Resources\FileCabinet.ico">
                     <RibbonApplicationMenuItem Header="About" Click="RibbonApplicationMenuItem_Click_About"/>
+                    <RibbonSeparator/>
                     <RibbonApplicationMenuItem Header="Exit" Click="RibbonApplicationMenuItem_Click_Exit" ImageSource="Resources\Exit.ico"/>
                 </RibbonApplicationMenu>
             </Ribbon.ApplicationMenu>
             <!-- Home Tab ############################################################################################-->
             <RibbonTab Name="tabHome" Header="Active Attendance">
+                
                 <RibbonGroup Header="Search">
+                    
+                    
                     <RibbonTextBox Name="txtSearch" SmallImageSource="Resources\Search.ico" Text=""
                                    TextBoxWidth="160"
                                    TextChanged="txtSearch_TextChanged" 
@@ -161,7 +165,8 @@
 
             </RibbonTab>
             <!--Attendee List Tab #######################################################################################-->
-            <RibbonTab Name="tabAttendeeList" Header="Attendee Prospect Check List" Margin="2,1,-2,-1">
+            <RibbonTab Name="tabAttendeeList" Header="Attendee Prospect Check List" 
+                       Margin="2,1,-2,-1">
 
                 <RibbonGroup Header="Search">
                     <RibbonTextBox Name="alisttxtSearch" SmallImageSource="Resources\Search.ico" Text=""
@@ -250,28 +255,30 @@
                       ClipboardCopyMode="IncludeHeader"
                       SelectionMode="Extended"
                       ColumnWidth="120" 
-                      ToolTipService.ShowDuration="10000" SelectionChanged="dataGrid_SelectionChanged">
+                      ToolTipService.ShowDuration="15000">
+
                 
-                
-              <!--  <DataGrid.ColumnHeaderStyle>
+            </DataGrid>
+
+            <!--  <DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader">
                         <EventSetter Event="Click"  Handler="dataGridHeader_Click" />
                     </Style>
                 </DataGrid.ColumnHeaderStyle>
                 -->
-            </DataGrid>
 
-            <!-- <DataGrid Name="dataGrid" CanUserAddRows="True" CanUserDeleteRows="True" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" DataContextChanged="dataGrid_DataContextChanged" SelectionChanged="dataGrid_SelectionChanged">
+
+                <!-- <DataGrid Name="dataGrid" CanUserAddRows="True" CanUserDeleteRows="True" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" DataContextChanged="dataGrid_DataContextChanged" SelectionChanged="dataGrid_SelectionChanged">
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn IsThreeState="False" Binding="{Binding, UpdateSourceTrigger=PropertyChanged}"></DataGridCheckBoxColumn>
                     
                 </DataGrid.Columns>
             -->
-            
+
+             
 
 
 
-            
         </Grid>
 
 
