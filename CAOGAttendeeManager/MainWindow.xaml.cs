@@ -211,7 +211,7 @@ namespace CAOGAttendeeProject
 
         private void correctDBerrors()
         {
-            DateTime correcteddate = new DateTime(2017, 8, 27);
+            DateTime correcteddate = new DateTime(2017, 9, 3);
 
             var queryAttendees = from AttendeeRec in m_dbContext.Attendance_Info
                                  where AttendeeRec.Status == "Follow-Up"
@@ -234,7 +234,7 @@ namespace CAOGAttendeeProject
                 string date = arydate[0];
 
 
-                if (date == "08-28-2017")
+                if (date == "09-03-2017")
                 {
 
                     attrec.Date = correcteddate;
@@ -774,7 +774,8 @@ namespace CAOGAttendeeProject
             dataGrid.IsReadOnly = false;
             dataGrid.CanUserDeleteRows = true;
             dataGrid.CanUserAddRows = false;
-            dataGrid.ToolTip = "Left mouse click to select attendee.\n\n" +
+            dataGrid.ToolTip = "Double click on a record to edit attendee First and Last name.\n\n " +
+                                "Left mouse click to select attendee.\n\n" +
                                  "Right mouse click to see selected attendee's attendence history.\n\n" +
                                  "Select and press the 'Delete' key to delete an attendee from the list.\n\n" +
                                  "Only attendee name modifications will be saved.";
@@ -1519,40 +1520,44 @@ namespace CAOGAttendeeProject
 
         }
 
-        private void Save_Changes(object sender, RoutedEventArgs e)
+        void Save_Changes(object sender, RoutedEventArgs e)
         {
             bool isAttendedStatusChecked = false;
 
             int i = -1;
 
 
-
-
-            dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
-            foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
-            {
-                if (dr.ItemArray[5].ToString() == "True")
+           
+                dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+                foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
                 {
-                    isAttendedStatusChecked = true;
+                    if (dr.ItemArray[5].ToString() == "True")
+                    {
+                        isAttendedStatusChecked = true;
 
-                    break;
+                        break;
+
+                    }
+                    else
+                    {
+                        isAttendedStatusChecked = false;
+                    }
+                }
+
+                if (isAttendedStatusChecked)
+                {
+                  MessageBox.Show("There are checked attendees in the attendee list that has not yet been added to the active list, add them to the active list first", "Attendees not added", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                  return ;
+                    
 
                 }
                 else
                 {
-                    isAttendedStatusChecked = false;
+                    m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
                 }
-            }
+           
 
-            if (isAttendedStatusChecked)
-            {
-                MessageBox.Show("There are checked attendees in the attendee list that has not yet been added to the active list, add them first", "Attendees not added", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            else
-            {
-                m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
-            }
+           
 
             if (m_DataSet.HasChanges())
             {
@@ -1667,7 +1672,7 @@ namespace CAOGAttendeeProject
                 MessageBox.Show("No changes to save.");
             }
 
-
+            
 
         }
 
@@ -1861,7 +1866,7 @@ namespace CAOGAttendeeProject
                                                                    flname,
                                                                     dr["Last Name"],
                                                                     dr["First Name"],
-                                                                    dr["Date"],
+                                                                    date,
                                                                     newAttInfoRec.Status
                                                                 };
 
@@ -1972,7 +1977,7 @@ namespace CAOGAttendeeProject
                                                                         flname,
                                                                         dr["Last Name"],
                                                                         dr["First Name"],
-                                                                        newRecord.Date,
+                                                                        date,
                                                                         newRecord.Status};
 
 
@@ -2492,6 +2497,7 @@ namespace CAOGAttendeeProject
 
 
             ////first focus the grid
+            dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
             m_DataSet.Tables["AttendeeListTable"].DefaultView.Sort = String.Empty;
             dataGrid.Focus();
             ////then create a new cell info, with the item we wish to edit and the column number of the cell we want in edit mode
@@ -2937,47 +2943,124 @@ namespace CAOGAttendeeProject
                     }
                 }
 
-                if (isAttendedStatusChecked)
-                {
-                    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee list that has not yet been added to the active list, discard changes and exit anyway?", "Attendees not added", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                    if (res == MessageBoxResult.OK)
-                    {
-                        e.Cancel = false;
-                    }
-                    else
-                        e.Cancel = true;
-
-                    return;
-                }
-                else
-                    m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
 
                 if (m_dbContext.ChangeTracker.HasChanges() || m_DataSet.HasChanges())
                 {
 
-                    MessageBoxResult result = MessageBox.Show("Changes has been made but not saved yet, save changes?", "Save Changes...", MessageBoxButton.YesNoCancel, MessageBoxImage.Exclamation);
-                    if (result == MessageBoxResult.Yes)
+                    Cursor = Cursors.Wait;
+
+                    if (isAttendedStatusChecked)
                     {
-                        Save_Changes(null, null);
-                        e.Cancel = false;
+                        MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list, discard checklist attendees and save changes in the active list to database?", "Attendees not added", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                        if (res == MessageBoxResult.OK)
+                        {
+                           
+                            Discard_CheckListandSaveActiveList();
+                            e.Cancel = false;
+                           
+                        }
+                        else
+                            e.Cancel = true;
+
+
                     }
-                    else if (result == MessageBoxResult.No)
-                        e.Cancel = false;
-                    else if (result == MessageBoxResult.Cancel)
-                        e.Cancel = true;
+                    else
+                    {
+                        MessageBoxResult res =  MessageBox.Show("Changes has been made but not saved to the database yet, save changes?", "Changes not saved", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+                        if (res == MessageBoxResult.Yes)
+                        {
 
+                            Discard_CheckListandSaveActiveList();
+                            e.Cancel = false;
 
+                        }
+                        else if (res == MessageBoxResult.No)
+                        {
+                            e.Cancel = false;
+                        }    
+                        else if (res == MessageBoxResult.Cancel)
+                            e.Cancel = true;
+                        
+                    }
+
+                    Cursor = Cursors.Arrow;
 
                 }
+
+           
+
             }
+               
+            
 
 
 
         }
-    }
+
+        private void Discard_CheckListandSaveActiveList()
+        {
+            int i = -1;
+                m_DataSet.Tables["DefaultTable"].DefaultView.RowFilter = String.Empty;
+                foreach (DataRow dr in m_DataSet.Tables["DefaultTable"].Rows)
+                {
+                i++;
+                    // modified record ------------------------------------------------------------------------------------------
+                    if (dr.RowState == DataRowState.Modified)
+                    {
+
+                        int AttendeeId = int.Parse(dr["AttendeeId"].ToString());
+
+                        var Attendee = m_dbContext.Attendees.Local.Single(att => att.AttendeeId == AttendeeId);
+
+                        if (Attendee != null)
+                        {
+                            Attendee.LastName = dr["Last Name"].ToString().Trim();
+                            Attendee.FirstName = dr["First Name"].ToString().Trim();
+                        }
 
 
-   
+                    }
+                    // deleted rec ------------------------------------------------------------------------------------------
+                    else if (dr.RowState == DataRowState.Deleted)
+                    {
+
+                        int attid = int.Parse(m_DataSet.Tables["DefaultTable"].Rows[i]["AttendeeId", DataRowVersion.Original].ToString());
+
+
+                        var Attrec = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == attid);
+
+                        var queryAttendeeInfo = (from inforec in m_dbContext.Attendance_Info.Local
+                                                 where inforec.AttendeeId == attid
+                                                 select inforec).ToArray();
+
+                        if (queryAttendeeInfo.Any())
+                        {
+
+
+                            for (int idx = 0; idx <= queryAttendeeInfo.Count() - 1; idx++)
+                            {
+                                m_dbContext.Attendance_Info.Local.Remove(queryAttendeeInfo[idx]);
+                            }
+
+                        }
+
+                        m_dbContext.Attendees.Local.Remove(Attrec);
+
+
+                    }
+
+
+                } // end foreach row
+
+
+            
+                GenerateDBFollowUps();
+                m_dbContext.SaveChanges();
+            
+            }
+
+        }
+
 
 } // end MainWindow
 
