@@ -1843,14 +1843,15 @@ namespace CAOGAttendeeProject
                             }
                             dataGrid.ScrollIntoView(dataGrid.Items[gridrowIdx]);
                             Cursor = Cursors.Arrow;
-                            MessageBox.Show("A record with the same attendee name already exist in the database.\nDo you want to add the attendee to the active attendance list with a suffix at the end to distinguish the two attendees?", "Duplicate record found", MessageBoxButton.OKCancel, MessageBoxImage.Error);
+                            MessageBox.Show("A record with the same attendee name already exist. Please select a unique name.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
+                            //MessageBox.Show("A record with the same attendee name already exist in the database.\nDo you want to add the attendee to the active attendance list with a suffix at the end to distinguish the two attendees?", "Duplicate record found", MessageBoxButton.OKCancel, MessageBoxImage.Error);
                             //if (res == MessageBoxResult.OK)
                             //{
                             //   haschanges = Create_New_Attendee_w_suffix(dr["First Name"].ToString(), dr["Last Name"].ToString(), date);
                             //}
                             //else if (res == MessageBoxResult.Cancel)
                             //{
-                            //    return;
+                            return;
                             //}
                             
                         }
@@ -1983,7 +1984,7 @@ namespace CAOGAttendeeProject
                                 }
                                 dataGrid.ScrollIntoView(dataGrid.Items[gridrowIdx]);
                                 Cursor = Cursors.Arrow;
-                                MessageBox.Show("A record with the same attendee and date already exist. Please select a unique name or date.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
+                                MessageBox.Show("A record with the same attendee already exist. Please select a unique name.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
                              
                                 
                                 
@@ -3079,14 +3080,14 @@ namespace CAOGAttendeeProject
 
                 if (!m_dbContext.ChangeTracker.HasChanges() && isAttendedStatusChecked)
                 {
-                    Cursor = Cursors.Wait;
+                   
 
 
-                    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list, discard checklist attendees and exit anyway?", "Attendees not added", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list, discard checklist attendees and exit anyway?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                     if (res == MessageBoxResult.OK)
                     {
 
-                        Discard_CheckListandSaveActiveList();
+                        //Discard_CheckListandSaveActiveList();
                         e.Cancel = false;
 
                     }
@@ -3097,14 +3098,15 @@ namespace CAOGAttendeeProject
 
 
 
-                    Cursor = Cursors.Arrow;
+                   
 
                 }
                 else if (m_dbContext.ChangeTracker.HasChanges() && isAttendedStatusChecked==false)
                 {
                      
                         MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet, save changes?", "Changes not saved", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
-                        if (res == MessageBoxResult.Yes)
+                    Cursor = Cursors.Wait;
+                    if (res == MessageBoxResult.Yes)
                         {
 
                             Discard_CheckListandSaveActiveList();
@@ -3118,29 +3120,34 @@ namespace CAOGAttendeeProject
                         else if (res == MessageBoxResult.Cancel)
                             e.Cancel = true;
 
-                    
+                    Cursor = Cursors.Arrow;
+
                 }
                 else if (m_dbContext.ChangeTracker.HasChanges() && isAttendedStatusChecked)
                 {
-                    Cursor = Cursors.Wait;
+                  
 
 
-                    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list, discard checklist attendees and save changes to database?", "Save and discard checklist", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                    if (res == MessageBoxResult.OK)
+                    MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet.\nThere are checked attendees in the attendee checklist that has not yet been added to the active attendance list, discard checklist attendees and save changes to database?", "Save and discard checklist", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+                    if (res == MessageBoxResult.Yes)
                     {
 
                         Discard_CheckListandSaveActiveList();
                         e.Cancel = false;
 
                     }
-                    else
+                    else if (res == MessageBoxResult.No)
+                    {
+                        e.Cancel = false;
+                    }
+                    else if (res == MessageBoxResult.Cancel)
                         e.Cancel = true;
 
 
 
 
 
-                    Cursor = Cursors.Arrow;
+                   
 
                 }
 
