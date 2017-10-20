@@ -747,7 +747,7 @@ namespace CAOGAttendeeProject
             }
 
             dataGrid.CanUserDeleteRows = false;
-            dataGrid.CanUserAddRows = true;
+            dataGrid.CanUserAddRows = false;
             dataGrid.ToolTip = null;
             dataGrid.IsReadOnly = false;
         } // end  private void Display_Database_in_Grid()
@@ -2613,6 +2613,7 @@ namespace CAOGAttendeeProject
 
 
             ////first focus the grid
+            dataGrid.CanUserAddRows = true;
             dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
             m_DataSet.Tables["AttendeeListTable"].DefaultView.Sort = String.Empty;
             dataGrid.Focus();
@@ -3083,7 +3084,7 @@ namespace CAOGAttendeeProject
                    
 
 
-                    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list, discard checklist attendees and exit anyway?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list, discard changes and exit anyway?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                     if (res == MessageBoxResult.OK)
                     {
 
@@ -3128,7 +3129,7 @@ namespace CAOGAttendeeProject
                   
 
 
-                    MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet.\nThere are checked attendees in the attendee checklist that has not yet been added to the active attendance list, discard checklist attendees and save changes to database?", "Save and discard checklist", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+                    MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet.\nThere are checked attendees in the attendee checklist that has not yet been added to the active attendance list, discard checklist changes and save changes to database?", "Save and discard checklist", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
                     if (res == MessageBoxResult.Yes)
                     {
 
