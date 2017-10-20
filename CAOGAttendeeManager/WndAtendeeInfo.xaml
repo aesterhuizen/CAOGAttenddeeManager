@@ -5,10 +5,35 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CAOGAttendeeProject"
         mc:Ignorable="d"
-        Title="Attendee Information" Height="500" Width="700" Topmost="True">
+        Title="Attendee Information" 
+        Height="500" Width="700"
+        Loaded="Window_Loaded"
+        >
 
-    <DataGrid Name="GrdAttendeeInfo" ItemsSource="{Binding}"/>
 
+    <DockPanel>
+
+
+        <!--
+       <ToolBar DockPanel.Dock="Top">
+            <Button Name="btnDelete" 
+                    Click="btnDelete_Click"
+                    ToolTip="Delete Attendee Record...">
+                
+                <Image Height="20" Source="Resources\Delete.ico"/>
+            </Button>
+  
+        </ToolBar>
+     -->
+
+        <DataGrid DockPanel.Dock="Bottom" Name="GrdAttendeeInfo" ItemsSource="{Binding}"
+                  CanUserDeleteRows="False"
+                  SelectedCellsChanged="GrdAttendeeInfo_SelectedCellsChanged"
+                  IsReadOnly="True"/>
+
+
+
+    </DockPanel>
 
 
 </Window>

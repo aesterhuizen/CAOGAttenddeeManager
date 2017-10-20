@@ -6,20 +6,26 @@
         xmlns:local="clr-namespace:CAOGAttendeeProject"
         mc:Ignorable="d"
         Title="CAOG Attendee Manager" Height="500" Width="1000"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        Closing="Window_Closing">
 
 
     <DockPanel>
 
         <Ribbon DockPanel.Dock="Top" Title="Attendee Manager" SelectionChanged="Ribbon_SelectionChanged">
             <Ribbon.ApplicationMenu>
-                <RibbonApplicationMenu Label="File">
+                <RibbonApplicationMenu Label="File" SmallImageSource="Resources\FileCabinet.ico">
+                    <RibbonApplicationMenuItem Header="About" Click="RibbonApplicationMenuItem_Click_About"/>
+                    <RibbonSeparator/>
                     <RibbonApplicationMenuItem Header="Exit" Click="RibbonApplicationMenuItem_Click_Exit" ImageSource="Resources\Exit.ico"/>
                 </RibbonApplicationMenu>
             </Ribbon.ApplicationMenu>
             <!-- Home Tab ############################################################################################-->
-            <RibbonTab Name="tabHome" Header="Active Attendence">
+            <RibbonTab Name="tabHome" Header="Active Attendance">
+                
                 <RibbonGroup Header="Search">
+                    
+                    
                     <RibbonTextBox Name="txtSearch" SmallImageSource="Resources\Search.ico" Text=""
                                    TextBoxWidth="160"
                                    TextChanged="txtSearch_TextChanged" 
@@ -48,7 +54,6 @@
 
                         <RibbonTextBox TextBoxWidth="120" SmallImageSource="Resources\CalDate.ico"  
                                        Name="txtDate" Grid.Row="0" Grid.ColumnSpan="2" 
-                                        Keyboard.PreviewKeyDown="txtDate_KeyDown"
                                         IsReadOnly="True"/>
 
                         <!--<Calendar Name="DateCalendar"  SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" 
@@ -75,58 +80,70 @@
                    
                 </RibbonGroup>
                -->
-                <RibbonGroup Header="View">
+                
+                <RibbonGroup Header="Database" >
 
-                  <!--  <RibbonToggleButton x:Name="btnAttendeeList" Width="96" Label="Attendee List" 
-                                      SmallImageSource="Resources\Checklist2.ico" 
-                                      Height="22" 
-                                      Click="btnAttendeeList_Click" 
-                                      ToolTip="Allows the user to  check off or add new church attendees for the day display in the date dropdown box." HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                    -->
-                   <!-- <RibbonToggleButton x:Name="btnFollowUp" Margin="0,0,-10,0" Width="96" Label="Filter Mode" 
-                                      SmallImageSource="Resources\FilterAdd.ico" 
-                                      Height="22" 
-                                      Click="btnFollowUp_Click" 
-                                      ToolTip="Allows the user to filter church attendees by using the filter options" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                    -->
+                    <RibbonButton Name="btnSave"
+                                  Label="Save"
+                                  LargeImageSource="Resources\save.ico"
+                                  Click="Save_Changes" 
+                                  ToolTip="Generate follow-ups and save all attendee changes to the database" />
+                    
+
+                    
+                    
+                        
+                </RibbonGroup>
+                
+                
+                <RibbonGroup Header="Attendance Metrics" Width="250">
                     <RibbonButton x:Name="btnChart" Label="Charts"  
                                       LargeImageSource="Resources\Chart2.ico" 
                                       Click="btnChart_Click" 
-                                      ToolTip="Allows the user to  check add church attendees for the day." HorizontalAlignment="Left" VerticalAlignment="Top" />
-
+                                      ToolTip="View attendee metrics in charts" HorizontalAlignment="Left" VerticalAlignment="Top" />
                     
-                </RibbonGroup>
-                                
-                
-                <RibbonGroup Header="Attendence Metrics" Width="200">
                     <RibbonButton x:Name="btnProspect" Label="Prospect"  
-                                      LargeImageSource="Resources\UserRemove.ico" 
+                                      LargeImageSource="Resources\prospect.ico" 
                                       Click="btnProspect_Click" 
-                                      ToolTip="Mark attendee as prospect attendee"/>
-                    
+                                      ToolTip="Mark attendee(s) as prospect attendee(s)"/>
+
+                   <!-- <RibbonButton Name="btnDelete" Label="Delete"
+                                  LargeImageSource="Resources\Delete.ico"
+                                  Click="DeleteRecord" 
+                                  ToolTip="Delete attendee(s) from active attendance table.\nAttendee(s) will be delete from the database once you save your changes to the database"/>
+                    -->
                     <StackPanel Orientation="Vertical" Margin="10,0,0,0" Width="110" Height="50">
                         <StackPanel Orientation="Horizontal">
                             <Label HorizontalAlignment="Left" Width="60">Active:</Label>
-                            <Label Margin="9,0,0,0" Name="lblAttendenceMetrics" Width="40" HorizontalAlignment="Left"></Label>
+                            <TextBlock Margin="9,0,0,0" Name="lblAttendenceMetrics" 
+                                   Width="40" 
+                                   Text="{Binding ElementName=dataGrid, Path=Items.Count}"
+                                   TextAlignment="Right" VerticalAlignment="Center"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Label Width="60" HorizontalAlignment="Left">Prospect:</Label>
-                            <Label Margin="9,0,0,0" Name="lblProspectsMetrics" Width="40" HorizontalAlignment="Left"/>
+                            <TextBlock Margin="9,0,0,0" Name="lblProspectsMetrics"
+                                       Width="40" 
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Right"/>
                         </StackPanel>
                         
                         
                         
                         
                     </StackPanel>
-                    
+
                     
                 </RibbonGroup>
-                
-                    
-                
+
+              
+
+
             </RibbonTab>
             <!--Attendee List Tab #######################################################################################-->
-            <RibbonTab Name="tabAttendeeList" Header="Attendee Prospect Check List" Margin="2,1,-2,-1">
+            <RibbonTab Name="tabAttendeeList" Header="Attendee Prospect Check List" 
+                       Margin="2,1,-2,-1">
 
                 <RibbonGroup Header="Search">
                     <RibbonTextBox Name="alisttxtSearch" SmallImageSource="Resources\Search.ico" Text=""
@@ -151,7 +168,6 @@
 
                     <RibbonTextBox TextBoxWidth="120" Name="alisttxtDate" 
                                     SmallImageSource="Resources\CalDate.ico"
-                                    Keyboard.PreviewKeyDown="alisttxtDate_KeyDown"
                                     IsReadOnly="True"/>
 
                     <!--<Calendar Name="alistDateCalendar"  
@@ -164,27 +180,28 @@
 
                 </RibbonGroup>
                 <RibbonGroup Header="Table Operations">
-                    
+                   
                 
-                <RibbonToggleButton x:Name="btnNewRec" 
+                <RibbonButton x:Name="btnNewRec" 
                                   Label="New Attendee" 
-                                  SmallImageSource="Resources\NewRec.ico"
+                                  LargeImageSource="Resources\NewRec.ico"
                                   Click="btnNewRec_Click" 
-                                  ToolTip="Insert a new Attendee into the database." HorizontalAlignment="Left"/>
+                                  ToolTip="Add a new Attendee to the attendee prospect checklist."/>
+                    
+                    <RibbonButton x:Name="btnImportRecords" 
+                                  Label="Add Attendee" 
+                                  LargeImageSource="Resources\Add.ico"
+                                  Click="ImportRows_Click" 
+                                  ToolTip="Add all the changes made in this checklist to the active attendence list"/>
 
-                <RibbonButton x:Name="btnSaveUpdate" 
-                                  Label="Save Changes" 
-                                  SmallImageSource="Resources\ApplyChanges.ico"
-                                  Click="btnApplyChanges_Click" 
-                                  ToolTip="Save all change to the database" HorizontalAlignment="Left"/>
-
-                 <!--   <RibbonButton x:Name="btnPrint" 
+                </RibbonGroup>
+                <!--   <RibbonButton x:Name="btnPrint" 
                                   Label="Print Table" 
                                   SmallImageSource="Resources\Print.ico"
                                   Click="btnPrint_Click" 
                                   ToolTip="Print this table" HorizontalAlignment="Left"/>
                     -->
-                </RibbonGroup>
+               
               <!--  <RibbonGroup Header="Save Status">
                     <TextBlock Name="txtSaveStatus" Width="120"/>
                 </RibbonGroup>
@@ -214,27 +231,31 @@
                       MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
                       ClipboardCopyMode="IncludeHeader"
                       SelectionMode="Extended"
-                      ColumnWidth="100" >
+                      ColumnWidth="120" 
+                      ToolTipService.ShowDuration="15000">
+
                 
-                <DataGrid.ColumnHeaderStyle>
+            </DataGrid>
+
+            <!--  <DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader">
                         <EventSetter Event="Click"  Handler="dataGridHeader_Click" />
                     </Style>
                 </DataGrid.ColumnHeaderStyle>
-                
-            </DataGrid>
+                -->
 
-            <!-- <DataGrid Name="dataGrid" CanUserAddRows="True" CanUserDeleteRows="True" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" DataContextChanged="dataGrid_DataContextChanged" SelectionChanged="dataGrid_SelectionChanged">
+
+                <!-- <DataGrid Name="dataGrid" CanUserAddRows="True" CanUserDeleteRows="True" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" DataContextChanged="dataGrid_DataContextChanged" SelectionChanged="dataGrid_SelectionChanged">
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn IsThreeState="False" Binding="{Binding, UpdateSourceTrigger=PropertyChanged}"></DataGridCheckBoxColumn>
                     
                 </DataGrid.Columns>
             -->
-            
+
+             
 
 
 
-            
         </Grid>
 
 
