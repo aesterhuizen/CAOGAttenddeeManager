@@ -80,76 +80,53 @@
                    
                 </RibbonGroup>
                -->
-                <RibbonGroup Header="Table Operations">
+                
+                <RibbonGroup Header="Database" >
 
                     <RibbonButton Name="btnSave"
-                                  Width="100"
-                                  Label="Save Changes"
-                                  SmallImageSource="Resources\save.ico"
+                                  Label="Save"
+                                  LargeImageSource="Resources\save.ico"
                                   Click="Save_Changes" 
-                                  ToolTip="Save all changes made to the database and generate followups." Height="Auto" Margin="0,0,0,-22"/>
-                    <!--<RibbonButton.Template>
-                            <TextBlock TextWrapping="Wrap">Save Changes Generate Follow-Ups</TextBlock>
-                        </RibbonButton.Template>
-                    </RibbonButton>
--->
+                                  ToolTip="Generate follow-ups and save all attendee changes to the database" />
+                    
 
-
-
-
-
-
-
-                    <!--<RibbonButton Name="btnDelete"
-                                  Width="100"
-                                  Label="Delete"
-                                  SmallImageSource="Resources\Delete.ico"
-                                  Click="DeleteRecord" 
-                                  ToolTip="Save all changes to the database"/>
-                    -->
+                    
+                    
                         
                 </RibbonGroup>
                 
-                <RibbonGroup Header="View">
-
-                  <!--  <RibbonToggleButton x:Name="btnAttendeeList" Width="96" Label="Attendee List" 
-                                      SmallImageSource="Resources\Checklist2.ico" 
-                                      Height="22" 
-                                      Click="btnAttendeeList_Click" 
-                                      ToolTip="Allows the user to  check off or add new church attendees for the day display in the date dropdown box." HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                    -->
-                   <!-- <RibbonToggleButton x:Name="btnFollowUp" Margin="0,0,-10,0" Width="96" Label="Filter Mode" 
-                                      SmallImageSource="Resources\FilterAdd.ico" 
-                                      Height="22" 
-                                      Click="btnFollowUp_Click" 
-                                      ToolTip="Allows the user to filter church attendees by using the filter options" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                    -->
+                
+                <RibbonGroup Header="Attendance Metrics" Width="250">
                     <RibbonButton x:Name="btnChart" Label="Charts"  
                                       LargeImageSource="Resources\Chart2.ico" 
                                       Click="btnChart_Click" 
-                                      ToolTip="Allows the user to  check add church attendees for the day." HorizontalAlignment="Left" VerticalAlignment="Top" />
-
+                                      ToolTip="View attendee metrics in charts" HorizontalAlignment="Left" VerticalAlignment="Top" />
                     
-                </RibbonGroup>
-                                
-                
-                <RibbonGroup Header="Attendance Metrics" Width="200">
                     <RibbonButton x:Name="btnProspect" Label="Prospect"  
-                                      LargeImageSource="Resources\UserRemove.ico" 
+                                      LargeImageSource="Resources\prospect.ico" 
                                       Click="btnProspect_Click" 
-                                      ToolTip="Mark attendee as prospect attendee"/>
-                    
+                                      ToolTip="Mark attendee(s) as prospect attendee(s)"/>
+
+                   <!-- <RibbonButton Name="btnDelete" Label="Delete"
+                                  LargeImageSource="Resources\Delete.ico"
+                                  Click="DeleteRecord" 
+                                  ToolTip="Delete attendee(s) from active attendance table.\nAttendee(s) will be delete from the database once you save your changes to the database"/>
+                    -->
                     <StackPanel Orientation="Vertical" Margin="10,0,0,0" Width="110" Height="50">
                         <StackPanel Orientation="Horizontal">
                             <Label HorizontalAlignment="Left" Width="60">Active:</Label>
-                            <Label Margin="9,0,0,0" Name="lblAttendenceMetrics" 
+                            <TextBlock Margin="9,0,0,0" Name="lblAttendenceMetrics" 
                                    Width="40" 
-                                   Content="{Binding ElementName=dataGrid, Path=Items.Count}"
-                                   HorizontalAlignment="Left"/>
+                                   Text="{Binding ElementName=dataGrid, Path=Items.Count}"
+                                   TextAlignment="Right" VerticalAlignment="Center"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Label Width="60" HorizontalAlignment="Left">Prospect:</Label>
-                            <Label Margin="9,0,0,0" Name="lblProspectsMetrics" Width="40" HorizontalAlignment="Left"/>
+                            <TextBlock Margin="9,0,0,0" Name="lblProspectsMetrics"
+                                       Width="40" 
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Right"/>
                         </StackPanel>
                         
                         
