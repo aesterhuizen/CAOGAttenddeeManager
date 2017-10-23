@@ -50,6 +50,7 @@ namespace CAOGAttendeeProject
 
 
             dataGrid.CopyingRowClipboardContent += new EventHandler<DataGridRowClipboardEventArgs>(CopyDataGridtoClipboard);
+            dataGrid.AddingNewItem += new EventHandler<AddingNewItemEventArgs>(New_AttendeeAdded);
 
 
 
@@ -193,6 +194,13 @@ namespace CAOGAttendeeProject
 
         //}
 
+        private void New_AttendeeAdded(object sender, AddingNewItemEventArgs e)
+        {
+
+            Console.WriteLine("\nadded new item to datagrid!\n");
+
+
+        }
         private void ChangedbVal()
         {
 
@@ -1028,7 +1036,7 @@ namespace CAOGAttendeeProject
 
                 querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
                             join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                            where attinfo.Status == "Attended" && attinfo.Date == m_DateSelected
+                            where (attinfo.Status == "Attended" || attinfo.Status == "Responded") && attinfo.Date == m_DateSelected
                             select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, status = attinfo.Status };
 
 
@@ -1039,7 +1047,7 @@ namespace CAOGAttendeeProject
 
                 querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
                             join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                            where attinfo.Status == "Attended"
+                            where (attinfo.Status == "Attended" || attinfo.Status == "Responded")
                             select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, status = attinfo.Status };
 
 
@@ -1547,11 +1555,19 @@ namespace CAOGAttendeeProject
 
                 if (isAttendedStatusChecked)
                 {
-                  MessageBox.Show("There are checked attendees in the attendee list that has not yet been added to the active list, add them to the active list first", "Attendees not added", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                  return ;
-                    
+                MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list, discard checked attendees and save changes?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (res == MessageBoxResult.OK)
+                {
+
+                    Discard_CheckListandSaveActiveList();
+                    InitAttendeeListTable();
 
                 }
+                else
+                    return;
+
+
+            }
                 else
                 {
                     m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
@@ -1737,22 +1753,9 @@ namespace CAOGAttendeeProject
             }
         }
 
-
-        private void ImportRows_Click(object sender, RoutedEventArgs e)
+        
+        private int check_date_bounds()
         {
-
-
-            Cursor = Cursors.Wait;
-
-            bool haschanges = false;
-            string date = m_alistDateSelected.ToString("MM-dd-yyyy");
-            string firstname = "";
-            string lastname = "";
-
-            // add all attendee status and date to database
-
-            dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
-            // first pass through list and make sure everything looks good before making any changes to the db context
             DateTime curdate = DateTime.Now;
             DateTime datelimit;
             List<DateTime> lstsundays = new List<DateTime>();
@@ -1782,139 +1785,46 @@ namespace CAOGAttendeeProject
                 {
                     MessageBox.Show($"Date limit is {datelimit.ToShortDateString()}.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
                     Cursor = Cursors.Arrow;
-                    return;
+                    return 1;
                 }
             }
 
-            m_DataSet.Tables["AttendeeListTable"].DefaultView.RowFilter = "";
-            foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
+            return 0;
+            
+        }
+        private void ImportRows_Click(object sender, RoutedEventArgs e)
+        {
+
+
+            Cursor = Cursors.Wait;
+
+            bool haschanges = false;
+            
+            string date = m_alistDateSelected.ToString("MM-dd-yyyy");
+            string firstname = "";
+            string lastname = "";
+            //DateTime? date_t;
+
+            // add all attendee status and date to database
+
+            dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+            // first pass through list and make sure everything looks good before making any changes to the db context
+
+            if (m_alistdateIsValid)
             {
 
-                
-                if (dr.RowState == DataRowState.Added)
+
+                int ret_error = check_date_bounds();
+                if (ret_error == 1)
+                    return;
+
+                m_DataSet.Tables["AttendeeListTable"].DefaultView.RowFilter = "";
+                foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
                 {
-                    if (dr.ItemArray[2].ToString() == "" || dr.ItemArray[3].ToString() == "" || dr.ItemArray[4].ToString() == "" || dr.ItemArray[5].ToString() != "True")
+
+
+                    if (dr.RowState == DataRowState.Added)
                     {
-                        dataGrid.Focus();
-                        string id = dr["AttendeeId"].ToString();
-                        int gridrowIdx = 0;
-                        foreach (DataRowView gridrow in dataGrid.Items)
-                        {
-
-                            if (gridrow["AttendeeId"].ToString() == id)
-                            {
-                                dataGrid.SelectedIndex = gridrowIdx;
-                                break;
-                            }
-                            gridrowIdx++;
-                        }
-                        dataGrid.ScrollIntoView(dataGrid.Items[gridrowIdx]);
-                        Cursor = Cursors.Arrow;
-                        MessageBox.Show("Please correct errors for attendee, check first name, last name, date and status is valid?", "Attendee Status", MessageBoxButton.OK, MessageBoxImage.Error);
-                      
-                        return;
-
-                    }
-                    else
-                    {
-                        firstname = dr["First Name"].ToString().ToUpper();
-                        lastname = dr["Last Name"].ToString().ToUpper();
-
-                        var queryAtt = (from AttRec in m_dbContext.Attendance_Info.Local
-                                        where AttRec.Attendee.FirstName.ToUpper() == firstname && AttRec.Attendee.LastName.ToUpper() == lastname
-                                        select AttRec).ToList().FirstOrDefault();
-
-
-                        if (queryAtt != null)
-                        {
-
-                            dataGrid.Focus();
-                            string id = dr["AttendeeId"].ToString();
-                            int gridrowIdx = 0;
-                            foreach (DataRowView gridrow in dataGrid.Items)
-                            {
-
-                                if (gridrow["AttendeeId"].ToString() == id)
-                                {
-                                    dataGrid.SelectedIndex = gridrowIdx;
-                                    break;
-                                }
-                                gridrowIdx++;
-                            }
-                            dataGrid.ScrollIntoView(dataGrid.Items[gridrowIdx]);
-                            Cursor = Cursors.Arrow;
-                            MessageBox.Show("A record with the same attendee name already exist. Please select a unique name.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
-                            //MessageBox.Show("A record with the same attendee name already exist in the database.\nDo you want to add the attendee to the active attendance list with a suffix at the end to distinguish the two attendees?", "Duplicate record found", MessageBoxButton.OKCancel, MessageBoxImage.Error);
-                            //if (res == MessageBoxResult.OK)
-                            //{
-                            //   haschanges = Create_New_Attendee_w_suffix(dr["First Name"].ToString(), dr["Last Name"].ToString(), date);
-                            //}
-                            //else if (res == MessageBoxResult.Cancel)
-                            //{
-                            return;
-                            //}
-                            
-                        }
-                        else
-                        {
-                            // Add a new Attendee to context
-                            Attendee newAttendeeRec = new Attendee();
-                            Attendance_Info newAttInfoRec = new Attendance_Info();
-
-
-
-                            newAttendeeRec.AttendeeId = m_NewAttendeeId;
-                            newAttendeeRec.FirstName = dr["First Name"].ToString().Trim();
-                            newAttendeeRec.LastName = dr["Last Name"].ToString().Trim();
-
-                            string flname = newAttendeeRec.FirstName + " " + newAttendeeRec.LastName;
-
-
-
-                            newAttInfoRec.AttendeeId = m_NewAttendeeId;
-                            newAttInfoRec.Date = m_alistDateSelected;
-                            //newAttInfoRec.Last_Attended = m_alistDateSelected;
-
-                            newAttInfoRec.Status = "Attended";
-
-                            newAttendeeRec.AttendanceList.Add(newAttInfoRec);
-
-
-
-
-                            m_NewAttendeeId += 1;
-
-
-                            // make new row in Default Table
-                            //build row to import
-
-                            DataRow newdr = m_DataSet.Tables["DefaultTable"].NewRow();
-                            newdr.ItemArray = new object[] {   newAttendeeRec.AttendeeId,
-                                                                   flname,
-                                                                    dr["Last Name"],
-                                                                    dr["First Name"],
-                                                                    date,
-                                                                    newAttInfoRec.Status
-                                                                };
-
-
-                            m_DataSet.Tables["DefaultTable"].Rows.Add(newdr);
-
-                            m_dbContext.Attendees.Add(newAttendeeRec);
-                            m_dbContext.Attendance_Info.Add(newAttInfoRec);
-
-
-                            haschanges = true;
-
-                        }
-                    }
-
-                }
-                else if (dr.RowState == DataRowState.Modified)
-                {
-                    if (dr.ItemArray[5].ToString() == "True")
-                    {
-
                         if (dr.ItemArray[2].ToString() == "" || dr.ItemArray[3].ToString() == "" || dr.ItemArray[4].ToString() == "" || dr.ItemArray[5].ToString() != "True")
                         {
                             dataGrid.Focus();
@@ -1933,36 +1843,20 @@ namespace CAOGAttendeeProject
                             dataGrid.ScrollIntoView(dataGrid.Items[gridrowIdx]);
                             Cursor = Cursors.Arrow;
                             MessageBox.Show("Please correct errors for attendee, check first name, last name, date and status is valid?", "Attendee Status", MessageBoxButton.OK, MessageBoxImage.Error);
-                          
-                            return;
-                        }
-                        if (!m_alistdateIsValid)
-                        {
-                            dataGrid.Focus();
-                            string id = dr["AttendeeId"].ToString();
-                            int gridrowIdx = 0;
-                            foreach (DataRowView gridrow in dataGrid.Items)
-                            {
 
-                                if (gridrow["AttendeeId"].ToString() == id)
-                                {
-                                    dataGrid.SelectedIndex = gridrowIdx;
-                                    break;
-                                }
-                                gridrowIdx++;
-                            }
-                            dataGrid.ScrollIntoView(dataGrid.Items[gridrowIdx]);
-                            Cursor = Cursors.Arrow;
-                            MessageBox.Show("Attendee date is not valid.", "Date invalid", MessageBoxButton.OK, MessageBoxImage.Error);
-                          
                             return;
+
                         }
                         else
                         {
                             firstname = dr["First Name"].ToString().ToUpper();
                             lastname = dr["Last Name"].ToString().ToUpper();
+             
+
+
                             var queryAtt = (from AttRec in m_dbContext.Attendance_Info.Local
                                             where AttRec.Attendee.FirstName.ToUpper() == firstname && AttRec.Attendee.LastName.ToUpper() == lastname
+                                            && AttRec.Date == m_alistDateSelected
                                             select AttRec).ToList().FirstOrDefault();
 
 
@@ -1984,55 +1878,199 @@ namespace CAOGAttendeeProject
                                 }
                                 dataGrid.ScrollIntoView(dataGrid.Items[gridrowIdx]);
                                 Cursor = Cursors.Arrow;
-                                MessageBox.Show("A record with the same attendee already exist. Please select a unique name.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
-                             
-                                
-                                
-                               
+                                MessageBox.Show("A record with the same attendee name and date already exist. Please select a unique name or date.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
+
+                                return;
+
+
+                            }
+                            else
+                            {
+                                // Add a new Attendee to context
+                                Attendee newAttendeeRec = new Attendee();
+                                Attendance_Info newAttInfoRec = new Attendance_Info();
+
+
+
+                                newAttendeeRec.AttendeeId = m_NewAttendeeId;
+                                newAttendeeRec.FirstName = dr["First Name"].ToString().Trim();
+                                newAttendeeRec.LastName = dr["Last Name"].ToString().Trim();
+
+                                string flname = newAttendeeRec.FirstName + " " + newAttendeeRec.LastName;
+
+
+
+                                newAttInfoRec.AttendeeId = m_NewAttendeeId;
+
+                                newAttInfoRec.Date = m_alistDateSelected;
+
+                                newAttInfoRec.Status = "Attended";
+
+
+
+                                newAttendeeRec.AttendanceList.Add(newAttInfoRec);
+
+
+
+
+                                m_NewAttendeeId += 1;
+
+
+                                // make new row in Default Table
+                                //build row to import
+
+                                DataRow newdr = m_DataSet.Tables["DefaultTable"].NewRow();
+                                newdr.ItemArray = new object[] {   newAttendeeRec.AttendeeId,
+                                                                   flname,
+                                                                    dr["Last Name"],
+                                                                    dr["First Name"],
+                                                                    date,
+                                                                    newAttInfoRec.Status
+                                                                };
+
+
+                                m_DataSet.Tables["DefaultTable"].Rows.Add(newdr);
+
+                                m_dbContext.Attendees.Add(newAttendeeRec);
+                                m_dbContext.Attendance_Info.Add(newAttInfoRec);
+
+
+                                haschanges = true;
+
+                            }
+                        }
+
+                    }
+                    else if (dr.RowState == DataRowState.Modified)
+                    {
+                        if (dr.ItemArray[5].ToString() == "True")
+                        {
+
+                            if (dr.ItemArray[2].ToString() == "" || dr.ItemArray[3].ToString() == "" || dr.ItemArray[4].ToString() == "" || dr.ItemArray[5].ToString() != "True")
+                            {
+                                dataGrid.Focus();
+                                string id = dr["AttendeeId"].ToString();
+                                int gridrowIdx = 0;
+                                foreach (DataRowView gridrow in dataGrid.Items)
+                                {
+
+                                    if (gridrow["AttendeeId"].ToString() == id)
+                                    {
+                                        dataGrid.SelectedIndex = gridrowIdx;
+                                        break;
+                                    }
+                                    gridrowIdx++;
+                                }
+                                dataGrid.ScrollIntoView(dataGrid.Items[gridrowIdx]);
+                                Cursor = Cursors.Arrow;
+                                MessageBox.Show("Please correct errors for attendee, check first name, last name, date and status is valid?", "Attendee Status", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                                return;
+                            }
+                            if (!m_alistdateIsValid)
+                            {
+                                dataGrid.Focus();
+                                string id = dr["AttendeeId"].ToString();
+                                int gridrowIdx = 0;
+                                foreach (DataRowView gridrow in dataGrid.Items)
+                                {
+
+                                    if (gridrow["AttendeeId"].ToString() == id)
+                                    {
+                                        dataGrid.SelectedIndex = gridrowIdx;
+                                        break;
+                                    }
+                                    gridrowIdx++;
+                                }
+                                dataGrid.ScrollIntoView(dataGrid.Items[gridrowIdx]);
+                                Cursor = Cursors.Arrow;
+                                MessageBox.Show("Attendee date attended is not valid.", "Date Invalid", MessageBoxButton.OK, MessageBoxImage.Error);
+
                                 return;
                             }
                             else
-                            { // add attinfo rec
-                                if (dr.ItemArray[5].ToString() == "True")
+                            {
+                                firstname = dr["First Name"].ToString().ToUpper();
+                                lastname = dr["Last Name"].ToString().ToUpper();
+                                //string dater = dr["Date"].ToString();
+
+                                //date_t = date_error_chk(dater);
+                                //if (date_t == null)
+                                //{
+                                //    MessageBox.Show("Date is the wrong format");
+                                //    return;
+                                //}
+
+                                var queryAtt = (from AttRec in m_dbContext.Attendance_Info.Local
+                                                where AttRec.Attendee.FirstName.ToUpper() == firstname && AttRec.Attendee.LastName.ToUpper() == lastname
+                                                && AttRec.Date == m_DateSelected
+                                                select AttRec).ToList().FirstOrDefault();
+
+
+                                if (queryAtt != null)
                                 {
-                                    int attid = int.Parse(dr["AttendeeId"].ToString());
-                                    Attendance_Info newRecord = new Attendance_Info { };
 
-                                    var queryAttendee = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == attid);
-
-                                    newRecord.AttendeeId = attid;
-                                    newRecord.Date = m_alistDateSelected;
-                                    //  newRecord.Last_Attended = m_alistDateSelected;
-
-                                    var lastAttInfoRec = (from AttInfo in m_dbContext.Attendance_Info.Local
-                                                          where AttInfo.AttendeeId == attid
-                                                          orderby AttInfo.Date ascending
-                                                          select AttInfo).ToArray().LastOrDefault();
-
-
-                                    string flname = queryAttendee.FirstName + " " + queryAttendee.LastName;
-
-
-                                    if (lastAttInfoRec != null && queryAttendee != null)
+                                    dataGrid.Focus();
+                                    string id = dr["AttendeeId"].ToString();
+                                    int gridrowIdx = 0;
+                                    foreach (DataRowView gridrow in dataGrid.Items)
                                     {
-                                        // If the last record is a follow-up then this record is a responded Status
-                                        if (lastAttInfoRec.Status == "Follow-Up")
-                                            newRecord.Status = "Responded";
+
+                                        if (gridrow["AttendeeId"].ToString() == id)
+                                        {
+                                            dataGrid.SelectedIndex = gridrowIdx;
+                                            break;
+                                        }
+                                        gridrowIdx++;
+                                    }
+                                    dataGrid.ScrollIntoView(dataGrid.Items[gridrowIdx]);
+                                    Cursor = Cursors.Arrow;
+                                    MessageBox.Show("A record with the same attendee name and date already exist. Please select a unique name or date.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
+
+                                    return;
+                                }
+                                else
+                                { // add attinfo rec
+                                    if (dr.ItemArray[5].ToString() == "True")
+                                    {
+                                        int attid = int.Parse(dr["AttendeeId"].ToString());
+                                        Attendance_Info newRecord = new Attendance_Info { };
+
+                                        var queryAttendee = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == attid);
+
+                                        newRecord.AttendeeId = attid;
+                                        newRecord.Date = m_alistDateSelected;
+                                        //  newRecord.Last_Attended = m_alistDateSelected;
+
+                                        var lastAttInfoRec = (from AttInfo in m_dbContext.Attendance_Info.Local
+                                                              where AttInfo.AttendeeId == attid
+                                                              orderby AttInfo.Date ascending
+                                                              select AttInfo).ToArray().LastOrDefault();
+
+
+                                        string flname = queryAttendee.FirstName + " " + queryAttendee.LastName;
+
+
+                                        if (lastAttInfoRec != null && queryAttendee != null)
+                                        {
+                                            // If the last record is a follow-up then this record is a responded Status
+                                            if (lastAttInfoRec.Status == "Follow-Up")
+                                                newRecord.Status = "Responded";
+                                            else
+                                                newRecord.Status = "Attended";
+
+
+                                        }
                                         else
+                                        {
                                             newRecord.Status = "Attended";
+                                        }
 
-
-                                    }
-                                    else
-                                    {
-                                        newRecord.Status = "Attended";
-                                    }
-
-                                    if (queryAttendee.Prospect == 1)
-                                    {
-                                        queryAttendee.Prospect = 0;
-                                        DataRow newdr = m_DataSet.Tables["DefaultTable"].NewRow();
-                                        newdr.ItemArray = new object[] {queryAttendee.AttendeeId,
+                                        if (queryAttendee.Prospect == 1)
+                                        {
+                                            queryAttendee.Prospect = 0;
+                                            DataRow newdr = m_DataSet.Tables["DefaultTable"].NewRow();
+                                            newdr.ItemArray = new object[] {queryAttendee.AttendeeId,
                                                                         flname,
                                                                         dr["Last Name"],
                                                                         dr["First Name"],
@@ -2040,34 +2078,39 @@ namespace CAOGAttendeeProject
                                                                         newRecord.Status};
 
 
-                                        m_DataSet.Tables["DefaultTable"].Rows.Add(newdr);
+                                            m_DataSet.Tables["DefaultTable"].Rows.Add(newdr);
+
+
+                                        }
+                                        else
+                                        {
+                                            UpdateDefaultTableIdAndStatus(queryAttendee.AttendeeId.ToString(), newRecord.Date, newRecord.Status);
+                                        }
+
+
+
+
+                                        m_dbContext.Attendance_Info.Add(newRecord);
+                                        haschanges = true;
 
 
                                     }
-                                    else
-                                    {
-                                        UpdateDefaultTableIdAndStatus(queryAttendee.AttendeeId.ToString(), newRecord.Date, newRecord.Status);
-                                    }
-
-
-
-
-                                    m_dbContext.Attendance_Info.Add(newRecord);
-                                    haschanges = true;
-
-
                                 }
+
                             }
-
-                        }
-                    } //end modified
+                        } //end modified
 
 
 
-                }
-                i++;
-            } // end foreach
+                    }
+                   
+                } // end foreach
+            }
+            else
+            {
+                MessageBox.Show("Please select attendee date attended from the clendar","Date Invalid",MessageBoxButton.OK,MessageBoxImage.Stop);
 
+            }
             // end if m_datValid
 
 
@@ -2090,10 +2133,7 @@ namespace CAOGAttendeeProject
                 MessageBox.Show("Attendees succesfully added to active attendence list.", "Attendee Added", MessageBoxButton.OK, MessageBoxImage.None);
 
             }
-            else
-            {
-                MessageBox.Show("No changes to prospect list, no attendees where added to active attendence list.", "No Changes", MessageBoxButton.OK, MessageBoxImage.None);
-            }
+           
 
 
 
@@ -2389,7 +2429,7 @@ namespace CAOGAttendeeProject
             {
                 querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
                             join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                            where attinfo.Status == "Attended"
+                            where attinfo.Status == "Attended" || attinfo.Status == "Responded"
                             select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, status = attinfo.Status };
 
 
@@ -2627,7 +2667,7 @@ namespace CAOGAttendeeProject
             //dataGrid.ScrollIntoView(itemToSelect);
             ////begin the edit
             //dataGrid.BeginEdit();
-            //dataGrid.SelectedItem = cellInfo;
+            dataGrid.SelectedItem = dataGrid.Items.Count-1;
             dataGrid.ScrollIntoView(dataGrid.Items[dataGrid.Items.Count - 1]); //scroll to last
 
             //dataGrid.UpdateLayout();
@@ -2648,7 +2688,7 @@ namespace CAOGAttendeeProject
                 DateCalendar.IsEnabled = true;
 
 
-
+                
 
                 if (m_alistdateIsValid)
                 {
@@ -3219,6 +3259,8 @@ namespace CAOGAttendeeProject
             
                 GenerateDBFollowUps();
                 m_dbContext.SaveChanges();
+
+                
             
             }
 
