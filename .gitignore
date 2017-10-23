@@ -1,4 +1,9 @@
 /CAOGAttendeeManager/bin
 /CAOGAttendeeManager/obj
+<<<<<<< HEAD
 *.suo
+=======
+/CAOGAttendeeManager/.vs
+
+>>>>>>> Bugfixes&Updates
 
