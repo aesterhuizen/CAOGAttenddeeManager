@@ -29,7 +29,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\v2.0\</OutputPath>
+    <OutputPath>bin\Release\v2.2\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -225,6 +225,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\FileCabinet.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Generate-followup.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
