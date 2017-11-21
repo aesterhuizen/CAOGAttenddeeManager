@@ -102,8 +102,8 @@ namespace CAOGAttendeeProject
                 //  ChangedbVal();
 
 
-                //  correctDBerrors();
 
+                //correctDBerrors();
                 if (m_dbContext.Attendees.Count() == 0)
                 {
                     CreateDatabase_FromXLSX();
@@ -113,7 +113,7 @@ namespace CAOGAttendeeProject
                 else
                 {
                     InitDataSet();
-
+                    
                     Display_DefaultTable_in_Grid();
                 }
 
@@ -219,37 +219,66 @@ namespace CAOGAttendeeProject
 
         private void correctDBerrors()
         {
-            DateTime correcteddate = new DateTime(2017, 9, 3);
+            DateTime latest_date = new DateTime(2017, 11, 05);
+
+            var daterec = from d in m_dbContext.Attendance_Info
+                          where d.Date == latest_date && d.Status == "Follow-Up" && 
+                          (d.Attendee.LastName == "Kuchera"
+                          && d.Attendee.FirstName == "Ashley")
+                          select d;
+
+            foreach (var rec in daterec)
+            {
+                m_dbContext.Attendance_Info.Remove(rec);
+
+            }
+
 
             
-            var queryAttendees = from AttendeeRec in m_dbContext.Attendance_Info
-                                 where AttendeeRec.Status == "Follow-Up"
-                                 select AttendeeRec;
+
+            m_dbContext.SaveChanges();
+
+            //string header = String.Format("{0,-30}{1,-30}{2,10}{3,12}\n",
+            //                            "LastName","FirstName","Date","Status");
+            //Console.WriteLine(header);
+            //foreach (var rec in daterec)
+            //{
+            //    string outputformat = String.Format("{0:-30} {1:30} {2:10} {3:-12}\n",
+            //                                        rec.Attendee.LastName, rec.Attendee.FirstName, rec.Date.ToString("MM-dd-yyyy"), rec.Status,rec.Attendee.Prospect);
+            //    Console.WriteLine(outputformat);
+
+            //    m_dbContext.Attendance_Info.Remove(rec);
+            //}
+
+            //m_dbContext.SaveChanges();
+            //var queryAttendees = from AttendeeRec in m_dbContext.Attendance_Info
+            //                     where AttendeeRec.Status == "Follow-Up"
+            //                     select AttendeeRec;
 
             //var lstInfoRecs = from InfoRec in m_dbContextContext.Attendance_Info
             //                  where InfoRec.Date == date && InfoRec.Status == "Responded"
             //                  select InfoRec;
 
 
-            foreach (var attrec in queryAttendees)
-            {
-                //var lstInfoRecs = (from InfoRec in attrec.AttendanceList
-                //                   where InfoRec.Status == "Follow-Up"
-                //                   select InfoRec).ToArray().LastOrDefault();
+            //foreach (var attInforec in queryAttendees)
+            //{
+            //    //var lstInfoRecs = (from InfoRec in attrec.AttendanceList
+            //    //                   where InfoRec.Status == "Follow-Up"
+            //    //                   select InfoRec).ToArray().LastOrDefault();
 
 
 
-                string[] arydate = attrec.Date.ToString().Split();
-                string date = arydate[0];
+            //    string[] arydate = attInforec.Date.ToString().Split();
+            //    string date = arydate[0];
                 
 
-                if (date == "9/17/2017")
-                {
+            //    if (date == "11/05/2017")
+            //    {
+            //        Console.WriteLine("Found date 11-05-2017");
+            //        //attInforec.Date = correcteddate;
 
-                    attrec.Date = correcteddate;
-
-                }
-            }
+            //    }
+            //}
 
             ////int count = lstInfoRecs.Count();
 
@@ -287,7 +316,7 @@ namespace CAOGAttendeeProject
 
 
            // m_dbContext.SaveChanges();
-            Console.WriteLine("Done!");
+           
 
         }
 
@@ -303,47 +332,55 @@ namespace CAOGAttendeeProject
             //3) if attendee has 3 follow-ups in a row, flag attendee and don't consider him for another follow-up entry. 
 
 
-
+           // DateTime curdate = DateTime.Now;
             // get last date that was just entered
-            int addEntity = 0;    
+           // int addEntity = 0;
             List<DateTime> lstsundays = new List<DateTime>();
 
             TimeSpan timespanSinceDate = new TimeSpan();
 
             //get all entries changed by the user
-            var entries_changed = m_dbContext.ChangeTracker.Entries();
+            //var entries_changed = m_dbContext.ChangeTracker.Entries();
 
-            foreach (var entry in entries_changed)
+            //foreach (var entry in entries_changed)
+            //{
+            //    if (entry.State == EntityState.Added)
+            //    {
+            //        addEntity = 1;
+            //        break;
+            //    }
+
+
+            //}
+
+            //if (addEntity == 1)
+            //{
+           // DateTime latest_date = new DateTime(2017, 11, 05);
+
+            var latest_date_attened = ( from d in m_dbContext.Attendance_Info.Local
+                                        where (d.Status == "Attended" || d.Status == "Responded")
+                                        orderby d.Date ascending
+                                        select d).ToArray().LastOrDefault();
+
+
+
+            var queryAttendees = from AttendeeRec in m_dbContext.Attendees.Local
+                                 select AttendeeRec;
+
+
+            foreach (var AttendeeRec in queryAttendees)
             {
-                if (entry.State == EntityState.Added)
+
+
+
+
+                var lstDateRecs = (from DateRec in AttendeeRec.AttendanceList
+                                   orderby DateRec.Date ascending
+                                   select DateRec).ToArray().LastOrDefault();
+
+                if (lstDateRecs != null)
                 {
-                    addEntity = 1;
-                    break;
-                }
-                    
-                    
-            }
-
-            if (addEntity == 1)
-            {
-                var queryAttendees = from AttendeeRec in m_dbContext.Attendees.Local
-                                     select AttendeeRec;
-
-
-                foreach (var AttendeeRec in queryAttendees)
-                {
-
-
-
-
-                    var lstDateRecs = (from DateRec in AttendeeRec.AttendanceList
-                                       orderby DateRec.Date ascending
-                                       select DateRec).ToArray().LastOrDefault();
-
-                    if (lstDateRecs != null)
-                    {
-                        timespanSinceDate = m_MostRecentSundayAdded - lstDateRecs.Date;
-
+                    timespanSinceDate = latest_date_attened.Date - lstDateRecs.Date;
 
 
                         if (timespanSinceDate.Days <= 21)
@@ -361,24 +398,24 @@ namespace CAOGAttendeeProject
                             //search for sunday
 
 
-                            //for (DateTime date = lstDateRecs.Date; date <= m_MostRecentSundayAdded; date = date.AddDays(1))
-                            //{
-                            //    if (date.DayOfWeek == DayOfWeek.Sunday)
-                            //    {
-                            //        lstsundays.Add(date);
-                            //    }
-                            //}
+                            for (DateTime date = lstDateRecs.Date; date <= latest_date_attened.Date; date = date.AddDays(1))
+                            {
+                                if (date.DayOfWeek == DayOfWeek.Sunday)
+                                {
+                                    lstsundays.Add(date);
+                                }
+                            }
 
-                            //DateTime lastSunday = lstsundays.LastOrDefault();
+                            DateTime lastSunday = lstsundays.LastOrDefault();
 
-                            //if (lastSunday != null)
-                            //{
-                            Attendance_Info newfollowUpRecord = new Attendance_Info { };
-                            newfollowUpRecord.AttendeeId = AttendeeRec.AttendeeId;
-                            newfollowUpRecord.Date = m_MostRecentSundayAdded;//lastSunday.Date;
-                            newfollowUpRecord.Status = "Follow-Up";
-                            m_dbContext.Attendance_Info.Add(newfollowUpRecord);
-                            //}
+                            if (lastSunday != null)
+                            {
+                                Attendance_Info newfollowUpRecord = new Attendance_Info { };
+                                newfollowUpRecord.AttendeeId = AttendeeRec.AttendeeId;
+                                newfollowUpRecord.Date = lastSunday.Date;
+                                newfollowUpRecord.Status = "Follow-Up";
+                                m_dbContext.Attendance_Info.Add(newfollowUpRecord);
+                            }
 
 
 
@@ -389,7 +426,9 @@ namespace CAOGAttendeeProject
 
                 } //end foreach
 
+           
 
+           
 
 
             }
@@ -397,7 +436,7 @@ namespace CAOGAttendeeProject
 
 
 
-        }
+    
 
         private void CreateDatabase_FromXLSX()
         {
@@ -814,7 +853,9 @@ namespace CAOGAttendeeProject
         private void InitDataSet()
         {
 
-
+            m_dbContext.Attendees.Load();
+            m_dbContext.Attendance_Info.Load();
+            
             //--------------------- Make DEFAULT TABLE---------------------------------------------------------------------------
 
             DataTable Default_Data_Table = new DataTable("DefaultTable");
@@ -832,8 +873,8 @@ namespace CAOGAttendeeProject
             try
             {
 
-                var queryAttendees = (from AttendeeRec in m_dbContext.Attendees
-                                      select AttendeeRec).ToArray();
+                var queryAttendees = from AttendeeRec in m_dbContext.Attendees.Local
+                                      select AttendeeRec;
 
 
                 Default_Data_Table.Columns.Add(new DataColumn("AttendeeId"));
@@ -1851,7 +1892,7 @@ namespace CAOGAttendeeProject
 
 
                             }
-                            else
+                            else //add new attendee to Default Table
                             {
                                 // Add a new Attendee to context
                                 Attendee newAttendeeRec = new Attendee();
@@ -1997,7 +2038,7 @@ namespace CAOGAttendeeProject
                                     return;
                                 }
                                 else
-                                { // add attinfo rec
+                                { // add attinfo rec modified record
                                     if (dr.ItemArray[5].ToString() == "True")
                                     {
                                         int attid = int.Parse(dr["AttendeeId"].ToString());
@@ -2047,7 +2088,7 @@ namespace CAOGAttendeeProject
 
 
                                             m_DataSet.Tables["DefaultTable"].Rows.Add(newdr);
-
+                                           
 
                                         }
                                         else
@@ -3183,12 +3224,14 @@ namespace CAOGAttendeeProject
 
                         int AttendeeId = int.Parse(dr["AttendeeId"].ToString());
 
-                        var Attendee = m_dbContext.Attendees.Local.Single(att => att.AttendeeId == AttendeeId);
+                        var Attendee = m_dbContext.Attendees.Local.SingleOrDefault(att => att.AttendeeId == AttendeeId);
 
                         if (Attendee != null)
                         {
                             Attendee.LastName = dr["Last Name"].ToString().Trim();
                             Attendee.FirstName = dr["First Name"].ToString().Trim();
+                            
+
                         }
 
 
@@ -3230,7 +3273,7 @@ namespace CAOGAttendeeProject
             if (m_dbContext.ChangeTracker.HasChanges())
             {
                 Cursor = Cursors.Wait;
-                GenerateDBFollowUps();
+                // save contents to database
                 m_dbContext.SaveChanges();
                 m_DataSet.Tables["DefaultTable"].AcceptChanges();
 
@@ -3285,8 +3328,19 @@ namespace CAOGAttendeeProject
 
         }
 
-
-   }
+        private void btnGenerateFollowUps_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult res = MessageBox.Show("Make sure all the most recent attendees are added before generating follow-ups, Generate follow-ups anyway?","Generate follow-ups",MessageBoxButton.OKCancel,MessageBoxImage.Exclamation);
+            if (res == MessageBoxResult.OK)
+            {
+                Cursor = Cursors.Wait;
+                GenerateDBFollowUps();
+                Cursor = Cursors.Arrow;
+                MessageBox.Show("Successfully generated follow-ups!");
+            }
+            
+        }
+    }
 
 
 } // end MainWindow
