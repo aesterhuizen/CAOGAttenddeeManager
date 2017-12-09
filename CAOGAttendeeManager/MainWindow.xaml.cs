@@ -2130,6 +2130,7 @@ namespace CAOGAttendeeProject
                 MessageBox.Show("Please select attendee date attended from the calendar","Date Invalid",MessageBoxButton.OK,MessageBoxImage.Stop);
 
             }
+            
             // end if m_datValid
 
 
@@ -2152,7 +2153,10 @@ namespace CAOGAttendeeProject
                 MessageBox.Show("Attendees succesfully added to active attendence list.", "Attendee Added", MessageBoxButton.OK, MessageBoxImage.None);
 
             }
-           
+            else
+            {
+                MessageBox.Show("There are no attendees to add", "No changes", MessageBoxButton.OK, MessageBoxImage.Stop);
+            }
 
 
 
