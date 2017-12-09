@@ -96,7 +96,7 @@
                 <RibbonGroup Header="Attendance Metrics" Width="300">
 
                     <RibbonButton Name="btnGenerateFollowUps"
-                                  Label="Generate Follow-Up"
+                                  Label="Generate Follow-Up..."
                                   LargeImageSource="Resources\Generate-followup.ico"
                                   Click="btnGenerateFollowUps_Click" 
                                   ToolTip="Generate a follow-up record for each attendee that missed 3 Sunday services in a row." />
