@@ -103,7 +103,7 @@ namespace CAOGAttendeeProject
 
 
 
-                //correctDBerrors();
+               // correctDBerrors();
                 if (m_dbContext.Attendees.Count() == 0)
                 {
                     CreateDatabase_FromXLSX();
@@ -219,24 +219,31 @@ namespace CAOGAttendeeProject
 
         private void correctDBerrors()
         {
-            DateTime latest_date = new DateTime(2017, 11, 05);
+            DateTime latest_date = new DateTime(2017, 11, 26);
 
             var daterec = from d in m_dbContext.Attendance_Info
-                          where d.Date == latest_date && d.Status == "Follow-Up" && 
-                          (d.Attendee.LastName == "Kuchera"
-                          && d.Attendee.FirstName == "Ashley")
+                          where d.Status == "Follow-Up" 
                           select d;
 
             foreach (var rec in daterec)
             {
-                m_dbContext.Attendance_Info.Remove(rec);
+                string[] arydate = rec.Date.ToString().Split();
+                string date = arydate[0];
+
+
+                if (date == "11/26/2017")
+                {
+                    Console.WriteLine("Found date 11-05-2017");
+                    //attInforec.Date = correcteddate;
+
+                }
 
             }
 
 
-            
 
-            m_dbContext.SaveChanges();
+
+            // m_dbContext.SaveChanges();
 
             //string header = String.Format("{0,-30}{1,-30}{2,10}{3,12}\n",
             //                            "LastName","FirstName","Date","Status");
@@ -270,7 +277,7 @@ namespace CAOGAttendeeProject
 
             //    string[] arydate = attInforec.Date.ToString().Split();
             //    string date = arydate[0];
-                
+
 
             //    if (date == "11/05/2017")
             //    {
@@ -315,8 +322,8 @@ namespace CAOGAttendeeProject
 
 
 
-           // m_dbContext.SaveChanges();
-           
+            // m_dbContext.SaveChanges();
+
 
         }
 
@@ -382,8 +389,11 @@ namespace CAOGAttendeeProject
                 {
                     timespanSinceDate = latest_date_attened.Date - lstDateRecs.Date;
 
+                    //if (AttendeeRec.FirstName == "Shirley" && AttendeeRec.LastName == "Adams")
+                    //{
 
-                        if (timespanSinceDate.Days <= 21)
+
+                        if (timespanSinceDate.Days < 21)
                         {
 
                             // do nothing
@@ -420,7 +430,7 @@ namespace CAOGAttendeeProject
 
 
                         }
-
+                   // }
                     } //end if
 
 
