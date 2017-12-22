@@ -1695,7 +1695,7 @@ namespace CAOGAttendeeProject
 
                         m_dbContext.Attendance_Info.Remove(queryAttendeeInfo);
                         gridrowIdx = 0;
-                        // get the DataTable index
+                        // get the Datagrid index
                         foreach (DataRowView gridrow in dataGrid.Items)
                         {
 
@@ -1718,7 +1718,7 @@ namespace CAOGAttendeeProject
                     ShowFilteredAttendeeTable();
                  
                     Cursor = Cursors.Arrow;
-                    MessageBox.Show("Attendee record(s) removed successfully. Changes has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
+                    MessageBox.Show("Attendee record removed successfully.\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
 
 
                 }
@@ -1747,7 +1747,7 @@ namespace CAOGAttendeeProject
                     Cursor = Cursors.Arrow;
 
 
-                    MessageBox.Show("Attendee record(s) removed successfully. Changes has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
+                    MessageBox.Show("Attendee record removed successfully.\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
                     RedrawDefaultTable();
                 }
                     
