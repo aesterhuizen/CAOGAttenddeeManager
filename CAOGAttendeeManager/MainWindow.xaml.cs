@@ -103,7 +103,7 @@ namespace CAOGAttendeeProject
 
 
 
-               // correctDBerrors();
+                // correctDBerrors();
                 if (m_dbContext.Attendees.Count() == 0)
                 {
                     CreateDatabase_FromXLSX();
@@ -113,11 +113,11 @@ namespace CAOGAttendeeProject
                 else
                 {
                     InitDataSet();
-                    
+
                     Display_DefaultTable_in_Grid();
                 }
 
-              //  SetTimer();
+                //  SetTimer();
 
 
             }
@@ -221,7 +221,7 @@ namespace CAOGAttendeeProject
             DateTime latest_date = new DateTime(2017, 11, 26);
 
             var daterec = from d in m_dbContext.Attendance_Info
-                          where d.Status == "Follow-Up" 
+                          where d.Status == "Follow-Up"
                           select d;
 
             foreach (var rec in daterec)
@@ -338,19 +338,19 @@ namespace CAOGAttendeeProject
             //3) if attendee has 3 follow-ups in a row, flag attendee and don't consider him for another follow-up entry. 
 
 
-           // DateTime curdate = DateTime.Now;
+            // DateTime curdate = DateTime.Now;
             // get last date that was just entered
-           // int addEntity = 0;
+            // int addEntity = 0;
             List<DateTime> lstsundays = new List<DateTime>();
 
             TimeSpan timespanSinceDate = new TimeSpan();
 
             Cursor = Cursors.Wait;
 
-            var latest_date_attened = ( from d in m_dbContext.Attendance_Info.Local
-                                        where (d.Status == "Attended" || d.Status == "Responded")
-                                        orderby d.Date ascending
-                                        select d).ToArray().LastOrDefault();
+            var latest_date_attened = (from d in m_dbContext.Attendance_Info.Local
+                                       where (d.Status == "Attended" || d.Status == "Responded")
+                                       orderby d.Date ascending
+                                       select d).ToArray().LastOrDefault();
 
 
 
@@ -376,48 +376,48 @@ namespace CAOGAttendeeProject
                     //{
 
 
-                        if (timespanSinceDate.Days < 21)
+                    if (timespanSinceDate.Days < 21)
+                    {
+
+                        // do nothing
+                        //Attendee already have a followUp sent so do not generate another followup unil 21 days has
+                        //lapsed since the last followUp        
+
+
+                    }
+                    else
+                    {
+                        //generate follow-up if attendee does not have 3 consecutive followups already
+                        //search for sunday
+
+
+                        for (DateTime date = lstDateRecs.Date; date <= latest_date_attened.Date; date = date.AddDays(1))
                         {
-
-                            // do nothing
-                            //Attendee already have a followUp sent so do not generate another followup unil 21 days has
-                            //lapsed since the last followUp        
-
-
+                            if (date.DayOfWeek == DayOfWeek.Sunday)
+                            {
+                                lstsundays.Add(date);
+                            }
                         }
-                        else
+
+                        DateTime lastSunday = lstsundays.LastOrDefault();
+
+                        if (lastSunday != null)
                         {
-                            //generate follow-up if attendee does not have 3 consecutive followups already
-                            //search for sunday
-
-
-                            for (DateTime date = lstDateRecs.Date; date <= latest_date_attened.Date; date = date.AddDays(1))
-                            {
-                                if (date.DayOfWeek == DayOfWeek.Sunday)
-                                {
-                                    lstsundays.Add(date);
-                                }
-                            }
-
-                            DateTime lastSunday = lstsundays.LastOrDefault();
-
-                            if (lastSunday != null)
-                            {
-                                Attendance_Info newfollowUpRecord = new Attendance_Info { };
-                                newfollowUpRecord.AttendeeId = AttendeeRec.AttendeeId;
-                                newfollowUpRecord.Date = lastSunday.Date;
-                                newfollowUpRecord.Status = "Follow-Up";
-                                m_dbContext.Attendance_Info.Add(newfollowUpRecord);
-                            }
-
-
-
+                            Attendance_Info newfollowUpRecord = new Attendance_Info { };
+                            newfollowUpRecord.AttendeeId = AttendeeRec.AttendeeId;
+                            newfollowUpRecord.Date = lastSunday.Date;
+                            newfollowUpRecord.Status = "Follow-Up";
+                            m_dbContext.Attendance_Info.Add(newfollowUpRecord);
                         }
-                   // }
-                    } //end if
 
 
-                } //end foreach
+
+                    }
+                    // }
+                } //end if
+
+
+            } //end foreach
 
 
 
@@ -429,7 +429,7 @@ namespace CAOGAttendeeProject
 
 
 
-    
+
 
         private void CreateDatabase_FromXLSX()
         {
@@ -850,7 +850,7 @@ namespace CAOGAttendeeProject
 
             m_dbContext.Attendees.Load();
             m_dbContext.Attendance_Info.Load();
-            
+
             //--------------------- Make DEFAULT TABLE---------------------------------------------------------------------------
 
             DataTable Default_Data_Table = new DataTable("DefaultTable");
@@ -869,7 +869,7 @@ namespace CAOGAttendeeProject
             {
 
                 var queryAttendees = from AttendeeRec in m_dbContext.Attendees.Local
-                                      select AttendeeRec;
+                                     select AttendeeRec;
 
 
                 Default_Data_Table.Columns.Add(new DataColumn("AttendeeId"));
@@ -962,7 +962,7 @@ namespace CAOGAttendeeProject
                             if (queryLastDateFollowUp != null)
                             {
 
-                               
+
                                 lstatus = queryLastDateFollowUp.Status;
 
                                 DataRow DefaultTabledr = Default_Data_Table.NewRow();
@@ -1167,7 +1167,16 @@ namespace CAOGAttendeeProject
                 else
                     DateCalendar.IsEnabled = false;
 
-                (dataGrid.DataContext as DataTable).DefaultView.RowFilter = String.Empty;
+                if ((m_filterByDate && m_dateIsValid) || m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked)
+                {
+                    m_DataSet.Tables["QueryTable"].DefaultView.RowFilter = String.Empty;
+
+                }
+                else
+                {
+                    m_DataSet.Tables["DefaultTable"].DefaultView.RowFilter = String.Empty;
+                }
+
 
                 //----------------------Textbox search has text-----------------------------------------------------------------------------------
             }
@@ -1175,7 +1184,15 @@ namespace CAOGAttendeeProject
             {
                 Disable_Filters();
                 DateCalendar.IsEnabled = false;
-                (dataGrid.DataContext as DataTable).DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+                if ((m_filterByDate && m_dateIsValid) || m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked)
+                {
+                    m_DataSet.Tables["QueryTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+
+                }
+                else
+                {
+                    m_DataSet.Tables["DefaultTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+                }
 
             }
 
@@ -1654,17 +1671,73 @@ namespace CAOGAttendeeProject
             }
         }
 
-           
 
-          
 
+
+        private void RedrawQueryTable()
+        {
+            //if (m_DataSet.Tables.Contains("QueryTable"))
+            //{
+            //    m_DataSet.Tables.Remove("QueryTable");
+            //}
+
+            //DataTable queryTable = new DataTable("QueryTable");
+
+            //queryTable.Columns.Add(new DataColumn("AttendeeId"));
+            //queryTable.Columns.Add(new DataColumn("FirstLastName"));
+            //queryTable.Columns.Add(new DataColumn("First Name"));
+            //queryTable.Columns.Add(new DataColumn("Last Name"));
+            //queryTable.Columns.Add(new DataColumn("Date"));
+            //queryTable.Columns.Add(new DataColumn("Status"));
+
+
+
+            //foreach (var rec in linqquery)
+            //{
+
+            //    DataRow newrow = queryTable.NewRow();
+
+
+
+            //    newrow["AttendeeId"] = rec.id;
+            //    newrow["FirstLastName"] = rec.fname + " " + rec.lname;
+            //    newrow["First Name"] = rec.fname;
+            //    newrow["Last Name"] = rec.lname;
+            //    newrow["Date"] = rec.date.ToString("MM-dd-yyyy");
+            //    newrow["Status"] = rec.status;
+
+
+            //    queryTable.Rows.Add(newrow);
+            //}
+
+
+
+
+            ////Swap LastName and FirstName columns
+            //queryTable.Columns[2].SetOrdinal(3);
+            //queryTable.AcceptChanges();
+            //m_DataSet.Tables.Add(queryTable);
+
+            //dataGrid.CanUserDeleteRows = false;
+            //dataGrid.CanUserAddRows = false;
+
+            //dataGrid.IsReadOnly = true;
+            //dataGrid.ToolTip = "Select and right mouse click to see attendance history.";
+            //dataGrid.DataContext = queryTable;
+            //if (dataGrid.Columns.Count > 1)
+            //{
+            //    dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
+            //    dataGrid.Columns[1].Visibility = Visibility.Hidden; //LastFirstName
+            //}
+        }
         private void DeleteRecord(object sender, RoutedEventArgs e)
         {
             var row_select = dataGrid.SelectedItems;
 
             int gridrowIdx = 0;
-            DataTable QueryTableMod;
 
+            DataTable QueryTableCopy;
+            DataTable DefaultTableCopy;
             if (row_select.Count != 0)
             {
 
@@ -1673,9 +1746,15 @@ namespace CAOGAttendeeProject
 
 
 
-                if (dataGrid.DataContext == m_DataSet.Tables["QueryTable"])
+                if ((m_filterByDate && m_dateIsValid) || m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked)
                 {
-                    QueryTableMod = m_DataSet.Tables["QueryTable"].Copy();
+
+                    QueryTableCopy = m_DataSet.Tables["QueryTable"].Copy();
+
+
+
+
+
 
                     foreach (DataRowView drv in row_select)
                     {
@@ -1695,14 +1774,21 @@ namespace CAOGAttendeeProject
 
                         m_dbContext.Attendance_Info.Remove(queryAttendeeInfo);
                         gridrowIdx = 0;
-                        // get the Datagrid index
-                        foreach (DataRowView gridrow in dataGrid.Items)
-                        {
 
-                            if (gridrow["Date"].ToString() == dateh && gridrow["First Name"].ToString() == fname && gridrow["Last Name"].ToString() == lname && gridrow["Status"].ToString() == status)
+                        // loop over QueryTableMod and get index of record to remove
+                        for (int i = 0; i <= QueryTableCopy.Rows.Count - 1; i++)
+                        {
+                            if (QueryTableCopy.Rows[i].RowState != DataRowState.Deleted)
                             {
-                                QueryTableMod.Rows[gridrowIdx].Delete();
-                                break;
+                                if (QueryTableCopy.Rows[i]["Date"].ToString() == dateh &&
+                                QueryTableCopy.Rows[i]["First Name"].ToString() == fname &&
+                                QueryTableCopy.Rows[i]["Last Name"].ToString() == lname &&
+                                QueryTableCopy.Rows[i]["Status"].ToString() == status)
+                                {
+                                    QueryTableCopy.Rows[gridrowIdx].Delete();
+
+                                    break;
+                                }
                             }
                             gridrowIdx++;
                         }
@@ -1710,13 +1796,16 @@ namespace CAOGAttendeeProject
 
 
                     }
+                    QueryTableCopy.AcceptChanges();
+                    m_DataSet.Tables["QueryTable"].Clear();
+                    for (int i = 0; i <= QueryTableCopy.Rows.Count - 1; i++)
+                    {
+                        m_DataSet.Tables["QueryTable"].ImportRow(QueryTableCopy.Rows[i]);
 
-                    m_DataSet.Tables.Remove("QueryTable");
-                    m_DataSet.Tables.Add(QueryTableMod);
+                    }
 
-                 
                     ShowFilteredAttendeeTable();
-                 
+
                     Cursor = Cursors.Arrow;
                     MessageBox.Show("Attendee record removed successfully.\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
 
@@ -1724,6 +1813,9 @@ namespace CAOGAttendeeProject
                 }
                 else
                 {
+
+                    DefaultTableCopy = m_DataSet.Tables["DefaultTable"].Copy();
+
 
                     foreach (DataRowView drv in row_select)
                     {
@@ -1741,25 +1833,45 @@ namespace CAOGAttendeeProject
                             m_dbContext.Attendance_Info.Remove(queryAttendeeInfo[idx]);
                         }
                         m_dbContext.Attendees.Remove(Attrec);
+
+                        gridrowIdx = 0;
+
+                        // loop over QueryTableMod and get index of record to remove
+                        for (int i = 0; i <= DefaultTableCopy.Rows.Count - 1; i++)
+                        {
+                            if (DefaultTableCopy.Rows[i].RowState != DataRowState.Deleted)
+                            {
+                                if (int.Parse(DefaultTableCopy.Rows[i]["AttendeeId"].ToString()) == AttendeeId)
+                                {
+                                    DefaultTableCopy.Rows[gridrowIdx].Delete();
+
+                                    break;
+                                }
+                            }
+                            gridrowIdx++;
+                        }
+                    }
+                    DefaultTableCopy.AcceptChanges();
+                    m_DataSet.Tables["DefaultTable"].Clear();
+                    for (int i = 0; i <= DefaultTableCopy.Rows.Count - 1; i++)
+                    {
+                        m_DataSet.Tables["DefaultTable"].ImportRow(DefaultTableCopy.Rows[i]);
+
                     }
 
+                    ShowFilteredAttendeeTable();
 
                     Cursor = Cursors.Arrow;
-
-
                     MessageBox.Show("Attendee record removed successfully.\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
-                    RedrawDefaultTable();
                 }
-                    
-
-                
             }
+                    
             else
             {
                 MessageBox.Show("At least one record must be selected.", "Select Record", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
 
-                
+      
             
         }
 
