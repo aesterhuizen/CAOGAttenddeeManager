@@ -22,14 +22,13 @@
             </Ribbon.ApplicationMenu>
             <!-- Home Tab ############################################################################################-->
             <RibbonTab Name="tabHome" Header="Active Attendance">
-                
                 <RibbonGroup Header="Search">
-                    
-                    
                     <RibbonTextBox Name="txtSearch" SmallImageSource="Resources\Search.ico" Text=""
                                    TextBoxWidth="160"
                                    TextChanged="txtSearch_TextChanged" 
                                    ToolTip="Attendee Search" />
+                    
+                   
                     <!--  <RibbonButton Margin="0,0,0,0" x:Name="btnNewRec" 
                                       Label="New Attendee" 
                                       SmallImageSource="Resources\NewRec.ico" 
@@ -87,20 +86,26 @@
                                   Label="Save"
                                   LargeImageSource="Resources\save.ico"
                                   Click="Save_Changes" 
-                                  ToolTip="Generate follow-ups and save all attendee changes to the database" />
+                                  ToolTip="Save changes to the database" />
 
                    
 
                 </RibbonGroup>
                 
-                <RibbonGroup Header="Attendance Metrics" Width="300">
+                <RibbonGroup Header="Attendance Metrics" Width="350">
 
                     <RibbonButton Name="btnGenerateFollowUps"
                                   Label="Generate Follow-Up..."
                                   LargeImageSource="Resources\Generate-followup.ico"
                                   Click="btnGenerateFollowUps_Click" 
                                   ToolTip="Generate a follow-up record for each attendee that missed 3 Sunday services in a row." />
-                    
+
+                    <RibbonButton Name="btnDelete" 
+                                  Label="Delete Record"
+                                  LargeImageSource="Resources\Delete.ico"
+                                  Click="DeleteRecord" 
+                                  ToolTip="Delete Record from Active Attendance table. Attendee record will not be deleted from the database untill you click on Save"/>
+
                     <RibbonButton x:Name="btnChart" Label="Charts"  
                                       LargeImageSource="Resources\Chart2.ico" 
                                       Click="btnChart_Click" 
@@ -111,11 +116,7 @@
                                       Click="btnProspect_Click" 
                                       ToolTip="Mark attendee(s) as prospect attendee(s)"/>
 
-                   <!-- <RibbonButton Name="btnDelete" Label="Delete"
-                                  LargeImageSource="Resources\Delete.ico"
-                                  Click="DeleteRecord" 
-                                  ToolTip="Delete attendee(s) from active attendance table.\nAttendee(s) will be delete from the database once you save your changes to the database"/>
-                    -->
+                                      
                     <StackPanel Orientation="Vertical" Margin="10,0,0,0" Width="110" Height="50">
                         <StackPanel Orientation="Horizontal">
                             <Label HorizontalAlignment="Left" Width="60">Active:</Label>
