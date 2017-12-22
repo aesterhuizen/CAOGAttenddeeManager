@@ -1699,7 +1699,7 @@ namespace CAOGAttendeeProject
                         foreach (DataRowView gridrow in dataGrid.Items)
                         {
 
-                            if (gridrow["Date"] == dateh && gridrow["First Name"] == fname && gridrow["Last Name"] == lname && gridrow["Status"] == status)
+                            if (gridrow["Date"].ToString() == dateh && gridrow["First Name"].ToString() == fname && gridrow["Last Name"].ToString() == lname && gridrow["Status"].ToString() == status)
                             {
                                 QueryTableMod.Rows[gridrowIdx].Delete();
                                 break;
@@ -3290,7 +3290,7 @@ namespace CAOGAttendeeProject
         }
         private void ShowFilteredAttendeeTable()
         {
-            if (dataGrid.DataContext == m_DataSet.Tables["QueryTable"])
+            if ((m_filterByDate && m_dateIsValid) || m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked)
             {
                 if (txtSearch.Text != "")
                 {
@@ -3317,9 +3317,15 @@ namespace CAOGAttendeeProject
                     dataGrid.IsReadOnly = false;
 
                 }
+                else
+                   Display_DefaultTable_in_Grid();
             }
-            
-            Display_DefaultTable_in_Grid();
+
+            if (dataGrid.Columns.Count > 1)
+            {
+                dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
+                dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
+            }
         }
         private void SaveActiveList()
         {
