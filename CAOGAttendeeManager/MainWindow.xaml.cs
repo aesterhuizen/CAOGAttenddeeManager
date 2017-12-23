@@ -1787,90 +1787,99 @@ namespace CAOGAttendeeProject
 
                 if (isDirty)
                 {
-                    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list.\n" +
-                                                           "Add them first then delete attendees, discard checked attendees in the attendee checklist and delete record anyway?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
+                    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list.\n\n" +
+                                                           "Add them first then delete attendees.\n\nDiscard checked attendees in the attendee checklist and delete record anyway?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
                     if (res == MessageBoxResult.OK)
-                        DeleteRecordInDefaultTable((System.Collections.IList)row_select);
+                    {
+
+                        if ((m_filterByDate && m_dateIsValid) || m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked)
+                        {
+
+                            QueryTableCopy = m_DataSet.Tables["QueryTable"].Copy();
+
+                            foreach (DataRowView drv in row_select)
+                            {
+                                int AttendeeId = int.Parse(drv.Row["AttendeeId"].ToString());
+
+                                string fname = drv.Row["First Name"].ToString();
+                                string lname = drv.Row["Last Name"].ToString();
+                                string dateh = drv.Row["Date"].ToString();
+                                string status = drv.Row["Status"].ToString();
+
+                                string[] date = drv.Row["Date"].ToString().Split('-');
+                                DateTime d = new DateTime(int.Parse(date[2]), int.Parse(date[0]), int.Parse(date[1]));
+
+                                var queryAttendeeInfo = (from rec in m_dbContext.Attendance_Info.Local
+                                                         where rec.AttendeeId == AttendeeId &&
+                                                         rec.Date == d && rec.Status == status
+                                                         select rec).ToArray();
+                                for (int idx = 0; idx <= queryAttendeeInfo.Count() - 1; idx++)
+                                {
+                                    m_dbContext.Attendance_Info.Remove(queryAttendeeInfo[idx]);
+                                }
+
+                                var queryAttendeeId = from rec in m_dbContext.Attendance_Info.Local
+                                                      where rec.AttendeeId == AttendeeId
+                                                      select rec;
+                                if (queryAttendeeId == null)
+                                {
+                                    //user deleted all attendee's history so delete Attendee in the default data table
+                                    DeleteRecordInDefaultDataTable(AttendeeId);
+                                }
+
+                                gridrowIdx = 0;
+
+                                // loop over QueryTableMod and get index of record to remove
+                                for (int i = 0; i <= QueryTableCopy.Rows.Count - 1; i++)
+                                {
+                                    if (QueryTableCopy.Rows[i].RowState != DataRowState.Deleted)
+                                    {
+                                        if (QueryTableCopy.Rows[i]["Date"].ToString() == dateh &&
+                                        QueryTableCopy.Rows[i]["First Name"].ToString() == fname &&
+                                        QueryTableCopy.Rows[i]["Last Name"].ToString() == lname &&
+                                        QueryTableCopy.Rows[i]["Status"].ToString() == status)
+                                        {
+                                            QueryTableCopy.Rows[gridrowIdx].Delete();
+
+                                            break;
+                                        }
+                                    }
+                                    gridrowIdx++;
+                                }
+
+
+
+                            }
+                            QueryTableCopy.AcceptChanges();
+                            m_DataSet.Tables["QueryTable"].Clear();
+                            for (int i = 0; i <= QueryTableCopy.Rows.Count - 1; i++)
+                            {
+                                m_DataSet.Tables["QueryTable"].ImportRow(QueryTableCopy.Rows[i]);
+
+                            }
+
+                            RedrawDefaultTable();
+                            ShowFilteredAttendeeTable();
+
+                            Cursor = Cursors.Arrow;
+                            MessageBox.Show("Attendee record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
+
+
+                        }
+                        else if (m_filterByDate == false && m_isAttendedChecked == false && m_isFollowupChecked == false && m_isRespondedChecked == false)
+                        {
+                            DeleteRecordInDefaultTable(row_select);
+
+                        }
+
+                    }
+                        
                     else // isDirty: user pressed the cancel button on the messagebox
                         Cursor = Cursors.Arrow;
                     return;
                 }
 
-                if ((m_filterByDate && m_dateIsValid) || m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked)
-                {
-
-                    QueryTableCopy = m_DataSet.Tables["QueryTable"].Copy();
-
-                    foreach (DataRowView drv in row_select)
-                    {
-                        int AttendeeId = int.Parse(drv.Row["AttendeeId"].ToString());
-
-                        string fname = drv.Row["First Name"].ToString();
-                        string lname = drv.Row["Last Name"].ToString();
-                        string dateh = drv.Row["Date"].ToString();
-                        string status = drv.Row["Status"].ToString();
-
-                        string[] date = drv.Row["Date"].ToString().Split('-');
-                        DateTime d = new DateTime(int.Parse(date[2]), int.Parse(date[0]), int.Parse(date[1]));
-
-                        var queryAttendeeInfo = m_dbContext.Attendance_Info.Local.SingleOrDefault(rec => rec.AttendeeId == AttendeeId &&
-                                                                                              rec.Date == d && rec.Status == status);
-
-
-                        m_dbContext.Attendance_Info.Remove(queryAttendeeInfo);
-                        var queryAttendeeId = from rec in m_dbContext.Attendance_Info.Local
-                                              where rec.AttendeeId == AttendeeId
-                                              select rec;
-                        if (queryAttendeeId == null)
-                        {
-                            //user deleted all attendee's history so delete Attendee in the default data table
-                            DeleteRecordInDefaultDataTable(AttendeeId);
-                        }
-                            
-                        gridrowIdx = 0;
-
-                        // loop over QueryTableMod and get index of record to remove
-                        for (int i = 0; i <= QueryTableCopy.Rows.Count - 1; i++)
-                        {
-                            if (QueryTableCopy.Rows[i].RowState != DataRowState.Deleted)
-                            {
-                                if (QueryTableCopy.Rows[i]["Date"].ToString() == dateh &&
-                                QueryTableCopy.Rows[i]["First Name"].ToString() == fname &&
-                                QueryTableCopy.Rows[i]["Last Name"].ToString() == lname &&
-                                QueryTableCopy.Rows[i]["Status"].ToString() == status)
-                                {
-                                    QueryTableCopy.Rows[gridrowIdx].Delete();
-
-                                    break;
-                                }
-                            }
-                            gridrowIdx++;
-                        }
-
-
-
-                    }
-                    QueryTableCopy.AcceptChanges();
-                    m_DataSet.Tables["QueryTable"].Clear();
-                    for (int i = 0; i <= QueryTableCopy.Rows.Count - 1; i++)
-                    {
-                        m_DataSet.Tables["QueryTable"].ImportRow(QueryTableCopy.Rows[i]);
-
-                    }
-
-                    RedrawDefaultTable();
-                    ShowFilteredAttendeeTable();
-
-                    Cursor = Cursors.Arrow;
-                    MessageBox.Show("Attendee record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
-
-
-                }
-                else if (m_filterByDate == false && m_isAttendedChecked==false && m_isFollowupChecked==false && m_isRespondedChecked==false)
-                {
-                   DeleteRecordInDefaultTable((System.Collections.IList)row_select);
-                                      
-                }
+                
 
               
                 
@@ -3281,7 +3290,7 @@ namespace CAOGAttendeeProject
                    
 
 
-                    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list, discard changes and exit anyway?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning,MessageBoxResult.Cancel);
+                    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list.\n\nDiscard changes and exit anyway?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning,MessageBoxResult.Cancel);
                     if (res == MessageBoxResult.OK)
                     {
 
@@ -3326,7 +3335,7 @@ namespace CAOGAttendeeProject
                   
 
 
-                    MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet.\nThere are checked attendees in the attendee checklist that has not yet been added to the active attendance list, discard checklist changes and save active attendance changes to database?", "Save and discard checklist", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
+                    MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet.\n\nThere are checked attendees in the attendee checklist that has not yet been added to the active attendance list.\n\nDiscard checklist changes and save active attendance changes to database?", "Save and discard checklist", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
                     if (res == MessageBoxResult.Yes)
                     {
 
