@@ -104,7 +104,7 @@
                                   Label="Delete Record"
                                   LargeImageSource="Resources\Delete.ico"
                                   Click="DeleteRecord" 
-                                  ToolTip="Delete Record from Active Attendance table. Attendee record will not be deleted from the database untill you click on Save"/>
+                                  ToolTip="Delete Record from Active Attendance table. Attendee will not be removed from the database until you click on the Save button"/>
 
                     <RibbonButton x:Name="btnChart" Label="Charts"  
                                       LargeImageSource="Resources\Chart2.ico" 
