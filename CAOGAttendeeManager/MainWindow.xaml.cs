@@ -1714,11 +1714,9 @@ namespace CAOGAttendeeProject
         {
 
             int gridrowIdx = 0;
-
             
-            DataTable DefaultTableCopy;
 
-            DefaultTableCopy = m_DataSet.Tables["DefaultTable"].Copy();
+            DataTable DefaultTableCopy = m_DataSet.Tables["DefaultTable"].Copy();
            
 
             foreach (DataRowView drv in row_select)
@@ -1769,18 +1767,88 @@ namespace CAOGAttendeeProject
             Cursor = Cursors.Arrow;
             MessageBox.Show("Attendee record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
         }
+
+        private void DeleteRecordInQueryTable(System.Collections.IList row_select)
+        {
+           
+            DataTable QueryTableCopy = m_DataSet.Tables["QueryTable"].Copy();
+            int gridrowIdx = 0;
+
+            foreach (DataRowView drv in row_select)
+            {
+                int AttendeeId = int.Parse(drv.Row["AttendeeId"].ToString());
+
+                string fname = drv.Row["First Name"].ToString();
+                string lname = drv.Row["Last Name"].ToString();
+                string dateh = drv.Row["Date"].ToString();
+                string status = drv.Row["Status"].ToString();
+
+                string[] date = drv.Row["Date"].ToString().Split('-');
+                DateTime d = new DateTime(int.Parse(date[2]), int.Parse(date[0]), int.Parse(date[1]));
+
+                var queryAttendeeInfo = (from rec in m_dbContext.Attendance_Info.Local
+                                         where rec.AttendeeId == AttendeeId &&
+                                         rec.Date == d && rec.Status == status
+                                         select rec).ToArray();
+                for (int idx = 0; idx <= queryAttendeeInfo.Count() - 1; idx++)
+                {
+                    m_dbContext.Attendance_Info.Remove(queryAttendeeInfo[idx]);
+                }
+
+                var queryAttendeeId = from rec in m_dbContext.Attendance_Info.Local
+                                      where rec.AttendeeId == AttendeeId
+                                      select rec;
+                if (queryAttendeeId == null)
+                {
+                    //user deleted all attendee's history so delete Attendee in the default data table
+                    DeleteRecordInDefaultDataTable(AttendeeId);
+                }
+
+                gridrowIdx = 0;
+
+                // loop over QueryTableMod and get index of record to remove
+                for (int i = 0; i <= QueryTableCopy.Rows.Count - 1; i++)
+                {
+                    if (QueryTableCopy.Rows[i].RowState != DataRowState.Deleted)
+                    {
+                        if (QueryTableCopy.Rows[i]["Date"].ToString() == dateh &&
+                        QueryTableCopy.Rows[i]["First Name"].ToString() == fname &&
+                        QueryTableCopy.Rows[i]["Last Name"].ToString() == lname &&
+                        QueryTableCopy.Rows[i]["Status"].ToString() == status)
+                        {
+                            QueryTableCopy.Rows[gridrowIdx].Delete();
+
+                            break;
+                        }
+                    }
+                    gridrowIdx++;
+                }
+
+
+
+            }
+            QueryTableCopy.AcceptChanges();
+            m_DataSet.Tables["QueryTable"].Clear();
+            for (int i = 0; i <= QueryTableCopy.Rows.Count - 1; i++)
+            {
+                m_DataSet.Tables["QueryTable"].ImportRow(QueryTableCopy.Rows[i]);
+
+            }
+
+            RedrawDefaultTable();
+            ShowFilteredAttendeeTable();
+            InitAttendeeListTable();
+            Cursor = Cursors.Arrow;
+            MessageBox.Show("Attendee record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
+        }
         private void DeleteRecord(object sender, RoutedEventArgs e)
         {
             var row_select = dataGrid.SelectedItems;
-            int gridrowIdx = 0;
+          
 
-            DataTable QueryTableCopy;
            
-
             if (row_select.Count != 0)
             {
-
-
 
                 Cursor = Cursors.Wait;
                 bool isDirty = isAttendeeListDirty();
@@ -1795,74 +1863,7 @@ namespace CAOGAttendeeProject
                         if ((m_filterByDate && m_dateIsValid) || m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked)
                         {
 
-                            QueryTableCopy = m_DataSet.Tables["QueryTable"].Copy();
-
-                            foreach (DataRowView drv in row_select)
-                            {
-                                int AttendeeId = int.Parse(drv.Row["AttendeeId"].ToString());
-
-                                string fname = drv.Row["First Name"].ToString();
-                                string lname = drv.Row["Last Name"].ToString();
-                                string dateh = drv.Row["Date"].ToString();
-                                string status = drv.Row["Status"].ToString();
-
-                                string[] date = drv.Row["Date"].ToString().Split('-');
-                                DateTime d = new DateTime(int.Parse(date[2]), int.Parse(date[0]), int.Parse(date[1]));
-
-                                var queryAttendeeInfo = (from rec in m_dbContext.Attendance_Info.Local
-                                                         where rec.AttendeeId == AttendeeId &&
-                                                         rec.Date == d && rec.Status == status
-                                                         select rec).ToArray();
-                                for (int idx = 0; idx <= queryAttendeeInfo.Count() - 1; idx++)
-                                {
-                                    m_dbContext.Attendance_Info.Remove(queryAttendeeInfo[idx]);
-                                }
-
-                                var queryAttendeeId = from rec in m_dbContext.Attendance_Info.Local
-                                                      where rec.AttendeeId == AttendeeId
-                                                      select rec;
-                                if (queryAttendeeId == null)
-                                {
-                                    //user deleted all attendee's history so delete Attendee in the default data table
-                                    DeleteRecordInDefaultDataTable(AttendeeId);
-                                }
-
-                                gridrowIdx = 0;
-
-                                // loop over QueryTableMod and get index of record to remove
-                                for (int i = 0; i <= QueryTableCopy.Rows.Count - 1; i++)
-                                {
-                                    if (QueryTableCopy.Rows[i].RowState != DataRowState.Deleted)
-                                    {
-                                        if (QueryTableCopy.Rows[i]["Date"].ToString() == dateh &&
-                                        QueryTableCopy.Rows[i]["First Name"].ToString() == fname &&
-                                        QueryTableCopy.Rows[i]["Last Name"].ToString() == lname &&
-                                        QueryTableCopy.Rows[i]["Status"].ToString() == status)
-                                        {
-                                            QueryTableCopy.Rows[gridrowIdx].Delete();
-
-                                            break;
-                                        }
-                                    }
-                                    gridrowIdx++;
-                                }
-
-
-
-                            }
-                            QueryTableCopy.AcceptChanges();
-                            m_DataSet.Tables["QueryTable"].Clear();
-                            for (int i = 0; i <= QueryTableCopy.Rows.Count - 1; i++)
-                            {
-                                m_DataSet.Tables["QueryTable"].ImportRow(QueryTableCopy.Rows[i]);
-
-                            }
-
-                            RedrawDefaultTable();
-                            ShowFilteredAttendeeTable();
-
-                            Cursor = Cursors.Arrow;
-                            MessageBox.Show("Attendee record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
+                            DeleteRecordInQueryTable(row_select);
 
 
                         }
@@ -1878,7 +1879,21 @@ namespace CAOGAttendeeProject
                         Cursor = Cursors.Arrow;
                     return;
                 }
+                else //------------------------//No Attendee checks in attendee list-----------------------------------------------------------
+                {
+                    if ((m_filterByDate && m_dateIsValid) || m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked)
+                    {
 
+                        DeleteRecordInQueryTable(row_select);
+
+
+                    }
+                    else if (m_filterByDate == false && m_isAttendedChecked == false && m_isFollowupChecked == false && m_isRespondedChecked == false)
+                    {
+                        DeleteRecordInDefaultTable(row_select);
+
+                    }
+                }
                 
 
               
@@ -3267,25 +3282,10 @@ namespace CAOGAttendeeProject
             }
             else
             {
-                // save dataGrid edits
-                dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
-                foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
-                {
-                    if (dr.ItemArray[5].ToString() == "True")
-                    {
-                        isAttendedStatusChecked = true;
 
-                        break;
+                isAttendedStatusChecked = isAttendeeListDirty();
 
-                    }
-                    else
-                    {
-                        isAttendedStatusChecked = false;
-                    }
-                }
-
-
-                if (!m_dbContext.ChangeTracker.HasChanges() && isAttendedStatusChecked)
+                if ( !(m_dbContext.ChangeTracker.HasChanges() || m_DataSet.HasChanges() ) && isAttendedStatusChecked)
                 {
                    
 
@@ -3308,7 +3308,7 @@ namespace CAOGAttendeeProject
                    
 
                 }
-                else if (m_dbContext.ChangeTracker.HasChanges() && isAttendedStatusChecked==false)
+                else if ((m_dbContext.ChangeTracker.HasChanges() || m_DataSet.HasChanges() ) && isAttendedStatusChecked==false)
                 {
                      
                         MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet, save changes?", "Changes not saved", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
@@ -3330,7 +3330,7 @@ namespace CAOGAttendeeProject
                     Cursor = Cursors.Arrow;
 
                 }
-                else if (m_dbContext.ChangeTracker.HasChanges() && isAttendedStatusChecked)
+                else if ((m_dbContext.ChangeTracker.HasChanges() || m_DataSet.HasChanges()) && isAttendedStatusChecked)
                 {
                   
 
@@ -3431,34 +3431,7 @@ namespace CAOGAttendeeProject
 
 
                     }
-                    // deleted rec ------------------------------------------------------------------------------------------
-                    else if (dr.RowState == DataRowState.Deleted)
-                    {
-
-                        int attid = int.Parse(m_DataSet.Tables["DefaultTable"].Rows[i]["AttendeeId", DataRowVersion.Original].ToString());
-
-
-                        var Attrec = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == attid);
-
-                        var queryAttendeeInfo = (from inforec in m_dbContext.Attendance_Info.Local
-                                                 where inforec.AttendeeId == attid
-                                                 select inforec).ToArray();
-
-                        if (queryAttendeeInfo.Any())
-                        {
-
-
-                            for (int idx = 0; idx <= queryAttendeeInfo.Count() - 1; idx++)
-                            {
-                                m_dbContext.Attendance_Info.Local.Remove(queryAttendeeInfo[idx]);
-                            }
-
-                        }
-
-                        m_dbContext.Attendees.Local.Remove(Attrec);
-
-
-                    }
+              
 
 
                 } // end foreach row
