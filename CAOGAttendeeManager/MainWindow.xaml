@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CAOGAttendeeProject"
         mc:Ignorable="d"
-        Title="CAOG Attendee Manager" Height="500" Width="1000"
+        Title="CAOG Attendee Manager" Height="700" Width="1000"
         Loaded="Window_Loaded"
         Closing="Window_Closing">
 
@@ -21,65 +21,19 @@
                 </RibbonApplicationMenu>
             </Ribbon.ApplicationMenu>
             <!-- Home Tab ############################################################################################-->
-            <RibbonTab Name="tabHome" Header="Active Attendance">
+            <RibbonTab Name="tabHome" Header="Active Attendance" >
                 <RibbonGroup Header="Search">
                     <RibbonTextBox Name="txtSearch" SmallImageSource="Resources\Search.ico" Text=""
                                    TextBoxWidth="160"
                                    TextChanged="txtSearch_TextChanged" 
                                    ToolTip="Attendee Search" />
-                    
-                   
-                    <!--  <RibbonButton Margin="0,0,0,0" x:Name="btnNewRec" 
-                                      Label="New Attendee" 
-                                      SmallImageSource="Resources\NewRec.ico" 
-                                      Click="btnNewRec_Click" 
-                                      ToolTip="Add new church attendee to the database"/>
-                            -->
-                  
+
+
+
                 </RibbonGroup>
-                <RibbonGroup Header="Filter options" Width="180">
+                               
+                           
 
-                    <Grid Height="75">
-                        <Grid.RowDefinitions>
-                        <RowDefinition Height="23"/>
-                        <RowDefinition Height="23"/>
-                        <RowDefinition Height="20"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-
-
-                        <RibbonTextBox TextBoxWidth="120" SmallImageSource="Resources\CalDate.ico"  
-                                       Name="txtDate" Grid.Row="0" Grid.ColumnSpan="2" 
-                                        IsReadOnly="True"/>
-
-                        <!--<Calendar Name="DateCalendar"  SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" 
-                                      DisplayDateChanged="DateCalendar_DisplayDateChanged" 
-                                      SelectedDatesChanged="DateCalendar_SelectedDateChanged"/>-->
-                                                    
-                        
-                        
-                        <RibbonCheckBox Grid.Row="1" Grid.Column="0" Label="Date"  Name="chkDateFilter" Checked="chkDateFiler_Checked" Unchecked="chkDateFiler_Unchecked" FontSize="10" HorizontalAlignment="Left" />
-                        <RibbonCheckBox Grid.Row="1" Grid.Column="1" Label="Attended" Name="chkAttended" Checked="chkAttended_Checked" Unchecked="chkAttended_Unchecked" FontSize="10" HorizontalAlignment="Left" />
-                        <RibbonCheckBox Grid.Row="2" Grid.Column="0" Label="Follow-Up" Name="chkFollowup" Checked="chkFollowup_Checked" Unchecked="chkFollowup_Unchecked" FontSize="10" HorizontalAlignment="Left"/>
-                        <RibbonCheckBox Grid.Row="2" Grid.Column="1" Label="Responded" Name="chkResponded" Checked="chkResponded_Checked" Unchecked="chkResponded_Unchecked" FontSize="10" HorizontalAlignment="Left"/>
-                        
-                    </Grid>
-
-                    
-                </RibbonGroup>
-               <!-- <RibbonGroup Header="Clipboard">
-                    <RibbonButton Name="btnCopy"
-                                  Label="Copy"
-                                  LargeImageSource="Resources\Copy.ico"
-                                  Click="btnCopy_Click" 
-                                  ToolTip="Copy the contents of data table to the clipboard"/>
-                   
-                </RibbonGroup>
-               -->
-                
                 <RibbonGroup Header="Database" >
 
                     <RibbonButton Name="btnSave"
@@ -88,35 +42,46 @@
                                   Click="Save_Changes" 
                                   ToolTip="Save changes to the database" />
 
-                   
+
 
                 </RibbonGroup>
-                
-                <RibbonGroup Header="Attendance Metrics" Width="350">
 
+                <RibbonGroup Header="Table Operations">
+                    
+                    
+                    
                     <RibbonButton Name="btnGenerateFollowUps"
                                   Label="Generate Follow-Up..."
                                   LargeImageSource="Resources\Generate-followup.ico"
                                   Click="btnGenerateFollowUps_Click" 
                                   ToolTip="Generate a follow-up record for each attendee that missed 3 Sunday services in a row." />
 
+                    <!--<RibbonButton Name="btnCopy"
+                                  Label="Copy"
+                                  LargeImageSource="Resources\Copy.ico"
+                                  Click="btnCopy_Click" 
+                                  ToolTip="Copy the contents of data table to the clipboard"/>
+                    -->
                     <RibbonButton Name="btnDelete" 
                                   Label="Delete Record"
                                   LargeImageSource="Resources\Delete.ico"
                                   Click="DeleteRecord" 
                                   ToolTip="Delete Record from Active Attendance table. Attendee will not be removed from the database until you click on the Save button"/>
 
+
+
+                </RibbonGroup>
+
+                <RibbonGroup Header="Attendance Metrics" Width="200">
+
+                  
+
                     <RibbonButton x:Name="btnChart" Label="Charts"  
                                       LargeImageSource="Resources\Chart2.ico" 
                                       Click="btnChart_Click" 
                                       ToolTip="View attendee metrics in charts" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                    
-                    <RibbonButton x:Name="btnProspect" Label="Prospect"  
-                                      LargeImageSource="Resources\prospect.ico" 
-                                      Click="btnProspect_Click" 
-                                      ToolTip="Mark attendee(s) as prospect attendee(s)"/>
 
-                                      
+
                     <StackPanel Orientation="Vertical" Margin="10,0,0,0" Width="110" Height="50">
                         <StackPanel Orientation="Horizontal">
                             <Label HorizontalAlignment="Left" Width="60">Active:</Label>
@@ -133,16 +98,16 @@
                                        VerticalAlignment="Center"
                                        TextAlignment="Right"/>
                         </StackPanel>
-                        
-                        
-                        
-                        
+
+
+
+
                     </StackPanel>
 
-                    
+
                 </RibbonGroup>
 
-              
+
 
 
             </RibbonTab>
@@ -156,17 +121,7 @@
                                    TextChanged="alisttxtSearch_TextChanged" 
                                    ToolTip="Attendee Search" />
 
-                    <!--  <RibbonButton Margin="0,0,0,0" x:Name="btnNewRec" 
-                                      Label="New Attendee" 
-                                      SmallImageSource="Resources\NewRec.ico" 
-                                      Click="btnNewRec_Click" 
-                                      ToolTip="Add new church attendee to the database"/>
-                            -->
 
-
-
-
-                      
                 </RibbonGroup>
                 <RibbonGroup Header="Date" >
 
@@ -175,91 +130,106 @@
                                     SmallImageSource="Resources\CalDate.ico"
                                     IsReadOnly="True"/>
 
-                    <!--<Calendar Name="alistDateCalendar"  
-                                  SelectionMode="SingleDate" 
-                                  Loaded="alistDateCalendar_Loaded" 
-                                  DisplayDateChanged="alistDateCalendar_DisplayDateChanged" 
-                                  SelectedDatesChanged="alistDateCalendar_SelectedDatesChanged"/>
-                    </RibbonTextBox>
-                    -->
-
                 </RibbonGroup>
-                <RibbonGroup Header="Table Operations">
-                   
-                
-                <RibbonButton x:Name="btnNewRec" 
+                <RibbonGroup Header="Table Operations" Width="300">
+
+
+                    <RibbonButton x:Name="btnNewRec" 
                                   Label="New Attendee" 
                                   LargeImageSource="Resources\NewRec.ico"
                                   Click="btnNewRec_Click" 
                                   ToolTip="Add a new Attendee to the attendee prospect checklist."/>
-                    
+
+                    <RibbonButton Name="btnlstDelete" 
+                                  Label="Delete Record"
+                                  LargeImageSource="Resources\Delete.ico"
+                                  Click="DeleteRecordInAttendeeList" 
+                                  ToolTip="Delete Record from Active Attendance table. Attendee will not be removed from the database until you click on the Save button"/>
+
                     <RibbonButton x:Name="btnImportRecords" 
                                   Label="Add Attendee" 
                                   LargeImageSource="Resources\Add.ico"
                                   Click="ImportRows_Click" 
                                   ToolTip="Add all the changes made in this checklist to the active attendence list"/>
 
+                    <StackPanel Orientation="Horizontal">
+                        <Label HorizontalAlignment="Left" Width="60">Prospect:</Label>
+                        <TextBlock Margin="9,0,0,0" Name="lblalistProspectCount" 
+                                   Width="40" 
+                                   Text="{Binding ElementName=dataGrid, Path=Items.Count}"
+                                   TextAlignment="Right" VerticalAlignment="Center"/>
+                    </StackPanel>
                 </RibbonGroup>
-                <!--   <RibbonButton x:Name="btnPrint" 
-                                  Label="Print Table" 
-                                  SmallImageSource="Resources\Print.ico"
-                                  Click="btnPrint_Click" 
-                                  ToolTip="Print this table" HorizontalAlignment="Left"/>
-                    -->
-               
-              <!--  <RibbonGroup Header="Save Status">
-                    <TextBlock Name="txtSaveStatus" Width="120"/>
-                </RibbonGroup>
-                -->
+                
             </RibbonTab>
             <!-- End AttendeeList #########################################################################-->
         </Ribbon>
 
-        <StackPanel DockPanel.Dock="Left">
-            <Calendar Name="DateCalendar"  SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" 
-                                      DisplayDateChanged="DateCalendar_DisplayDateChanged" 
-                                      SelectedDatesChanged="DateCalendar_SelectedDateChanged"/>
 
-        </StackPanel>
-        <Grid DockPanel.Dock="Bottom" Margin="2" ShowGridLines="True" >
+        <Grid DockPanel.Dock="Left" Margin="2" ShowGridLines="True" >
             <Grid.RowDefinitions>
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250" MinWidth="200"/>
+                <ColumnDefinition Width="5"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="False"
+            <StackPanel Grid.Column="0">
+                <GroupBox Name="FilterOptionsGroupbox" Header="Filter Options">
+
+                    <StackPanel MinWidth="200">
+                        <Expander Name="CalendarExpander" IsExpanded="True">
+                            <Expander.Header>
+                                <StackPanel Name="DateStackPanel" Orientation="Horizontal">
+                                    <CheckBox Content="Date"  Name="chkDateFilter" Checked="chkDateFiler_Checked" Unchecked="chkDateFiler_Unchecked" HorizontalAlignment="Left" />
+                                </StackPanel>
+                            </Expander.Header>
+
+                            <Calendar Name="DateCalendar"  SelectionMode="SingleDate" Loaded="DateCalendar_Loaded" 
+                                      DisplayDateChanged="DateCalendar_DisplayDateChanged" 
+                                      SelectedDatesChanged="DateCalendar_SelectedDateChanged"/>
+                        </Expander>
+                        <Expander Name="ChurchStatusExpender" Header="Church Status" IsExpanded="True">
+
+                            <StackPanel>
+                                <CheckBox Content="Attended" Name="chkAttended" Checked="chkAttended_Checked" Unchecked="chkAttended_Unchecked" HorizontalAlignment="Left" />
+                                <CheckBox Content="Follow-Up" Name="chkFollowup" Checked="chkFollowup_Checked" Unchecked="chkFollowup_Unchecked" HorizontalAlignment="Left"/>
+                                <CheckBox Content="Responded" Name="chkResponded" Checked="chkResponded_Checked" Unchecked="chkResponded_Unchecked" HorizontalAlignment="Left"/>
+                            </StackPanel>
+
+                        </Expander>
+                        <!--  <Expander Name="ActivityExpander" IsExpanded="True" Height="200">
+                            <Expander.Header>
+                                <StackPanel Orientation="Horizontal" >
+                                    <CheckBox Content="Activity"  Name="chkActivityFilter" Checked="chkActivityFilter_Checked" Unchecked="chkActivityFilter_Unchecked"/>
+
+                                </StackPanel>
+                            </Expander.Header>
+                          
+
+                        </Expander>
+                        -->
+
+                    </StackPanel>
+                </GroupBox>
+                    </StackPanel>
+
+                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Left" Background="#FF6793BF"/>
+
+            <DataGrid Grid.Column="2" Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="False"
                       ItemsSource="{Binding}" 
                       CanUserReorderColumns="False"
                       MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
                       ClipboardCopyMode="IncludeHeader"
                       SelectionMode="Extended"
                       ColumnWidth="120" 
-                      ToolTipService.ShowDuration="15000">
+                      CanUserResizeRows="False">
 
-                
+
             </DataGrid>
-
-            <!--  <DataGrid.ColumnHeaderStyle>
-                    <Style TargetType="DataGridColumnHeader">
-                        <EventSetter Event="Click"  Handler="dataGridHeader_Click" />
-                    </Style>
-                </DataGrid.ColumnHeaderStyle>
-                -->
-
-
-                <!-- <DataGrid Name="dataGrid" CanUserAddRows="True" CanUserDeleteRows="True" CanUserSortColumns="True" CanUserReorderColumns="False" ItemsSource="{Binding}" MouseRightButtonUp="dataGrid_MouseRightButtonUp" DataContextChanged="dataGrid_DataContextChanged" SelectionChanged="dataGrid_SelectionChanged">
-                <DataGrid.Columns>
-                    <DataGridCheckBoxColumn IsThreeState="False" Binding="{Binding, UpdateSourceTrigger=PropertyChanged}"></DataGridCheckBoxColumn>
-                    
-                </DataGrid.Columns>
-            -->
-
-             
-
-
 
         </Grid>
 

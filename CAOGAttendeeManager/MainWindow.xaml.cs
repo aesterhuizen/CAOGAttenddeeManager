@@ -44,6 +44,10 @@ namespace CAOGAttendeeProject
 
             InitializeComponent();
 
+          //  InitActivityList();
+            
+
+
 #if (DEBUG)
             this.Title = "CAOG Attendee Manager (Debug)";
 #endif
@@ -144,7 +148,7 @@ namespace CAOGAttendeeProject
 
 
         private ModelDb m_dbContext;
-
+        //private List<Activity> lstActivities = new List<Activity>();
         private DateTime m_DateSelected;
         private DateTime m_alistDateSelected;
         private DataSet m_DataSet = new DataSet();
@@ -200,21 +204,7 @@ namespace CAOGAttendeeProject
 
 
         }
-        private void ChangedbVal()
-        {
-
-
-
-            var queryAttendees = from AttendeeRec in m_dbContext.Attendees
-                                 select AttendeeRec;
-
-            foreach (var Attendee in queryAttendees)
-            {
-                Attendee.Prospect = 0;
-            }
-            m_dbContext.SaveChanges();
-
-        }
+      
 
         private void correctDBerrors()
         {
@@ -325,8 +315,189 @@ namespace CAOGAttendeeProject
 
 
         }
+        public void PrintTree(BinaryTreeNode root, TreeTraversal treeTraversal)
+        {
+            int count = 0;  
+            BinTreeTraversal(root, ref count);
+                    
+        }
+        public void BinTreeTraversal(BinaryTreeNode root, ref int count)
+        {
+            if (root != null)
+            {
+                TreeViewItem newItem = new TreeViewItem();
+                newItem.Header = root.Name;
+                //ActivityTreeViewer.Items.Add(newItem);
+                
+
+                if (count > 1)
+                {
+                    newItem.IsExpanded = true;
+                    TreeViewItem subItem = new TreeViewItem();
+                    CheckBox mychkbox = new CheckBox();
+                    mychkbox.Content = root.Name;
+                    mychkbox.Margin = new Thickness(5, 0, 0, 0);
+
+                    subItem.Header = mychkbox;
+                   // ActivityTreeViewer.Items.Add(subItem);
+
+                }
+                //TextBlock txtblkActivityHeader = new TextBlock();
+                //txtblkActivityHeader.Name = $"txtblkActivityHeader_{count++}";
+                //txtblkActivityHeader.Text = root.Name;
+                //spActivity.Children.Add(txtblkActivityHeader);
 
 
+                //CheckBox chkActivityHeader = new CheckBox();
+                //chkActivityHeader.Margin = new Thickness(5, 0, 0, 0);
+                //chkActivityHeader.Content = root.Metadata;
+                //spActivity.Children.Add(chkActivityHeader);
+
+                BinTreeTraversal(root.Right, ref count);
+                BinTreeTraversal(root.Left, ref count);
+            }
+
+            
+                
+
+           
+                
+
+           
+            }
+        public void InOrderTraversal(BinaryTreeNode root)
+        {
+            if (root != null)
+            {
+                InOrderTraversal(root.Left);
+                Console.WriteLine($"{ root.Name}");
+                InOrderTraversal(root.Right);
+            }
+
+        }
+        public void PostOrderTraversal(BinaryTreeNode root)
+        {
+            if (root != null)
+            {
+
+                PostOrderTraversal(root.Left);
+                PostOrderTraversal(root.Right);
+                Console.WriteLine($"{root.Name}");
+            }
+
+        }
+        private void InitActivityList()
+        {
+
+            BinaryTreeNode car = new BinaryTreeNode("Caring");
+            BinaryTreeNode cca = new BinaryTreeNode("Central Christian Academy");
+            BinaryTreeNode ck5 = new BinaryTreeNode("Central Kids: Elementry (K-5th Grade)");
+            BinaryTreeNode ckn = new BinaryTreeNode("Central Kids: Nursery (8WKS-2YRS)");
+            BinaryTreeNode ckp = new BinaryTreeNode("Central Kids: Preschool (3-5YRS old)");
+            BinaryTreeNode cko = new BinaryTreeNode("Central Kids: Outreach Events");
+            BinaryTreeNode ca = new BinaryTreeNode("Creative Arts");
+            BinaryTreeNode hel = new BinaryTreeNode("Helps");
+            BinaryTreeNode hos = new BinaryTreeNode("Hospitality");
+            BinaryTreeNode outr = new BinaryTreeNode("Outreach: Local Missions");
+            BinaryTreeNode cktr = new BinaryTreeNode("Students: The Rock (6-12th Grade)");
+
+            car.set_left(cca);
+            car.set_right(new BinaryTreeNode("Hospitality","Briefely visit(on a day of your choosing) and pray with individuals who are in local hospitals - Church office will supply admission information."));
+            car.Right.set_left(new BinaryTreeNode("Shut-In Visitation", "Call to arrange convenient times fora home visit - Communion may also be served."));
+            car.Right.Left.set_left(new BinaryTreeNode("Nursing Home Visitation", "Visit local nursing homes during anassigned week each month to encourage those in need."));
+
+            cca.set_left(ck5);
+            cca.set_right(new BinaryTreeNode("General Volenteer"));
+            cca.Right.set_left(new BinaryTreeNode("Box Tops Collector","Cut, collect and count Box Tops."));
+            cca.Right.Left.set_left(new BinaryTreeNode("Library Helper","Proof read library books before we put them on the shelves."));
+            cca.Right.Left.Left.set_left(new BinaryTreeNode("Lunch Monitor","Help to supervise the children during lunchtime."));
+            cca.Right.Left.Left.Left.set_left(new BinaryTreeNode("Office Helper","Help to prepare mass mailings for fundraisers."));
+
+            ck5.set_left(ckn);
+            ck5.set_right(new BinaryTreeNode("Sunday Mornings: Super Church"));
+            ck5.Right.set_right(new BinaryTreeNode("Leader/Teacher & Assistant", "Facilitate the lessons, crafts & classroom management. Provide a godly example."));
+            ck5.Right.Right.set_left(new BinaryTreeNode("Check-in Greeter", "Greet families while checking-in kids with our computerized system at the beginning of the service."));
+            ck5.Right.set_left(new BinaryTreeNode("Wednesday Evenings: M-Pact Girls Club & Royal Rangers"));
+            ck5.Right.Left.set_right(new BinaryTreeNode("Leader/Teacher & Assistant", "Facilitate the lessons, crafts & classroom management. Provide a godly example."));
+            ck5.Right.Left.Right.set_left(new BinaryTreeNode("Check-in Greeter", "Greet families while checking-in kids with our computerized system at the beginning of the service."));
+
+            ckn.set_left(ckp);
+            ckn.set_right(new BinaryTreeNode("Sunday Mornings & Wednesday Evenings"));
+            ckn.Right.set_right(new BinaryTreeNode("Leader/Assistant","Minister to nursery age children and their needs."));
+            ckn.Right.Right.set_left(new BinaryTreeNode("Rocker","Hold and rock infants as you minister in the nursery."));
+            ckn.Right.Right.Left.set_left(new BinaryTreeNode("Check-in Greeter","Greet families while checking in kids with our computerized system at the begining of  service."));
+
+            ckp.set_left(cko);
+            ckp.set_right(new BinaryTreeNode("Children's Church (Sunday) & Rainbows Club (Wednesdays)"));
+            ckp.Right.set_right(new BinaryTreeNode("Leader/Teacher & Assistant"));
+
+            cko.set_left(ca);
+            cko.set_right(new BinaryTreeNode("Concessions", "Prepare and serve food to children."));
+            cko.Right.set_left(new BinaryTreeNode("Leader & Assistant", "Minister to children and their needs at these events."));
+            cko.Right.Left.set_left(new BinaryTreeNode("Recreation", "Register children as they enter each day's event."));
+            cko.Right.Left.Left.set_left(new BinaryTreeNode("Security", "Monitoring and securing the grounds at each event."));
+
+
+            ca.set_left(hel);
+            ca.set_right(new BinaryTreeNode("Workshop Team (Vocal & Instrumental)", "Use your talents to assist in leading the congregation into worship during our weekly services."));
+            ca.Right.set_left(new BinaryTreeNode("Technical Multimedia Team", "Apply your skills in the area of sound, videography, and computer technology during our weekly worship services."));
+
+            hel.set_left(hos);
+            hel.set_right(new BinaryTreeNode("Grounds Team"));
+            hel.Right.set_right(new BinaryTreeNode("Construction", "Use your skills to help with special projects on campus."));
+            hel.Right.Right.set_left(new BinaryTreeNode("Housekeeping", "Help keep our facilities clean by volunteering to clean in certain areas."));
+            hel.Right.Right.Left.set_left(new BinaryTreeNode("Lanscaping", "Groom and care for landscaping and mulchbeds around church and parsonage."));
+            hel.Right.Right.Left.Left.set_left(new BinaryTreeNode("Lawn Maintenance", "Join a rotaion to keep the lawn on campus mowed."));
+
+            hel.Right.set_left(new BinaryTreeNode("Kitchen Help"));
+            hel.Right.Left.set_right(new BinaryTreeNode("Funeral Dinners", "Cook and serve dinners to the families and friends of those whoare grievingafter funeral services."));
+            hel.Right.Left.Right.set_left(new BinaryTreeNode("Special Events", "Throughout the year their are events that will require assistance with cooking, food preparation and setup."));
+            hel.Right.Left.set_left(new BinaryTreeNode("Medical Ministry Team", "Be a first responder in the event of a medical emergency on the church campus or at a church event (special training and certification required)."));
+            hel.Right.Left.Left.set_left(new BinaryTreeNode("Office Volunteers"));
+            hel.Right.Left.Left.Left.set_right(new BinaryTreeNode("General Volunteer", "Support the office staff on a regular basis - answering phones, type & copy documents as needed, basic computer skills and a pleasant personality will be required."));
+            hel.Right.Left.Left.Left.Right.set_left(new BinaryTreeNode("Special Projects", "Help on an as-needed basis with a wide variety of tasks such as mailings, packet assembly, cutting, sorting, etc."));
+            hel.Right.Left.Left.Left.set_left(new BinaryTreeNode("Security Team", "Be a part of a ministry team to help ensure the safety of all who choose to worship at Central."));
+            hel.Right.Left.Left.Left.Left.set_left(new BinaryTreeNode("Transportation", "Drive school bus (CDL license required) or church vans for special events throughout the year for children, youth and adult groups."));
+
+
+            hos.set_left(outr);
+            hos.set_right(new BinaryTreeNode("Communion Team(set-up, Condense, or Clean-up)", "Prayerfully prepare the communion elements to be served monthly - includes clean-up (gathering cups from the pews and emptying/cleaning communion trays."));
+            hos.Right.set_left(new BinaryTreeNode("Welcome Center Assistance", "To welcome new people to Central by giving them a gift bag, offering a tour of the campus, and helping them finding their children's classes."));
+            hos.Right.Left.set_left(new BinaryTreeNode("Doorkeeper", "Open the doors for people as they arrive to make them fell welcome."));
+            hos.Right.Left.Left.set_left(new BinaryTreeNode("Greeter", "Greeting people with your talents and abilities to connect with God and others in the church."));
+            hos.Right.Left.Left.Left.set_right(new BinaryTreeNode("Information Center Assistant", "Supply congregation with up-to-date information regarding events, visitor information, ficility directions, and money collection for various items."));
+            hos.Right.Left.Left.Left.set_left(new BinaryTreeNode("Parking Lot Attendant", "Direct traffic flow, assist anyone who needs help getting into the church, and ensure a great first impression for everyone."));
+            hos.Right.Left.Left.Left.Left.set_left(new BinaryTreeNode("Usher Misistry", "Help seat guests, hand out bulletins, handle crowed control, answer questions, take offering and serve communion during our Sunday services and special events."));
+            hos.Right.Left.Left.Left.Left.Left.set_left(new BinaryTreeNode("Golf Cart Drivers", "Shuttle people to and from their cars on Sunday mornings and special events."));
+
+
+            outr.set_left(cktr);
+            outr.set_right(new BinaryTreeNode("Special Projects", "Help with local outreach projects including minor building repairs, painting, collecting and distriburting clothing & food, etc."));
+
+            cktr.set_right(new BinaryTreeNode("Administrative", "Guest follow-up, parent communication, mailing/emailing, Website."));
+            cktr.Right.set_left(new BinaryTreeNode("Adio/Technicl Team", "Prepare, manage, maintain and operate the sound, video, computer and lighting systems to enhance services."));
+            cktr.Right.Left.set_left(new BinaryTreeNode("Cafe Team", "Serving food, snacks and beverage items to the students on Wednesday nights and special events."));
+            cktr.Right.Left.Left.set_left(new BinaryTreeNode("Junior High Ministry Team", "Serve by teaching/assisting in our Sunday Morning Junior High Class with students in grades 6-8"));
+            cktr.Right.Left.Left.Left.set_right(new BinaryTreeNode("Ministry Team Volunteer", "Serve by assisting during Wednesday night meetings in the areas of check-in, leading activities, small group discussions, events, student discipleship and leader retreats."));
+            cktr.Right.Left.Left.Left.set_left(new BinaryTreeNode("Evangelic Outreach", "Shate the love of Christ with others by partnering with missionschurches' events, outreaches, VBS, etc."));
+
+
+
+
+            PrintTree(car, TreeTraversal.BinTreeTraversal);
+
+                          
+            
+            
+                
+
+            
+                
+                
+
+            
+
+        }
         private void GenerateDBFollowUps()
         {
             //problem
@@ -542,7 +713,7 @@ namespace CAOGAttendeeProject
                                     churchAttendee.LastName = FLname[0];
                                 }
 
-                                churchAttendee.Prospect = 0;
+                               
 
                                 //------for each column 1/3-4/30--------------------------------------------------------------------------------------------
                                 for (int col_index = 3; col_index <= 3 + 22; col_index++)
@@ -719,7 +890,7 @@ namespace CAOGAttendeeProject
                                     churchAttendee.LastName = FLname[0];
 
                                 }
-                                churchAttendee.Prospect = 1;
+                             
 
                                 if (dr["Last attended"].ToString() != "")
                                 {
@@ -742,7 +913,7 @@ namespace CAOGAttendeeProject
                                         churchAttendee.LastName = FLname[0];
 
                                     }
-                                    churchAttendee.Prospect = 1;
+                                  
 
                                     Attendee_Status.AttendeeId = attID;
                                     Attendee_Status.Date = dateLA;
@@ -809,6 +980,8 @@ namespace CAOGAttendeeProject
             dataGrid.CanUserAddRows = false;
             dataGrid.ToolTip = null;
             dataGrid.IsReadOnly = false;
+            if (m_DataSet.Tables.Count > 0)
+                lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
         } // end  private void Display_Database_in_Grid()
 
 
@@ -834,12 +1007,12 @@ namespace CAOGAttendeeProject
             dataGrid.IsReadOnly = false;
             dataGrid.CanUserDeleteRows = false;
             dataGrid.CanUserAddRows = false;
-            dataGrid.ToolTip = "Double click on a record to edit attendee First and Last name.\n\n " +
-                               "Left mouse click to select attendee.\n\n" +
-                               "Right mouse click to see selected attendee's attendence history.\n\n" +
-                               "Only attendee name modifications will be saved.";
-
-            lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
+            //dataGrid.ToolTip = "Double click on a record to edit attendee First and Last name.\n\n " +
+            //                   "Left mouse click to select attendee.\n\n" +
+            //                   "Right mouse click to see selected attendee's attendence history.\n\n" +
+            //                   "Only attendee name modifications will be saved.";
+            if (m_DataSet.Tables.Count > 0)
+                lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
         } // end  private void Display_Database_in_Grid()
 
 
@@ -878,6 +1051,7 @@ namespace CAOGAttendeeProject
                 Default_Data_Table.Columns.Add(new DataColumn("First Name"));
                 Default_Data_Table.Columns.Add(new DataColumn("Date Last Attended"));
                 Default_Data_Table.Columns.Add(new DataColumn("Status"));
+               
 
                 //-------------------------------Make AttendeeList Table-------------------------------------------------------------------
                 AttendeeListTable.Columns.Add(new DataColumn("AttendeeId"));
@@ -886,6 +1060,7 @@ namespace CAOGAttendeeProject
                 AttendeeListTable.Columns.Add(new DataColumn("First Name"));
                 AttendeeListTable.Columns.Add(new DataColumn("Date"));
                 AttendeeListTable.Columns.Add(new DataColumn("Attended", typeof(bool)));
+               
 
                 Default_Data_Table.Columns["AttendeeId"].Unique = true;
 
@@ -909,8 +1084,7 @@ namespace CAOGAttendeeProject
 
 
 
-                    if (AttendeeRec.Prospect == 0 || AttendeeRec.Prospect == 1)
-                    {
+                  
                         //----Construct AttendeeLisTable-----------------------------------------
                         DataRow drNewAttendeeListRec = AttendeeListTable.NewRow();
 
@@ -924,12 +1098,10 @@ namespace CAOGAttendeeProject
                         drNewAttendeeListRec["Attended"] = false;
 
                         AttendeeListTable.Rows.Add(drNewAttendeeListRec);
-                    }
+                   
 
                     //------Active Attendee--//---Construct DefaultTable-------------------------------------------------------------
-                    if (AttendeeRec.Prospect == 0)
-                    {
-
+                  
                         if (queryLastDate != null)
                         {
                             ldate = queryLastDate.Date.ToString("MM-dd-yyyy");
@@ -981,8 +1153,6 @@ namespace CAOGAttendeeProject
                                 Default_Data_Table.Rows.Add(DefaultTabledr);
 
                             }
-                        }
-
                     }
                 } // end foreach
 
@@ -995,8 +1165,8 @@ namespace CAOGAttendeeProject
                 m_DataSet.Tables["DefaultTable"].AcceptChanges();
                 m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
 
-
-                lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
+                if (m_DataSet.Tables.Count > 0)
+                    lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
 
 
             }
@@ -1146,7 +1316,7 @@ namespace CAOGAttendeeProject
             chkAttended.IsEnabled = false;
             chkFollowup.IsEnabled = false;
             chkResponded.IsEnabled = false;
-            chkDateFilter.IsEnabled = false;
+            chkDateFilter.IsEnabled = false; 
 
 
 
@@ -1286,6 +1456,7 @@ namespace CAOGAttendeeProject
 
                 dataGrid.IsReadOnly = true;
                 dataGrid.ToolTip = "Select and right mouse click to see attendance history.";
+                queryTable.DefaultView.Sort = "[Last Name] ASC";
                 dataGrid.DataContext = queryTable;
                 if (dataGrid.Columns.Count > 1)
                 {
@@ -1293,7 +1464,7 @@ namespace CAOGAttendeeProject
                     dataGrid.Columns[1].Visibility = Visibility.Hidden; //LastFirstName
                 }
 
-
+                
 
 
 
@@ -1411,7 +1582,7 @@ namespace CAOGAttendeeProject
                 {
                     UpdateAttendeeListTableWithDateFilter();
                     dataGrid.DataContext = m_DataSet.Tables["AttendeeListTable"];
-                    // m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
+                 
 
                 }
                 else if (m_dateIsValid)
@@ -1494,7 +1665,7 @@ namespace CAOGAttendeeProject
                     if (datec.DayOfWeek == DayOfWeek.Sunday)
                     {
 
-                        txtDate.Text = date;
+                       // txtDate.Text = date; //FIX ME
 
                         m_dateIsValid = true;
 
@@ -1691,6 +1862,8 @@ namespace CAOGAttendeeProject
                         isAttendedStatusChecked = false;
                     }
                 }
+            if (isAttendedStatusChecked == false)
+                m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
 
             return isAttendedStatusChecked;
         }
@@ -1806,7 +1979,7 @@ namespace CAOGAttendeeProject
 
                 gridrowIdx = 0;
 
-                // loop over QueryTableMod and get index of record to remove
+                // loop over QueryTableMCopy and get index of record to remove
                 for (int i = 0; i <= QueryTableCopy.Rows.Count - 1; i++)
                 {
                     if (QueryTableCopy.Rows[i].RowState != DataRowState.Deleted)
@@ -2270,26 +2443,9 @@ namespace CAOGAttendeeProject
                                             newRecord.Status = "Attended";
                                         }
 
-                                        if (queryAttendee.Prospect == 1)
-                                        {
-                                            queryAttendee.Prospect = 0;
-                                            DataRow newdr = m_DataSet.Tables["DefaultTable"].NewRow();
-                                            newdr.ItemArray = new object[] {queryAttendee.AttendeeId,
-                                                                        flname,
-                                                                        dr["Last Name"],
-                                                                        dr["First Name"],
-                                                                        date,
-                                                                        newRecord.Status};
-
-
-                                            m_DataSet.Tables["DefaultTable"].Rows.Add(newdr);
-                                           
-
-                                        }
-                                        else
-                                        {
+                                       
                                             UpdateDefaultTableIdAndStatus(queryAttendee.AttendeeId.ToString(), newRecord.Date, newRecord.Status);
-                                        }
+                                       
 
 
 
@@ -2371,12 +2527,6 @@ namespace CAOGAttendeeProject
                 foreach (var AttendeeRec in queryAttendees)
                 {
 
-                    if (AttendeeRec.Prospect == 0 || AttendeeRec.Prospect == 1)
-                    {
-
-
-
-
                         m_NewAttendeeId = AttendeeRec.AttendeeId;
 
                         DataRow nrow = m_DataSet.Tables["AttendeeListTable"].NewRow();
@@ -2393,14 +2543,13 @@ namespace CAOGAttendeeProject
 
 
 
-                    }
-                } // end foreach
+                 } // end foreach
             } // end foreach data defaulttable row
 
             m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
 
-
-            lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
+            if (m_DataSet.Tables.Count > 0)
+                lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
         }
 
       
@@ -2427,9 +2576,6 @@ namespace CAOGAttendeeProject
                                                  where DateRec.Status == "Attended" || DateRec.Status == "Responded"
                                                  orderby DateRec.Date ascending
                                                  select DateRec).ToList().LastOrDefault();
-
-                    if (AttendeeRec.Prospect == 0)
-                    {
 
                         if (queryLastDateAttended != null)
                         {
@@ -2480,9 +2626,9 @@ namespace CAOGAttendeeProject
 
 
                             }
-                        }
+                       }
 
-                    } // end if Prospect==0
+                   
                 } // end foreach
             } // end foreach data defaulttable row
         }
@@ -2500,12 +2646,6 @@ namespace CAOGAttendeeProject
                 foreach (var AttendeeRec in queryAttendees)
                 {
 
-                    if (AttendeeRec.Prospect == 0 || AttendeeRec.Prospect == 1)
-                    {
-
-
-
-
                         m_NewAttendeeId = AttendeeRec.AttendeeId;
 
                         DataRow nrow = m_DataSet.Tables["AttendeeListTable"].NewRow();
@@ -2522,7 +2662,7 @@ namespace CAOGAttendeeProject
 
 
 
-                    }
+                  
                 } // end foreach
             } // end foreach data defaulttable row
         }
@@ -2550,9 +2690,6 @@ namespace CAOGAttendeeProject
                                                  orderby DateRec.Date ascending
                                                  select DateRec).ToList().LastOrDefault();
                     
-                    if (AttendeeRec.Prospect == 0)
-                    {
-
                         if (queryLastDateAttended != null)
                         {
                             ldate = queryLastDateAttended.Date.ToString("MM-dd-yyyy");
@@ -2603,8 +2740,7 @@ namespace CAOGAttendeeProject
 
                             }
                         }
-
-                    } // end if Prospect==0
+    
                 } // end foreach
             } // end foreach data defaulttable row
 
@@ -2646,7 +2782,7 @@ namespace CAOGAttendeeProject
             chkAttended.IsEnabled = true;
             chkFollowup.IsEnabled = true;
             chkResponded.IsEnabled = true;
-            chkDateFilter.IsEnabled = true;
+            chkDateFilter.IsEnabled = true; 
 
 
         }
@@ -2656,7 +2792,7 @@ namespace CAOGAttendeeProject
             chkFollowup.IsChecked = false;
             chkResponded.IsChecked = false;
             chkAttended.IsChecked = false;
-            chkDateFilter.IsChecked = false;
+            chkDateFilter.IsChecked = false; 
             DateCalendar.IsEnabled = false;
         }
 
@@ -2699,10 +2835,10 @@ namespace CAOGAttendeeProject
             if (m_dateIsValid)
             {
                 DateCalendar_SelectedDateChanged(null, null);
-                txtDate.Text = m_DateSelected.ToString("MM-dd-yyyy");
+               // txtDate.Text = m_DateSelected.ToString("MM-dd-yyyy"); //FIX ME
 
             }
-            txtDate.IsEnabled = true;
+            //txtDate.IsEnabled = true; //FIX ME
             DateCalendar.IsEnabled = true;
 
 
@@ -2716,8 +2852,8 @@ namespace CAOGAttendeeProject
         {
             m_filterByDate = false;
             DateCalendar.IsEnabled = false;
-            txtDate.IsEnabled = false;
-            txtDate.Text = "Check date filter to select date.";
+            // txtDate.IsEnabled = false; //FIX ME
+            // txtDate.Text = "Check date filter to select date."; //FIX ME
 
             string query = "0";
             Cursor = Cursors.Wait;
@@ -2782,11 +2918,11 @@ namespace CAOGAttendeeProject
             Uncheck_All_Filters();
 
 
-
+            //ActivityScrollViewer.IsEnabled = false;
 
 
             txtSearch.Text = "";
-            txtDate.IsEnabled = false;
+           //  txtDate.IsEnabled = false; //FIX ME
             m_dateIsValid = false;
 
             // commit datagrid edits and return DataContext to show all records
@@ -2798,8 +2934,7 @@ namespace CAOGAttendeeProject
 
 
 
-            lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
-
+           
 
             if (dataGrid.Columns.Count > 1)
             {
@@ -2814,68 +2949,18 @@ namespace CAOGAttendeeProject
 
         }
 
-        private void dataGridHeader_Click(object sender, RoutedEventArgs e)
-        {
-
-            //var colHeader = sender as DataGridColumnHeader;
-
-            //string colname = colHeader.Column.Header.ToString();
-
-            //if (colHeader != null)
-            //{
-            //    if (m_lstdataGridHeadersClicked.Contains(colname) )
-            //    {
-            //        m_lstdataGridHeadersClicked.Remove(colname);
-            //    }
-            //    else
-            //    {
-            //        m_lstdataGridHeadersClicked.Add(colname);
-            //    }
-
-
-            //    dataGrid.SelectionUnit = DataGridSelectionUnit.CellOrRowHeader;
-            //    dataGrid.SelectedCells.Clear();
-            //    foreach (var item in dataGrid.Items)
-            //    {
-            //        dataGrid.SelectedCells.Add(new DataGridCellInfo(item, dataGrid.Columns[0]));
-            //    }
-
-            //    foreach (DataRow row in m_DataSet.Tables["DefaultTable"].Rows)
-            //    {
-
-            //    }
-
-            // }
-
-
-            //var list = dataGrid.ItemsSource.Cast<object>();
-            //    List<string> lstnames = new List<string> { };
-
-            //if (list.Count() > 0)
-            //{
-
-
-            //        foreach (DataRow row in values)
-            //        {
-            //            lstnames.Add(row.ItemArray[index].ToString());
-
-            //        }
-
-            //    }
-
-
-            //     }
-
-
-
-        }
-
         private void CopyDataGridtoClipboard(object sender, DataGridRowClipboardEventArgs e)
         {
 
             var selectedcells = sender as DataGrid;
-            var currentCell = e.ClipboardRowContent[dataGrid.CurrentCell.Column.DisplayIndex - 1];
+            var currentCell = e.ClipboardRowContent[dataGrid.CurrentCell.Column.DisplayIndex-1];
             e.ClipboardRowContent.Add(currentCell);
+            if (e.ClipboardRowContent.Count > 3)
+            {
+                e.ClipboardRowContent.RemoveAt(4);
+            }
+            
+            
         }
 
         private void btnChart_Click(object sender, RoutedEventArgs e)
@@ -2987,7 +3072,10 @@ namespace CAOGAttendeeProject
                 m_AttendanceView = false;
                 DateCalendar.IsEnabled = true;
 
-
+                FilterOptionsGroupbox.Header = "Date";
+                DateStackPanel.Visibility = Visibility.Hidden;
+                //ActivityExpander.Visibility = Visibility.Hidden;
+                ChurchStatusExpender.Visibility = Visibility.Hidden;
                 
 
                 if (m_alistdateIsValid)
@@ -3010,12 +3098,7 @@ namespace CAOGAttendeeProject
 
                 Display_AttendeeListTable_in_Grid();
 
-                lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
-
-
-
-
-
+             
 
 
             }
@@ -3026,6 +3109,10 @@ namespace CAOGAttendeeProject
                 m_alistView = false;
                 m_AttendanceView = true;
 
+                FilterOptionsGroupbox.Header = "Filter Options";
+                DateStackPanel.Visibility = Visibility.Visible;
+               // ActivityExpander.Visibility = Visibility.Visible;
+                ChurchStatusExpender.Visibility = Visibility.Visible;
                 // commit datagrid edits and return DataContext to show all records
                 if (dataGrid.Columns.Count > 1)
                 {
@@ -3040,7 +3127,7 @@ namespace CAOGAttendeeProject
                 if (m_dateIsValid && m_filterByDate)
                 {
                     DateCalendar.SelectedDates.Clear();
-                    txtDate.Text = m_DateSelected.ToString("MM-dd-yyyy");
+                   // txtDate.Text = m_DateSelected.ToString("MM-dd-yyyy"); //FIX ME
                     DateCalendar.DisplayDate = m_DateSelected;
                     DateCalendar.SelectedDate = m_DateSelected;
 
@@ -3061,98 +3148,6 @@ namespace CAOGAttendeeProject
 
         }
 
-       
-
-        private void btnProspect_Click(object sender, RoutedEventArgs e)
-        {
-            var row_select = dataGrid.SelectedItems;
-
-            bool haschanges = false;
-
-            if (row_select.Count != 0)
-            {
-
-
-                foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
-                {
-                    if (dr.ItemArray[5].ToString() == "True")
-                    {
-                        haschanges = true;
-                        break;
-                    }
-                }
-
-
-                if (haschanges)
-                {
-                    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that needs to be added to the active attendance list first.\n\nDiscard checklist changes and mark selected attendees as prospect?", "Add Prospect Attendee", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                    if (res == MessageBoxResult.OK)
-                    {
-                        Cursor = Cursors.Wait;
-
-                        foreach (DataRowView drv in row_select)
-                        {
-
-                            int AttendeeId = int.Parse(drv.Row["AttendeeId"].ToString());
-
-                            var Attrec = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == AttendeeId);
-
-                            Attrec.Prospect = 1;
-
-                        }
-
-                        InitDefaultTable();
-                        InitAttendeeListTable();
-                        Cursor = Cursors.Arrow;
-                    }
-                    else if (res == MessageBoxResult.Cancel)
-                    {
-                        return;
-                    }
-
-                }
-                else
-                {
-                    MessageBoxResult res = MessageBox.Show("Are you sure you want to flag selected attendee(s) as prospect and remove them from the active attendance list?\n\n Attendee will be unflagged the next time attendee attend church", "Add Prospect Attendee", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                    if (res == MessageBoxResult.OK)
-                    {
-                        Cursor = Cursors.Wait;
-
-                        foreach (DataRowView drv in row_select)
-                        {
-
-                            int AttendeeId = int.Parse(drv.Row["AttendeeId"].ToString());
-
-                            var Attrec = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == AttendeeId);
-
-                            Attrec.Prospect = 1;
-
-                        }
-
-                        InitDefaultTable();
-                        InitAttendeeListTable();
-                        Cursor = Cursors.Arrow;
-                    }
-                    else if (res == MessageBoxResult.Cancel)
-                    {
-                        return;
-                    }
-
-
-                }
-            }
-            else
-            {
-                MessageBox.Show("At least one attendee record must be selected.", "Select Record", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-
-
-          
-
-
-
-        }
-            
         
         private void alisttxtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -3389,7 +3384,7 @@ namespace CAOGAttendeeProject
                 {
                     m_DataSet.Tables["DefaultTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
                     dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
-                    dataGrid.CanUserDeleteRows = true;
+                    dataGrid.CanUserDeleteRows = false;
                     dataGrid.CanUserAddRows = false;
                     dataGrid.IsReadOnly = false;
 
@@ -3473,6 +3468,118 @@ namespace CAOGAttendeeProject
                 MessageBox.Show("Successfully generated follow-ups!");
             }
             
+        }
+
+        private void DeleteRecordInAttendeeListTable(System.Collections.IList row_select)
+        {
+            int gridrowIdx = 0;
+
+
+            DataTable AttendeeListTableCopy = m_DataSet.Tables["AttendeeListTable"].Copy();
+
+
+            foreach (DataRowView drv in row_select)
+            {
+                int AttendeeId = int.Parse(drv.Row["AttendeeId"].ToString());
+
+                var Attrec = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == AttendeeId);
+
+
+                var queryAttendeeInfo = (from inforec in m_dbContext.Attendance_Info.Local
+                                         where inforec.AttendeeId == AttendeeId
+                                         select inforec).ToArray();
+
+                for (int idx = 0; idx <= queryAttendeeInfo.Count() - 1; idx++)
+                {
+                    m_dbContext.Attendance_Info.Remove(queryAttendeeInfo[idx]);
+                }
+                m_dbContext.Attendees.Remove(Attrec);
+
+                gridrowIdx = 0;
+
+                // loop over QueryTableMod and get index of record to remove
+                for (int i = 0; i <= AttendeeListTableCopy.Rows.Count - 1; i++)
+                {
+                    if (AttendeeListTableCopy.Rows[i].RowState != DataRowState.Deleted)
+                    {
+                        if (int.Parse(AttendeeListTableCopy.Rows[i]["AttendeeId"].ToString()) == AttendeeId)
+                        {
+                            AttendeeListTableCopy.Rows[gridrowIdx].Delete();
+
+                            break;
+                        }
+                    }
+                    gridrowIdx++;
+                }
+            }
+            AttendeeListTableCopy.AcceptChanges();
+            m_DataSet.Tables["AttendeeListTable"].Clear();
+            for (int i = 0; i <= AttendeeListTableCopy.Rows.Count - 1; i++)
+            {
+                m_DataSet.Tables["AttendeeListTable"].ImportRow(AttendeeListTableCopy.Rows[i]);
+
+            }
+
+            RedrawDefaultTable();
+            InitAttendeeListTable();
+            Cursor = Cursors.Arrow;
+            MessageBox.Show("Attendee record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
+        }
+        private void DeleteRecordInAttendeeList(object sender, RoutedEventArgs e)
+        {
+            var row_select = dataGrid.SelectedItems;
+
+
+
+            if (row_select.Count != 0)
+            {
+
+                Cursor = Cursors.Wait;
+               
+                            DeleteRecordInAttendeeListTable(row_select);
+                             
+
+
+            }
+
+            else
+            {
+                MessageBox.Show("At least one record must be selected.", "Select Record", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+
+            Cursor = Cursors.Arrow;
+        }
+
+        private void chkActivityFilter_Checked(object sender, RoutedEventArgs e)
+        {
+           // ActivityScrollViewer.IsEnabled = true;
+        }
+
+        private void chkActivityFilter_Unchecked(object sender, RoutedEventArgs e)
+        {
+           // ActivityScrollViewer.IsEnabled = false;
+        }
+
+        private void chkFilterAllNone_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void chkFilterAllNone_Unchecked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnCopy_Click(object sender, RoutedEventArgs e)
+        {
+
+           // DataGridCellClipboardEventArgs clip = new DataGridCellClipboardEventArgs()
+           // CopyDataGridtoClipboard(dataGrid, );
         }
     }
 
