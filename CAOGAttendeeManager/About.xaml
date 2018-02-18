@@ -10,7 +10,7 @@
         ResizeMode="NoResize">
     <Grid>
         <StackPanel Orientation="Vertical" Margin="0,50,0,0">
-            <Label Content="Attendee Manager v 2.5" HorizontalAlignment="Center" />
+            <Label Content="Attendee Manager v 2.6" HorizontalAlignment="Center" />
             <Label Content="by Anton Esterhuizen" HorizontalAlignment="Center" Margin="78,0" Width="138"/>
             
        </StackPanel>

@@ -38,7 +38,8 @@ namespace CAOGAttendeeProject
         public int AttendeeId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-       
+        public int Prospect { get; set; }
+
         public virtual List<Attendance_Info> AttendanceList { get; set; }
        
 
