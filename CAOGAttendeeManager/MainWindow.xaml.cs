@@ -2397,13 +2397,13 @@ namespace CAOGAttendeeProject
                                 // Add a new Attendee to context
                                 Attendee newAttendeeRec = new Attendee();
                                 Attendance_Info newAttInfoRec = new Attendance_Info();
-
+                                dupID = 1;
                                 // if attendee ID present increment by one
                                 while (dupID == 1)
                                 {
                                     var isAttID_present = m_dbContext.Attendees.Local.SingleOrDefault(attid => attid.AttendeeId == m_NewAttendeeId);
                                     if (isAttID_present != null)
-                                        m_NewAttendeeId += 1;
+                                      m_NewAttendeeId += 1;
                                     else
                                         dupID = 0;
                                 }
