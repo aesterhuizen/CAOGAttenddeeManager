@@ -115,7 +115,7 @@ namespace CAOGAttendeeProject
 
 
 
-
+            // GrdAttendeeInfo.ItemsSource = linqquery;
 
 
 

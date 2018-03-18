@@ -123,14 +123,14 @@
 
 
                 </RibbonGroup>
-                <RibbonGroup Header="Date" >
+                <!--<RibbonGroup Header="Date" >
 
 
                     <RibbonTextBox TextBoxWidth="120" Name="alisttxtDate" 
                                     SmallImageSource="Resources\CalDate.ico"
                                     IsReadOnly="True"/>
 
-                </RibbonGroup>
+                </RibbonGroup>-->
                 <RibbonGroup Header="Table Operations" Width="300">
 
 
@@ -150,7 +150,7 @@
                                   Label="Add Attendee" 
                                   LargeImageSource="Resources\Add.ico"
                                   Click="ImportRows_Click" 
-                                  ToolTip="Add all the changes made in this checklist to the active attendence list"/>
+                                  ToolTip="Add all the changes made in this checklist to the active attendance list"/>
 
                     <StackPanel Orientation="Horizontal">
                         <Label HorizontalAlignment="Left" Width="60">Prospect:</Label>
@@ -163,6 +163,9 @@
                 
             </RibbonTab>
             <!-- End AttendeeList #########################################################################-->
+            <RibbonTab Name="ActivityTab" Header="Activity">
+                
+            </RibbonTab>
         </Ribbon>
 
 
@@ -192,7 +195,7 @@
                                       DisplayDateChanged="DateCalendar_DisplayDateChanged" 
                                       SelectedDatesChanged="DateCalendar_SelectedDateChanged"/>
                         </Expander>
-                        <Expander Name="ChurchStatusExpender" Header="Church Status" IsExpanded="True">
+                        <Expander Name="ChurchStatusExpander" Header="Church Status" IsExpanded="True">
 
                             <StackPanel>
                                 <CheckBox Content="Attended" Name="chkAttended" Checked="chkAttended_Checked" Unchecked="chkAttended_Unchecked" HorizontalAlignment="Left" />
@@ -201,33 +204,65 @@
                             </StackPanel>
 
                         </Expander>
-                        <!--  <Expander Name="ActivityExpander" IsExpanded="True" Height="200">
+                        <Expander Name="ActivityExpander" IsExpanded="True" Height="200">
                             <Expander.Header>
                                 <StackPanel Orientation="Horizontal" >
                                     <CheckBox Content="Activity"  Name="chkActivityFilter" Checked="chkActivityFilter_Checked" Unchecked="chkActivityFilter_Unchecked"/>
 
                                 </StackPanel>
                             </Expander.Header>
-                          
+                                 <TreeView Name="trvActivities">
+                                    <TreeView.ItemContainerStyle>
+                                        <Style TargetType="{x:Type TreeViewItem}">
+                                            <Setter Property="IsExpanded" Value="True"/>
+                                        </Style>
+                                    </TreeView.ItemContainerStyle>
+                                    <TreeView.Resources>
+                                        <Style TargetType="{x:Type ScrollViewer}">
+                                            <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
+                                        </Style>
+                                        <HierarchicalDataTemplate DataType="{x:Type local:ActivityGroup }" ItemsSource="{Binding lstActivityTasks}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding ActivityName}" FontWeight="Bold" />
+                                            </StackPanel>
+                                        </HierarchicalDataTemplate>
+
+                                        <HierarchicalDataTemplate DataType="{x:Type local:ActivityTask }" ItemsSource="{Binding lstsubTasks}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <CheckBox Content="{Binding TaskName}" Margin="5,0,0,0" Checked="CheckBox_Checked_1" Unchecked="CheckBox_Unchecked"/>
+                                            </StackPanel>
+                                        </HierarchicalDataTemplate>
+                                   
+                                        
+                                        
+                                    </TreeView.Resources>
+                                </TreeView>
+
+                             
 
                         </Expander>
-                        -->
+                        
 
                     </StackPanel>
                 </GroupBox>
-                    </StackPanel>
+                <TextBlock Name="txtblkTaskDescription" TextWrapping="Wrap"/>
+            </StackPanel>
 
                     <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Left" Background="#FF6793BF"/>
 
             <DataGrid Grid.Column="2" Name="dataGrid" CanUserAddRows="False" CanUserDeleteRows="False"
-                      ItemsSource="{Binding}" 
+                      ItemsSource="{Binding IsAsync=True}" 
                       CanUserReorderColumns="False"
                       MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
                       ClipboardCopyMode="IncludeHeader"
                       SelectionMode="Extended"
                       ColumnWidth="120" 
                       CanUserResizeRows="False">
-
+                <DataGrid.RowDetailsTemplate>
+                    <DataTemplate>
+                        <TextBlock Margin="10" FontWeight="Bold">Details go here</TextBlock>
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
 
             </DataGrid>
 

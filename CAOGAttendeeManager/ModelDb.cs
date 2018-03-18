@@ -3,6 +3,7 @@ namespace CAOGAttendeeProject
     using System;
     using System.Data.Entity;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
 
     public class ModelDb : DbContext
@@ -38,6 +39,7 @@ namespace CAOGAttendeeProject
         public int AttendeeId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        // keep Prospect field for legacy purposes
         public int Prospect { get; set; }
 
         public virtual List<Attendance_Info> AttendanceList { get; set; }
@@ -47,19 +49,17 @@ namespace CAOGAttendeeProject
 
     public class Attendance_Info
     {
-        //public Attendance_Info()
-        //{
-        //    lstActivities = new List<Activity> { };
-        //}
+       
+
         public int Attendance_InfoId { get; set; }
         public int AttendeeId { get; set; }
         public virtual Attendee Attendee { get; set; }
         public DateTime Date { get; set; }
         public string Status { get; set; }
-      //  public virtual List<Activity> lstActivities { get; set; }
+        public string Activity { get; set; }
  
-        //public string Phone { get; set; }
-        //public string Email { get; set; }
+        public string Phone { get; set; }
+        public string Email { get; set; }
     }
     public class AttRecord
     {
@@ -74,51 +74,39 @@ namespace CAOGAttendeeProject
     }
     public class Activity
     {
-        public Activity()
+     
+        public string ActivityName { get; set; }
+      
+        public DateTime ActivityDateLastAttended { get; set; }
+        public string ActivityDescription { get; set; }
+
+
+    }
+
+    public class ActivityGroup
+    {
+        public ActivityGroup()
         {
-            lstActivityName = new List<string> { };
+            this.lstActivityTasks = new ObservableCollection<ActivityTask>();
         }
-        public string Header { get; set; }
-        public List<string> lstActivityName { get; set; }
-        public DateTime Date { get; set; }
+
+        public string ActivityName { get; set; }
+        public ObservableCollection<ActivityTask> lstActivityTasks { get; set; }
+    }
+    public class ActivityTask
+    {
+
+        public ActivityTask()
+        {
+            this.lstsubTasks = new ObservableCollection<ActivityTask>();
+        }
+        public string TaskName { get; set; }
         public string Description { get; set; }
 
-
+       public ObservableCollection<ActivityTask> lstsubTasks { get; set; }
     }
 
-    public class BinaryTreeNode
-    {
-        public BinaryTreeNode(string header, string data=null)
-        {
-            this.Name = header;
-            this.Metadata = data;
-        }
 
-        public string Name { get; set; }
-        public string Metadata { get; set; }
-        public BinaryTreeNode Left { get; set; }
-        public BinaryTreeNode Right { get; set; }
-
-        public void set_left(BinaryTreeNode new_left)
-        {
-            Left = new_left;
-
-        }
-
-        public void set_right(BinaryTreeNode new_right)
-        {
-            Right = new_right;
-        }
-
-
-    }
-    public enum TreeTraversal
-    {
-        BinTreeTraversal,
-        
-    }
-
-   
 
 
 

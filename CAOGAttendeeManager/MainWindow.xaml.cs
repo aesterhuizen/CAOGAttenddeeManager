@@ -5,6 +5,7 @@ using System.IO;
 using Microsoft.Win32;
 using System.Timers;
 using System.Collections.Generic;
+
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,7 +45,7 @@ namespace CAOGAttendeeProject
 
             InitializeComponent();
 
-          //  InitActivityList();
+            InitActivityList();
             
 
 
@@ -155,7 +156,7 @@ namespace CAOGAttendeeProject
         private DateTime m_alistDateSelected;
         private DataSet m_DataSet = new DataSet();
         DataTable m_tempTable = new DataTable();
-
+        List<ActivityGroup> m_lstActivities = new List<ActivityGroup>();
         // private Timer aTimer;
 
         private bool m_NoCredFile = false;
@@ -421,187 +422,203 @@ namespace CAOGAttendeeProject
 
 
         }
-        public void PrintTree(BinaryTreeNode root, TreeTraversal treeTraversal)
-        {
-            int count = 0;  
-            BinTreeTraversal(root, ref count);
-                    
-        }
-        public void BinTreeTraversal(BinaryTreeNode root, ref int count)
-        {
-            if (root != null)
-            {
-                TreeViewItem newItem = new TreeViewItem();
-                newItem.Header = root.Name;
-                //ActivityTreeViewer.Items.Add(newItem);
-                
+        // public void PrintTree(BinaryTreeNode root, TreeTraversal treeTraversal)
+        // {
+        //     int count = 1;  
+        //     BinTreeTraversal(root, ref count);
 
-                if (count > 1)
-                {
-                    newItem.IsExpanded = true;
-                    TreeViewItem subItem = new TreeViewItem();
-                    CheckBox mychkbox = new CheckBox();
-                    mychkbox.Content = root.Name;
-                    mychkbox.Margin = new Thickness(5, 0, 0, 0);
-
-                    subItem.Header = mychkbox;
-                   // ActivityTreeViewer.Items.Add(subItem);
-
-                }
-                //TextBlock txtblkActivityHeader = new TextBlock();
-                //txtblkActivityHeader.Name = $"txtblkActivityHeader_{count++}";
-                //txtblkActivityHeader.Text = root.Name;
-                //spActivity.Children.Add(txtblkActivityHeader);
+        // }
+        // public void BinTreeTraversal(BinaryTreeNode root, ref int count)
+        // {
+        //     if (root != null)
+        //     {
 
 
-                //CheckBox chkActivityHeader = new CheckBox();
-                //chkActivityHeader.Margin = new Thickness(5, 0, 0, 0);
-                //chkActivityHeader.Content = root.Metadata;
-                //spActivity.Children.Add(chkActivityHeader);
 
-                BinTreeTraversal(root.Right, ref count);
-                BinTreeTraversal(root.Left, ref count);
-            }
+        //         if (count % 2 == 0)
+        //         {
+        //             CheckBox chkActivityHeader = new CheckBox();
+        //             chkActivityHeader.Margin = new Thickness(5, 0, 0, 0);
+        //             chkActivityHeader.Content = root.Name;
+        //             spActivity.Children.Add(chkActivityHeader);
 
-            
-                
 
-           
-                
+        //         }
+        //         else
+        //         {
+        //             CheckBox chkActivityHeader = new CheckBox();
+        //             chkActivityHeader.Margin = new Thickness(5, 0, 0, 0);
+        //             chkActivityHeader.Content = root.Name;
+        //             spActivity.Children.Add(chkActivityHeader);
+        //             TextBlock txtblkActivityHeader = new TextBlock();
+        //             txtblkActivityHeader.Name = $"txtblkActivityHeader_{count}";
+        //             txtblkActivityHeader.Text = root.Name;
+        //             spActivity.Children.Add(txtblkActivityHeader);
+        //         }
 
-           
-            }
-        public void InOrderTraversal(BinaryTreeNode root)
-        {
-            if (root != null)
-            {
-                InOrderTraversal(root.Left);
-                Console.WriteLine($"{ root.Name}");
-                InOrderTraversal(root.Right);
-            }
 
-        }
-        public void PostOrderTraversal(BinaryTreeNode root)
-        {
-            if (root != null)
-            {
 
-                PostOrderTraversal(root.Left);
-                PostOrderTraversal(root.Right);
-                Console.WriteLine($"{root.Name}");
-            }
+        //         count =+ 2;
+        //         BinTreeTraversal(root.Right, ref count);
+        //         count =- 1;
+        //         BinTreeTraversal(root.Left, ref count);
 
-        }
+        //     }
+
+
+
+
+
+
+
+
+        //}
+        // public void InOrderTraversal(BinaryTreeNode root)
+        // {
+        //     if (root != null)
+        //     {
+        //         InOrderTraversal(root.Left);
+        //         Console.WriteLine($"{ root.Name}");
+        //         InOrderTraversal(root.Right);
+        //     }
+
+        // }
+        // public void PostOrderTraversal(BinaryTreeNode root)
+        // {
+        //     if (root != null)
+        //     {
+
+        //         PostOrderTraversal(root.Left);
+        //         PostOrderTraversal(root.Right);
+        //         Console.WriteLine($"{root.Name}");
+        //     }
+
+        // }
+
         private void InitActivityList()
         {
 
-            BinaryTreeNode car = new BinaryTreeNode("Caring");
-            BinaryTreeNode cca = new BinaryTreeNode("Central Christian Academy");
-            BinaryTreeNode ck5 = new BinaryTreeNode("Central Kids: Elementry (K-5th Grade)");
-            BinaryTreeNode ckn = new BinaryTreeNode("Central Kids: Nursery (8WKS-2YRS)");
-            BinaryTreeNode ckp = new BinaryTreeNode("Central Kids: Preschool (3-5YRS old)");
-            BinaryTreeNode cko = new BinaryTreeNode("Central Kids: Outreach Events");
-            BinaryTreeNode ca = new BinaryTreeNode("Creative Arts");
-            BinaryTreeNode hel = new BinaryTreeNode("Helps");
-            BinaryTreeNode hos = new BinaryTreeNode("Hospitality");
-            BinaryTreeNode outr = new BinaryTreeNode("Outreach: Local Missions");
-            BinaryTreeNode cktr = new BinaryTreeNode("Students: The Rock (6-12th Grade)");
+        
+         
 
-            car.set_left(cca);
-            car.set_right(new BinaryTreeNode("Hospitality","Briefely visit(on a day of your choosing) and pray with individuals who are in local hospitals - Church office will supply admission information."));
-            car.Right.set_left(new BinaryTreeNode("Shut-In Visitation", "Call to arrange convenient times fora home visit - Communion may also be served."));
-            car.Right.Left.set_left(new BinaryTreeNode("Nursing Home Visitation", "Visit local nursing homes during anassigned week each month to encourage those in need."));
-
-            cca.set_left(ck5);
-            cca.set_right(new BinaryTreeNode("General Volenteer"));
-            cca.Right.set_left(new BinaryTreeNode("Box Tops Collector","Cut, collect and count Box Tops."));
-            cca.Right.Left.set_left(new BinaryTreeNode("Library Helper","Proof read library books before we put them on the shelves."));
-            cca.Right.Left.Left.set_left(new BinaryTreeNode("Lunch Monitor","Help to supervise the children during lunchtime."));
-            cca.Right.Left.Left.Left.set_left(new BinaryTreeNode("Office Helper","Help to prepare mass mailings for fundraisers."));
-
-            ck5.set_left(ckn);
-            ck5.set_right(new BinaryTreeNode("Sunday Mornings: Super Church"));
-            ck5.Right.set_right(new BinaryTreeNode("Leader/Teacher & Assistant", "Facilitate the lessons, crafts & classroom management. Provide a godly example."));
-            ck5.Right.Right.set_left(new BinaryTreeNode("Check-in Greeter", "Greet families while checking-in kids with our computerized system at the beginning of the service."));
-            ck5.Right.set_left(new BinaryTreeNode("Wednesday Evenings: M-Pact Girls Club & Royal Rangers"));
-            ck5.Right.Left.set_right(new BinaryTreeNode("Leader/Teacher & Assistant", "Facilitate the lessons, crafts & classroom management. Provide a godly example."));
-            ck5.Right.Left.Right.set_left(new BinaryTreeNode("Check-in Greeter", "Greet families while checking-in kids with our computerized system at the beginning of the service."));
-
-            ckn.set_left(ckp);
-            ckn.set_right(new BinaryTreeNode("Sunday Mornings & Wednesday Evenings"));
-            ckn.Right.set_right(new BinaryTreeNode("Leader/Assistant","Minister to nursery age children and their needs."));
-            ckn.Right.Right.set_left(new BinaryTreeNode("Rocker","Hold and rock infants as you minister in the nursery."));
-            ckn.Right.Right.Left.set_left(new BinaryTreeNode("Check-in Greeter","Greet families while checking in kids with our computerized system at the begining of  service."));
-
-            ckp.set_left(cko);
-            ckp.set_right(new BinaryTreeNode("Children's Church (Sunday) & Rainbows Club (Wednesdays)"));
-            ckp.Right.set_right(new BinaryTreeNode("Leader/Teacher & Assistant"));
-
-            cko.set_left(ca);
-            cko.set_right(new BinaryTreeNode("Concessions", "Prepare and serve food to children."));
-            cko.Right.set_left(new BinaryTreeNode("Leader & Assistant", "Minister to children and their needs at these events."));
-            cko.Right.Left.set_left(new BinaryTreeNode("Recreation", "Register children as they enter each day's event."));
-            cko.Right.Left.Left.set_left(new BinaryTreeNode("Security", "Monitoring and securing the grounds at each event."));
+            ActivityGroup Caring = new ActivityGroup() { ActivityName = "Caring" };
+            ActivityGroup Central_Christian_Academy = new ActivityGroup() { ActivityName = "Central Christian Academy" };
+            ActivityGroup Central_Kids_Elementry_K5th_Grade = new ActivityGroup() { ActivityName = "Central Kids: Elementry (K-5th Grade)" };
+            ActivityGroup Central_Kids_Nursery_8WKS_2YRS = new ActivityGroup() { ActivityName = "Central Kids: Nursery (8WKS-2YRS)" };
+            ActivityGroup Central_Kids_Preschool3_5YRS_old = new ActivityGroup() { ActivityName = "Central Kids: Preschool (3-5YRS old)" };
+            ActivityGroup Central_Kids_Outreach_Events = new ActivityGroup() { ActivityName = "Central Kids: Outreach Events" };
+            ActivityGroup Creative_Arts = new ActivityGroup() { ActivityName = "Creative Arts" };
+            ActivityGroup Helps = new ActivityGroup() { ActivityName = "Helps" };
+            ActivityGroup Hospitality = new ActivityGroup() { ActivityName = "Hospitality" };
+            ActivityGroup Outreach_Local_Missions = new ActivityGroup() { ActivityName = "Outreach: Local Missions" };
+            ActivityGroup Students_The_Rock6_12th_Grade = new ActivityGroup() { ActivityName = "Students: The Rock (6-12th Grade)" };
 
 
-            ca.set_left(hel);
-            ca.set_right(new BinaryTreeNode("Workshop Team (Vocal & Instrumental)", "Use your talents to assist in leading the congregation into worship during our weekly services."));
-            ca.Right.set_left(new BinaryTreeNode("Technical Multimedia Team", "Apply your skills in the area of sound, videography, and computer technology during our weekly worship services."));
+            Caring.lstActivityTasks.Add(new ActivityTask() { TaskName = "Hospitality", Description = "Briefely visit(on a day of your choosing) and pray with individuals who are in local hospitals - Church office will supply admission information." });
+            Caring.lstActivityTasks.Add(new ActivityTask() { TaskName = "Shut-In Visitation", Description = "Call to arrange convenient times fora home visit - Communion may also be served." });
+            Caring.lstActivityTasks.Add(new ActivityTask() { TaskName = "Nursing Home Visitation", Description = "Visit local nursing homes during anassigned week each month to encourage those in need." });
 
-            hel.set_left(hos);
-            hel.set_right(new BinaryTreeNode("Grounds Team"));
-            hel.Right.set_right(new BinaryTreeNode("Construction", "Use your skills to help with special projects on campus."));
-            hel.Right.Right.set_left(new BinaryTreeNode("Housekeeping", "Help keep our facilities clean by volunteering to clean in certain areas."));
-            hel.Right.Right.Left.set_left(new BinaryTreeNode("Lanscaping", "Groom and care for landscaping and mulchbeds around church and parsonage."));
-            hel.Right.Right.Left.Left.set_left(new BinaryTreeNode("Lawn Maintenance", "Join a rotaion to keep the lawn on campus mowed."));
+          
 
-            hel.Right.set_left(new BinaryTreeNode("Kitchen Help"));
-            hel.Right.Left.set_right(new BinaryTreeNode("Funeral Dinners", "Cook and serve dinners to the families and friends of those whoare grievingafter funeral services."));
-            hel.Right.Left.Right.set_left(new BinaryTreeNode("Special Events", "Throughout the year their are events that will require assistance with cooking, food preparation and setup."));
-            hel.Right.Left.set_left(new BinaryTreeNode("Medical Ministry Team", "Be a first responder in the event of a medical emergency on the church campus or at a church event (special training and certification required)."));
-            hel.Right.Left.Left.set_left(new BinaryTreeNode("Office Volunteers"));
-            hel.Right.Left.Left.Left.set_right(new BinaryTreeNode("General Volunteer", "Support the office staff on a regular basis - answering phones, type & copy documents as needed, basic computer skills and a pleasant personality will be required."));
-            hel.Right.Left.Left.Left.Right.set_left(new BinaryTreeNode("Special Projects", "Help on an as-needed basis with a wide variety of tasks such as mailings, packet assembly, cutting, sorting, etc."));
-            hel.Right.Left.Left.Left.set_left(new BinaryTreeNode("Security Team", "Be a part of a ministry team to help ensure the safety of all who choose to worship at Central."));
-            hel.Right.Left.Left.Left.Left.set_left(new BinaryTreeNode("Transportation", "Drive school bus (CDL license required) or church vans for special events throughout the year for children, youth and adult groups."));
+        
+            ActivityTask General_Volunteer = new ActivityTask { TaskName = "General Volenteer" };
+            General_Volunteer.lstsubTasks.Add(new ActivityTask() { TaskName = "Box Tops Collector", Description = "Cut, collect and count Box Tops." });
+            General_Volunteer.lstsubTasks.Add(new ActivityTask() { TaskName = "Library Helper", Description = "Proof read library books before we put them on the shelves." });
+            General_Volunteer.lstsubTasks.Add(new ActivityTask() { TaskName = "Lunch Monitor", Description = "Help to supervise the children during lunchtime." });
+            General_Volunteer.lstsubTasks.Add(new ActivityTask() { TaskName = "Office Helper", Description = "Help to prepare mass mailings for fundraisers." });
+
+            Central_Christian_Academy.lstActivityTasks.Add(General_Volunteer);
+
+            ActivityTask Sunday_mornings = new ActivityTask { TaskName = "Sunday Mornings: Super Church" };
+            Sunday_mornings.lstsubTasks.Add(new ActivityTask() { TaskName = "Leader/Teacher & Assistant", Description = "Facilitate the lessons, crafts & classroom management. Provide a godly example." });
+            Sunday_mornings.lstsubTasks.Add(new ActivityTask() { TaskName = "Check-in Greeter", Description = "Greet families while checking-in kids with our computerized system at the beginning of the service." });
+
+            ActivityTask Wednesday_evenings = new ActivityTask { TaskName = "Wednesday Evenings: M-Pact Girls Club & Royal Rangers" };
+            Wednesday_evenings.lstsubTasks.Add(new ActivityTask() { TaskName = "Leader/Teacher & Assistant", Description = "Facilitate the lessons, crafts & classroom management. Provide a godly example." });
+            Wednesday_evenings.lstsubTasks.Add(new ActivityTask() { TaskName = "Check-in Greeter", Description = "Greet families while checking-in kids with our computerized system at the beginning of the service." });
+
+            ActivityTask Sunday_Mornings_Wednesday_Evenings = new ActivityTask { TaskName = "Sunday Mornings & Wednesday Evenings" };
+            Sunday_Mornings_Wednesday_Evenings.lstsubTasks.Add(new ActivityTask() { TaskName = "Leader/Assistant", Description = "Minister to nursery age children and their needs." });
+            Sunday_Mornings_Wednesday_Evenings.lstsubTasks.Add(new ActivityTask() { TaskName = "Rocker", Description = "Hold and rock infants as you minister in the nursery." });
+            Sunday_Mornings_Wednesday_Evenings.lstsubTasks.Add(new ActivityTask() { TaskName = "Check-in Greeter", Description = "Greet families while checking in kids with our computerized system at the begining of  service."});
+
+            ActivityTask Childrens_church = new ActivityTask { TaskName = "Children's Church (Sunday) & Rainbows Club (Wednesdays)" };
+            Childrens_church.lstsubTasks.Add(new ActivityTask() { TaskName = "Leader/Teacher & Assistant", Description = "Facilitate the lessons, crafts & classroom management. Provide a godly example." });
+
+            Central_Kids_Preschool3_5YRS_old.lstActivityTasks.Add(Childrens_church);
+            Central_Kids_Nursery_8WKS_2YRS.lstActivityTasks.Add(Sunday_Mornings_Wednesday_Evenings);
+
+            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { TaskName = "Concessions", Description = "Prepare and serve food to children." });
+            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { TaskName = "Leader & Assistant", Description = "Minister to children and their needs at these events." });
+            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { TaskName = "Recreation", Description = "Register children as they enter each day's event." });
+            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { TaskName = "Security", Description = "Monitoring and securing the grounds at each event." });
+
+            Central_Kids_Elementry_K5th_Grade.lstActivityTasks.Add(Sunday_mornings);
+            Central_Kids_Elementry_K5th_Grade.lstActivityTasks.Add(Wednesday_evenings);
+
+            Creative_Arts.lstActivityTasks.Add(new ActivityTask() { TaskName = "Workshop Team (Vocal & Instrumental", Description = "Use your talents to assist in leading the congregation into worship during our weekly services." });
+            Creative_Arts.lstActivityTasks.Add(new ActivityTask() { TaskName = "Technical Multimedia Team", Description = "Apply your skills in the area of sound, videography, and computer technology during our weekly worship services." });
+
+            ActivityTask GroundsTeam = new ActivityTask { TaskName = "Grounds Team" };
+            GroundsTeam.lstsubTasks.Add(new ActivityTask() { TaskName = "Construction", Description = "Use your skills to help with special projects on campus." });
+            GroundsTeam.lstsubTasks.Add(new ActivityTask() { TaskName = "Housekeeping", Description = "Help keep our facilities clean by volunteering to clean in certain areas." });
+            GroundsTeam.lstsubTasks.Add(new ActivityTask() { TaskName = "Lanscaping", Description = "Groom and care for landscaping and mulchbeds around church and parsonage." });
+            GroundsTeam.lstsubTasks.Add(new ActivityTask() { TaskName = "Lawn Maintenance", Description = "Join a rotaion to keep the lawn on campus mowed." });
+
+            ActivityTask kitchenHelp = new ActivityTask { TaskName = "Kitchen Help" };
+            kitchenHelp.lstsubTasks.Add(new ActivityTask() { TaskName = "Funeral Dinners", Description = "Cook and serve dinners to the families and friends of those whoare grievingafter funeral services." });
+            kitchenHelp.lstsubTasks.Add(new ActivityTask() { TaskName = "Special Events", Description = "Throughout the year their are events that will require assistance with cooking, food preparation and setup." });
+
+           
+            Helps.lstActivityTasks.Add(new ActivityTask() { TaskName = "Medical Ministry Team", Description = "Be a first responder in the event of a medical emergency on the church campus or at a church event (special training and certification required)." });
+
+            ActivityTask Office_Volunteers = new ActivityTask { TaskName = "Office Volunteers" };
+            GroundsTeam.lstsubTasks.Add(new ActivityTask() { TaskName = "General Volunteer", Description = "Support the office staff on a regular basis - answering phones, type & copy documents as needed, basic computer skills and a pleasant personality will be required." });
+            GroundsTeam.lstsubTasks.Add(new ActivityTask() { TaskName = "Special Projects", Description = "Help on an as-needed basis with a wide variety of tasks such as mailings, packet assembly, cutting, sorting, etc." });
 
 
-            hos.set_left(outr);
-            hos.set_right(new BinaryTreeNode("Communion Team(set-up, Condense, or Clean-up)", "Prayerfully prepare the communion elements to be served monthly - includes clean-up (gathering cups from the pews and emptying/cleaning communion trays."));
-            hos.Right.set_left(new BinaryTreeNode("Welcome Center Assistance", "To welcome new people to Central by giving them a gift bag, offering a tour of the campus, and helping them finding their children's classes."));
-            hos.Right.Left.set_left(new BinaryTreeNode("Doorkeeper", "Open the doors for people as they arrive to make them fell welcome."));
-            hos.Right.Left.Left.set_left(new BinaryTreeNode("Greeter", "Greeting people with your talents and abilities to connect with God and others in the church."));
-            hos.Right.Left.Left.Left.set_right(new BinaryTreeNode("Information Center Assistant", "Supply congregation with up-to-date information regarding events, visitor information, ficility directions, and money collection for various items."));
-            hos.Right.Left.Left.Left.set_left(new BinaryTreeNode("Parking Lot Attendant", "Direct traffic flow, assist anyone who needs help getting into the church, and ensure a great first impression for everyone."));
-            hos.Right.Left.Left.Left.Left.set_left(new BinaryTreeNode("Usher Misistry", "Help seat guests, hand out bulletins, handle crowed control, answer questions, take offering and serve communion during our Sunday services and special events."));
-            hos.Right.Left.Left.Left.Left.Left.set_left(new BinaryTreeNode("Golf Cart Drivers", "Shuttle people to and from their cars on Sunday mornings and special events."));
+            Helps.lstActivityTasks.Add(GroundsTeam);
+            Helps.lstActivityTasks.Add(kitchenHelp);
+            Helps.lstActivityTasks.Add(new ActivityTask() {TaskName= "Security Team",Description= "Be a part of a ministry team to help ensure the safety of all who choose to worship at Central." });
+            Helps.lstActivityTasks.Add(new ActivityTask() { TaskName = "Transportation", Description = "Drive school bus (CDL license required) or church vans for special events throughout the year for children, youth and adult groups." });
+
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Communion Team(set-up, Condense, or Clean-up)", Description = "Prayerfully prepare the communion elements to be served monthly - includes clean-up (gathering cups from the pews and emptying/cleaning communion trays." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Welcome Center Assistance", Description = "To welcome new people to Central by giving them a gift bag, offering a tour of the campus, and helping them finding their children's classes." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Doorkeeper", Description = "Open the doors for people as they arrive to make them fell welcome." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Greeter", Description = "Greeting people with your talents and abilities to connect with God and others in the church." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Information Center Assistant", Description = "Supply congregation with up-to-date information regarding events, visitor information, ficility directions, and money collection for various items." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Parking Lot Attendant", Description = "Direct traffic flow, assist anyone who needs help getting into the church, and ensure a great first impression for everyone." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Usher Misistry", Description = "Help seat guests, hand out bulletins, handle crowed control, answer questions, take offering and serve communion during our Sunday services and special events." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Golf Cart Drivers", Description = "Shuttle people to and from their cars on Sunday mornings and special events." });
+
+            Outreach_Local_Missions.lstActivityTasks.Add(new ActivityTask() { TaskName = "Special Projects", Description = "Help with local outreach projects including minor building repairs, painting, collecting and distriburting clothing & food, etc." });
+
+            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { TaskName = "Administrative", Description = "Guest follow-up, parent communication, mailing/emailing, Website." });
+            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { TaskName = "Adio/Technicl Team", Description = "Prepare, manage, maintain and operate the sound, video, computer and lighting systems to enhance services." });
+            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { TaskName = "Cafe Team", Description = "Serving food, snacks and beverage items to the students on Wednesday nights and special events." });
+            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { TaskName = "Junior High Ministry Team", Description = "Serve by teaching/assisting in our Sunday Morning Junior High Class with students in grades 6-8" });
+            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { TaskName = "Ministry Team Volunteer", Description = "Serve by assisting during Wednesday night meetings in the areas of check-in, leading activities, small group discussions, events, student discipleship and leader retreats." });
+            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { TaskName = "Evangelic Outreach", Description = "Shate the love of Christ with others by partnering with missionschurches' events, outreaches, VBS, etc." });
+
+            //  lstsubTasks = new System.Collections.ObjectModel.ObservableCollection<ActivityTask>().Add(subtask1)
+
+            m_lstActivities.Add(Caring);
+            m_lstActivities.Add(Central_Christian_Academy);
+            m_lstActivities.Add(Central_Kids_Elementry_K5th_Grade);
+            m_lstActivities.Add(Central_Kids_Nursery_8WKS_2YRS);
+            m_lstActivities.Add(Central_Kids_Preschool3_5YRS_old);
+            m_lstActivities.Add(Central_Kids_Outreach_Events);
+            m_lstActivities.Add(Creative_Arts);
+            m_lstActivities.Add(Helps);
+            m_lstActivities.Add(Hospitality);
+            m_lstActivities.Add(Outreach_Local_Missions);
+            m_lstActivities.Add(Students_The_Rock6_12th_Grade);
 
 
-            outr.set_left(cktr);
-            outr.set_right(new BinaryTreeNode("Special Projects", "Help with local outreach projects including minor building repairs, painting, collecting and distriburting clothing & food, etc."));
 
-            cktr.set_right(new BinaryTreeNode("Administrative", "Guest follow-up, parent communication, mailing/emailing, Website."));
-            cktr.Right.set_left(new BinaryTreeNode("Adio/Technicl Team", "Prepare, manage, maintain and operate the sound, video, computer and lighting systems to enhance services."));
-            cktr.Right.Left.set_left(new BinaryTreeNode("Cafe Team", "Serving food, snacks and beverage items to the students on Wednesday nights and special events."));
-            cktr.Right.Left.Left.set_left(new BinaryTreeNode("Junior High Ministry Team", "Serve by teaching/assisting in our Sunday Morning Junior High Class with students in grades 6-8"));
-            cktr.Right.Left.Left.Left.set_right(new BinaryTreeNode("Ministry Team Volunteer", "Serve by assisting during Wednesday night meetings in the areas of check-in, leading activities, small group discussions, events, student discipleship and leader retreats."));
-            cktr.Right.Left.Left.Left.set_left(new BinaryTreeNode("Evangelic Outreach", "Shate the love of Christ with others by partnering with missionschurches' events, outreaches, VBS, etc."));
-
-
-
-
-            PrintTree(car, TreeTraversal.BinTreeTraversal);
-
-                          
+            trvActivities.ItemsSource = m_lstActivities;
             
-            
-                
 
-            
-                
-                
-
-            
 
         }
         private void GenerateDBFollowUps()
@@ -1157,7 +1174,9 @@ namespace CAOGAttendeeProject
                 Default_Data_Table.Columns.Add(new DataColumn("First Name"));
                 Default_Data_Table.Columns.Add(new DataColumn("Date Last Attended"));
                 Default_Data_Table.Columns.Add(new DataColumn("Status"));
-               
+                //Default_Data_Table.Columns.Add(new DataColumn("Activity"));
+                //Default_Data_Table.Columns.Add(new DataColumn("Phone"));
+                //Default_Data_Table.Columns.Add(new DataColumn("Email"));
 
                 //-------------------------------Make AttendeeList Table-------------------------------------------------------------------
                 AttendeeListTable.Columns.Add(new DataColumn("AttendeeId"));
@@ -1750,7 +1769,7 @@ namespace CAOGAttendeeProject
                         dataGrid.DataContext = m_DataSet.Tables["AttendeeListTable"];
 
 
-                        alisttxtDate.Text = date;
+                      //  alisttxtDate.Text = date;
 
 
                     }
@@ -1867,6 +1886,8 @@ namespace CAOGAttendeeProject
                 calendar.BlackoutDates.Add(new CalendarDateRange(d, d));
             }
         }
+
+    
         private void DateCalendar_Loaded(object sender, RoutedEventArgs e)
         {
 
@@ -2515,8 +2536,7 @@ namespace CAOGAttendeeProject
                                 }
                                 else
                                 { // add attinfo rec modified record
-                                    if (dr.ItemArray[5].ToString() == "True")
-                                    {
+                                   
                                         int attid = int.Parse(dr["AttendeeId"].ToString());
                                         Attendance_Info newRecord = new Attendance_Info { };
 
@@ -2562,7 +2582,7 @@ namespace CAOGAttendeeProject
 
 
                                     
-                                }
+                                
 
                             }
                         } //end modified
@@ -3024,6 +3044,7 @@ namespace CAOGAttendeeProject
 
             Uncheck_All_Filters();
 
+            chkActivityFilter.IsChecked = true;
 
             //ActivityScrollViewer.IsEnabled = false;
 
@@ -3182,13 +3203,13 @@ namespace CAOGAttendeeProject
                 FilterOptionsGroupbox.Header = "Date";
                 DateStackPanel.Visibility = Visibility.Hidden;
                 //ActivityExpander.Visibility = Visibility.Hidden;
-                ChurchStatusExpender.Visibility = Visibility.Hidden;
+                ChurchStatusExpander.Visibility = Visibility.Hidden;
                 
 
                 if (m_alistdateIsValid)
                 {
                     DateCalendar.SelectedDates.Clear();
-                    alisttxtDate.Text = m_alistDateSelected.ToString("MM-dd-yyyy");
+                  //  alisttxtDate.Text = m_alistDateSelected.ToString("MM-dd-yyyy");
                     DateCalendar.DisplayDate = m_alistDateSelected;
                     DateCalendar.SelectedDate = m_alistDateSelected;
 
@@ -3219,7 +3240,7 @@ namespace CAOGAttendeeProject
                 FilterOptionsGroupbox.Header = "Filter Options";
                 DateStackPanel.Visibility = Visibility.Visible;
                // ActivityExpander.Visibility = Visibility.Visible;
-                ChurchStatusExpender.Visibility = Visibility.Visible;
+                ChurchStatusExpander.Visibility = Visibility.Visible;
                 // commit datagrid edits and return DataContext to show all records
                 if (dataGrid.Columns.Count > 1)
                 {
@@ -3660,12 +3681,12 @@ namespace CAOGAttendeeProject
 
         private void chkActivityFilter_Checked(object sender, RoutedEventArgs e)
         {
-           // ActivityScrollViewer.IsEnabled = true;
+            trvActivities.IsEnabled = true;
         }
 
         private void chkActivityFilter_Unchecked(object sender, RoutedEventArgs e)
         {
-           // ActivityScrollViewer.IsEnabled = false;
+            trvActivities.IsEnabled = false;
         }
 
         private void chkFilterAllNone_Checked(object sender, RoutedEventArgs e)
@@ -3688,6 +3709,44 @@ namespace CAOGAttendeeProject
 
            // DataGridCellClipboardEventArgs clip = new DataGridCellClipboardEventArgs()
            // CopyDataGridtoClipboard(dataGrid, );
+        }
+
+        private void CheckBox_Checked_1(object sender, RoutedEventArgs e)
+        {
+            var check = sender as CheckBox;
+
+            var activityName = check.Content;
+            
+            foreach (ActivityGroup activity_group in m_lstActivities)
+            {
+                foreach (ActivityTask task in activity_group.lstActivityTasks )
+                {
+                    if (task.lstsubTasks.Count != 0)
+                    {
+                        foreach (ActivityTask subtask in task.lstsubTasks)
+                        {
+                            if (activityName == subtask.TaskName)
+                            {
+                                txtblkTaskDescription.Text = subtask.Description;
+                                break;
+                            }
+                        }
+                    }
+                    if (activityName == task.TaskName)
+                    {
+                        txtblkTaskDescription.Text = task.Description;
+                        break;
+                    }
+                }
+            }
+
+
+
+        }
+
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            txtblkTaskDescription.Text = "";
         }
     }
 
