@@ -33,7 +33,7 @@ namespace CAOGAttendeeProject
 
         public Attendee()
         {
-            AttendanceList = new List<Attendance_Info> { };
+            this.AttendanceList = new ObservableCollection<Attendance_Info>();
 
         }
         public int AttendeeId { get; set; }
@@ -42,24 +42,27 @@ namespace CAOGAttendeeProject
         // keep Prospect field for legacy purposes
         public int Prospect { get; set; }
 
-        public virtual List<Attendance_Info> AttendanceList { get; set; }
+        public virtual ObservableCollection<Attendance_Info> AttendanceList { get; private set; }
        
 
     }
 
     public class Attendance_Info
     {
-       
-
+        
         public int Attendance_InfoId { get; set; }
         public int AttendeeId { get; set; }
-        public virtual Attendee Attendee { get; set; }
+
         public DateTime Date { get; set; }
         public string Status { get; set; }
         public string Activity { get; set; }
- 
+
         public string Phone { get; set; }
         public string Email { get; set; }
+
+        public virtual Attendee Attendee { get; set; }
+
+        
     }
     public class AttRecord
     {
@@ -71,6 +74,19 @@ namespace CAOGAttendeeProject
 
 
 
+    }
+
+    public class txtSearchState
+    {
+        public txtSearchState()
+        {
+            txtSearchActiveState = "";
+            txtSearchActivityState = "";
+            txtSearchProspectState = "";
+        }
+        public string txtSearchActiveState { get; set; }
+        public string txtSearchProspectState { get; set; }
+        public string txtSearchActivityState { get; set; }
     }
     public class Activity
     {
