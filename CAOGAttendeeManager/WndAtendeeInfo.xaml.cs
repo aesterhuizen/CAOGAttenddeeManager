@@ -21,7 +21,7 @@ namespace CAOGAttendeeProject
     /// </summary>
     public partial class WndAttendeeInfo : Window
     {
-        public WndAttendeeInfo(string fname, string lname, ModelDb dbcontext)
+        public WndAttendeeInfo(string fname, string lname, ref ModelDb dbcontext)
         {
             InitializeComponent();
             IQueryable<AttRecord> querylinq;
