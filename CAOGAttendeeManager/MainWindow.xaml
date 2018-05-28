@@ -142,9 +142,9 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <GroupBox Name="FilterOptionsGroupbox" Header="Filter Options">
+                <GroupBox Name="gbFilterOptions" Header="Filter Options">
 
-                    <StackPanel MinWidth="200">
+                    <StackPanel Name="spFilterOptions" MinWidth="200">
                         <Expander Name="CalendarExpander" IsExpanded="True" Margin="0,0,0,10">
                             <Expander.Header>
                                 <StackPanel Name="DateStackPanel" Orientation="Horizontal">
@@ -165,7 +165,7 @@
                             </StackPanel>
 
                         </Expander>
-                        <Expander Name="ActivityExpander" IsExpanded="True" Height="200">
+                        <!--<Expander Name="ActivityExpander" IsExpanded="True" Height="200">
                             <Expander.Header>
                                 <StackPanel Orientation="Horizontal" >
                                     <CheckBox Content="Activity"  Name="chkActivityFilter" Checked="chkActivityFilter_Checked" Unchecked="chkActivityFilter_Unchecked"/>
@@ -201,7 +201,7 @@
 
 
 
-                        </Expander>
+                        </Expander>-->
 
 
                     </StackPanel>
@@ -227,19 +227,15 @@
                                 ColumnWidth="120" 
                                 CanUserResizeRows="False" 
                                 ItemsSource="{Binding}"/>
-
-                    <!--<DataGrid.Columns>
-                                <DataGridTextColumn Header="Status" Binding="{Binding  Status}"/>
-                                <DataGridTextColumn Header="Activity" Binding="{Binding Activity}"/>
-                                <DataGridTextColumn Header="Last Date Attended" Binding="{Binding Date}"/>
-                            </DataGrid.Columns>
-                        </DataGrid>-->
-                   <!-- </Grid>-->
+     
 
                 </TabItem>
 
                 <TabItem Header="Prospect List" Name="ProspectListTab">
-                    <DataGrid Name="dataGrid_prospect" CanUserAddRows="False" CanUserDeleteRows="False"
+                                       
+                    <DataGrid Name="dataGrid_prospect"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
                       ItemsSource="{Binding IsAsync=True}" 
                       CanUserReorderColumns="False"
                       MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
@@ -247,9 +243,11 @@
                       SelectionMode="Extended"
                       ColumnWidth="120" 
                       CanUserResizeRows="False"/>
+
+                    
                 </TabItem>
 
-                <TabItem Header="Activity" Name="ActivityTab">
+                <!--<TabItem Header="Activity" Name="ActivityTab">
                     <DataGrid Name="dataGrid_activity" CanUserAddRows="False" CanUserDeleteRows="False"
                       ItemsSource="{Binding IsAsync=True}" 
                       CanUserReorderColumns="False"
@@ -257,13 +255,13 @@
                       ClipboardCopyMode="IncludeHeader"
                       SelectionMode="Extended"
                       ColumnWidth="120" 
-                      CanUserResizeRows="False">
+                      CanUserResizeRows="False"/>
 
 
-                       
-                    </DataGrid>
 
-                </TabItem>
+
+
+                </TabItem>-->
             </TabControl>
 
 

@@ -76,6 +76,8 @@ namespace CAOGAttendeeProject
 
     }
 
+  
+
     public class txtSearchState
     {
         public txtSearchState()
