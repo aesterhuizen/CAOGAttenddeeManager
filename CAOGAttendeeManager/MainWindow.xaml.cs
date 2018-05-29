@@ -631,7 +631,7 @@ namespace CAOGAttendeeProject
             //3) if attendee has 3 follow-ups in a row, flag attendee and don't consider him for another follow-up entry. 
 
 
-            // DateTime curdate = DateTime.Now;
+             DateTime curdate = DateTime.Now;
             // get last date that was just entered
             // int addEntity = 0;
             List<DateTime> lstsundays = new List<DateTime>();
@@ -640,12 +640,7 @@ namespace CAOGAttendeeProject
 
             Cursor = Cursors.Wait;
 
-            var latest_date_attened = (from d in m_dbContext.Attendance_Info.Local
-                                       where (d.Status == "Attended" || d.Status == "Responded")
-                                       orderby d.Date ascending
-                                       select d).ToArray().LastOrDefault();
-
-
+           
 
             var queryAttendees = from AttendeeRec in m_dbContext.Attendees.Local
                                  select AttendeeRec;
@@ -663,7 +658,7 @@ namespace CAOGAttendeeProject
 
                 if (lstDateRecs != null)
                 {
-                    timespanSinceDate = latest_date_attened.Date - lstDateRecs.Date;
+                    timespanSinceDate = curdate - lstDateRecs.Date;
 
                     //if (AttendeeRec.FirstName == "Shirley" && AttendeeRec.LastName == "Adams")
                     //{
@@ -684,7 +679,7 @@ namespace CAOGAttendeeProject
                         //search for sunday
 
 
-                        for (DateTime date = lstDateRecs.Date; date <= latest_date_attened.Date; date = date.AddDays(1))
+                        for (DateTime date = lstDateRecs.Date; date <= curdate; date = date.AddDays(1))
                         {
                             if (date.DayOfWeek == DayOfWeek.Sunday)
                             {
@@ -1102,19 +1097,19 @@ namespace CAOGAttendeeProject
 
             if (m_DataSet.Tables.Contains("AttendeeListTable"))
             {
+                m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
+                m_DataSet.Tables["AttendeeListTable"].DefaultView.Sort = "[Last Name] ASC";
+
                 dataGrid_prospect.DataContext = m_DataSet.Tables["AttendeeListTable"];
 
-                // m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
-              //  m_DataSet.Tables["AttendeeListTable"].DefaultView.Sort = "[Last Name] ASC";
-              
 
             }
-          
+
             dataGrid_prospect.CanUserDeleteRows = false;
             dataGrid_prospect.CanUserAddRows = false;
             dataGrid_prospect.IsReadOnly = false;
 
-           lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
+            lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
         } 
 
 
@@ -1128,7 +1123,7 @@ namespace CAOGAttendeeProject
             {
 
                 dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
-                (dataGrid.DataContext as DataTable).DefaultView.Sort = "[Last Name] ASC";
+               (dataGrid.DataContext as DataTable).DefaultView.Sort = "[Last Name] ASC";
 
                 
                
@@ -2021,7 +2016,7 @@ namespace CAOGAttendeeProject
 
             
                 // save dataGrid edits
-                dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+                dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
                 foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
                 {
                     if (dr.ItemArray[5].ToString() == "True")
@@ -2044,8 +2039,7 @@ namespace CAOGAttendeeProject
         private void DeleteRecordInDefaultDataTable(int AttendeeId)
         {
           
-            int gridrowIdx = 0;
-           
+                      
             for (int i = 0; i <= m_DataSet.Tables["DefaultTable"].Rows.Count - 1; i++)
             {
                 
@@ -2066,49 +2060,61 @@ namespace CAOGAttendeeProject
         private void DeleteRecordInDefaultTable(System.Collections.IList row_select)
         {
 
-            int gridrowIdx = 0;
-            int AttendeeId = 0;
+          
 
             DataTable DefaultTableCopy = m_DataSet.Tables["DefaultTable"].Copy();
            
 
             foreach (DataRowView drv in row_select)
             {
-                AttendeeId = int.Parse(drv.Row["AttendeeId"].ToString());
+                bool bconv = int.TryParse(drv.Row["AttendeeId"].ToString(), out int result);
 
-                var Attrec = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == AttendeeId);
-
-
-                //var queryAttendeeInfo = (from inforec in m_dbContext.Attendance_Info.Local
-                //                         where inforec.AttendeeId == AttendeeId
-                //                         select inforec).ToArray();
-
-                for (int idx = 0; idx <= Attrec.AttendanceList.Count() - 1; idx++)
+                if (result == 0)
                 {
-                    m_dbContext.Attendance_Info.Remove(Attrec.AttendanceList[idx]);
+                    // convert fail because AttendeeId = "", this is a added row but user want to delete it
                 }
-                if (Attrec != null)
-                    m_dbContext.Attendees.Remove(Attrec);
-
-                gridrowIdx = 0;
-
-                // loop over QueryTableMod and get index of record to remove
-                for (int i = 0; i <= DefaultTableCopy.Rows.Count - 1; i++)
+                else
                 {
-                    if (DefaultTableCopy.Rows[i].RowState != DataRowState.Deleted)
+                    var Attrec = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == result);
+
+
+
+
+                    for (int idx = 0; idx <= Attrec.AttendanceList.Count() - 1; idx++)
                     {
-                        if (int.Parse(DefaultTableCopy.Rows[i]["AttendeeId"].ToString()) == AttendeeId)
-                        {
-                            DefaultTableCopy.Rows[gridrowIdx].Delete();
-                            m_DataSet.Tables["AttendeeListTable"].Rows[gridrowIdx].Delete();
-                            m_DataSet.Tables["ActivityTable"].Rows[gridrowIdx].Delete();
-
-                            break;
-                        }
+                        m_dbContext.Attendance_Info.Remove(Attrec.AttendanceList[idx]);
                     }
-                    gridrowIdx++;
+                    if (Attrec != null)
+                        m_dbContext.Attendees.Remove(Attrec);
+
                 }
+
+
+
+                // get row index of datarow to remove from AttendeeList DataTable
+                int rowindex = m_DataSet.Tables["DefaultTable"].Rows.IndexOf(drv.Row);
+
+
+                if (DefaultTableCopy.Rows[rowindex].RowState != DataRowState.Deleted)
+                {
+
+                    if (drv.Row["AttendeeId"].ToString() == "")
+                    {
+
+                        DefaultTableCopy.Rows[rowindex].Delete();
+                    }
+                    else
+                    {
+                        m_DataSet.Tables["AttendeeListTable"].Rows[rowindex].Delete();
+                        m_DataSet.Tables["ActivityTable"].Rows[rowindex].Delete();
+                        DefaultTableCopy.Rows[rowindex].Delete();
+                    }
+
+
+                }
+
             }
+
             DefaultTableCopy.AcceptChanges();
             m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
             m_DataSet.Tables["ActivityTable"].AcceptChanges();
@@ -2124,7 +2130,11 @@ namespace CAOGAttendeeProject
             ShowFiltered_Or_DefaultTable();
            
             Cursor = Cursors.Arrow;
-            MessageBox.Show("Attendee record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
+            if (m_dbContext.ChangeTracker.HasChanges() )
+            {
+                MessageBox.Show("Attendee record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
+            }
+                
         }
 
         private void DeleteRecordInActivityTable(System.Collections.IList row_select)
@@ -2136,39 +2146,48 @@ namespace CAOGAttendeeProject
 
             foreach (DataRowView drv in row_select)
             {
-                AttendeeId = int.Parse(drv.Row["AttendeeId"].ToString());
+                bool bconv = int.TryParse(drv.Row["AttendeeId"].ToString(), out int result);
 
-                var Attrec = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == AttendeeId);
-
-
-                //var queryAttendeeInfo = (from inforec in m_dbContext.Attendance_Info.Local
-                //                         where inforec.AttendeeId == AttendeeId
-                //                         select inforec).ToArray();
-
-                for (int idx = 0; idx <= Attrec.AttendanceList.Count() - 1; idx++)
+                if (result == 0)
                 {
-                    m_dbContext.Attendance_Info.Remove(Attrec.AttendanceList[idx]);
+                    // convert fail because AttendeeId = "", this is a added row but user want to delete it
                 }
-                if (Attrec != null)
-                    m_dbContext.Attendees.Remove(Attrec);
-
-                gridrowIdx = 0;
-
-                // loop over QueryTableMod and get index of record to remove
-                for (int i = 0; i <= ActivityListTableCopy.Rows.Count - 1; i++)
+                else
                 {
-                    if (ActivityListTableCopy.Rows[i].RowState != DataRowState.Deleted)
-                    {
-                        if (int.Parse(ActivityListTableCopy.Rows[i]["AttendeeId"].ToString()) == AttendeeId)
-                        {
-                            ActivityListTableCopy.Rows[gridrowIdx].Delete();
-                            m_DataSet.Tables["AttendeeListTable"].Rows[gridrowIdx].Delete();
-                            m_DataSet.Tables["DefaultTable"].Rows[gridrowIdx].Delete();
+                    var Attrec = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == result);
 
-                            break;
-                        }
+
+
+
+                    for (int idx = 0; idx <= Attrec.AttendanceList.Count() - 1; idx++)
+                    {
+                        m_dbContext.Attendance_Info.Remove(Attrec.AttendanceList[idx]);
                     }
-                    gridrowIdx++;
+                    if (Attrec != null)
+                        m_dbContext.Attendees.Remove(Attrec);
+
+                }
+
+                // get row index of datarow to remove from AttendeeList DataTable
+                int rowindex = m_DataSet.Tables["AttendeeListTable"].Rows.IndexOf(drv.Row);
+
+
+                if (ActivityListTableCopy.Rows[rowindex].RowState != DataRowState.Deleted)
+                {
+
+                    if (drv.Row["AttendeeId"].ToString() == "")
+                    {
+
+                        ActivityListTableCopy.Rows[rowindex].Delete();
+                    }
+                    else
+                    {
+                        m_DataSet.Tables["DefaultTable"].Rows[rowindex].Delete();
+                        m_DataSet.Tables["AttendeeList"].Rows[rowindex].Delete();
+                        ActivityListTableCopy.Rows[rowindex].Delete();
+                    }
+
+
                 }
             }
             ActivityListTableCopy.AcceptChanges();
@@ -2187,55 +2206,73 @@ namespace CAOGAttendeeProject
             Display_ActivityTable_in_Grid();
            
             Cursor = Cursors.Arrow;
-            MessageBox.Show("Attendee record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
+            if (m_dbContext.ChangeTracker.HasChanges() )
+            {
+                MessageBox.Show("Attendee record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
+            }
+            
 
         }
         private void DeleteRecordInAttendeeListTable(System.Collections.IList row_select)
         {
-            int gridrowIdx = 0;
+            
 
 
             DataTable AttendeeListTableCopy = m_DataSet.Tables["AttendeeListTable"].Copy();
-
+            
 
             foreach (DataRowView drv in row_select)
             {
-                int AttendeeId = int.Parse(drv.Row["AttendeeId"].ToString());
 
-                var Attrec = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == AttendeeId);
+              
+                    bool bconv = int.TryParse(drv.Row["AttendeeId"].ToString(), out int result);
 
-
-                //var queryAttendeeInfo = (from inforec in m_dbContext.Attendance_Info.Local
-                //                         where inforec.AttendeeId == AttendeeId
-                //                         select inforec).ToArray();
-
-                for (int idx = 0; idx <= Attrec.AttendanceList.Count() - 1; idx++)
+                if (result == 0)
                 {
-                    m_dbContext.Attendance_Info.Remove(Attrec.AttendanceList[idx]);
+                    // convert fail because AttendeeId = "", this is a added row but user want to delete it
                 }
-                if (Attrec != null)
-                    m_dbContext.Attendees.Remove(Attrec);
-
-                gridrowIdx = 0;
-
-                // loop over QueryTableMod and get index of record to remove
-                for (int i = 0; i <= AttendeeListTableCopy.Rows.Count - 1; i++)
+                else
                 {
-                    if (AttendeeListTableCopy.Rows[i].RowState != DataRowState.Deleted)
+                    var Attrec = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == result);
+
+
+                   
+
+                    for (int idx = 0; idx <= Attrec.AttendanceList.Count() - 1; idx++)
                     {
-                        if (int.Parse(AttendeeListTableCopy.Rows[i]["AttendeeId"].ToString()) == AttendeeId)
-                        {
-                            AttendeeListTableCopy.Rows[gridrowIdx].Delete();
-                            m_DataSet.Tables["DefaultTable"].Rows[gridrowIdx].Delete();
-                            m_DataSet.Tables["ActivityTable"].Rows[gridrowIdx].Delete();
-
-
-                            break;
-                        }
+                        m_dbContext.Attendance_Info.Remove(Attrec.AttendanceList[idx]);
                     }
-                    gridrowIdx++;
+                    if (Attrec != null)
+                        m_dbContext.Attendees.Remove(Attrec);
+
                 }
-            }
+
+                // get row index of datarow to remove from AttendeeList DataTable
+                int rowindex = m_DataSet.Tables["AttendeeListTable"].Rows.IndexOf(drv.Row);
+
+                               
+                if (AttendeeListTableCopy.Rows[rowindex].RowState != DataRowState.Deleted)
+                {
+                        
+                        if (drv.Row["AttendeeId"].ToString() == "")
+                        {
+                            
+                            AttendeeListTableCopy.Rows[rowindex].Delete();
+                        }
+                        else
+                        {
+                            m_DataSet.Tables["DefaultTable"].Rows[rowindex].Delete();
+                            m_DataSet.Tables["ActivityTable"].Rows[rowindex].Delete();
+                            AttendeeListTableCopy.Rows[rowindex].Delete();
+                        }
+
+                        
+                }
+
+                            
+                
+            } // end foreach drv
+
             AttendeeListTableCopy.AcceptChanges();
             m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
             m_DataSet.Tables["ActivityTable"].AcceptChanges();
@@ -2250,7 +2287,11 @@ namespace CAOGAttendeeProject
            
             Display_AttendeeListTable_in_Grid();
             Cursor = Cursors.Arrow;
-            MessageBox.Show("Attendee record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
+            if (m_dbContext.ChangeTracker.HasChanges() )
+            {
+                MessageBox.Show("Attendee record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
+            }
+            
         }
         private void DeleteRecordInQueryTable(System.Collections.IList row_select)
         {
@@ -2389,6 +2430,7 @@ namespace CAOGAttendeeProject
                 Cursor = Cursors.Wait;
                 bool isDirty = isAttendeeListDirty();
 
+              
                 if (isDirty)
                 {
                     MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list.\n\n" +
@@ -2411,7 +2453,8 @@ namespace CAOGAttendeeProject
                         }
                         if (m_alistView)
                         {
-                            DeleteRecordInAttendeeListTable(row_select);
+                          
+                                DeleteRecordInAttendeeListTable(row_select);
                         }
                         if (m_activityView)
                         {
@@ -3755,7 +3798,11 @@ namespace CAOGAttendeeProject
 
                 }
                 else
-                   Display_DefaultTable_in_Grid();
+                {
+                    (dataGrid.DataContext as DataTable).DefaultView.Sort = "[Last Name] ASC";
+                    Display_DefaultTable_in_Grid();
+                }
+                   
             }
 
             if (dataGrid.Columns.Count > 1)
@@ -3939,150 +3986,169 @@ namespace CAOGAttendeeProject
 
             if ((GridsTabControl.SelectedItem as TabItem).Name == "ActiveTab")
             {
-                int rowindex = 0;
-                bool datarow_empty = false;
-
-                foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
+                if (!m_AttendanceView)
                 {
-                    if (dr.RowState == DataRowState.Added && dr.ItemArray[2].ToString() == "" && dr.ItemArray[3].ToString() == "")
+
+
+
+                    int rowindex = 0;
+                    bool datarow_empty = false;
+
+                    foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
                     {
-                        datarow_empty = true;
-                        rowindex = m_DataSet.Tables["AttendeeListTable"].Rows.IndexOf(dr);
-                        break;
+                        if (dr.RowState == DataRowState.Added && dr.ItemArray[2].ToString() == "" && dr.ItemArray[3].ToString() == "")
+                        {
+                            datarow_empty = true;
+                            rowindex = m_DataSet.Tables["AttendeeListTable"].Rows.IndexOf(dr);
+                            break;
+                        }
                     }
-                }
 
-                if (datarow_empty)
-                    m_DataSet.Tables["AttendeeListTable"].Rows[rowindex].Delete();
+                    if (datarow_empty)
+                        m_DataSet.Tables["AttendeeListTable"].Rows[rowindex].Delete();
+                    
+                    // save current state of search text
+                    if (m_AttendanceView)
+                        m_txtSearchTabState.txtSearchActiveState = txtSearch.Text;
+                    else if (m_alistView)
+                        m_txtSearchTabState.txtSearchProspectState = txtSearch.Text;
+                    else if (m_activityView)
+                        m_txtSearchTabState.txtSearchActivityState = txtSearch.Text;
 
-                // save current state of search text
-                if (m_AttendanceView)
-                    m_txtSearchTabState.txtSearchActiveState = txtSearch.Text;
-                else if (m_alistView)
-                    m_txtSearchTabState.txtSearchProspectState = txtSearch.Text;
-                else if (m_activityView)
-                    m_txtSearchTabState.txtSearchActivityState = txtSearch.Text;
+                    m_alistView = false;
+                    m_AttendanceView = true;
+                    m_activityView = false;
 
-                m_alistView = false;
-                m_AttendanceView = true;
-                m_activityView = false;
-
-                // load state from tab
-                txtSearch.Text = "";
+                    // load state from tab
+                    txtSearch.Text = "";
                     txtSearch.Text = m_txtSearchTabState.txtSearchActiveState;
-                
 
-                gbFilterOptions.Header = "Filter Options";
-                DateStackPanel.Visibility = Visibility.Visible;
-                // FIX ME ActivityExpander.Visibility = Visibility.Visible;
-                ChurchStatusExpander.Visibility = Visibility.Visible;
 
-                // commit datagrid edits and return DataContext to show all records
-                if (dataGrid.Columns.Count > 1)
-                {
-                    dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+                    gbFilterOptions.Header = "Filter Options";
+                    DateStackPanel.Visibility = Visibility.Visible;
+                    // FIX ME ActivityExpander.Visibility = Visibility.Visible;
+                    ChurchStatusExpander.Visibility = Visibility.Visible;
+
+                    // commit datagrid edits and return DataContext to show all records
+                    if (dataGrid.Columns.Count > 1)
+                    {
+                        dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+                    }
+
+                    if (!m_filterByDate)
+                    {
+                        DateCalendar.IsEnabled = false;
+                    }
+
+                    if (m_dateIsValid && m_filterByDate)
+                    {
+                        DateCalendar.SelectedDates.Clear();
+                        // txtDate.Text = m_DateSelected.ToString("MM-dd-yyyy"); //FIX ME
+                        DateCalendar.DisplayDate = m_DateSelected;
+                        DateCalendar.SelectedDate = m_DateSelected;
+
+                        // DateCalendar_SelectedDateChanged(null, null);
+
+                    }
+                    else
+                    {
+                        DateCalendar.SelectedDates.Clear();
+                        // DateCalendar.SelectedDate = DateTime.Today;
+                    }
+
+
+                    btnNewRec.IsEnabled = false;
+                    btnImportRecords.IsEnabled = false;
+                    ShowFiltered_Or_DefaultTable();
                 }
-
-                if (!m_filterByDate)
-                {
-                    DateCalendar.IsEnabled = false;
-                }
-
-                if (m_dateIsValid && m_filterByDate)
-                {
-                    DateCalendar.SelectedDates.Clear();
-                    // txtDate.Text = m_DateSelected.ToString("MM-dd-yyyy"); //FIX ME
-                    DateCalendar.DisplayDate = m_DateSelected;
-                    DateCalendar.SelectedDate = m_DateSelected;
-
-                    // DateCalendar_SelectedDateChanged(null, null);
-
-                }
-                else
-                {
-                    DateCalendar.SelectedDates.Clear();
-                    // DateCalendar.SelectedDate = DateTime.Today;
-                }
-
-
-                btnNewRec.IsEnabled = false;
-                btnImportRecords.IsEnabled = false;
-                ShowFiltered_Or_DefaultTable();
             }
             else if ((GridsTabControl.SelectedItem as TabItem).Name == "ProspectListTab")
             {
-                if (m_AttendanceView)
-                    m_txtSearchTabState.txtSearchActiveState = txtSearch.Text;
-                else if (m_alistView)
-                    m_txtSearchTabState.txtSearchProspectState = txtSearch.Text;
-                else if (m_activityView)
-                    m_txtSearchTabState.txtSearchActivityState = txtSearch.Text;
 
-                m_alistView = true;
-                m_AttendanceView = false;
-                m_activityView = false;
-
-                txtSearch.Text = "";
-                txtSearch.Text = m_txtSearchTabState.txtSearchProspectState;
-
-                DateCalendar.IsEnabled = true;
-
-                gbFilterOptions.Header = "Filter Options";
-                DateStackPanel.Visibility = Visibility.Visible;
-                chkDateFilter.IsChecked = true;
-
-               // FIX ME ActivityExpander.Visibility = Visibility.Hidden;
-                ChurchStatusExpander.Visibility = Visibility.Hidden;
-
-
-                if (m_alistdateIsValid)
+                if (!m_alistView)
                 {
-                    DateCalendar.SelectedDates.Clear();
-                    //  alisttxtDate.Text = m_alistDateSelected.ToString("MM-dd-yyyy");
-                    DateCalendar.DisplayDate = m_alistDateSelected;
-                    DateCalendar.SelectedDate = m_alistDateSelected;
 
-                    // DateCalendar_SelectedDateChanged(null, null);
+
+
+                    if (m_AttendanceView)
+                        m_txtSearchTabState.txtSearchActiveState = txtSearch.Text;
+                    else if (m_alistView)
+                        m_txtSearchTabState.txtSearchProspectState = txtSearch.Text;
+                    else if (m_activityView)
+                        m_txtSearchTabState.txtSearchActivityState = txtSearch.Text;
+
+                    m_alistView = true;
+                    m_AttendanceView = false;
+                    m_activityView = false;
+
+                    txtSearch.Text = "";
+                    txtSearch.Text = m_txtSearchTabState.txtSearchProspectState;
+
+                    DateCalendar.IsEnabled = true;
+
+                    gbFilterOptions.Header = "Filter Options";
+                    DateStackPanel.Visibility = Visibility.Visible;
+                    chkDateFilter.IsChecked = true;
+
+                    // FIX ME ActivityExpander.Visibility = Visibility.Hidden;
+                    ChurchStatusExpander.Visibility = Visibility.Hidden;
+
+
+                    if (m_alistdateIsValid)
+                    {
+                        DateCalendar.SelectedDates.Clear();
+                        //  alisttxtDate.Text = m_alistDateSelected.ToString("MM-dd-yyyy");
+                        DateCalendar.DisplayDate = m_alistDateSelected;
+                        DateCalendar.SelectedDate = m_alistDateSelected;
+
+                        // DateCalendar_SelectedDateChanged(null, null);
+
+                    }
+                    else
+                    {
+                        DateCalendar.SelectedDates.Clear();
+                        // DateCalendar.SelectedDate = DateTime.Today;
+
+                    }
+
+                    btnImportRecords.IsEnabled = true;
+                    btnNewRec.IsEnabled = true;
+
+
+                    Display_AttendeeListTable_in_Grid();
 
                 }
-                else
-                {
-                    DateCalendar.SelectedDates.Clear();
-                    // DateCalendar.SelectedDate = DateTime.Today;
-
-                }
-
-                btnImportRecords.IsEnabled = true;
-                btnNewRec.IsEnabled = true;
-
-                Display_AttendeeListTable_in_Grid();
-
-              
             }
             else if ((GridsTabControl.SelectedItem as TabItem).Name == "ActivityTab")
             {
-                if (m_AttendanceView)
-                    m_txtSearchTabState.txtSearchActiveState = txtSearch.Text;
-                else if (m_alistView)
-                    m_txtSearchTabState.txtSearchProspectState = txtSearch.Text;
-                else if (m_activityView)
-                    m_txtSearchTabState.txtSearchActivityState = txtSearch.Text;
 
-                m_alistView = false;
-                m_AttendanceView = false;
-                m_activityView = true;
-                btnNewRec.IsEnabled = false;
+                if (!m_activityView)
+                {
 
-                txtSearch.Text = "";
-                txtSearch.Text = m_txtSearchTabState.txtSearchActivityState;
 
-                
-                ChurchStatusExpander.Visibility = Visibility.Hidden;
-                //FIX ME ActivityExpander.Visibility = Visibility.Visible;
+                    if (m_AttendanceView)
+                        m_txtSearchTabState.txtSearchActiveState = txtSearch.Text;
+                    else if (m_alistView)
+                        m_txtSearchTabState.txtSearchProspectState = txtSearch.Text;
+                    else if (m_activityView)
+                        m_txtSearchTabState.txtSearchActivityState = txtSearch.Text;
 
-               Display_ActivityTable_in_Grid();
+                    m_alistView = false;
+                    m_AttendanceView = false;
+                    m_activityView = true;
+                    btnNewRec.IsEnabled = false;
+
+                    txtSearch.Text = "";
+                    txtSearch.Text = m_txtSearchTabState.txtSearchActivityState;
+
+
+                    ChurchStatusExpander.Visibility = Visibility.Hidden;
+                    //FIX ME ActivityExpander.Visibility = Visibility.Visible;
+
+                    Display_ActivityTable_in_Grid();
+                }
             }
-            
+
 
         }
 
@@ -4118,6 +4184,7 @@ namespace CAOGAttendeeProject
             
         }
 
+    
     }
 
 
