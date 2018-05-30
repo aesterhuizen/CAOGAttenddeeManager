@@ -631,7 +631,7 @@ namespace CAOGAttendeeProject
             //3) if attendee has 3 follow-ups in a row, flag attendee and don't consider him for another follow-up entry. 
 
 
-             DateTime curdate = DateTime.Now;
+            // DateTime curdate = DateTime.Now;
             // get last date that was just entered
             // int addEntity = 0;
             List<DateTime> lstsundays = new List<DateTime>();
@@ -640,7 +640,12 @@ namespace CAOGAttendeeProject
 
             Cursor = Cursors.Wait;
 
-           
+            var latest_date_attened = (from d in m_dbContext.Attendance_Info.Local
+                                       where (d.Status == "Attended" || d.Status == "Responded")
+                                       orderby d.Date ascending
+                                       select d).ToArray().LastOrDefault();
+
+
 
             var queryAttendees = from AttendeeRec in m_dbContext.Attendees.Local
                                  select AttendeeRec;
@@ -658,7 +663,7 @@ namespace CAOGAttendeeProject
 
                 if (lstDateRecs != null)
                 {
-                    timespanSinceDate = curdate - lstDateRecs.Date;
+                    timespanSinceDate = latest_date_attened.Date - lstDateRecs.Date;
 
                     //if (AttendeeRec.FirstName == "Shirley" && AttendeeRec.LastName == "Adams")
                     //{
@@ -679,7 +684,7 @@ namespace CAOGAttendeeProject
                         //search for sunday
 
 
-                        for (DateTime date = lstDateRecs.Date; date <= curdate; date = date.AddDays(1))
+                        for (DateTime date = lstDateRecs.Date; date <= latest_date_attened.Date; date = date.AddDays(1))
                         {
                             if (date.DayOfWeek == DayOfWeek.Sunday)
                             {
@@ -710,7 +715,6 @@ namespace CAOGAttendeeProject
 
 
             Cursor = Cursors.Arrow;
-
 
         }
 
@@ -1097,7 +1101,7 @@ namespace CAOGAttendeeProject
 
             if (m_DataSet.Tables.Contains("AttendeeListTable"))
             {
-                m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
+                
                 m_DataSet.Tables["AttendeeListTable"].DefaultView.Sort = "[Last Name] ASC";
 
                 dataGrid_prospect.DataContext = m_DataSet.Tables["AttendeeListTable"];
@@ -1105,10 +1109,7 @@ namespace CAOGAttendeeProject
 
             }
 
-            dataGrid_prospect.CanUserDeleteRows = false;
-            dataGrid_prospect.CanUserAddRows = false;
-            dataGrid_prospect.IsReadOnly = false;
-
+           
             lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
         } 
 
@@ -1122,16 +1123,12 @@ namespace CAOGAttendeeProject
             if (m_DataSet.Tables.Contains("DefaultTable"))
             {
 
+                m_DataSet.Tables["DefaultTable"].DefaultView.Sort = "[Last Name] ASC";
                 dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
-               (dataGrid.DataContext as DataTable).DefaultView.Sort = "[Last Name] ASC";
-
                 
-               
             }
 
-            dataGrid.IsReadOnly = false;
-            dataGrid.CanUserDeleteRows = false;
-            dataGrid.CanUserAddRows = false;
+           
         
         } // end  private void Display_Database_in_Grid()
 
@@ -1305,12 +1302,12 @@ namespace CAOGAttendeeProject
 
                 m_DataSet.Tables.Add(Default_Data_Table);
                 m_DataSet.Tables.Add(AttendeeListTable);
-                m_DataSet.Tables.Add(ActivityTable);
+               // FIX ME m_DataSet.Tables.Add(ActivityTable);
 
                 lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
                 m_DataSet.Tables["DefaultTable"].AcceptChanges();
                 m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
-                m_DataSet.Tables["ActivityTable"].AcceptChanges();
+                // FIX ME m_DataSet.Tables["ActivityTable"].AcceptChanges();
 
             }
             catch (Exception ex)
@@ -1494,7 +1491,7 @@ namespace CAOGAttendeeProject
                 }
                 else if (m_activityView)
                 {
-                    m_DataSet.Tables["ActivityTable"].DefaultView.RowFilter = String.Empty;
+                   // FIX ME m_DataSet.Tables["ActivityTable"].DefaultView.RowFilter = String.Empty;
                 }
 
 
@@ -1519,7 +1516,7 @@ namespace CAOGAttendeeProject
                 }
                 else if (m_activityView)
                 {
-                    m_DataSet.Tables["ActivityTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+                   // FIX ME m_DataSet.Tables["ActivityTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
                 }
 
                 
@@ -2047,12 +2044,12 @@ namespace CAOGAttendeeProject
                     {
                         m_DataSet.Tables["DefaultTable"].Rows[i].Delete();
                         m_DataSet.Tables["AttendeeListTable"].Rows[i].Delete();
-                        m_DataSet.Tables["ActivityTable"].Rows[i].Delete();
+                        // FIX ME m_DataSet.Tables["ActivityTable"].Rows[i].Delete();
                         
                     }
                 m_DataSet.Tables["DefaultTable"].AcceptChanges();
                 m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
-                m_DataSet.Tables["ActivityTable"].AcceptChanges();
+                // FIX ME m_DataSet.Tables["ActivityTable"].AcceptChanges();
             }
 
             lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
@@ -2106,7 +2103,7 @@ namespace CAOGAttendeeProject
                     else
                     {
                         m_DataSet.Tables["AttendeeListTable"].Rows[rowindex].Delete();
-                        m_DataSet.Tables["ActivityTable"].Rows[rowindex].Delete();
+                        //FIX ME m_DataSet.Tables["ActivityTable"].Rows[rowindex].Delete();
                         DefaultTableCopy.Rows[rowindex].Delete();
                     }
 
@@ -2117,7 +2114,8 @@ namespace CAOGAttendeeProject
 
             DefaultTableCopy.AcceptChanges();
             m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
-            m_DataSet.Tables["ActivityTable"].AcceptChanges();
+
+            // FIX ME m_DataSet.Tables["ActivityTable"].AcceptChanges();
 
             m_DataSet.Tables["DefaultTable"].Clear();
             for (int i = 0; i <= DefaultTableCopy.Rows.Count - 1; i++)
@@ -2262,7 +2260,8 @@ namespace CAOGAttendeeProject
                         else
                         {
                             m_DataSet.Tables["DefaultTable"].Rows[rowindex].Delete();
-                            m_DataSet.Tables["ActivityTable"].Rows[rowindex].Delete();
+                        
+                           //Fix ME m_DataSet.Tables["ActivityTable"].Rows[rowindex].Delete();
                             AttendeeListTableCopy.Rows[rowindex].Delete();
                         }
 
@@ -2274,8 +2273,8 @@ namespace CAOGAttendeeProject
             } // end foreach drv
 
             AttendeeListTableCopy.AcceptChanges();
-            m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
-            m_DataSet.Tables["ActivityTable"].AcceptChanges();
+            m_DataSet.Tables["DefaultTable"].AcceptChanges();
+            // FIX ME m_DataSet.Tables["ActivityTable"].AcceptChanges();
 
             m_DataSet.Tables["AttendeeListTable"].Clear();
             for (int i = 0; i <= AttendeeListTableCopy.Rows.Count - 1; i++)
@@ -2382,7 +2381,7 @@ namespace CAOGAttendeeProject
             }
             QueryTableCopy.AcceptChanges();
             m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
-            m_DataSet.Tables["ActivityTable"].AcceptChanges();
+           // FIX ME m_DataSet.Tables["ActivityTable"].AcceptChanges();
 
             m_DataSet.Tables["QueryTable"].Clear();
             for (int i = 0; i <= QueryTableCopy.Rows.Count - 1; i++)
@@ -2917,7 +2916,7 @@ namespace CAOGAttendeeProject
 
               
                 InitAttendeeListTable();
-
+                m_DataSet.Tables["AttendeeListTable"].AcceptChanges(); // save the new record to the data table
                 Display_AttendeeListTable_in_Grid();
 
 
@@ -3324,6 +3323,8 @@ namespace CAOGAttendeeProject
 
             m_alistView = false;
             m_AttendanceView = true;
+            btnNewRec.IsEnabled = false;
+            btnImportRecords.IsEnabled = false;
 
             Uncheck_All_Filters();
 
@@ -3461,24 +3462,26 @@ namespace CAOGAttendeeProject
         {
 
 
-            //////first focus the grid
-            //dataGrid_prospect.CanUserAddRows = true;
-            //dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
+           
+           
+            dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
+            dataGrid_prospect.UpdateLayout();
+
             m_DataSet.Tables["AttendeeListTable"].DefaultView.Sort = String.Empty;
             dataGrid_prospect.Focus();
             //////then create a new cell info, with the item we wish to edit and the column number of the cell we want in edit mode
-            ////DataGridCell dgcell = new DataGridCell();
 
-            ////DataGridCellInfo cellInfo = new DataGridCellInfo(dgcell, dataGrid.Columns[1]);
-            //////set the cell to be the active one
-            ////dataGrid.CurrentCell = cellInfo;
-            //////scroll the item into view
-            ////dataGrid.ScrollIntoView(itemToSelect);
-            //////begin the edit
-            ////dataGrid.BeginEdit();
-            
-            dataGrid_prospect.ScrollIntoView(dataGrid_prospect.Items[dataGrid_prospect.Items.Count - 1]); //scroll to last
-            dataGrid_prospect.SelectedItem = dataGrid_prospect.Items.Count - 1;
+            //DataGridCell dgcell = new DataGridCell();
+            //DataGridCellInfo cellInfo = new DataGridCellInfo(dgcell, dataGrid.Columns[2]);
+            ////////set the cell to be the active one
+            //dataGrid_prospect.CurrentCell = cellInfo;
+            ////////scroll the item into view
+            //dataGrid_prospect.ScrollIntoView(dataGrid_prospect.Items[dataGrid_prospect.Items.Count - 1]); //scroll to last
+            //dataGrid_prospect.SelectedItem = dataGrid_prospect.Items.Count - 1;
+            ////////begin the edit
+            //dataGrid_prospect.BeginEdit();
+
+
             string strdate;
 
             if (m_alistdateIsValid)
@@ -3486,16 +3489,27 @@ namespace CAOGAttendeeProject
             else
                 strdate = "Date Not Valid";
 
-            DataRow newdr = m_DataSet.Tables["AttendeeListTable"].NewRow();
-            //AttendeeId(int)-FirstLastName(string)-LastName(string)-FirstName(String)-Date(string)-Attended(bool)
-            newdr.ItemArray = new object[] { "", "", "", "" , strdate , false};
-            m_DataSet.Tables["AttendeeListTable"].Rows.Add(newdr);
+            
+            int last_rowindex = m_DataSet.Tables["AttendeeListTable"].Rows.Count - 1;
+            DataRow lastdr = m_DataSet.Tables["AttendeeListTable"].Rows[last_rowindex];
+
+            if (lastdr["Last Name"].ToString() == "" || lastdr["First Name"].ToString() == "")
+            {
+                // do nothing
+            }
+            else // there is an AttendeeId
+            {
+                DataRow newdr = m_DataSet.Tables["AttendeeListTable"].NewRow();
+                //AttendeeId(int)-FirstLastName(string)-LastName(string)-FirstName(String)-Date(string)-Attended(bool)
+                newdr.ItemArray = new object[] { "", "", "", "", strdate, false };
+                m_DataSet.Tables["AttendeeListTable"].Rows.Add(newdr);
+
+
+                dataGrid_prospect.DataContext = m_DataSet.Tables["AttendeeListTable"];
+            }
+            
 
             
-            dataGrid_prospect.DataContext = m_DataSet.Tables["AttendeeListTable"];
-
-            //// dataGrid_prospect.UpdateLayout();
-            ////dataGrid.ScrollIntoView(dataGrid.SelectedItem);
 
 
 
@@ -3982,7 +3996,8 @@ namespace CAOGAttendeeProject
         private void GridsTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
-            //dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+            dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
+            dataGrid_prospect.UpdateLayout();
 
             if ((GridsTabControl.SelectedItem as TabItem).Name == "ActiveTab")
             {
@@ -3991,22 +4006,20 @@ namespace CAOGAttendeeProject
 
 
 
-                    int rowindex = 0;
-                    bool datarow_empty = false;
+                    int last_rowindex = m_DataSet.Tables["AttendeeListTable"].Rows.Count - 1;
+                    DataRow lastdr = m_DataSet.Tables["AttendeeListTable"].Rows[last_rowindex];
 
-                    foreach (DataRow dr in m_DataSet.Tables["AttendeeListTable"].Rows)
+                    if (lastdr.RowState != DataRowState.Detached)
                     {
-                        if (dr.RowState == DataRowState.Added && dr.ItemArray[2].ToString() == "" && dr.ItemArray[3].ToString() == "")
+                        if (lastdr["Last Name"].ToString() == "" || lastdr["First Name"].ToString() == "")
                         {
-                            datarow_empty = true;
-                            rowindex = m_DataSet.Tables["AttendeeListTable"].Rows.IndexOf(dr);
-                            break;
+                            m_DataSet.Tables["AttendeeListTable"].Rows[last_rowindex].Delete();
                         }
                     }
-
-                    if (datarow_empty)
-                        m_DataSet.Tables["AttendeeListTable"].Rows[rowindex].Delete();
                     
+
+                   
+
                     // save current state of search text
                     if (m_AttendanceView)
                         m_txtSearchTabState.txtSearchActiveState = txtSearch.Text;

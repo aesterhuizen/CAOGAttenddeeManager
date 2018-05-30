@@ -234,6 +234,7 @@
                 <TabItem Header="Prospect List" Name="ProspectListTab">
                                        
                     <DataGrid Name="dataGrid_prospect"
+                      CanUserSortColumns="False"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
                       ItemsSource="{Binding IsAsync=True}" 
