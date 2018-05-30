@@ -3699,6 +3699,10 @@ namespace CAOGAttendeeProject
             }
             else
             {
+                dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
+                dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+                dataGrid.UpdateLayout();
+                dataGrid_prospect.UpdateLayout();
 
                 isAttendedStatusChecked = isAttendeeListDirty();
 
