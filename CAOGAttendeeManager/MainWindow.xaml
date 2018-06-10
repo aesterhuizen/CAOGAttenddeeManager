@@ -165,7 +165,7 @@
                             </StackPanel>
 
                         </Expander>
-                        <!--<Expander Name="ActivityExpander" IsExpanded="True" Height="200">
+                        <Expander Name="ActivityExpander" IsExpanded="True" Height="200">
                             <Expander.Header>
                                 <StackPanel Orientation="Horizontal" >
                                     <CheckBox Content="Activity"  Name="chkActivityFilter" Checked="chkActivityFilter_Checked" Unchecked="chkActivityFilter_Unchecked"/>
@@ -201,7 +201,7 @@
 
 
 
-                        </Expander>-->
+                        </Expander>
 
 
                     </StackPanel>
@@ -248,7 +248,7 @@
                     
                 </TabItem>
 
-                <!--<TabItem Header="Activity" Name="ActivityTab">
+                <TabItem Header="Activity" Name="ActivityTab">
                     <DataGrid Name="dataGrid_activity" CanUserAddRows="False" CanUserDeleteRows="False"
                       ItemsSource="{Binding IsAsync=True}" 
                       CanUserReorderColumns="False"
@@ -262,7 +262,7 @@
 
 
 
-                </TabItem>-->
+                </TabItem>
             </TabControl>
 
 

@@ -615,7 +615,7 @@ namespace CAOGAttendeeProject
 
 
 
-           // FIX ME trvActivities.ItemsSource = m_lstActivities;
+          trvActivities.ItemsSource = m_lstActivities;
             
 
 
@@ -1082,19 +1082,19 @@ namespace CAOGAttendeeProject
 
         private void Display_ActivityTable_in_Grid()
         {
-            //Fix ME //if (m_DataSet.Tables.Contains("ActivityTable"))
-            //{
-            //    dataGrid_activity.DataContext = m_DataSet.Tables["ActivityTable"];
+            if (m_DataSet.Tables.Contains("ActivityTable"))
+            {
+                dataGrid_activity.DataContext = m_DataSet.Tables["ActivityTable"];
 
-            //    // m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
-            //    m_DataSet.Tables["ActivityTable"].DefaultView.Sort = "[Last Name] ASC";
+                // m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
+                m_DataSet.Tables["ActivityTable"].DefaultView.Sort = "[Last Name] ASC";
 
 
-            //}
+            }
 
-            //dataGrid_activity.CanUserDeleteRows = false;
-            //dataGrid_activity.CanUserAddRows = false;
-            //dataGrid_activity.IsReadOnly = false;
+            dataGrid_activity.CanUserDeleteRows = false;
+            dataGrid_activity.CanUserAddRows = false;
+            dataGrid_activity.IsReadOnly = false;
         }
         private void Display_AttendeeListTable_in_Grid()
         {
@@ -1302,12 +1302,12 @@ namespace CAOGAttendeeProject
 
                 m_DataSet.Tables.Add(Default_Data_Table);
                 m_DataSet.Tables.Add(AttendeeListTable);
-               // FIX ME m_DataSet.Tables.Add(ActivityTable);
+               m_DataSet.Tables.Add(ActivityTable);
 
                 lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
                 m_DataSet.Tables["DefaultTable"].AcceptChanges();
                 m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
-                // FIX ME m_DataSet.Tables["ActivityTable"].AcceptChanges();
+                m_DataSet.Tables["ActivityTable"].AcceptChanges();
 
             }
             catch (Exception ex)
@@ -1457,7 +1457,7 @@ namespace CAOGAttendeeProject
             chkFollowup.IsEnabled = false;
             chkResponded.IsEnabled = false;
             chkDateFilter.IsEnabled = false;
-            // FIX ME chkActivityFilter.IsEnabled = false;
+            chkActivityFilter.IsEnabled = false;
             
 
 
@@ -1491,7 +1491,7 @@ namespace CAOGAttendeeProject
                 }
                 else if (m_activityView)
                 {
-                   // FIX ME m_DataSet.Tables["ActivityTable"].DefaultView.RowFilter = String.Empty;
+                   m_DataSet.Tables["ActivityTable"].DefaultView.RowFilter = String.Empty;
                 }
 
 
@@ -1516,7 +1516,7 @@ namespace CAOGAttendeeProject
                 }
                 else if (m_activityView)
                 {
-                   // FIX ME m_DataSet.Tables["ActivityTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+                   m_DataSet.Tables["ActivityTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
                 }
 
                 
@@ -2044,12 +2044,12 @@ namespace CAOGAttendeeProject
                     {
                         m_DataSet.Tables["DefaultTable"].Rows[i].Delete();
                         m_DataSet.Tables["AttendeeListTable"].Rows[i].Delete();
-                        // FIX ME m_DataSet.Tables["ActivityTable"].Rows[i].Delete();
+                        m_DataSet.Tables["ActivityTable"].Rows[i].Delete();
                         
                     }
                 m_DataSet.Tables["DefaultTable"].AcceptChanges();
                 m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
-                // FIX ME m_DataSet.Tables["ActivityTable"].AcceptChanges();
+                m_DataSet.Tables["ActivityTable"].AcceptChanges();
             }
 
             lblProspectsMetrics.Text = m_DataSet.Tables["AttendeeListTable"].Rows.Count.ToString();
@@ -2103,7 +2103,7 @@ namespace CAOGAttendeeProject
                     else
                     {
                         m_DataSet.Tables["AttendeeListTable"].Rows[rowindex].Delete();
-                        //FIX ME m_DataSet.Tables["ActivityTable"].Rows[rowindex].Delete();
+                         m_DataSet.Tables["ActivityTable"].Rows[rowindex].Delete();
                         DefaultTableCopy.Rows[rowindex].Delete();
                     }
 
@@ -2115,7 +2115,7 @@ namespace CAOGAttendeeProject
             DefaultTableCopy.AcceptChanges();
             m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
 
-            // FIX ME m_DataSet.Tables["ActivityTable"].AcceptChanges();
+            m_DataSet.Tables["ActivityTable"].AcceptChanges();
 
             m_DataSet.Tables["DefaultTable"].Clear();
             for (int i = 0; i <= DefaultTableCopy.Rows.Count - 1; i++)
@@ -2261,7 +2261,7 @@ namespace CAOGAttendeeProject
                         {
                             m_DataSet.Tables["DefaultTable"].Rows[rowindex].Delete();
                         
-                           //Fix ME m_DataSet.Tables["ActivityTable"].Rows[rowindex].Delete();
+                            m_DataSet.Tables["ActivityTable"].Rows[rowindex].Delete();
                             AttendeeListTableCopy.Rows[rowindex].Delete();
                         }
 
@@ -2274,7 +2274,7 @@ namespace CAOGAttendeeProject
 
             AttendeeListTableCopy.AcceptChanges();
             m_DataSet.Tables["DefaultTable"].AcceptChanges();
-            // FIX ME m_DataSet.Tables["ActivityTable"].AcceptChanges();
+            m_DataSet.Tables["ActivityTable"].AcceptChanges();
 
             m_DataSet.Tables["AttendeeListTable"].Clear();
             for (int i = 0; i <= AttendeeListTableCopy.Rows.Count - 1; i++)
@@ -2381,7 +2381,7 @@ namespace CAOGAttendeeProject
             }
             QueryTableCopy.AcceptChanges();
             m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
-           // FIX ME m_DataSet.Tables["ActivityTable"].AcceptChanges();
+            m_DataSet.Tables["ActivityTable"].AcceptChanges();
 
             m_DataSet.Tables["QueryTable"].Clear();
             for (int i = 0; i <= QueryTableCopy.Rows.Count - 1; i++)
@@ -2417,7 +2417,7 @@ namespace CAOGAttendeeProject
             //--Activity Table -----------------------------------------------------------------------------------------------------------
             if (m_activityView)
             {
-                // FIX ME MAYBE? row_select = dataGrid_activity.SelectedItems;
+                row_select = dataGrid_activity.SelectedItems;
 
              
 
@@ -3183,7 +3183,7 @@ namespace CAOGAttendeeProject
             chkFollowup.IsEnabled = true;
             chkResponded.IsEnabled = true;
             chkDateFilter.IsEnabled = true;
-           //FIX ME chkActivityFilter.IsEnabled = true;
+            chkActivityFilter.IsEnabled = true;
 
 
         }
@@ -3194,9 +3194,9 @@ namespace CAOGAttendeeProject
             chkResponded.IsChecked = false;
             chkAttended.IsChecked = false;
             chkDateFilter.IsChecked = false;
-           // FIX ME chkActivityFilter.IsChecked = false;
+            chkActivityFilter.IsChecked = false;
             DateCalendar.IsEnabled = false;
-           // FIX ME trvActivities.IsEnabled = false;
+            trvActivities.IsEnabled = false;
         }
 
 
@@ -3929,12 +3929,12 @@ namespace CAOGAttendeeProject
 
         private void chkActivityFilter_Checked(object sender, RoutedEventArgs e)
         {
-            // FIX ME trvActivities.IsEnabled = true;
+            trvActivities.IsEnabled = true;
         }
 
         private void chkActivityFilter_Unchecked(object sender, RoutedEventArgs e)
         {
-            // FIX ME trvActivities.IsEnabled = false;
+            trvActivities.IsEnabled = false;
         }
 
         private void chkFilterAllNone_Checked(object sender, RoutedEventArgs e)
@@ -4043,7 +4043,7 @@ namespace CAOGAttendeeProject
 
                     gbFilterOptions.Header = "Filter Options";
                     DateStackPanel.Visibility = Visibility.Visible;
-                    // FIX ME ActivityExpander.Visibility = Visibility.Visible;
+                    ActivityExpander.Visibility = Visibility.Visible;
                     ChurchStatusExpander.Visibility = Visibility.Visible;
 
                     // commit datagrid edits and return DataContext to show all records
@@ -4107,7 +4107,7 @@ namespace CAOGAttendeeProject
                     DateStackPanel.Visibility = Visibility.Visible;
                     chkDateFilter.IsChecked = true;
 
-                    // FIX ME ActivityExpander.Visibility = Visibility.Hidden;
+                    ActivityExpander.Visibility = Visibility.Hidden;
                     ChurchStatusExpander.Visibility = Visibility.Hidden;
 
 
@@ -4160,7 +4160,7 @@ namespace CAOGAttendeeProject
 
 
                     ChurchStatusExpander.Visibility = Visibility.Hidden;
-                    //FIX ME ActivityExpander.Visibility = Visibility.Visible;
+                     ActivityExpander.Visibility = Visibility.Visible;
 
                     Display_ActivityTable_in_Grid();
                 }
@@ -4192,13 +4192,13 @@ namespace CAOGAttendeeProject
             }
             else if (tabctrl.SelectedIndex == 2)
             {
-              // FIX ME MAYBE //if (dataGrid_activity.Columns.Count > 1)
-                //{
-                //    dataGrid_activity.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
-                //    dataGrid_activity.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
-                //}
+                if (dataGrid_activity.Columns.Count > 1)
+                {
+                    dataGrid_activity.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
+                    dataGrid_activity.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
+                }
             }
-            
+
         }
 
     
