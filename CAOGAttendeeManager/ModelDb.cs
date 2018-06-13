@@ -1,6 +1,7 @@
 namespace CAOGAttendeeProject
 {
     using System;
+    using System.ComponentModel;
     using System.Data.Entity;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
@@ -90,28 +91,48 @@ namespace CAOGAttendeeProject
         public string txtSearchProspectState { get; set; }
         public string txtSearchActivityState { get; set; }
     }
-    public class Activity
-    {
+    //public class Activity
+    //{
      
-        public string ActivityName { get; set; }
+    //    public string ActivityName { get; set; }
       
-        public DateTime ActivityDateLastAttended { get; set; }
-        public string ActivityDescription { get; set; }
+    //    public DateTime ActivityDateLastAttended { get; set; }
+    //    public string ActivityDescription { get; set; }
 
 
-    }
+    //}
 
-    public class ActivityGroup
+    public class ActivityGroup : INotifyPropertyChanged
     {
         public ActivityGroup()
         {
             this.lstActivityTasks = new ObservableCollection<ActivityTask>();
         }
-
+        
         public string ActivityName { get; set; }
+        private bool _IsSelected = false;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        #region INotifyPropertyChanged Members
+
+
+        private void OnChanged(string prop)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+        }
+
+        #endregion
+
+        public bool IsSelected
+        {
+            get { return _IsSelected; }
+            set { _IsSelected = value; OnChanged("IsSelected"); }
+        }
+
         public ObservableCollection<ActivityTask> lstActivityTasks { get; set; }
     }
-    public class ActivityTask
+    public class ActivityTask : INotifyPropertyChanged
     {
 
         public ActivityTask()
@@ -120,8 +141,34 @@ namespace CAOGAttendeeProject
         }
         public string TaskName { get; set; }
         public string Description { get; set; }
+        private bool _IsSelected = false;
 
-       public ObservableCollection<ActivityTask> lstsubTasks { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        #region INotifyPropertyChanged Members
+
+
+        private void OnChanged(string prop)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+        }
+
+        #endregion
+
+        public bool IsSelected
+        {
+            get { return _IsSelected; }
+
+            set
+            {
+                _IsSelected = value;
+                OnChanged("IsSelected");
+            }
+        }
+
+      
+
+        public ObservableCollection<ActivityTask> lstsubTasks { get; set; }
     }
 
 

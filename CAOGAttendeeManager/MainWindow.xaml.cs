@@ -3930,11 +3930,16 @@ namespace CAOGAttendeeProject
         private void chkActivityFilter_Checked(object sender, RoutedEventArgs e)
         {
             trvActivities.IsEnabled = true;
+           
         }
 
         private void chkActivityFilter_Unchecked(object sender, RoutedEventArgs e)
         {
             trvActivities.IsEnabled = false;
+            foreach (ActivityGroup group in trvActivities.ItemsSource)
+            {
+                group.IsSelected = false;
+            }
         }
 
         private void chkFilterAllNone_Checked(object sender, RoutedEventArgs e)
@@ -3947,11 +3952,7 @@ namespace CAOGAttendeeProject
 
         }
 
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-
-        }
-
+  
         private void btnCopy_Click(object sender, RoutedEventArgs e)
         {
 
@@ -3963,29 +3964,44 @@ namespace CAOGAttendeeProject
         {
             var check = sender as CheckBox;
 
-            var activityName = check.Content;
+            var TaskName = check.Content;
             
             foreach (ActivityGroup activity_group in m_lstActivities)
             {
-                foreach (ActivityTask task in activity_group.lstActivityTasks )
-                {
-                    if (task.lstsubTasks.Count != 0)
+                
+                    foreach (ActivityTask task in activity_group.lstActivityTasks)
                     {
-                        foreach (ActivityTask subtask in task.lstsubTasks)
+                        
+                        if (TaskName == task.TaskName)
                         {
-                            if (activityName == subtask.TaskName)
+                            foreach (ActivityTask subtask in task.lstsubTasks)
                             {
-                                txtblkTaskDescription.Text = subtask.Description;
-                                break;
+                                check.IsChecked = true;
+
+                            //if (TaskName == subtask.TaskName)
+                            //{
+                            //    txtblkTaskDescription.Text = subtask.Description;
+                            //    break;
+                            //}
+                                trvActivities.Items.Refresh();
                             }
-                        }
+                            txtblkTaskDescription.Text = task.Description;
                     }
-                    if (activityName == task.TaskName)
-                    {
-                        txtblkTaskDescription.Text = task.Description;
-                        break;
+                        
+
                     }
-                }
+                        
+                            
+                            
+                        
+                    
+
+                        
+                    
+                
+                
+                
+                
             }
 
 
@@ -3995,6 +4011,10 @@ namespace CAOGAttendeeProject
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             txtblkTaskDescription.Text = "";
+            //foreach (ActivityTask task in trvActivities.ItemsSource)
+            //{
+            //    task.IsSelected = false;
+            //}
         }
 
         private void GridsTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -4041,11 +4061,7 @@ namespace CAOGAttendeeProject
                     txtSearch.Text = m_txtSearchTabState.txtSearchActiveState;
 
 
-                    gbFilterOptions.Header = "Filter Options";
-                    DateStackPanel.Visibility = Visibility.Visible;
-                    ActivityExpander.Visibility = Visibility.Visible;
-                    ChurchStatusExpander.Visibility = Visibility.Visible;
-
+                  
                     // commit datagrid edits and return DataContext to show all records
                     if (dataGrid.Columns.Count > 1)
                     {
@@ -4077,6 +4093,7 @@ namespace CAOGAttendeeProject
                     btnNewRec.IsEnabled = false;
                     btnImportRecords.IsEnabled = false;
                     ShowFiltered_Or_DefaultTable();
+                    Customize_Panel();
                 }
             }
             else if ((GridsTabControl.SelectedItem as TabItem).Name == "ProspectListTab")
@@ -4103,13 +4120,7 @@ namespace CAOGAttendeeProject
 
                     DateCalendar.IsEnabled = true;
 
-                    gbFilterOptions.Header = "Filter Options";
-                    DateStackPanel.Visibility = Visibility.Visible;
-                    chkDateFilter.IsChecked = true;
-
-                    ActivityExpander.Visibility = Visibility.Hidden;
-                    ChurchStatusExpander.Visibility = Visibility.Hidden;
-
+                   
 
                     if (m_alistdateIsValid)
                     {
@@ -4133,7 +4144,7 @@ namespace CAOGAttendeeProject
 
 
                     Display_AttendeeListTable_in_Grid();
-
+                    Customize_Panel();
                 }
             }
             else if ((GridsTabControl.SelectedItem as TabItem).Name == "ActivityTab")
@@ -4159,16 +4170,88 @@ namespace CAOGAttendeeProject
                     txtSearch.Text = m_txtSearchTabState.txtSearchActivityState;
 
 
-                    ChurchStatusExpander.Visibility = Visibility.Hidden;
-                     ActivityExpander.Visibility = Visibility.Visible;
+                   
 
                     Display_ActivityTable_in_Grid();
+                    Customize_Panel();
                 }
             }
 
 
         }
 
+        private void Customize_Panel()
+        {
+            if (GridsTabControl.SelectedIndex == 0) //activeTab
+            {
+
+                spFilterOptions.Children.Clear();
+
+                if (!spFilterOptions.Children.Contains(CalendarExpander))
+                 spFilterOptions.Children.Add(CalendarExpander);
+
+                if (!spFilterOptions.Children.Contains(ChurchStatusExpander))
+                   spFilterOptions.Children.Add(ChurchStatusExpander);
+
+
+                if (!spFilterOptions.Children.Contains(ActivityExpander))
+                    spFilterOptions.Children.Add(ActivityExpander);
+
+                
+                
+            }
+            else if (GridsTabControl.SelectedIndex == 1) // prospect tab
+            {
+
+                spFilterOptions.Children.Clear();
+
+                if (spFilterOptions.Children.Contains(CalendarExpander))
+                {
+                   chkDateFilter.IsChecked = true;
+                }
+                else
+                {
+                    chkDateFilter.IsChecked = true;
+                    spFilterOptions.Children.Add(CalendarExpander);
+                }
+
+           
+
+                if (spFilterOptions.Children.Contains(ChurchStatusExpander))
+                    spFilterOptions.Children.Remove(ChurchStatusExpander);
+
+                if (spFilterOptions.Children.Contains(ActivityExpander))
+                    spFilterOptions.Children.Remove(ActivityExpander);
+
+            }
+            else if (GridsTabControl.SelectedIndex == 2) // activity tab
+            {
+                spFilterOptions.Children.Clear();
+
+                if (spFilterOptions.Children.Contains(CalendarExpander))
+                {
+                    chkDateFilter.IsChecked = true;
+                    chkActivityFilter.IsChecked = true;
+                }
+                else
+                {
+                    chkDateFilter.IsChecked = true;
+                    chkActivityFilter.IsChecked = true;
+                    spFilterOptions.Children.Add(CalendarExpander);
+                }
+
+                if (spFilterOptions.Children.Contains(ChurchStatusExpander))
+                    spFilterOptions.Children.Remove(ChurchStatusExpander);
+
+                if (!spFilterOptions.Children.Contains(ActivityExpander))
+                    spFilterOptions.Children.Add(ActivityExpander);
+
+               
+
+               
+            }
+            txtblkTaskDescription.Text = "";
+        }
         private void GridsTabControl_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
