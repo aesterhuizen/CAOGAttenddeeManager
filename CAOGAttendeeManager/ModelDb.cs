@@ -57,6 +57,7 @@ namespace CAOGAttendeeProject
         public DateTime Date { get; set; }
         public string Status { get; set; }
         public string Activity { get; set; }
+        public DateTime? ActivityDate { get; set; }
 
         public string Phone { get; set; }
         public string Email { get; set; }
@@ -70,8 +71,15 @@ namespace CAOGAttendeeProject
         public int id;
         public string fname;
         public string lname;
-        public DateTime date;
+        public DateTime? date;
         public string status;
+        public DateTime? activity_date;
+        public string activity;
+        public string phone;
+        public string email;
+
+
+
 
 
 
@@ -79,29 +87,50 @@ namespace CAOGAttendeeProject
 
   
 
-    public class txtSearchState
+    public class TabState
     {
-        public txtSearchState()
+        public TabState()
         {
             txtSearchActiveState = "";
             txtSearchActivityState = "";
             txtSearchProspectState = "";
+
+            
+
+            ProspectTab_isFilterbyDateChecked = false;
+
+            ActiveTab_isFilterbyActivityDateChecked = false;
+            ActiveTab_isActivityChecked = false;
+
+            ActiveTab_isFilterbyDateChecked = false;
+            ActivityTab_isActivityDateChecked = false;
+            ActivityTab_isActivityChecked = false;
+
+            ActiveTab_isAttendedChecked = false;
+            ActiveTab_isRespondedChecked = false;
+            ActiveTab_isFollowUpChecked = false;
+            ActiveTab_isChurchStatusChecked = false;
         }
         public string txtSearchActiveState { get; set; }
         public string txtSearchProspectState { get; set; }
         public string txtSearchActivityState { get; set; }
+
+        public bool? ActiveTab_isAttendedChecked { get; set;  }
+        public bool? ActiveTab_isRespondedChecked { get; set; }
+        public bool? ActiveTab_isFollowUpChecked { get; set; }
+        public bool? ActiveTab_isActivityChecked { get; set; }
+        public bool? ActiveTab_isChurchStatusChecked { get; set; }
+
+        public bool? ActiveTab_isFilterbyDateChecked { get; set; }
+        public bool? ProspectTab_isFilterbyDateChecked { get; set; }
+
+        public bool? ActiveTab_isFilterbyActivityDateChecked { get; set; }
+        public bool? ActivityTab_isActivityChecked { get; set; }
+
+        public bool? ActivityTab_isActivityDateChecked { get; set; }
+
     }
-    //public class Activity
-    //{
-     
-    //    public string ActivityName { get; set; }
-      
-    //    public DateTime ActivityDateLastAttended { get; set; }
-    //    public string ActivityDescription { get; set; }
-
-
-    //}
-
+   
     public class ActivityGroup : INotifyPropertyChanged
     {
         public ActivityGroup()
@@ -119,7 +148,7 @@ namespace CAOGAttendeeProject
 
         private void OnChanged(string prop)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+            this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
         }
 
         #endregion
@@ -127,7 +156,7 @@ namespace CAOGAttendeeProject
         public bool IsSelected
         {
             get { return _IsSelected; }
-            set { _IsSelected = value; OnChanged("IsSelected"); }
+            set { _IsSelected = value; OnChanged("IsChecked"); }
         }
 
         public ObservableCollection<ActivityTask> lstActivityTasks { get; set; }
@@ -162,7 +191,7 @@ namespace CAOGAttendeeProject
             set
             {
                 _IsSelected = value;
-                OnChanged("IsSelected");
+                OnChanged("IsChecked");
             }
         }
 

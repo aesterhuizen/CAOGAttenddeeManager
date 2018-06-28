@@ -106,7 +106,7 @@ namespace CAOGAttendeeProject
                 newrow["AttendeeInfoId"] = rec.id;
                 newrow["First Name"] = rec.fname;
                 newrow["Last Name"] = rec.lname;
-                newrow["Date"] = rec.date.ToString("MM-dd-yyyy");
+                newrow["Date"] = rec.date?.ToString("MM-dd-yyyy");
                 newrow["Status"] = rec.status;
 
 

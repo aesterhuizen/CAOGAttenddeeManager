@@ -62,16 +62,16 @@
                                   ToolTip="Generate a follow-up record for each attendee that missed 3 Sunday services in a row." />
 
                     <RibbonButton x:Name="btnNewRec" 
-                                  Label="New Attendee" 
+                                  Label="New Record" 
                                   LargeImageSource="Resources\NewRec.ico"
                                   Click="btnNewRec_Click" 
-                                  ToolTip="Add a new Attendee to the attendee prospect checklist."/>
+                                  ToolTip="Add a new Attendee record to the attendee prospect checklist."/>
 
                     <RibbonButton x:Name="btnImportRecords" 
-                                  Label="Add Attendee" 
+                                  Label="Update Changes" 
                                   LargeImageSource="Resources\Add.ico"
                                   Click="ImportRows_Click" 
-                                  ToolTip="Add all the changes made in this checklist to the active attendance list"/>
+                                  ToolTip="Update changes made in Prospect List or Activity &amp; Info tabs to the Active table that will be saved to the database when the user click on the Save button."/>
 
                     <!--<RibbonButton Name="btnCopy"
                                   Label="Copy"
@@ -107,15 +107,8 @@
                                    Text="{Binding ElementName=dataGrid, Path=Items.Count}"
                                    TextAlignment="Right" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Width="60" HorizontalAlignment="Left">Prospect:</Label>
-                            <TextBlock Margin="9,0,0,0" Name="lblProspectsMetrics"
-                                       Width="40" 
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Center"
-                                       TextAlignment="Right"/>
-                        </StackPanel>
-
+                     
+                      
                         <!-- Text="{Binding ElementName=dataGrid_prospect, Path=Items.Count}"-->
 
 
@@ -148,7 +141,8 @@
                         <Expander Name="CalendarExpander" IsExpanded="True" Margin="0,0,0,10">
                             <Expander.Header>
                                 <StackPanel Name="DateStackPanel" Orientation="Horizontal">
-                                    <CheckBox Content="Date"  Name="chkDateFilter" Checked="chkDateFiler_Checked" Unchecked="chkDateFiler_Unchecked" HorizontalAlignment="Left" />
+                                    <CheckBox Margin="5,0,0,0" Content="Church Date" Name="chkChurchDateFilter" Checked="chkChurchDateFiler_Checked" Unchecked="chkChurchDateFiler_Unchecked" HorizontalAlignment="Left" />
+                                    <CheckBox Margin="5,0,0,0" Content="Activity Date" Name="chkActivityDateFilter" Checked="chkActivityDateFilter_Checked" Unchecked="chkActivityDateFilter_Unchecked" HorizontalAlignment="Left" />
                                 </StackPanel>
                             </Expander.Header>
 
@@ -156,22 +150,30 @@
                                       DisplayDateChanged="DateCalendar_DisplayDateChanged" 
                                       SelectedDatesChanged="DateCalendar_SelectedDateChanged"/>
                         </Expander>
-                        <Expander Name="ChurchStatusExpander" Header="Church Status" IsExpanded="True" Margin="0,0,0,10">
+                        
+                        <Expander Name="ChurchStatusExpander" IsExpanded="True" Margin="0,0,0,10">
+                            <Expander.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <CheckBox Content="Church Status" Name="chkChurchStatusFilter" Checked="chkChurchStatusFilter_Checked" Unchecked="chkChurchStatusFilter_Unchecked" HorizontalAlignment="Left" />
 
-                            <StackPanel>
+                                </StackPanel>
+                            </Expander.Header>
+
+                            <StackPanel Name="spChurchStatus">
                                 <CheckBox Content="Attended" Name="chkAttended" Checked="chkAttended_Checked" Unchecked="chkAttended_Unchecked" HorizontalAlignment="Left" />
                                 <CheckBox Content="Follow-Up" Name="chkFollowup" Checked="chkFollowup_Checked" Unchecked="chkFollowup_Unchecked" HorizontalAlignment="Left"/>
                                 <CheckBox Content="Responded" Name="chkResponded" Checked="chkResponded_Checked" Unchecked="chkResponded_Unchecked" HorizontalAlignment="Left"/>
                             </StackPanel>
 
                         </Expander>
-                        <Expander Name="ActivityExpander" IsExpanded="True" Height="200">
+                        <Expander Name="ActivityExpander" IsExpanded="True" Height="300">
                             <Expander.Header>
                                 <StackPanel Orientation="Horizontal" >
                                     <CheckBox Content="Activity"  Name="chkActivityFilter" Checked="chkActivityFilter_Checked" Unchecked="chkActivityFilter_Unchecked"/>
 
                                 </StackPanel>
                             </Expander.Header>
+                            
                             <TreeView Name="trvActivities">
                                 <TreeView.ItemContainerStyle>
                                     <Style TargetType="{x:Type TreeViewItem}">
@@ -190,7 +192,9 @@
 
                                     <HierarchicalDataTemplate DataType="{x:Type local:ActivityTask }" ItemsSource="{Binding lstsubTasks}">
                                         <StackPanel Orientation="Horizontal">
-                                            <CheckBox Name="chkTaskName" Content="{Binding TaskName}" Margin="5,0,0,0" Checked="CheckBox_Checked_1" Unchecked="CheckBox_Unchecked"/>
+                                            <CheckBox Name="chkTaskName" Content="{Binding TaskName}" Margin="5,0,0,0" Checked="CheckBox_Checked_1" 
+                                                      Unchecked="CheckBox_Unchecked"
+                                                      IsChecked="{Binding IsSelected}"/>
                                         </StackPanel>
                                     </HierarchicalDataTemplate>
 
@@ -198,7 +202,7 @@
 
                                 </TreeView.Resources>
                             </TreeView>
-
+                            
 
 
                         </Expander>
@@ -207,16 +211,20 @@
                     </StackPanel>
                 </GroupBox>
                 <TextBlock Name="txtblkTaskDescription" TextWrapping="Wrap"/>
+                
             </StackPanel>
 
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Left" Background="#FF6793BF"/>
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Left" Foreground="#FF0C7AB9"/>
 
             <TabControl Name="GridsTabControl" SelectionChanged="GridsTabControl_SelectionChanged" MouseUp="GridsTabControl_MouseUp" Grid.Column="2">
                 <TabItem Header="Active" Name="ActiveTab">
-                    <!--<Grid DataContext="{StaticResource attendeeViewSource}">-->
-
-
-                    <DataGrid x:Name="dataGrid" 
+                    <Grid>
+                        <Grid.Resources>
+                            <Style TargetType="{x:Type ScrollViewer}">
+                                <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
+                            </Style>
+                        </Grid.Resources>
+                        <DataGrid x:Name="dataGrid" 
                                 AutoGenerateColumns="True"
                                 CanUserAddRows="False" 
                                 CanUserDeleteRows="False"
@@ -227,13 +235,18 @@
                                 ColumnWidth="120" 
                                 CanUserResizeRows="False" 
                                 ItemsSource="{Binding}"/>
-     
 
+                    </Grid>
                 </TabItem>
 
                 <TabItem Header="Prospect List" Name="ProspectListTab">
-                                       
-                    <DataGrid Name="dataGrid_prospect"
+                    <Grid>
+                        <Grid.Resources>
+                            <Style TargetType="{x:Type ScrollViewer}">
+                                <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
+                            </Style>
+                        </Grid.Resources>
+                        <DataGrid Name="dataGrid_prospect"
                       CanUserSortColumns="False"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
@@ -244,19 +257,36 @@
                       SelectionMode="Extended"
                       ColumnWidth="120" 
                       CanUserResizeRows="False"/>
+                    </Grid>
 
-                    
                 </TabItem>
+               
+                <TabItem Header="Activity &amp; Info" Name="ActivityTab">
+                    <Grid>
+                        <Grid.Resources>
+                            <Style TargetType="{x:Type ScrollViewer}">
+                                <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
+                            </Style>
+                        </Grid.Resources>
+                        <DataGrid Name="dataGrid_activity" CanUserAddRows="False" CanUserDeleteRows="False"
+                                    ItemsSource="{Binding IsAsync=True}" 
+                                    SelectedCellsChanged="dataGrid_activity_SelectedCellsChanged"
+                                    CanUserReorderColumns="False"
+                                    MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
+                                    ClipboardCopyMode="IncludeHeader"
+                                    SelectionMode="Extended"
+                                    ColumnWidth="120" 
+                                    CanUserResizeRows="False"/>
+                    </Grid>
 
-                <TabItem Header="Activity" Name="ActivityTab">
-                    <DataGrid Name="dataGrid_activity" CanUserAddRows="False" CanUserDeleteRows="False"
-                      ItemsSource="{Binding IsAsync=True}" 
-                      CanUserReorderColumns="False"
-                      MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
-                      ClipboardCopyMode="IncludeHeader"
-                      SelectionMode="Extended"
-                      ColumnWidth="120" 
-                      CanUserResizeRows="False"/>
+
+
+
+
+
+
+
+
 
 
 
