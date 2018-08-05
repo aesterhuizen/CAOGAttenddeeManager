@@ -1,6 +1,7 @@
 namespace CAOGAttendeeProject
 {
     using System;
+    using System.Data;
     using System.ComponentModel;
     using System.Data.Entity;
     using System.Collections.Generic;
@@ -25,6 +26,7 @@ namespace CAOGAttendeeProject
         // public virtual DbSet<MyEntity> MyEntities { get; set; }
         public virtual DbSet<Attendee> Attendees { get; set; }
         public virtual DbSet<Attendance_Info> Attendance_Info { get; set; }
+        public virtual DbSet<ActivityPair> Activities { get; set; }
     }
     //    
     //}
@@ -34,7 +36,8 @@ namespace CAOGAttendeeProject
 
         public Attendee()
         {
-            this.AttendanceList = new ObservableCollection<Attendance_Info>();
+            AttendanceList = new ObservableCollection<Attendance_Info>();
+            ActivityList = new ObservableCollection<ActivityPair>();
 
         }
         public int AttendeeId { get; set; }
@@ -42,28 +45,202 @@ namespace CAOGAttendeeProject
         public string LastName { get; set; }
         // keep Prospect field for legacy purposes
         public int Prospect { get; set; }
+        
+        public string Phone { get; set; }
+        
+        public string Email { get; set; }
 
-        public virtual ObservableCollection<Attendance_Info> AttendanceList { get; private set; }
-       
+        public virtual ObservableCollection<Attendance_Info> AttendanceList { get; private set; } 
+        public virtual ObservableCollection<ActivityPair> ActivityList { get; private set; } 
 
     }
 
     public class Attendance_Info
     {
-        
+
+       
         public int Attendance_InfoId { get; set; }
         public int AttendeeId { get; set; }
 
         public DateTime Date { get; set; }
         public string Status { get; set; }
-        public string Activity { get; set; }
-        public DateTime? ActivityDate { get; set; }
-
-        public string Phone { get; set; }
-        public string Email { get; set; }
 
         public virtual Attendee Attendee { get; set; }
 
+        
+    }
+
+
+    public class ActivityPair :INotifyPropertyChanged
+    {
+       
+        public ActivityPair()
+        {
+
+        }
+        public int ActivityPairId {get; set; }
+        public int AttendeeId { get; set; }
+
+        public string ActivityGroup { get; set; }
+
+        public override string ToString()
+        {
+            if (ParentTaskName == "" && ChildTaskName == "")
+            {
+                return "n/a";
+            }
+            else if (ChildTaskName == "")
+            {
+
+                return ActivityGroup + "->" + " " + ParentTaskName;
+            }
+            else if (ParentTaskName != "" && ChildTaskName != "")
+            {
+                return ActivityGroup + "->" + "  " + ParentTaskName + "->" + "   " + ChildTaskName;
+            }
+            else
+            {
+                return "n/a";
+            }
+            
+
+        }
+        public string ParentTaskName
+        {
+            get
+            {
+                return _parenttaskname;
+            }
+
+            set
+            {
+                if (_parenttaskname != value)
+                {
+                    _parenttaskname = value;
+                    NotifyPropertyChanged("ParentTaskName");
+                }
+            }
+        }
+        public string ChildTaskName
+        {
+            get
+            {
+                return _childtaskname;
+            }
+
+            set
+            {
+                if (_childtaskname != value)
+                {
+                    _childtaskname = value;
+                    NotifyPropertyChanged("ChildTaskName");
+                }
+            }
+        }
+
+        
+        public string DateString { get; private set; }
+
+        public DateTime? Date
+        {
+            get
+            {
+                return _date;
+            }
+
+            set
+            {
+                if (_date != value)
+                {
+                    _date = value;
+                    DateString = _date?.ToString("MM-dd-yyyy");
+
+                    NotifyPropertyChanged("DateString");
+                }
+            }
+        }
+        private string _parenttaskname = "";
+        private string _childtaskname = "";
+        private DateTime? _date = null;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+
+    }
+    public class ActivityTableRow : INotifyPropertyChanged
+    {
+
+        public ActivityTableRow()
+        {
+            ActivityList = new ObservableCollection<ActivityPair>() { };
+           
+        }
+        public int AttendeeId { get; set; }
+        string _firstlastname = "";
+        public string FirstLastName
+        {
+            get
+            {
+                return _firstlastname;
+            }
+
+            set
+            {
+                if (_firstlastname != value)
+                {
+                    _firstlastname = value;
+                }
+            }
+         }
+
+        public string LastName { get; set; }
+        public string FirstName { get; set; }
+
+
+
+        private ObservableCollection<ActivityPair> _activitylist = new ObservableCollection<ActivityPair>() { };
+
+        public ObservableCollection<ActivityPair> ActivityList
+        {
+            get
+            {
+                return _activitylist;
+            }
+
+            set
+            {
+
+
+                _activitylist = value;
+                NotifyPropertyChanged("ActivityList");
+
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+
+
+    }
+
+
+    public class ActivityRecord
+    {
+        public int id;
+        public string fname;
+        public string lname;
+        public string activity_date;
+        public string activity;
         
     }
     public class AttRecord
@@ -73,7 +250,7 @@ namespace CAOGAttendeeProject
         public string lname;
         public DateTime? date;
         public string status;
-        public DateTime? activity_date;
+        public string activity_date;
         public string activity;
         public string phone;
         public string email;
@@ -148,7 +325,8 @@ namespace CAOGAttendeeProject
 
         private void OnChanged(string prop)
         {
-            this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
+           
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
 
         #endregion
@@ -156,7 +334,7 @@ namespace CAOGAttendeeProject
         public bool IsSelected
         {
             get { return _IsSelected; }
-            set { _IsSelected = value; OnChanged("IsChecked"); }
+            set { _IsSelected = value; OnChanged("IsSelected"); }
         }
 
         public ObservableCollection<ActivityTask> lstActivityTasks { get; set; }
@@ -166,8 +344,10 @@ namespace CAOGAttendeeProject
 
         public ActivityTask()
         {
-            this.lstsubTasks = new ObservableCollection<ActivityTask>();
+            this.lstsubTasks = new ObservableCollection<ActivityTask>() { };
         }
+
+        public int ActivityId {get;set; }
         public string TaskName { get; set; }
         public string Description { get; set; }
         private bool _IsSelected = false;
@@ -176,10 +356,13 @@ namespace CAOGAttendeeProject
 
         #region INotifyPropertyChanged Members
 
+       
 
         private void OnChanged(string prop)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+         
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+           
         }
 
         #endregion
@@ -191,7 +374,7 @@ namespace CAOGAttendeeProject
             set
             {
                 _IsSelected = value;
-                OnChanged("IsChecked");
+                OnChanged("IsSelected");
             }
         }
 
@@ -200,8 +383,7 @@ namespace CAOGAttendeeProject
         public ObservableCollection<ActivityTask> lstsubTasks { get; set; }
     }
 
-
-
+  
 
 
 }

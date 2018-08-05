@@ -5,6 +5,7 @@ using System.IO;
 using Microsoft.Win32;
 using System.Timers;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 using System.Linq;
 using System.Text;
@@ -45,7 +46,8 @@ namespace CAOGAttendeeProject
 
             InitializeComponent();
 
-            InitActivityList();
+            InitActivityTreeView();
+
 
 
 
@@ -93,7 +95,7 @@ namespace CAOGAttendeeProject
 
                     m_dbContext = new ModelDb(m_constr);
 
-                   // correctDBerrors();
+                    // correctDBerrors();
 
                     if (m_dbContext.Attendees.Count() == 0)
                     {
@@ -106,7 +108,7 @@ namespace CAOGAttendeeProject
                     {
 
                         InitDataSet();
-
+                        dataGrid_activity.DataContext = m_lstactivityTableRows;
                         Display_DefaultTable_in_Grid();
                     }
 
@@ -147,20 +149,27 @@ namespace CAOGAttendeeProject
 
 
         private ModelDb m_dbContext;
-        private System.Collections.IList m_activity_row_select = new List<DataRowView> { };
+       
         private DateTime m_DateSelected;
         private DateTime m_alistDateSelected;
-        private DateTime m_ActivityDateSelected;
+        private DateTime? m_ActivityDateSelected;
         private DataSet m_DataSet = new DataSet();
+
+        // list of activities select in listView
+        private List<ActivityPair> m_activityPairs_selectedFromListView = new List<ActivityPair> { };
+        // current activity row that is selected
+        private ActivityTableRow m_activity_row_select;
+        private int m_old_activityRow_attendeeId;
+        private List<ActivityTableRow> m_lstactivityTableRows = new List<ActivityTableRow>() { };
 
         List<ActivityGroup> m_lstActivities = new List<ActivityGroup> { };
         private TabState m_TabState = new TabState();
-
+        string m_ActivityName;
         // private Timer aTimer;
 
         private bool m_NoCredFile = false;
+        private int m_activitychecked_count = 0;
 
-        
 
         private bool m_isActivityfilterByDateChecked = false;
         private bool m_isFilterByDateChecked = false;
@@ -171,12 +180,11 @@ namespace CAOGAttendeeProject
         private bool m_isActivityFilterChecked = false;
         private bool m_isActivityChecked = false;
         private bool m_isQueryTableShown = false;
-        object m_ActivityName;
         private bool m_alistView = false;
         private bool m_AttendanceView = false;
         private bool m_activityView = false;
-
-
+        private string[] m_ary_ActivityStatus = new string[10];
+        private string m_old_attendeeId = "";
         private bool m_dateIsValid = false;
         private bool m_alistdateIsValid = false;
 
@@ -268,10 +276,11 @@ namespace CAOGAttendeeProject
 
                     int attID = int.Parse(AttendeeReader["AttendeeId"].ToString());
 
-                    newAttendeeRec = new Attendee();
-
-                    newAttendeeRec.FirstName = AttendeeReader["FirstName"].ToString();
-                    newAttendeeRec.LastName = AttendeeReader["LastName"].ToString();
+                    newAttendeeRec = new Attendee
+                    {
+                        FirstName = AttendeeReader["FirstName"].ToString(),
+                        LastName = AttendeeReader["LastName"].ToString()
+                    };
 
 
                     foreach (DataRow Attendee_InfoRec in oldDB_AttInfo_dt.Rows)
@@ -507,11 +516,11 @@ namespace CAOGAttendeeProject
 
         // }
 
-        private void InitActivityList()
+        private void InitActivityTreeView()
         {
 
 
-          
+
             ActivityGroup Caring = new ActivityGroup() { ActivityName = "Caring" };
             ActivityGroup Central_Christian_Academy = new ActivityGroup() { ActivityName = "Central Christian Academy" };
             ActivityGroup Central_Kids_Elementry_K5th_Grade = new ActivityGroup() { ActivityName = "Central Kids: Elementry (K-5th Grade)" };
@@ -525,91 +534,91 @@ namespace CAOGAttendeeProject
             ActivityGroup Students_The_Rock6_12th_Grade = new ActivityGroup() { ActivityName = "Students: The Rock (6-12th Grade)" };
 
 
-            Caring.lstActivityTasks.Add(new ActivityTask() { TaskName = "Hospitality", Description = "Briefely visit(on a day of your choosing) and pray with individuals who are in local hospitals - Church office will supply admission information." });
-            Caring.lstActivityTasks.Add(new ActivityTask() { TaskName = "Shut-In Visitation", Description = "Call to arrange convenient times fora home visit - Communion may also be served." });
-            Caring.lstActivityTasks.Add(new ActivityTask() { TaskName = "Nursing Home Visitation", Description = "Visit local nursing homes during anassigned week each month to encourage those in need." });
+            Caring.lstActivityTasks.Add(new ActivityTask() { ActivityId = 1, TaskName = "Hospitality", Description = "Briefely visit(on a day of your choosing) and pray with individuals who are in local hospitals - Church office will supply admission information." });
+            Caring.lstActivityTasks.Add(new ActivityTask() { ActivityId = 2, TaskName = "Shut-In Visitation", Description = "Call to arrange convenient times fora home visit - Communion may also be served." });
+            Caring.lstActivityTasks.Add(new ActivityTask() { ActivityId = 3, TaskName = "Nursing Home Visitation", Description = "Visit local nursing homes during anassigned week each month to encourage those in need." });
 
 
 
 
-            ActivityTask General_Volunteer = new ActivityTask { TaskName = "General Volenteer" };
-            General_Volunteer.lstsubTasks.Add(new ActivityTask() { TaskName = "Box Tops Collector", Description = "Cut, collect and count Box Tops." });
-            General_Volunteer.lstsubTasks.Add(new ActivityTask() { TaskName = "Library Helper", Description = "Proof read library books before we put them on the shelves." });
-            General_Volunteer.lstsubTasks.Add(new ActivityTask() { TaskName = "Lunch Monitor", Description = "Help to supervise the children during lunchtime." });
-            General_Volunteer.lstsubTasks.Add(new ActivityTask() { TaskName = "Office Helper", Description = "Help to prepare mass mailings for fundraisers." });
+            ActivityTask General_Volunteer = new ActivityTask { ActivityId = 4, TaskName = "General Volenteer" };
+            General_Volunteer.lstsubTasks.Add(new ActivityTask() { ActivityId = 5, TaskName = "Box Tops Collector", Description = "Cut, collect and count Box Tops." });
+            General_Volunteer.lstsubTasks.Add(new ActivityTask() { ActivityId = 6, TaskName = "Library Helper", Description = "Proof read library books before we put them on the shelves." });
+            General_Volunteer.lstsubTasks.Add(new ActivityTask() { ActivityId = 7, TaskName = "Lunch Monitor", Description = "Help to supervise the children during lunchtime." });
+            General_Volunteer.lstsubTasks.Add(new ActivityTask() { ActivityId = 8, TaskName = "Office Helper", Description = "Help to prepare mass mailings for fundraisers." });
 
             Central_Christian_Academy.lstActivityTasks.Add(General_Volunteer);
 
-            ActivityTask Sunday_mornings = new ActivityTask { TaskName = "Sunday Mornings: Super Church" };
-            Sunday_mornings.lstsubTasks.Add(new ActivityTask() { TaskName = "Leader/Teacher & Assistant", Description = "Facilitate the lessons, crafts & classroom management. Provide a godly example." });
-            Sunday_mornings.lstsubTasks.Add(new ActivityTask() { TaskName = "Check-in Greeter", Description = "Greet families while checking-in kids with our computerized system at the beginning of the service." });
+            ActivityTask Sunday_mornings = new ActivityTask { ActivityId = 9, TaskName = "Sunday Mornings: Super Church" };
+            Sunday_mornings.lstsubTasks.Add(new ActivityTask() { ActivityId = 10, TaskName = "Leader/Teacher & Assistant", Description = "Facilitate the lessons, crafts & classroom management. Provide a godly example." });
+            Sunday_mornings.lstsubTasks.Add(new ActivityTask() { ActivityId = 11, TaskName = "Check-in Greeter", Description = "Greet families while checking-in kids with our computerized system at the beginning of the service." });
 
-            ActivityTask Wednesday_evenings = new ActivityTask { TaskName = "Wednesday Evenings: M-Pact Girls Club & Royal Rangers" };
-            Wednesday_evenings.lstsubTasks.Add(new ActivityTask() { TaskName = "Leader/Teacher & Assistant", Description = "Facilitate the lessons, crafts & classroom management. Provide a godly example." });
-            Wednesday_evenings.lstsubTasks.Add(new ActivityTask() { TaskName = "Check-in Greeter", Description = "Greet families while checking-in kids with our computerized system at the beginning of the service." });
+            ActivityTask Wednesday_evenings = new ActivityTask { ActivityId = 12, TaskName = "Wednesday Evenings: M-Pact Girls Club & Royal Rangers" };
+            Wednesday_evenings.lstsubTasks.Add(new ActivityTask() { ActivityId = 13, TaskName = "Leader/Teacher & Assistant", Description = "Facilitate the lessons, crafts & classroom management. Provide a godly example." });
+            Wednesday_evenings.lstsubTasks.Add(new ActivityTask() { ActivityId = 14, TaskName = "Check-in Greeter", Description = "Greet families while checking-in kids with our computerized system at the beginning of the service." });
 
-            ActivityTask Sunday_Mornings_Wednesday_Evenings = new ActivityTask { TaskName = "Sunday Mornings & Wednesday Evenings" };
-            Sunday_Mornings_Wednesday_Evenings.lstsubTasks.Add(new ActivityTask() { TaskName = "Leader/Assistant", Description = "Minister to nursery age children and their needs." });
-            Sunday_Mornings_Wednesday_Evenings.lstsubTasks.Add(new ActivityTask() { TaskName = "Rocker", Description = "Hold and rock infants as you minister in the nursery." });
-            Sunday_Mornings_Wednesday_Evenings.lstsubTasks.Add(new ActivityTask() { TaskName = "Check-in Greeter", Description = "Greet families while checking in kids with our computerized system at the begining of  service." });
+            ActivityTask Sunday_Mornings_Wednesday_Evenings = new ActivityTask { ActivityId = 15, TaskName = "Sunday Mornings & Wednesday Evenings" };
+            Sunday_Mornings_Wednesday_Evenings.lstsubTasks.Add(new ActivityTask() { ActivityId = 16, TaskName = "Leader/Assistant", Description = "Minister to nursery age children and their needs." });
+            Sunday_Mornings_Wednesday_Evenings.lstsubTasks.Add(new ActivityTask() { ActivityId = 17, TaskName = "Rocker", Description = "Hold and rock infants as you minister in the nursery." });
+            Sunday_Mornings_Wednesday_Evenings.lstsubTasks.Add(new ActivityTask() { ActivityId = 18, TaskName = "Check-in Greeter", Description = "Greet families while checking in kids with our computerized system at the begining of  service." });
 
-            ActivityTask Childrens_church = new ActivityTask { TaskName = "Children's Church (Sunday) & Rainbows Club (Wednesdays)" };
-            Childrens_church.lstsubTasks.Add(new ActivityTask() { TaskName = "Leader/Teacher & Assistant", Description = "Facilitate the lessons, crafts & classroom management. Provide a godly example." });
+            ActivityTask Childrens_church = new ActivityTask { ActivityId = 19, TaskName = "Children's Church (Sunday) & Rainbows Club (Wednesdays)" };
+            Childrens_church.lstsubTasks.Add(new ActivityTask() { ActivityId = 20, TaskName = "Leader/Teacher & Assistant", Description = "Facilitate the lessons, crafts & classroom management. Provide a godly example." });
 
             Central_Kids_Preschool3_5YRS_old.lstActivityTasks.Add(Childrens_church);
             Central_Kids_Nursery_8WKS_2YRS.lstActivityTasks.Add(Sunday_Mornings_Wednesday_Evenings);
 
-            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { TaskName = "Concessions", Description = "Prepare and serve food to children." });
-            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { TaskName = "Leader & Assistant", Description = "Minister to children and their needs at these events." });
-            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { TaskName = "Recreation", Description = "Register children as they enter each day's event." });
-            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { TaskName = "Security", Description = "Monitoring and securing the grounds at each event." });
+            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { ActivityId = 21, TaskName = "Concessions", Description = "Prepare and serve food to children." });
+            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { ActivityId = 22, TaskName = "Leader & Assistant", Description = "Minister to children and their needs at these events." });
+            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { ActivityId = 23, TaskName = "Recreation", Description = "Register children as they enter each day's event." });
+            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { ActivityId = 24, TaskName = "Security", Description = "Monitoring and securing the grounds at each event." });
 
             Central_Kids_Elementry_K5th_Grade.lstActivityTasks.Add(Sunday_mornings);
             Central_Kids_Elementry_K5th_Grade.lstActivityTasks.Add(Wednesday_evenings);
 
-            Creative_Arts.lstActivityTasks.Add(new ActivityTask() { TaskName = "Workshop Team (Vocal & Instrumental", Description = "Use your talents to assist in leading the congregation into worship during our weekly services." });
-            Creative_Arts.lstActivityTasks.Add(new ActivityTask() { TaskName = "Technical Multimedia Team", Description = "Apply your skills in the area of sound, videography, and computer technology during our weekly worship services." });
+            Creative_Arts.lstActivityTasks.Add(new ActivityTask() { ActivityId = 25, TaskName = "Workshop Team (Vocal & Instrumental", Description = "Use your talents to assist in leading the congregation into worship during our weekly services." });
+            Creative_Arts.lstActivityTasks.Add(new ActivityTask() { ActivityId = 26, TaskName = "Technical Multimedia Team", Description = "Apply your skills in the area of sound, videography, and computer technology during our weekly worship services." });
 
             ActivityTask GroundsTeam = new ActivityTask { TaskName = "Grounds Team" };
-            GroundsTeam.lstsubTasks.Add(new ActivityTask() { TaskName = "Construction", Description = "Use your skills to help with special projects on campus." });
-            GroundsTeam.lstsubTasks.Add(new ActivityTask() { TaskName = "Housekeeping", Description = "Help keep our facilities clean by volunteering to clean in certain areas." });
-            GroundsTeam.lstsubTasks.Add(new ActivityTask() { TaskName = "Lanscaping", Description = "Groom and care for landscaping and mulchbeds around church and parsonage." });
-            GroundsTeam.lstsubTasks.Add(new ActivityTask() { TaskName = "Lawn Maintenance", Description = "Join a rotaion to keep the lawn on campus mowed." });
+            GroundsTeam.lstsubTasks.Add(new ActivityTask() { ActivityId = 27, TaskName = "Construction", Description = "Use your skills to help with special projects on campus." });
+            GroundsTeam.lstsubTasks.Add(new ActivityTask() { ActivityId = 28, TaskName = "Housekeeping", Description = "Help keep our facilities clean by volunteering to clean in certain areas." });
+            GroundsTeam.lstsubTasks.Add(new ActivityTask() { ActivityId = 29, TaskName = "Lanscaping", Description = "Groom and care for landscaping and mulchbeds around church and parsonage." });
+            GroundsTeam.lstsubTasks.Add(new ActivityTask() { ActivityId = 30, TaskName = "Lawn Maintenance", Description = "Join a rotaion to keep the lawn on campus mowed." });
 
-            ActivityTask kitchenHelp = new ActivityTask { TaskName = "Kitchen Help" };
-            kitchenHelp.lstsubTasks.Add(new ActivityTask() { TaskName = "Funeral Dinners", Description = "Cook and serve dinners to the families and friends of those whoare grievingafter funeral services." });
-            kitchenHelp.lstsubTasks.Add(new ActivityTask() { TaskName = "Special Events", Description = "Throughout the year their are events that will require assistance with cooking, food preparation and setup." });
+            ActivityTask kitchenHelp = new ActivityTask { ActivityId = 31, TaskName = "Kitchen Help" };
+            kitchenHelp.lstsubTasks.Add(new ActivityTask() { ActivityId = 32, TaskName = "Funeral Dinners", Description = "Cook and serve dinners to the families and friends of those whoare grievingafter funeral services." });
+            kitchenHelp.lstsubTasks.Add(new ActivityTask() { ActivityId = 33, TaskName = "Special Events", Description = "Throughout the year their are events that will require assistance with cooking, food preparation and setup." });
 
 
-            Helps.lstActivityTasks.Add(new ActivityTask() { TaskName = "Medical Ministry Team", Description = "Be a first responder in the event of a medical emergency on the church campus or at a church event (special training and certification required)." });
+            Helps.lstActivityTasks.Add(new ActivityTask() { ActivityId = 34, TaskName = "Medical Ministry Team", Description = "Be a first responder in the event of a medical emergency on the church campus or at a church event (special training and certification required)." });
 
-            ActivityTask Office_Volunteers = new ActivityTask { TaskName = "Office Volunteers" };
-            GroundsTeam.lstsubTasks.Add(new ActivityTask() { TaskName = "General Volunteer", Description = "Support the office staff on a regular basis - answering phones, type & copy documents as needed, basic computer skills and a pleasant personality will be required." });
-            GroundsTeam.lstsubTasks.Add(new ActivityTask() { TaskName = "Special Projects", Description = "Help on an as-needed basis with a wide variety of tasks such as mailings, packet assembly, cutting, sorting, etc." });
+            ActivityTask Office_Volunteers = new ActivityTask { ActivityId = 35, TaskName = "Office Volunteers" };
+            GroundsTeam.lstsubTasks.Add(new ActivityTask() { ActivityId = 36, TaskName = "General Volunteer", Description = "Support the office staff on a regular basis - answering phones, type & copy documents as needed, basic computer skills and a pleasant personality will be required." });
+            GroundsTeam.lstsubTasks.Add(new ActivityTask() { ActivityId = 37, TaskName = "Special Projects", Description = "Help on an as-needed basis with a wide variety of tasks such as mailings, packet assembly, cutting, sorting, etc." });
 
 
             Helps.lstActivityTasks.Add(GroundsTeam);
             Helps.lstActivityTasks.Add(kitchenHelp);
-            Helps.lstActivityTasks.Add(new ActivityTask() { TaskName = "Security Team", Description = "Be a part of a ministry team to help ensure the safety of all who choose to worship at Central." });
-            Helps.lstActivityTasks.Add(new ActivityTask() { TaskName = "Transportation", Description = "Drive school bus (CDL license required) or church vans for special events throughout the year for children, youth and adult groups." });
+            Helps.lstActivityTasks.Add(new ActivityTask() { ActivityId = 38, TaskName = "Security Team", Description = "Be a part of a ministry team to help ensure the safety of all who choose to worship at Central." });
+            Helps.lstActivityTasks.Add(new ActivityTask() { ActivityId = 39, TaskName = "Transportation", Description = "Drive school bus (CDL license required) or church vans for special events throughout the year for children, youth and adult groups." });
 
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Communion Team(set-up, Condense, or Clean-up)", Description = "Prayerfully prepare the communion elements to be served monthly - includes clean-up (gathering cups from the pews and emptying/cleaning communion trays." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Welcome Center Assistance", Description = "To welcome new people to Central by giving them a gift bag, offering a tour of the campus, and helping them finding their children's classes." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Doorkeeper", Description = "Open the doors for people as they arrive to make them fell welcome." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Greeter", Description = "Greeting people with your talents and abilities to connect with God and others in the church." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Information Center Assistant", Description = "Supply congregation with up-to-date information regarding events, visitor information, ficility directions, and money collection for various items." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Parking Lot Attendant", Description = "Direct traffic flow, assist anyone who needs help getting into the church, and ensure a great first impression for everyone." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Usher Misistry", Description = "Help seat guests, hand out bulletins, handle crowed control, answer questions, take offering and serve communion during our Sunday services and special events." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { TaskName = "Golf Cart Drivers", Description = "Shuttle people to and from their cars on Sunday mornings and special events." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { ActivityId = 40, TaskName = "Communion Team(set-up, Condense, or Clean-up)", Description = "Prayerfully prepare the communion elements to be served monthly - includes clean-up (gathering cups from the pews and emptying/cleaning communion trays." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { ActivityId = 41, TaskName = "Welcome Center Assistance", Description = "To welcome new people to Central by giving them a gift bag, offering a tour of the campus, and helping them finding their children's classes." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { ActivityId = 42, TaskName = "Doorkeeper", Description = "Open the doors for people as they arrive to make them fell welcome." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { ActivityId = 43, TaskName = "Greeter", Description = "Greeting people with your talents and abilities to connect with God and others in the church." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { ActivityId = 44, TaskName = "Information Center Assistant", Description = "Supply congregation with up-to-date information regarding events, visitor information, ficility directions, and money collection for various items." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { ActivityId = 45, TaskName = "Parking Lot Attendant", Description = "Direct traffic flow, assist anyone who needs help getting into the church, and ensure a great first impression for everyone." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { ActivityId = 46, TaskName = "Usher Misistry", Description = "Help seat guests, hand out bulletins, handle crowed control, answer questions, take offering and serve communion during our Sunday services and special events." });
+            Hospitality.lstActivityTasks.Add(new ActivityTask() { ActivityId = 47, TaskName = "Golf Cart Drivers", Description = "Shuttle people to and from their cars on Sunday mornings and special events." });
 
-            Outreach_Local_Missions.lstActivityTasks.Add(new ActivityTask() { TaskName = "Special Projects", Description = "Help with local outreach projects including minor building repairs, painting, collecting and distriburting clothing & food, etc." });
+            Outreach_Local_Missions.lstActivityTasks.Add(new ActivityTask() { ActivityId = 48, TaskName = "Special Projects", Description = "Help with local outreach projects including minor building repairs, painting, collecting and distriburting clothing & food, etc." });
 
-            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { TaskName = "Administrative", Description = "Guest follow-up, parent communication, mailing/emailing, Website." });
-            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { TaskName = "Adio/Technicl Team", Description = "Prepare, manage, maintain and operate the sound, video, computer and lighting systems to enhance services." });
-            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { TaskName = "Cafe Team", Description = "Serving food, snacks and beverage items to the students on Wednesday nights and special events." });
-            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { TaskName = "Junior High Ministry Team", Description = "Serve by teaching/assisting in our Sunday Morning Junior High Class with students in grades 6-8" });
-            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { TaskName = "Ministry Team Volunteer", Description = "Serve by assisting during Wednesday night meetings in the areas of check-in, leading activities, small group discussions, events, student discipleship and leader retreats." });
-            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { TaskName = "Evangelic Outreach", Description = "Shate the love of Christ with others by partnering with missionschurches' events, outreaches, VBS, etc." });
+            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { ActivityId = 49, TaskName = "Administrative", Description = "Guest follow-up, parent communication, mailing/emailing, Website." });
+            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { ActivityId = 50, TaskName = "Adio/Technicl Team", Description = "Prepare, manage, maintain and operate the sound, video, computer and lighting systems to enhance services." });
+            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { ActivityId = 51, TaskName = "Cafe Team", Description = "Serving food, snacks and beverage items to the students on Wednesday nights and special events." });
+            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { ActivityId = 52, TaskName = "Junior High Ministry Team", Description = "Serve by teaching/assisting in our Sunday Morning Junior High Class with students in grades 6-8" });
+            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { ActivityId = 53, TaskName = "Ministry Team Volunteer", Description = "Serve by assisting during Wednesday night meetings in the areas of check-in, leading activities, small group discussions, events, student discipleship and leader retreats." });
+            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { ActivityId = 54, TaskName = "Evangelic Outreach", Description = "Shate the love of Christ with others by partnering with missionschurches' events, outreaches, VBS, etc." });
 
             //  lstsubTasks = new System.Collections.ObjectModel.ObservableCollection<ActivityTask>().Add(subtask1)
 
@@ -1122,7 +1131,7 @@ namespace CAOGAttendeeProject
             }
 
 
-        
+
         }
 
 
@@ -1144,13 +1153,51 @@ namespace CAOGAttendeeProject
 
         } // end  private void Display_Database_in_Grid()
 
+        private string[] getActivityNameFromIds(string parent_id, string child_id)
+        {
+            string[] aryActivityname = new string[2];
 
+            foreach (ActivityGroup activity_group in m_lstActivities)
+            {
+                foreach (ActivityTask task in activity_group.lstActivityTasks)
+                {
+
+
+                    if (task.lstsubTasks.Count != 0) // task has children
+                    {
+                        foreach (ActivityTask subtask in task.lstsubTasks)
+                        {
+
+
+                            if (subtask.ActivityId.ToString() == child_id && task.ActivityId.ToString() == parent_id)
+                            {
+                                aryActivityname[0] = task.TaskName;
+                                aryActivityname[1] = subtask.TaskName;
+                                break;
+                            }
+
+                        }
+                    }
+                    else if (task.ActivityId.ToString() == parent_id)
+                    {
+
+                        aryActivityname[0] = task.TaskName;
+                        aryActivityname[1] = "";
+                        break;
+                    }
+                }
+            }
+
+            return aryActivityname;
+        }
 
         private void InitDataSet()
         {
 
             m_dbContext.Attendees.Load();
             m_dbContext.Attendance_Info.Load();
+            m_dbContext.Activities.Load();
+
 
             //--------------------- Make DEFAULT TABLE---------------------------------------------------------------------------
 
@@ -1167,19 +1214,17 @@ namespace CAOGAttendeeProject
             try
             {
 
-                var queryAttendees = from AttendeeRec in m_dbContext.Attendees.Local
-                                     select AttendeeRec;
+                var queryAttendeeRec = from AttendeeRec in m_dbContext.Attendees.Local
+                                       select AttendeeRec;
 
 
-
-                ActivityTable.Columns.Add(new DataColumn("AttendeeId"));
-                ActivityTable.Columns.Add(new DataColumn("FirstLastName"));
-                ActivityTable.Columns.Add(new DataColumn("Last Name"));
-                ActivityTable.Columns.Add(new DataColumn("First Name"));
-                ActivityTable.Columns.Add(new DataColumn("Activity"));
-                ActivityTable.Columns.Add(new DataColumn("Activity Last Attended"));
-                ActivityTable.Columns.Add(new DataColumn("Phone"));
-                ActivityTable.Columns.Add(new DataColumn("Email"));
+                //FIX ME
+                //ActivityTable.Columns.Add(new DataColumn("AttendeeId"));
+                //ActivityTable.Columns.Add(new DataColumn("FirstLastName"));
+                //ActivityTable.Columns.Add(new DataColumn("Last Name"));
+                //ActivityTable.Columns.Add(new DataColumn("First Name"));
+                //ActivityTable.Columns.Add(new DataColumn("Phone"));
+                //ActivityTable.Columns.Add(new DataColumn("Email"));
 
                 Default_Data_Table.Columns.Add(new DataColumn("AttendeeId"));
                 Default_Data_Table.Columns.Add(new DataColumn("FirstLastName"));
@@ -1187,7 +1232,7 @@ namespace CAOGAttendeeProject
                 Default_Data_Table.Columns.Add(new DataColumn("First Name"));
                 Default_Data_Table.Columns.Add(new DataColumn("Date Last Attended"));
                 Default_Data_Table.Columns.Add(new DataColumn("Status"));
-                Default_Data_Table.Columns.Add(new DataColumn("Activity"));
+                Default_Data_Table.Columns.Add(new DataColumn("Activity") );
                 Default_Data_Table.Columns.Add(new DataColumn("Activity Last Attended"));
                 Default_Data_Table.Columns.Add(new DataColumn("Phone"));
                 Default_Data_Table.Columns.Add(new DataColumn("Email"));
@@ -1213,7 +1258,7 @@ namespace CAOGAttendeeProject
 
 
 
-                foreach (var AttendeeRec in queryAttendees)
+                foreach (var AttendeeRec in queryAttendeeRec)
                 {
 
                     var queryLastDate = (from DateRec in AttendeeRec.AttendanceList
@@ -1221,24 +1266,92 @@ namespace CAOGAttendeeProject
                                          orderby DateRec.Date ascending
                                          select DateRec).ToList().LastOrDefault();
 
-                    var queryActivityLastDate = (from ActivityDateRec in AttendeeRec.AttendanceList
-                                                 orderby ActivityDateRec.ActivityDate ascending
+                    var queryActivityLastDate = (from ActivityDateRec in AttendeeRec.ActivityList
+                                                 orderby ActivityDateRec.Date ascending
                                                  select ActivityDateRec).ToList().LastOrDefault();
 
-                    //--------------Construct Activity Table
-                    DataRow drActivityTable = ActivityTable.NewRow();
 
-                    drActivityTable["AttendeeId"] = AttendeeRec.AttendeeId;
-                    drActivityTable["FirstLastName"] = AttendeeRec.FirstName + " " + AttendeeRec.LastName;
 
-                    drActivityTable["First Name"] = AttendeeRec.FirstName;
-                    drActivityTable["Last Name"] = AttendeeRec.LastName;
-                    drActivityTable["Activity"] = queryActivityLastDate.Activity;
-                    drActivityTable["Activity Last Attended"] = queryActivityLastDate.ActivityDate?.ToString("MM-dd-yyyy");
-                    drActivityTable["Phone"] = queryActivityLastDate.Phone;
-                    drActivityTable["Email"] = queryActivityLastDate.Email;
+                  
 
-                    ActivityTable.Rows.Add(drActivityTable);
+
+
+                    if (queryActivityLastDate != null)
+                    {
+                        //get activity last attended string for each attendee in database
+                        // and parse out the parent and child task names
+                        //string[] tempAryStr = queryActivityLastDate.Activity.Split(',');
+                        //string[] arytemp = new string[2];
+                        //// foreach activity
+                        //foreach (string activity_str in tempAryStr)
+                        //{
+                        //    string[] substr = activity_str.Split('_');
+
+                        //    string AttendeeId = substr[0];
+                        //    string ActivityName = substr[2];
+                        //    string[] tempIDstrs = substr[1].Split('-');
+                        //    string ParentId = tempIDstrs[0];
+                        //    string ChildId = tempIDstrs[1];
+
+
+                        //lookup Activityname from Ids
+                        // arytemp = getActivityNameFromIds(ParentId, ChildId);
+
+                        //my_activity.ParentTaskName = arytemp[0];
+                        //my_activity.ChildTaskName = arytemp[1];
+
+                        // activityPairs.Add(my_activity);
+                        // add activity to lookup Table
+                        // string item = AttendeeId + '_' + ParentId + '-' + ChildId + '_' + ActivityName;
+                        //  m_lstActivityLookupTable.Add(item);
+
+
+                       
+                    }
+
+
+                    //fill activity table columns. Add to list for each row
+                    m_lstactivityTableRows.Add(new ActivityTableRow()
+                    {
+                        AttendeeId = AttendeeRec.AttendeeId,
+                        FirstLastName = AttendeeRec.FirstName.ToUpper() + " " + AttendeeRec.LastName.ToUpper(),
+                        LastName = AttendeeRec.LastName,
+                        FirstName = AttendeeRec.FirstName,
+                        ActivityList = AttendeeRec.ActivityList,
+                       
+
+                    });
+
+
+
+
+
+
+
+                    // FIX ME
+                    //DataRow drActivityTable = ActivityTable.NewRow();
+
+                    //drActivityTable["AttendeeId"] = AttendeeRec.AttendeeId;
+                    //drActivityTable["FirstLastName"] = AttendeeRec.FirstName + " " + AttendeeRec.LastName;
+
+                    //drActivityTable["First Name"] = AttendeeRec.FirstName;
+                    //drActivityTable["Last Name"] = AttendeeRec.LastName;
+
+                    //if (queryActivityLastDate != null)
+                    //{
+                    //    drActivityTable["Activity Last Attended"] = adate;
+                    //    drActivityTable["Activity"] = queryActivityLastDate.Date;
+                    //}
+                    //else
+                    //{
+                    //    drActivityTable["Activity Last Attended"] = "n/a";
+                    //    drActivityTable["Activity Last Attended"] = "n/a";
+                    //}
+
+
+
+
+                    //ActivityTable.Rows.Add(drActivityTable);
 
                     //----Construct AttendeeLisTable-----------------------------------------
                     DataRow drNewAttendeeListRec = AttendeeListTable.NewRow();
@@ -1260,7 +1373,8 @@ namespace CAOGAttendeeProject
                     if (queryLastDate != null)
                     {
                         ldate = queryLastDate.Date.ToString("MM-dd-yyyy");
-                        adate = queryActivityLastDate.ActivityDate?.ToString("MM-dd-yyyy");
+                        if (queryActivityLastDate != null)
+                            adate = queryActivityLastDate.Date?.ToString("MM-dd-yyyy");
 
                         lstatus = queryLastDate.Status;
 
@@ -1278,11 +1392,21 @@ namespace CAOGAttendeeProject
 
                         DefaultTabledr["Date Last Attended"] = ldate;
                         DefaultTabledr["Status"] = lstatus;
-                        DefaultTabledr["Activity"] = queryActivityLastDate.Activity;
-                        DefaultTabledr["Activity Last Attended"] = adate;
+                        
+                        if (queryActivityLastDate != null)
+                        {
+                            DefaultTabledr["Activity Last Attended"] = adate;
+                            DefaultTabledr["Activity"] = queryActivityLastDate.ToString();
+                        }
+                        else
+                        {
+                            DefaultTabledr["Activity Last Attended"] = "n/a";
+                           // DefaultTabledr["Activity"] = queryActivityLastDate.ToString() ;
+                        }
+                            
 
-                        DefaultTabledr["Phone"] = queryActivityLastDate.Phone;
-                        DefaultTabledr["Email"] = queryActivityLastDate.Email;
+                        DefaultTabledr["Phone"] = AttendeeRec.Phone;
+                        DefaultTabledr["Email"] = AttendeeRec.Email;
 
                         Default_Data_Table.Rows.Add(DefaultTabledr);
                     }
@@ -1313,10 +1437,19 @@ namespace CAOGAttendeeProject
                             DefaultTabledr["Date Last Attended"] = "N/A";
                             DefaultTabledr["Status"] = lstatus;
 
-                            DefaultTabledr["Activity"] = queryActivityLastDate.Activity;
-                            DefaultTabledr["Activity Last Attended"] = adate;
-                            DefaultTabledr["Phone"] = queryActivityLastDate.Phone;
-                            DefaultTabledr["Email"] = queryActivityLastDate.Email;
+                            if (queryActivityLastDate != null)
+                            {
+                                DefaultTabledr["Activity Last Attended"] = adate;
+                                DefaultTabledr["Activity"] = queryActivityLastDate.ToString();
+                            }
+                            else
+                            {
+                                DefaultTabledr["Activity Last Attended"] = "n/a";
+                                DefaultTabledr["Activity Last Attended"] = "n/a";
+                            }
+                            
+                            DefaultTabledr["Phone"] = AttendeeRec.Phone;
+                            DefaultTabledr["Email"] = AttendeeRec.Email;
 
 
                             Default_Data_Table.Rows.Add(DefaultTabledr);
@@ -1325,12 +1458,13 @@ namespace CAOGAttendeeProject
                     }
                 } // end foreach
 
-
+              
                 m_DataSet.Tables.Add(Default_Data_Table);
                 m_DataSet.Tables.Add(AttendeeListTable);
-                m_DataSet.Tables.Add(ActivityTable);
+                //FIX ME
+                // m_DataSet.Tables.Add(ActivityTable);
 
-          
+
                 m_DataSet.Tables["DefaultTable"].AcceptChanges();
                 m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
                 m_DataSet.Tables["ActivityTable"].AcceptChanges();
@@ -1351,7 +1485,7 @@ namespace CAOGAttendeeProject
 
         private void chkResponded_Checked(object sender, RoutedEventArgs e)
         {
-           
+
             Cursor = Cursors.Wait;
             chkAttended.IsChecked = false;
             chkFollowup.IsChecked = false;
@@ -1386,7 +1520,7 @@ namespace CAOGAttendeeProject
 
 
             Cursor = Cursors.Wait;
-           
+
             chkResponded.IsChecked = false;
             chkFollowup.IsChecked = false;
 
@@ -1449,7 +1583,10 @@ namespace CAOGAttendeeProject
                 }
                 else if (m_activityView)
                 {
-                    m_DataSet.Tables["ActivityTable"].DefaultView.RowFilter = String.Empty;
+
+                    dataGrid_activity.DataContext = m_lstactivityTableRows;
+
+
                 }
 
 
@@ -1459,6 +1596,7 @@ namespace CAOGAttendeeProject
             {
                 Disable_Filters();
                 DateCalendar.IsEnabled = false;
+                string Upstring = txtSearch.Text.ToUpper();
 
                 if (m_AttendanceView)
                 {
@@ -1479,7 +1617,9 @@ namespace CAOGAttendeeProject
                 }
                 else if (m_activityView)
                 {
-                    m_DataSet.Tables["ActivityTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+                    //m_DataSet.Tables["ActivityTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+                    var filteredActivityList = m_lstactivityTableRows.Where(row => row.FirstLastName.Contains(Upstring) );
+                    dataGrid_activity.DataContext = filteredActivityList;
                 }
 
 
@@ -1505,7 +1645,7 @@ namespace CAOGAttendeeProject
             }
 
         }
-        private void UpdateDataGrid(IQueryable<AttRecord> linqquery, string query = "0")
+        private void UpdateDataGridWithQuery(IQueryable<AttRecord> linqquery, string query = "0")
         {
 
 
@@ -1545,7 +1685,7 @@ namespace CAOGAttendeeProject
                     dataGrid.IsReadOnly = true;
                 }
                 m_isQueryTableShown = true;
-              
+
             }
             else if (linqquery != null)
             {
@@ -1583,8 +1723,8 @@ namespace CAOGAttendeeProject
                     newrow["Last Name"] = rec.lname;
                     newrow["Date"] = rec.date?.ToString("MM-dd-yyyy");
                     newrow["Status"] = rec.status;
-                    newrow["Activity"] = rec.activity;
-                    newrow["Activity Last Attended"] = rec.activity_date?.ToString("MM-dd-yyyy");
+                    newrow["Activity"] = rec.activity.ToString();
+                    newrow["Activity Last Attended"] = rec.activity_date;
                     newrow["Phone"] = rec.phone;
                     newrow["Email"] = rec.email;
 
@@ -1627,7 +1767,7 @@ namespace CAOGAttendeeProject
 
         private void chkAttended_Unchecked(object sender, RoutedEventArgs e)
         {
-            
+
             m_isAttendedChecked = false;
             m_isQueryTableShown = false;
 
@@ -1640,7 +1780,7 @@ namespace CAOGAttendeeProject
 
         private void chkFollowup_Unchecked(object sender, RoutedEventArgs e)
         {
-          
+
             m_isFollowupChecked = false;
             m_isQueryTableShown = false;
 
@@ -1654,7 +1794,7 @@ namespace CAOGAttendeeProject
 
         private void chkResponded_Unchecked(object sender, RoutedEventArgs e)
         {
-           
+
             m_isRespondedChecked = false;
             m_isQueryTableShown = false;
 
@@ -1667,7 +1807,7 @@ namespace CAOGAttendeeProject
         {
             var calender = sender as Calendar;
 
-           
+
             if (calender != null)
             {
                 DateTime datec = calender.SelectedDate.Value;
@@ -1695,13 +1835,14 @@ namespace CAOGAttendeeProject
 
 
                 }
+                // AttendanceView-------------------------------------------------------------------------------------------------------------
                 else if (m_AttendanceView)
                 {
-                    if (m_isFilterByDateChecked && !m_isActivityfilterByDateChecked)
+                    if (m_isFilterByDateChecked)
                     {
                         m_DateSelected = datec;
                     }
-                    else if (m_isActivityfilterByDateChecked && !m_isFilterByDateChecked)
+                    else if (m_isActivityfilterByDateChecked)
                     {
                         m_ActivityDateSelected = datec;
                     }
@@ -1723,20 +1864,51 @@ namespace CAOGAttendeeProject
 
 
                     BuildQuery_and_UpdateGrid();
-                   
+
                 }
+                // ActivityView-------------------------------------------------------------------------------------------------------------------
                 else if (m_activityView && m_isActivityfilterByDateChecked)
                 {
                     m_ActivityDateSelected = datec;
 
-                    string date = m_ActivityDateSelected.ToString("MM-dd-yyyy");
 
-                    if (m_activity_row_select.Count != 0)
+
+                    string date = m_ActivityDateSelected?.ToString("MM-dd-yyyy");
+
+                    if (m_activity_row_select != null)
                     {
-                        foreach (DataRowView drv in m_activity_row_select)
+                        if (m_activityPairs_selectedFromListView.Count != 0)
                         {
-                            drv.Row["Activity Last Attended"] = date;
+
+                               
+                          
+                            //else  // There is no Activity in the Activity List so create onejust update the date
+                            //{
+                            //    
+
+
+                            //   
+                            //}
+
+                            foreach (ActivityPair ap in m_activityPairs_selectedFromListView)
+                            {
+                                //Find activity in Attendee List
+                                var qFindActivityInList = m_activity_row_select.ActivityList.SingleOrDefault(apair => apair.AttendeeId == m_activity_row_select.AttendeeId &&
+                                                                                                  apair.ActivityGroup == ap.ActivityGroup &&
+                                                                                                  apair.ParentTaskName == ap.ParentTaskName &&
+                                                                                                  apair.ChildTaskName == ap.ChildTaskName);
+                                if (qFindActivityInList != null)
+                                {
+                                    qFindActivityInList.Date = m_ActivityDateSelected;
+                                }
+                                
+
+
+
+
+                            }
                         }
+                        
                     }
                 }
 
@@ -1747,7 +1919,7 @@ namespace CAOGAttendeeProject
             {
 
             }
-                
+
         }
 
 
@@ -1985,7 +2157,7 @@ namespace CAOGAttendeeProject
                 m_DataSet.Tables["DefaultTable"].ImportRow(DefaultTableCopy.Rows[i]);
 
             }
-         
+
             ShowFiltered_Or_DefaultTable();
 
             Cursor = Cursors.Arrow;
@@ -2060,7 +2232,7 @@ namespace CAOGAttendeeProject
 
             }
 
-          
+
 
             Display_ActivityTable_in_Grid();
 
@@ -2260,46 +2432,47 @@ namespace CAOGAttendeeProject
             MessageBox.Show("Attendee record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
         }
 
-        private void UpdateActivityInActivityTable(System.Collections.IList row_select, string taskname)
+        private void update_attendee_combobox_in_activity_table(string attendeeId, string ParentName, string ChildName)
         {
 
-            int gridrowIdx = 0;
-            int AttendeeId = 0;
 
-            foreach (DataRowView drv in row_select)
-            {
-                AttendeeId = int.Parse(drv.Row["AttendeeId"].ToString());
 
-                gridrowIdx = 0;
+            // FIX ME
 
-                // loop over ActivityTable and change the Activity for each record to the checked activity
-                foreach (DataRow dr in m_DataSet.Tables["ActivityTable"].Rows)
-                {
-                    if (int.Parse(dr["AttendeeId"].ToString()) == AttendeeId)
-                    {
+            //IEnumerable<string> attendeeRec = from rec in m_lstActivityLookupTable
+            //                                  where rec.Contains(attendeeId)
+            //                                  select rec;
 
-                        if (dr["Activity"].ToString() != "")
-                        {
-                            dr["Activity"] = dr["Activity"].ToString() + "," + taskname;
-                            break;
-                        }
-                        else
-                        {
-                            dr["Activity"] = taskname;
-                            break;
-                        }
 
-                    }
+            //foreach (DataRow dr in m_DataSet.Tables["ActivityTable"].Rows)
+            //{
+            //    if (dr["AttendeeId"].ToString() == attendeeId)
+            //    {
 
-                    gridrowIdx++;
-                }
-            }
+            //        foreach (var rec in attendeeRec)
+            //        {
 
+
+
+
+
+
+
+            //        }
+
+            //    }
+            //}
 
 
 
 
         }
+
+
+
+
+
+
         private void DeleteRecord(object sender, RoutedEventArgs e)
         {
             System.Collections.IList row_select;
@@ -2612,7 +2785,7 @@ namespace CAOGAttendeeProject
 
 
                                 newAttendeeRec.AttendanceList.Add(newAttInfoRec);
-
+                               
 
 
 
@@ -2630,16 +2803,16 @@ namespace CAOGAttendeeProject
                                                                 };
                                 //build row for ActivityTable
                                 DataRow newActivitydr = m_DataSet.Tables["ActivityTable"].NewRow();
-                                newActivitydr.ItemArray = new object[] {   newAttendeeRec.AttendeeId,
-                                                                   flname,
-                                                                    dr["Last Name"],
-                                                                    dr["First Name"],
-                                                                    "", //Activity
-                                                                    null, //ActivityDate
-                                                                    "", // Phone
-                                                                    "" //Email
-                                                                };
 
+                                newActivitydr["AttendeeId"] = newAttendeeRec.AttendeeId;
+                                newActivitydr["FirstLastName"] = flname;
+                                newActivitydr["LastName"] = dr["Last Name"].ToString();
+                                newActivitydr["FirstName"] = dr["First Name"].ToString();
+                                newActivitydr["Phone"] = "";
+                                newActivitydr["Email"] = "";
+
+                                //m_lstactivityTableRows.Add(newActivitydr);
+                                //m_lstactivityTableRows.Sort();
                                 m_DataSet.Tables["DefaultTable"].Rows.Add(newdr);
                                 m_DataSet.Tables["ActivityTable"].Rows.Add(newActivitydr);
 
@@ -2773,50 +2946,63 @@ namespace CAOGAttendeeProject
             }
             else if (m_activityView)
             {
-                //end all edits and update the datagrid with changes
+                ////end all edits and update the datagrid with changes
                 dataGrid_activity.CommitEdit(DataGridEditingUnit.Row, true);
                 dataGrid_activity.UpdateLayout();
-                // if at least one row selected
 
-                foreach (DataRow ActivityTable_dr in m_DataSet.Tables["ActivityTable"].Rows)
+                //Default_Data_Table.Columns.Add(new DataColumn("AttendeeId"));
+                //Default_Data_Table.Columns.Add(new DataColumn("FirstLastName"));
+                //Default_Data_Table.Columns.Add(new DataColumn("Last Name"));
+                //Default_Data_Table.Columns.Add(new DataColumn("First Name"));
+                //Default_Data_Table.Columns.Add(new DataColumn("Date Last Attended"));
+                //Default_Data_Table.Columns.Add(new DataColumn("Status"));
+                //Default_Data_Table.Columns.Add(new DataColumn("Activity"));
+                //Default_Data_Table.Columns.Add(new DataColumn("Activity Last Attended"));
+                //Default_Data_Table.Columns.Add(new DataColumn("Phone"));
+                //Default_Data_Table.Columns.Add(new DataColumn("Email"));
+
+                 
+                foreach (Attendee attendeeRec in m_dbContext.Attendees)
                 {
-                    //find AttendeeId in activity table and update record with the activity record that changed
-                    //update db contents as well
-                    if (ActivityTable_dr.RowState == DataRowState.Modified)
+
+                    foreach (ActivityPair ap in attendeeRec.ActivityList)
                     {
-                        int attId = int.Parse(ActivityTable_dr["AttendeeId"].ToString());
-
-
-                        var attendee_infoRec = from AttInfo in m_dbContext.Attendance_Info.Local
-                                               where AttInfo.AttendeeId == attId
-                                               select AttInfo;
-
-                        if (attendee_infoRec != null)
-                        {
-                            foreach (Attendance_Info ainforec in attendee_infoRec)
-                            {
-                                ainforec.Activity = ActivityTable_dr["Activity"].ToString();
-                                ainforec.ActivityDate = m_ActivityDateSelected;
-                                ainforec.Phone = ActivityTable_dr["Phone"].ToString();
-                                ainforec.Email = ActivityTable_dr["Email"].ToString();
-                            }
-                            haschanges = true;
-                            //update default table
-                            UpdateDefaultTableWithActivityInfo(ActivityTable_dr["AttendeeId"].ToString(), ActivityTable_dr);
-                        }
-                        else // no attendee
-                        {
-                            //TBD error
-                        }
+                        attendeeRec.ActivityList.Add(ap);
 
                     }
+                    
+
+                    //if (dr.ActivityList.Count != 0)
+                    //{
+                    //    //add activity to attendee ActivityList
+                    //    foreach (ActivityPair ap in dr.ActivityList)
+                    //    {
+                    //        m_dbContext.Activities.Add(ap);
+                    //    }
+                        
+
+                        //var queryActivityLastAttended = (from rec in dr.ActivityList
+                        //                                 orderby rec.Date ascending
+                        //                                 select rec).ToList().FirstOrDefault();
+
+                        //if (queryActivityLastAttended != null)
+                        //{
+                        //    //find row in default table with attendeeId and new info to it
+                        //    foreach (DataRow dr_defaultTable in m_DataSet.Tables["DefaultTable"].Rows)
+                        //    {
+                        //        if (dr_defaultTable["AttendeeId"].ToString() == queryActivityLastAttended.AttendeeId.ToString())
+                        //        {
+                        //            dr_defaultTable["Activity"] = queryActivityLastAttended.ToString();
+                        //            dr_defaultTable["Activity Last Attended"] = queryActivityLastAttended.DateString;
+
+                        //        }
+                        //    }
+
+
+                        //}
+                   // }
                 }
-
-
-            }
-            else
-            {
-                MessageBox.Show("Please select attendee date attended from the calendar", "Date Invalid", MessageBoxButton.OK, MessageBoxImage.Stop);
+                
 
             }
 
@@ -2843,11 +3029,11 @@ namespace CAOGAttendeeProject
                 }
                 else if (m_activityView)
                 {
-                    m_DataSet.Tables["ActivityTable"].AcceptChanges();
+                  //  m_DataSet.Tables["ActivityTable"].AcceptChanges();
                 }
 
 
-                MessageBox.Show("Attendees succesfully added to active attendence list.", "Attendee Added", MessageBoxButton.OK, MessageBoxImage.None);
+                MessageBox.Show("Attendees succesfully updated.", "Attendee Added", MessageBoxButton.OK, MessageBoxImage.None);
 
             }
             else
@@ -2862,6 +3048,11 @@ namespace CAOGAttendeeProject
 
             Cursor = Cursors.Arrow;
 
+
+        }
+
+        private void ErrorChecking()
+        {
 
         }
         private void UpdateDefaultTableWithActivityInfo(string attId, DataRow ActivityTabledr)
@@ -2921,7 +3112,7 @@ namespace CAOGAttendeeProject
 
             m_DataSet.Tables["AttendeeListTable"].AcceptChanges();
 
-         
+
         }
 
 
@@ -3182,7 +3373,7 @@ namespace CAOGAttendeeProject
 
 
             m_isFilterByDateChecked = true;
-            
+
 
             m_isActivityfilterByDateChecked = false;
             chkActivityDateFilter.IsChecked = false;
@@ -3211,7 +3402,7 @@ namespace CAOGAttendeeProject
             if (m_alistView)
                 return;
 
-          
+
             Cursor = Cursors.Wait;
 
             BuildQuery_and_UpdateGrid();
@@ -3229,16 +3420,20 @@ namespace CAOGAttendeeProject
             m_alistView = false;
             m_isActivityfilterByDateChecked = false;
             m_AttendanceView = true;
+
+          
+
             btnNewRec.IsEnabled = false;
             btnImportRecords.IsEnabled = false;
             chkAttended.IsEnabled = false;
             chkFollowup.IsEnabled = false;
             chkResponded.IsEnabled = false;
+           
 
             Uncheck_All_Filters();
 
 
-            
+
 
 
             txtSearch.Text = "";
@@ -3329,39 +3524,51 @@ namespace CAOGAttendeeProject
 
             IQueryable<AttRecord> querylinq;
 
-            querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                        join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                        where attinfo.Date == m_DateSelected
-                        select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+            //querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+            //            join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+            //            join activity in m_dbContext.Activities.Local on attinfo.AttendeeId equals activity.AttendeeId
+            //            where attinfo.Date == m_DateSelected
+            //            select new AttRecord
+            //            {
+            //                id = att.AttendeeId,
+            //                fname = att.FirstName,
+            //                lname = att.LastName,
+            //                date = attinfo.Date,
+            //                activity_date = activity.Date,
+            //                activity = activity.Activity,
+            //                phone = att.Phone,
+            //                email = att.Email,
+            //                status = attinfo.Status
+            //            };
+
+            // FIX ME
+            //if (m_isAttendedChecked)
+            //{
+            //    querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+            //                join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+            //                where attinfo.Status == "Attended" && attinfo.Date == m_DateSelected
+            //                select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
 
 
-            if (m_isAttendedChecked)
-            {
-                querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                            join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                            where attinfo.Status == "Attended" && attinfo.Date == m_DateSelected
-                            select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+            //}
+            //else if (m_isFollowupChecked)
+            //{
+            //    querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+            //                join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+            //                where attinfo.Status == "Follow-Up" && attinfo.Date == m_DateSelected
+            //                select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
 
+            //}
+            //else if (m_isRespondedChecked)
+            //{
+            //    querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+            //                join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+            //                where attinfo.Status == "Responded" && attinfo.Date == m_DateSelected
+            //                select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
 
-            }
-            else if (m_isFollowupChecked)
-            {
-                querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                            join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                            where attinfo.Status == "Follow-Up" && attinfo.Date == m_DateSelected
-                            select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+            //}
 
-            }
-            else if (m_isRespondedChecked)
-            {
-                querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                            join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                            where attinfo.Status == "Responded" && attinfo.Date == m_DateSelected
-                            select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-
-            }
-
-            UpdateDataGrid(querylinq, query);
+            //UpdateDataGrid(querylinq, query);
 
 
         }
@@ -3505,7 +3712,7 @@ namespace CAOGAttendeeProject
             {
                 DateCalendar.SelectedDates.Clear();
 
-                DateCalendar.DisplayDate = m_ActivityDateSelected;
+                DateCalendar.DisplayDate = (DateTime)m_ActivityDateSelected;
                 DateCalendar.SelectedDate = m_ActivityDateSelected;
             }
             else
@@ -3749,13 +3956,13 @@ namespace CAOGAttendeeProject
         }
         private void SaveActiveList()
         {
-           
+
             if (m_DataSet.HasChanges())
             {
                 m_DataSet.Tables["DefaultTable"].DefaultView.RowFilter = String.Empty;
                 foreach (DataRow dr in m_DataSet.Tables["DefaultTable"].Rows)
                 {
-                   
+
                     // checkmodified record ------------------------------------------------------------------------------------------
                     if (dr.RowState == DataRowState.Modified)
                     {
@@ -3787,9 +3994,9 @@ namespace CAOGAttendeeProject
                 // save contents to database
                 m_dbContext.SaveChanges();
 
-                m_DataSet.Tables["DefaultTable"].AcceptChanges();
 
-                ShowFiltered_Or_DefaultTable();
+                m_DataSet.AcceptChanges();
+                //  ShowFiltered_Or_DefaultTable();
 
 
                 MessageBox.Show("Changes were succesfully saved to the database.");
@@ -3874,68 +4081,263 @@ namespace CAOGAttendeeProject
             // CopyDataGridtoClipboard(dataGrid, );
         }
 
-        private void CheckBox_Checked_1(object sender, RoutedEventArgs e)
+        private void ActivityTreeView_Checkbox_Checked(object sender, RoutedEventArgs e)
         {
+
+
             m_isActivityChecked = true;
-            var check = sender as CheckBox;
-            m_ActivityName = check.Content;
+            var checkbox = sender as CheckBox;
+            m_ActivityName = checkbox.Content.ToString();
+
+
+            if (m_AttendanceView)
+            {
+                Do_treeview_ActiveView();
+            }
+            else if (m_activityView)
+            {
 
            
-                System.Collections.IList row_select = dataGrid_activity.SelectedItems;
-          
-
-            foreach (ActivityGroup activity_group in m_lstActivities)
-            {
-                foreach (ActivityTask task in activity_group.lstActivityTasks)
+              // enable activity date calendar
+                if (!m_isActivityfilterByDateChecked)
                 {
-                    if (task.lstsubTasks.Count != 0)
-                    {
-                        foreach (ActivityTask subtask in task.lstsubTasks)
-                        {
-                            if (m_ActivityName.ToString() == subtask.TaskName)
-                            {
-                                if (m_activityView)
-                                {
-                                    UpdateActivityInActivityTable(row_select, subtask.TaskName);
-                                    dataGrid_activity.DataContext = m_DataSet.Tables["ActivityTable"];
-                                    txtblkTaskDescription.Text = subtask.Description;
-                                    break;
-                                }
-                                else if (m_AttendanceView) // active view so filter by activity
-                                {
-                                    BuildQuery_and_UpdateGrid();
-                                    txtblkTaskDescription.Text = subtask.Description;
-                                }
-
-                            }
-                        }
-                    }
-                    else if (m_ActivityName.ToString() == task.TaskName)
-                    {
-                        if (m_activityView)
-                        {
-                            UpdateActivityInActivityTable(row_select, task.TaskName);
-                            dataGrid_activity.DataContext = m_DataSet.Tables["ActivityTable"];
-                            txtblkTaskDescription.Text = task.Description;
-                            break;
-                        }
-                        else if (m_AttendanceView)
-                        {
-                            BuildQuery_and_UpdateGrid();
-                            txtblkTaskDescription.Text = task.Description;
-
-                        }
-                    }
+                    chkActivityDateFilter.IsChecked = true;
                 }
+
+                if (m_activity_row_select !=null )
+                {
+                    if (m_activitychecked_count == 1 && m_isActivityfilterByDateChecked && m_dateIsValid)
+                    {
+                       
+                        Do_treeview_CheckedActivity();
+                    }
+                    else
+                    {
+                        Do_treeview_CheckedActivity();
+
+                    }
+
+
+                    
+                }
+                else
+                {
+                    MessageBox.Show("Must select at least one row", "Must select row...", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ClearTreeView();
+                    m_activitychecked_count = 0;
+                }
+
             }
 
 
 
         }
 
+        private void Do_treeview_ActiveView()
+        {
+            foreach (ActivityGroup activity_group in m_lstActivities)
+            {
+                foreach (ActivityTask task in activity_group.lstActivityTasks)
+                {
+
+
+                    if (task.lstsubTasks.Count != 0) // task has children
+                    {
+                        foreach (ActivityTask subtask in task.lstsubTasks)
+                        {
+
+
+                            if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected)
+                            {
+
+                                BuildQuery_and_UpdateGrid();
+
+                                txtblkTaskDescription.Text = subtask.Description;
+                                task.IsSelected = true; //check parent
+                                break;
+                            }
+
+                        }
+                    }
+                    else if ((m_ActivityName == task.TaskName) && task.IsSelected)
+                    {
+                        BuildQuery_and_UpdateGrid();
+                        txtblkTaskDescription.Text = task.Description;
+
+                        break;
+
+                    }
+                }
+            }
+        }
+        private void Do_treeview_CheckedActivity()
+        {
+
+            // check if we have a activity pair selected
+
+
+
+           
+                int attendeeId = m_activity_row_select.AttendeeId;
+
+
+                // if cell already contain activity that is being selected then do not update the table, this function was called from an indirect selection
+                // only reflect activity status
+
+
+                foreach (ActivityGroup activity_group in m_lstActivities)
+                {
+                    foreach (ActivityTask task in activity_group.lstActivityTasks)
+                    {
+
+
+                        if (task.lstsubTasks.Count != 0) // task has children
+                        {
+                            foreach (ActivityTask subtask in task.lstsubTasks)
+                            {
+
+                                if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected)
+                                {
+                                    task.IsSelected = true; //check parent
+                                string activityName = activity_group.ActivityName;
+                                string ParentName = task.TaskName;
+                                string ChildName = subtask.TaskName;
+
+                                    m_activitychecked_count++;
+
+
+
+
+                                /* Check if selected activity is already in the attendee list
+                                 * If already in list, only update date, if not in list create and add a new activity to the list
+                                 */
+
+                                var qActivityIsInList = m_activity_row_select.ActivityList.SingleOrDefault(apair => apair.AttendeeId == m_activity_row_select.AttendeeId &&
+                                                                                                           apair.ActivityGroup == activityName &&
+                                                                                                           apair.ParentTaskName == ParentName &&
+                                                                                                           apair.ChildTaskName == ChildName);
+                                                         
+                              
+
+                                // activity not in list, add new activity to list
+                                if (qActivityIsInList == null)
+                                {
+                                    ActivityPair nap = new ActivityPair() { };
+                                    nap.AttendeeId = m_activity_row_select.AttendeeId;
+                                    nap.ActivityGroup = activityName;
+                                    nap.ParentTaskName = ParentName;
+                                    nap.ChildTaskName = ChildName;
+
+
+                                    m_activity_row_select.ActivityList.Add(nap);
+                                }
+                            
+
+                             
+                             
+                             
+                                    
+                               
+                               
+                                    txtblkTaskDescription.Text = subtask.Description;
+
+
+                                    break;
+                                }
+
+                            }
+                        }
+                        else if ((m_ActivityName == task.TaskName) && task.IsSelected)
+                        {
+                            
+                            task.IsSelected = true;
+                                string activityName = activity_group.ActivityName;
+                                string ParentName = task.TaskName;
+                                
+
+                             m_activitychecked_count++;
+
+                        /* Check if selected activity is already in the attendee list
+                           * If already in list, only update date, if not in list create and add a new activity to the list
+                           */
+
+                        var qActivityIsInList = m_activity_row_select.ActivityList.SingleOrDefault(apair => apair.AttendeeId == m_activity_row_select.AttendeeId &&
+                                                                                                   apair.ActivityGroup == activityName &&
+                                                                                                   apair.ParentTaskName == ParentName);
+
+
+
+                        // activity not in list, add new activity to list
+                        if (qActivityIsInList == null)
+                        {
+                            ActivityPair nap = new ActivityPair() { };
+                            nap.AttendeeId = m_activity_row_select.AttendeeId;
+                            nap.ActivityGroup = activityName;
+                            nap.ParentTaskName = ParentName;
+
+
+
+                            m_activity_row_select.ActivityList.Add(nap);
+                        }
+                        
+
+
+
+                      
+                            
+                            txtblkTaskDescription.Text = task.Description;
+
+                            break;
+
+                        }
+                    }
+                }
+            
+        }
+
+      
+      
+           
+
+      
+
+        private void RemoveActivity_from_ActivityTableRowAttendeeActivityList(ref ActivityPair ap)
+        {
+
+            List<int> idx = new List<int> { };
+
+            int i = 0;
+           
+
+
+                foreach (ActivityPair activity in m_activity_row_select.ActivityList)
+                {
+                    if (activity.AttendeeId == ap.AttendeeId &&
+                        activity.ActivityGroup == ap.ActivityGroup &&
+                        activity.ParentTaskName == ap.ParentTaskName &&
+                        activity.ChildTaskName == ap.ChildTaskName)
+                    {
+                        idx.Add(m_activity_row_select.ActivityList.IndexOf(activity) );
+                        
+                    }
+                    
+                }
+
+                foreach (int idxx in idx)
+                {
+                    m_activity_row_select.ActivityList.RemoveAt(idxx);
+                }
+                
+           
+        }
+
+
+      
+
+
         private void BuildQuery_and_UpdateGrid()
         {
-           
+
 
 
 
@@ -3949,221 +4351,363 @@ namespace CAOGAttendeeProject
             {
 
                 if (m_isQueryTableShown && !m_AttendanceView)
-                  query = "QueryTableShown";
+                    query = "QueryTableShown";
                 else
                 {
                     //Date, Attended, Activity
                     if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isAttendedChecked && m_isActivityFilterChecked && m_isActivityChecked)
                     {
 
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where (attinfo.Status == "Attended" || attinfo.Status == "Responded") && attinfo.Date == m_DateSelected && attinfo.Activity == m_ActivityName.ToString()
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                        //querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                        //            join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                        //            where (attinfo.Status == "Attended" || attinfo.Status == "Responded") && attinfo.Date == m_DateSelected && attinfo.Activity == m_ActivityName.ToString()
+                        //            select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                      
+
+                    }
 
 
-                    }
-                    //Date, Followup, Activity
-                    else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && m_isActivityFilterChecked && m_isActivityChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Status == "Follow-Up" && attinfo.Date == m_DateSelected && attinfo.Activity == m_ActivityName.ToString()
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Date, Responded, Activity
-                    else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && m_isActivityFilterChecked && m_isActivityChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Status == "Responded" && attinfo.Date == m_DateSelected && attinfo.Activity == m_ActivityName.ToString()
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Activity date, Atttended, Activity
-                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isAttendedChecked && m_isActivityFilterChecked && m_isActivityChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where (attinfo.Status == "Attended" || attinfo.Status == "Responded") && attinfo.ActivityDate == m_ActivityDateSelected && attinfo.Activity == m_ActivityName.ToString()
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Activity date, FollowUp, Activity
-                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && m_isActivityFilterChecked && m_isActivityChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Status == "Follow-Up" && attinfo.ActivityDate == m_ActivityDateSelected && attinfo.Activity == m_ActivityName.ToString()
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Activity date, Responded, Activity
-                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && m_isActivityFilterChecked && m_isActivityChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Status == "Responded" && attinfo.ActivityDate == m_ActivityDateSelected && attinfo.Activity == m_ActivityName.ToString()
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Activity date, Atttended
-                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isAttendedChecked && !m_isActivityFilterChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where (attinfo.Status == "Attended" || attinfo.Status == "Responded") && attinfo.ActivityDate == m_ActivityDateSelected
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Activity date, FollowUp
-                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && !m_isActivityFilterChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Status == "Follow-Up" && attinfo.ActivityDate == m_ActivityDateSelected
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Activity date, Responded
-                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && !m_isActivityFilterChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Status == "Responded" && attinfo.ActivityDate == m_ActivityDateSelected
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Date, Atttended
-                    else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isAttendedChecked && !m_isActivityFilterChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where (attinfo.Status == "Attended" || attinfo.Status == "Responded") && attinfo.Date == m_DateSelected
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Date, FollowUp
-                    else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && !m_isActivityFilterChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Status == "Follow-Up" && attinfo.Date == m_DateSelected
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Date, Responded
-                    else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && !m_isActivityFilterChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Status == "Responded" && attinfo.Date == m_DateSelected
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Date
-                    else if (m_isFilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && !m_isActivityFilterChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Date == m_DateSelected
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Date, activity
-                    else if (m_isFilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && m_isActivityFilterChecked && m_isActivityChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Date == m_DateSelected && attinfo.Activity == m_ActivityName
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Activity date
-                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && !m_isActivityFilterChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.ActivityDate == m_ActivityDateSelected
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Activity date, activity
-                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && m_isActivityFilterChecked && m_isActivityChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.ActivityDate == m_ActivityDateSelected && attinfo.Activity == m_ActivityName
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Activity
+                    ////Date, Followup, Activity
+                    // else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && m_isActivityFilterChecked && m_isActivityChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Status == "Follow-Up" && attinfo.Date == m_DateSelected && attinfo.Activity == m_ActivityName.ToString()
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Date, Responded, Activity
+                    // else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && m_isActivityFilterChecked && m_isActivityChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Status == "Responded" && attinfo.Date == m_DateSelected && attinfo.Activity == m_ActivityName.ToString()
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Activity date, Atttended, Activity
+                    // else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isAttendedChecked && m_isActivityFilterChecked && m_isActivityChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where (attinfo.Status == "Attended" || attinfo.Status == "Responded") && attinfo.ActivityDate == m_ActivityDateSelected && attinfo.Activity == m_ActivityName.ToString()
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Activity date, FollowUp, Activity
+                    // else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && m_isActivityFilterChecked && m_isActivityChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Status == "Follow-Up" && attinfo.ActivityDate == m_ActivityDateSelected && attinfo.Activity == m_ActivityName.ToString()
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Activity date, Responded, Activity
+                    // else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && m_isActivityFilterChecked && m_isActivityChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Status == "Responded" && attinfo.ActivityDate == m_ActivityDateSelected && attinfo.Activity == m_ActivityName.ToString()
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Activity date, Atttended
+                    // else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isAttendedChecked && !m_isActivityFilterChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where (attinfo.Status == "Attended" || attinfo.Status == "Responded") && attinfo.ActivityDate == m_ActivityDateSelected
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Activity date, FollowUp
+                    // else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && !m_isActivityFilterChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Status == "Follow-Up" && attinfo.ActivityDate == m_ActivityDateSelected
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Activity date, Responded
+                    // else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && !m_isActivityFilterChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Status == "Responded" && attinfo.ActivityDate == m_ActivityDateSelected
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Date, Atttended
+                    // else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isAttendedChecked && !m_isActivityFilterChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where (attinfo.Status == "Attended" || attinfo.Status == "Responded") && attinfo.Date == m_DateSelected
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Date, FollowUp
+                    // else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && !m_isActivityFilterChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Status == "Follow-Up" && attinfo.Date == m_DateSelected
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Date, Responded
+                    // else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && !m_isActivityFilterChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Status == "Responded" && attinfo.Date == m_DateSelected
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Date
+                    // else if (m_isFilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && !m_isActivityFilterChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Date == m_DateSelected
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Date, activity
+                    // else if (m_isFilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && m_isActivityFilterChecked && m_isActivityChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Date == m_DateSelected && attinfo.Activity == m_ActivityName
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Activity date
+                    // else if (m_isActivityfilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && !m_isActivityFilterChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.ActivityDate == m_ActivityDateSelected
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Activity date, activity
+                    // else if (m_isActivityfilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && m_isActivityFilterChecked && m_isActivityChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.ActivityDate == m_ActivityDateSelected && attinfo.Activity == m_ActivityName
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Activity
                     else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isChurchStatusFilterChecked && m_isActivityFilterChecked && m_isActivityChecked)
                     {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Activity == m_ActivityName
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Activity, Attended
-                    else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && m_isChurchStatusFilterChecked && m_isAttendedChecked && m_isActivityFilterChecked && m_isActivityChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where (attinfo.Status == "Attended" || attinfo.Status == "Responded") && attinfo.Activity == m_ActivityName
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Activity, Follow-Up
-                    else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && m_isChurchStatusFilterChecked && m_isFollowupChecked && m_isActivityFilterChecked && m_isActivityChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where (attinfo.Status == "Follow-Up") && attinfo.Activity == m_ActivityName
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Activity, Responded
-                    else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && m_isChurchStatusFilterChecked && m_isRespondedChecked && m_isActivityFilterChecked && m_isActivityChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Status == "Responded" && attinfo.Activity == m_ActivityName
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
-                    //Attended
-                    else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityChecked && m_isChurchStatusFilterChecked && m_isAttendedChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Status == "Attended"
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                        //querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                        //            join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                        //            where attinfo.Activity == m_ActivityName
+                        //            select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
 
-                    }
-                    //Responded
-                    else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityChecked && m_isChurchStatusFilterChecked && m_isRespondedChecked)
-                    {
                         querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
                                     join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Status == "Responded"
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                                    join activity in m_dbContext.Activities.Local on attinfo.AttendeeId equals activity.AttendeeId
+                                    where activity.ToString().Contains(m_ActivityName)
+                                    select new AttRecord
+                                    {
+                                        id = att.AttendeeId,
+                                        fname = att.FirstName,
+                                        lname = att.LastName,
+                                        date = attinfo.Date,
+                                        activity_date = activity.DateString,
+                                        activity = activity.ToString(),
+                                        phone = att.Phone,
+                                        email = att.Email,
+                                        status = attinfo.Status
+                                    };
                     }
-                    //Follow-up
-                    else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityChecked && m_isChurchStatusFilterChecked && m_isFollowupChecked)
-                    {
-                        querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
-                                    join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                                    where attinfo.Status == "Follow-Up"
-                                    select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
-                    }
+                    // //Activity, Attended
+                    // else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && m_isChurchStatusFilterChecked && m_isAttendedChecked && m_isActivityFilterChecked && m_isActivityChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where (attinfo.Status == "Attended" || attinfo.Status == "Responded") && attinfo.Activity == m_ActivityName
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Activity, Follow-Up
+                    // else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && m_isChurchStatusFilterChecked && m_isFollowupChecked && m_isActivityFilterChecked && m_isActivityChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where (attinfo.Status == "Follow-Up") && attinfo.Activity == m_ActivityName
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Activity, Responded
+                    // else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && m_isChurchStatusFilterChecked && m_isRespondedChecked && m_isActivityFilterChecked && m_isActivityChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Status == "Responded" && attinfo.Activity == m_ActivityName
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Attended
+                    // else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityChecked && m_isChurchStatusFilterChecked && m_isAttendedChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Status == "Attended"
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+
+                    // }
+                    // //Responded
+                    // else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityChecked && m_isChurchStatusFilterChecked && m_isRespondedChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Status == "Responded"
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
+                    // //Follow-up
+                    // else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityChecked && m_isChurchStatusFilterChecked && m_isFollowupChecked)
+                    // {
+                    //     querylinq = from att in m_dbContext.Attendees.Local.AsQueryable()
+                    //                 join attinfo in m_dbContext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                    //                 where attinfo.Status == "Follow-Up"
+                    //                 select new AttRecord { id = att.AttendeeId, fname = att.FirstName, lname = att.LastName, date = attinfo.Date, activity_date = attinfo.ActivityDate, activity = attinfo.Activity, phone = attinfo.Phone, email = attinfo.Email, status = attinfo.Status };
+                    // }
                     else
                     {
                         query = "ShowDefaultTable";
                         querylinq = null;
                     }
-                }    
-                
-                    
+                }
 
-                
+
+
+
             }
 
-            UpdateDataGrid(querylinq, query);
-           
+            UpdateDataGridWithQuery(querylinq, query);
+
         }
-        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        private void ActivityTreeView_Checkbox_UnChecked(object sender, RoutedEventArgs e)
         {
-            txtblkTaskDescription.Text = "";
-            //foreach (ActivityTask task in trvActivities.ItemsSource)
-            //{
-            //    task.IsSelected = false;
-            //}
+            m_isActivityChecked = false;
+            var checkbox = sender as CheckBox;
+            m_ActivityName = checkbox.Content.ToString();
+
+
+
+            if (m_AttendanceView)
+            {
+                foreach (ActivityGroup activity_group in m_lstActivities)
+                {
+                    foreach (ActivityTask task in activity_group.lstActivityTasks)
+                    {
+
+
+                        if (task.lstsubTasks.Count != 0) // task has children
+                        {
+                            foreach (ActivityTask subtask in task.lstsubTasks)
+                            {
+
+
+                                if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected)
+                                {
+
+                                    BuildQuery_and_UpdateGrid();
+
+                                    txtblkTaskDescription.Text = subtask.Description;
+                                    task.IsSelected = true; //check parent
+                                    break;
+                                }
+
+                            }
+                        }
+                        else if ((m_ActivityName == task.TaskName) && task.IsSelected)
+                        {
+                            BuildQuery_and_UpdateGrid();
+                            txtblkTaskDescription.Text = task.Description;
+
+                            break;
+
+                        }
+                    }
+                }
+            }
+            else if (m_activityView)
+            {
+               // m_activity_row_select = (List<ActivityTableRow>)dataGrid_activity.SelectedItems;
+               //FIX ME
+                //if (m_activity_row_select.AttendeeId != m_old_activityRow_attendeeId)
+                //{
+
+
+                   
+
+
+                    if (m_activity_row_select != null)
+                    {
+
+
+                        int attendeeid = m_activity_row_select.AttendeeId;
+
+
+                        foreach (ActivityGroup activity_group in m_lstActivities)
+                        {
+                            foreach (ActivityTask task in activity_group.lstActivityTasks)
+                            {
+
+
+                                if (task.lstsubTasks.Count != 0) // task has children
+                                {
+                                    foreach (ActivityTask subtask in task.lstsubTasks)
+                                    {
+
+                                        if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected == false)
+                                        {
+                                            task.IsSelected = false; //check parent
+                                            int parentId = task.ActivityId;
+                                            int childId = subtask.ActivityId;
+
+                                                ActivityPair ap = new ActivityPair() { };
+                                                ap.AttendeeId = attendeeid;
+                                                ap.ActivityGroup = activity_group.ActivityName;
+                                                ap.ChildTaskName = subtask.TaskName;
+                                                ap.ParentTaskName = task.TaskName;
+
+                                        RemoveActivity_from_ActivityTableRowAttendeeActivityList(ref ap);
+
+
+                                            // UpdateActivityFromLookUpTable(attendeeId, task.TaskName, subtask.TaskName);
+
+                                            txtblkTaskDescription.Text = subtask.Description;
+
+
+                                            break;
+                                        }
+
+                                    }
+                                }
+                                else if ((m_ActivityName == task.TaskName) && task.IsSelected == false)
+                                {
+                                    int parentId = task.ActivityId;
+                                    int childId = task.ActivityId;
+
+                                    //  DeleteActivityFromLookUpTable(attendeeId, parentId, childId);
+
+                                    // UpdateActivityFromLookUpTable(attendeeId, task.TaskName, "");
+                                    txtblkTaskDescription.Text = task.Description;
+
+                                    break;
+
+                                }
+                            }
+                            // }
+                        }
+
+                    }
+                    else
+                    {
+                        MessageBox.Show("Must select at least one row", "Must select row...", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+
+                //}
+                //else
+                //{
+                //    // Do Nothing uncheck is evoked by user selecting a different row
+                //}
+            }
+
         }
 
+   
         private void GridsTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
@@ -4255,7 +4799,7 @@ namespace CAOGAttendeeProject
                     chkActivityDateFilter.IsChecked = m_TabState.ActiveTab_isFilterbyActivityDateChecked;
                     chkActivityFilter.IsChecked = m_TabState.ActiveTab_isActivityChecked;
                     chkChurchStatusFilter.IsChecked = m_TabState.ActiveTab_isChurchStatusChecked;
-                   
+
 
 
 
@@ -4282,6 +4826,8 @@ namespace CAOGAttendeeProject
 
                     //}
 
+                 
+                    
 
                     btnNewRec.IsEnabled = false;
                     btnImportRecords.IsEnabled = false;
@@ -4356,6 +4902,8 @@ namespace CAOGAttendeeProject
                     //}
 
                     btnImportRecords.IsEnabled = true;
+                    btnImportRecords.Content = "Update Changes";
+
                     btnNewRec.IsEnabled = true;
                     btnDelete.IsEnabled = false;
 
@@ -4379,7 +4927,7 @@ namespace CAOGAttendeeProject
                         m_TabState.ActiveTab_isRespondedChecked = chkResponded.IsChecked;
 
                         m_TabState.ActiveTab_isChurchStatusChecked = chkChurchStatusFilter.IsChecked;
-                        
+
                         m_TabState.ActiveTab_isFilterbyDateChecked = chkChurchDateFilter.IsChecked;
                         m_TabState.ActiveTab_isFilterbyActivityDateChecked = chkActivityDateFilter.IsChecked;
                         m_TabState.ActiveTab_isActivityChecked = chkActivityFilter.IsChecked;
@@ -4398,12 +4946,16 @@ namespace CAOGAttendeeProject
 
                     }
 
+
                     m_alistView = false;
                     m_AttendanceView = false;
                     m_activityView = true;
                     btnNewRec.IsEnabled = false;
-                    btnDelete.IsEnabled = false;
+
+                  
                     btnImportRecords.IsEnabled = true;
+                    btnDelete.IsEnabled = false;
+
 
                     // load Activity state from TabState class
                     txtSearch.Text = "";
@@ -4412,7 +4964,7 @@ namespace CAOGAttendeeProject
 
 
 
-
+                    
                     Display_ActivityTable_in_Grid();
                     Customize_Panel();
                 }
@@ -4435,7 +4987,11 @@ namespace CAOGAttendeeProject
 
 
                 if (!DateStackPanel.Children.Contains(chkActivityDateFilter))
+                {
                     DateStackPanel.Children.Add(chkActivityDateFilter);
+                    //  btnAddActivity.Visibility = Visibility.Hidden;
+                }
+
 
 
                 if (!DateStackPanel.Children.Contains(chkChurchDateFilter))
@@ -4450,6 +5006,9 @@ namespace CAOGAttendeeProject
                     chkChurchDateFilter.Content = "Church Date";
 
                 }
+
+                //if (btnAddActivity.IsVisible)
+                //    btnAddActivity.Visibility = Visibility.Hidden;
 
                 spFilterOptions.Children.Add(CalendarExpander);
                 spFilterOptions.Children.Add(ChurchStatusExpander);
@@ -4510,6 +5069,10 @@ namespace CAOGAttendeeProject
                     DateStackPanel.Children.Add(chkActivityDateFilter);
 
 
+
+                //if (!btnAddActivity.IsVisible)
+                //    btnAddActivity.Visibility = Visibility.Visible;
+
                 spFilterOptions.Children.Add(CalendarExpander);
                 spFilterOptions.Children.Add(ActivityExpander);
 
@@ -4559,7 +5122,7 @@ namespace CAOGAttendeeProject
 
             chkChurchDateFilter.IsChecked = false;
             DateCalendar.IsEnabled = true;
-           // DateCalendar.SelectedDates.Clear();
+            // DateCalendar.SelectedDates.Clear();
 
 
 
@@ -4579,7 +5142,7 @@ namespace CAOGAttendeeProject
                 return;
             else
             {
-              
+
                 Cursor = Cursors.Wait;
                 BuildQuery_and_UpdateGrid();
                 Cursor = Cursors.Arrow;
@@ -4625,87 +5188,147 @@ namespace CAOGAttendeeProject
 
         private void dataGrid_activity_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
+            
+            var selectedItems = sender as DataGrid;
 
-
-
-            int AttendeeId = 0;
-            int gridrowIdx = 0;
-            string[] ary_ActivityStatus = new string[10];
-            string str_ActivityStatus = "";
-
-            m_activity_row_select = dataGrid_activity.SelectedItems;
-
-            //m_activity_row_select = dataGrid_activity.SelectedItems;
-            DataRowView row_select = ((sender as DataGrid).SelectedItem as DataRowView);
-
-            if (row_select != null)
+            if (selectedItems.SelectedItem != null)
             {
-
-
-
-
-                if (row_select.Row["Activity"].ToString() != "")
-                {
-                    ary_ActivityStatus = row_select.Row["Activity"].ToString().Split(',');
-
-
-                }
-                else
-                {
-                    ary_ActivityStatus[0] = row_select.Row["Activity"].ToString();
-
-                }
-
-                UpdateActivityTreeCheckboxes(ary_ActivityStatus);
+                m_activity_row_select = (ActivityTableRow)selectedItems.SelectedItem;
+                m_old_activityRow_attendeeId = m_activity_row_select.AttendeeId;
             }
+
+
+            ClearTreeView();
+         
+        }
+
+
+        private void ClearTreeView()
+        {
+            //loop through ActivityTree and update the checkboxes
+            foreach (ActivityGroup activity_group in m_lstActivities)
+            {
+                foreach (ActivityTask task in activity_group.lstActivityTasks)
+                {
+                    //check the box
+                    task.IsSelected = false;
+
+                    if (task.lstsubTasks.Count != 0) // task has children
+                    {
+                        foreach (ActivityTask subtask in task.lstsubTasks)
+                        {
+                            subtask.IsSelected = false;
+                        }
+
+                    }
+
+
+
+                }
+            }
+        }
+        private void UpdateActivityTreeCheckboxes(ActivityTableRow dr)
+        {
+
+            ////chkActivityFilter.IsChecked = true;
+
+
+
+            //////loop through ActivityTree and update the checkboxes
+            //foreach (ActivityGroup activity_group in m_lstActivities)
+            //{
+            //    foreach (ActivityTask task in activity_group.lstActivityTasks)
+            //    {
+            //        if (task.lstsubTasks.Count != 0) // task has children
+            //        {
+            //            foreach (ActivityTask subtask in task.lstsubTasks)
+            //            {
+            //                if (subtask.TaskName == dr.)
+            //                {
+            //                    //check the box
+            //                    subtask.IsSelected = true;
+            //                    task.IsSelected = true; // check the parent also
+            //                }
+            //            }
+
+            //        }
+            //        else if (task.ActivityId.ToString() == ParentId)
+            //        {
+            //            //check the box
+            //            task.IsSelected = true;
+
+            //        }
+            //    }
+            //}
 
 
 
 
         }
 
-
-
-        private void UpdateActivityTreeCheckboxes(string[] vs)
+        private void GetActivityFromTreeView(int attendeeId, ref List<ActivityPair> aList)
         {
-
-
-            foreach (string chkName in vs)
+            foreach (ActivityGroup activity_group in m_lstActivities)
             {
-                //loop through ActivityTree and update the checkboxes
-                foreach (ActivityGroup activity_group in m_lstActivities)
+                foreach (ActivityTask task in activity_group.lstActivityTasks)
                 {
-                    foreach (ActivityTask task in activity_group.lstActivityTasks)
-                    {
-                        if (task.lstsubTasks.Count != 0)
-                        {
-                            foreach (ActivityTask subtask in task.lstsubTasks)
-                            {
-                                if (chkName == subtask.TaskName)
-                                {
-                                    //check the box
-                                    subtask.IsSelected = true;
-                                   
 
-                                    trvActivities.UpdateLayout();
-                                   
-                                    break;
-                                }
-                            }
-                        }
-                        else if (chkName == task.TaskName)
+
+                    if (task.lstsubTasks.Count != 0) // task has children
+                    {
+                        foreach (ActivityTask subtask in task.lstsubTasks)
                         {
-                            //check the box
-                            // subtask.IsSelected = true;
-                            break;
+
+
+                            if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected)
+                            {
+
+                                BuildQuery_and_UpdateGrid();
+
+                                txtblkTaskDescription.Text = subtask.Description;
+                                task.IsSelected = true; //check parent
+                                break;
+                            }
+
                         }
+                    }
+                    else if ((m_ActivityName == task.TaskName) && task.IsSelected)
+                    {
+                        BuildQuery_and_UpdateGrid();
+                        txtblkTaskDescription.Text = task.Description;
+
+                        break;
+
                     }
                 }
             }
         }
-    }
-}
+      
+        private void lstActivity_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var itemscollection = sender as ListView;
 
+            m_activityPairs_selectedFromListView.Clear();
+            System.Collections.IList numActivities = itemscollection.SelectedItems;
+            
+            foreach (ActivityPair ap in numActivities)
+            {
+                m_activityPairs_selectedFromListView.Add(ap);
+            }
+            
+
+
+
+
+        }
+    }
+
+
+
+
+    
+            
+}
 
 
 

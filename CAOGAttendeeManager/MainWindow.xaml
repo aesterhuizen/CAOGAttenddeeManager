@@ -155,7 +155,7 @@
                             <Expander.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <CheckBox Content="Church Status" Name="chkChurchStatusFilter" Checked="chkChurchStatusFilter_Checked" Unchecked="chkChurchStatusFilter_Unchecked" HorizontalAlignment="Left" />
-
+                                   
                                 </StackPanel>
                             </Expander.Header>
 
@@ -168,9 +168,10 @@
                         </Expander>
                         <Expander Name="ActivityExpander" IsExpanded="True" Height="300">
                             <Expander.Header>
-                                <StackPanel Orientation="Horizontal" >
-                                    <CheckBox Content="Activity"  Name="chkActivityFilter" Checked="chkActivityFilter_Checked" Unchecked="chkActivityFilter_Unchecked"/>
-
+                                <StackPanel Name="spActivityExpanderHeader" Orientation="Horizontal" >
+                                    <CheckBox Margin="0,5,0,0" Content="Activity"  Name="chkActivityFilter" Checked="chkActivityFilter_Checked" Unchecked="chkActivityFilter_Unchecked" RenderTransformOrigin="0.797,-0.5"/>
+                                 
+                                  
                                 </StackPanel>
                             </Expander.Header>
                             
@@ -180,6 +181,7 @@
                                         <Setter Property="IsExpanded" Value="True"/>
                                     </Style>
                                 </TreeView.ItemContainerStyle>
+                                
                                 <TreeView.Resources>
                                     <Style TargetType="{x:Type ScrollViewer}">
                                         <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
@@ -192,14 +194,11 @@
 
                                     <HierarchicalDataTemplate DataType="{x:Type local:ActivityTask }" ItemsSource="{Binding lstsubTasks}">
                                         <StackPanel Orientation="Horizontal">
-                                            <CheckBox Name="chkTaskName" Content="{Binding TaskName}" Margin="5,0,0,0" Checked="CheckBox_Checked_1" 
-                                                      Unchecked="CheckBox_Unchecked"
-                                                      IsChecked="{Binding IsSelected}"/>
+                                            <CheckBox  Name="chkActivity" Content="{Binding TaskName}" Margin="5,0,0,0" Checked="ActivityTreeView_Checkbox_Checked" 
+                                                      Unchecked="ActivityTreeView_Checkbox_UnChecked"
+                                                      IsChecked="{Binding IsSelected}" />
                                         </StackPanel>
                                     </HierarchicalDataTemplate>
-
-
-
                                 </TreeView.Resources>
                             </TreeView>
                             
@@ -214,7 +213,7 @@
                 
             </StackPanel>
 
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Left" Foreground="#FF0C7AB9"/>
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Left" Background="#FF0C7AB9"/>
 
             <TabControl Name="GridsTabControl" SelectionChanged="GridsTabControl_SelectionChanged" MouseUp="GridsTabControl_MouseUp" Grid.Column="2">
                 <TabItem Header="Active" Name="ActiveTab">
@@ -223,6 +222,9 @@
                             <Style TargetType="{x:Type ScrollViewer}">
                                 <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
                             </Style>
+                            
+                         
+                            
                         </Grid.Resources>
                         <DataGrid x:Name="dataGrid" 
                                 AutoGenerateColumns="True"
@@ -264,33 +266,75 @@
                 <TabItem Header="Activity &amp; Info" Name="ActivityTab">
                     <Grid>
                         <Grid.Resources>
+
                             <Style TargetType="{x:Type ScrollViewer}">
                                 <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
                             </Style>
+
+
+                            <!--<ControlTemplate x:Key="Default" TargetType='{x:Type ListViewItem}'>
+                                <StackPanel Background="Beige">
+                                    <GridViewRowPresenter Content="{TemplateBinding Content}" Columns="{TemplateBinding GridView.ColumnCollection}"/>
+                                </StackPanel>
+                            </ControlTemplate>-->
+                           
+
                         </Grid.Resources>
                         <DataGrid Name="dataGrid_activity" CanUserAddRows="False" CanUserDeleteRows="False"
                                     ItemsSource="{Binding IsAsync=True}" 
+                                    AutoGenerateColumns="False"
                                     SelectedCellsChanged="dataGrid_activity_SelectedCellsChanged"
                                     CanUserReorderColumns="False"
                                     MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
                                     ClipboardCopyMode="IncludeHeader"
-                                    SelectionMode="Extended"
+                                    SelectionMode="Single"
                                     ColumnWidth="120" 
-                                    CanUserResizeRows="False"/>
+                                    CanUserResizeRows="False"
+                                    RowDetailsVisibilityMode="VisibleWhenSelected" >
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
+                                <DataGridTextColumn Header="FirstLastName" Binding="{Binding FirstLastName}"/>
+                                <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}"/>
+                                <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}"/>
+                             
+                            </DataGrid.Columns>
+
+                            <DataGrid.RowDetailsTemplate>
+                                <DataTemplate>
+                                  
+                                        <ListView Name="lstActivity" ItemsSource="{Binding ActivityList}" SelectionChanged="lstActivity_SelectionChanged">
+                                        <!--<ListView.ItemContainerStyle>
+                                            <Style TargetType="{x:Type ListViewItem}"  >
+                                                <Setter Property="Template" Value="{StaticResource Default}"/>
+                                        
+                                            </Style>
+                                        </ListView.ItemContainerStyle>-->
+                                            
+                                        <ListView.View>
+                                            <GridView>
+                                                <GridViewColumn Header="Activity" Width="230">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel>
+                                                                <TextBlock Text="{Binding ActivityGroup}" FontSize="10" FontWeight="Bold"/>
+                                                                <TextBlock Text="{Binding ParentTaskName}" Margin="5,0,0,0" FontSize="10"/>
+                                                                <TextBlock Text="{Binding ChildTaskName}" Margin="10,0,0,0" FontSize="10"/>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+                                                
+                                                <GridViewColumn Header="Date" Width="100" DisplayMemberBinding="{Binding DateString}"/>
+
+                                            </GridView>
+                                                
+                                            </ListView.View>
+                                        </ListView>
+                                
+                                </DataTemplate> 
+                            </DataGrid.RowDetailsTemplate>
+                        </DataGrid>
                     </Grid>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                 </TabItem>
             </TabControl>
