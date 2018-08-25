@@ -1,12 +1,15 @@
 namespace CAOGAttendeeProject
 {
     using System;
+    using System.Windows;
     using System.Data;
     using System.ComponentModel;
     using System.Data.Entity;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
+    using System.Collections;
+    using System.Collections.Specialized;
 
     public class ModelDb : DbContext
     {
@@ -31,38 +34,138 @@ namespace CAOGAttendeeProject
     //    
     //}
 
-    public class Attendee
+    public class Attendee : INotifyPropertyChanged
     {
 
         public Attendee()
         {
-            AttendanceList = new ObservableCollection<Attendance_Info>();
-            ActivityList = new ObservableCollection<ActivityPair>();
+            AttendanceList = new ObservableCollection<Attendance_Info>() { };
+            ActivityList = new ObservableCollection<ActivityPair>() { };
 
         }
         public int AttendeeId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        private string _lastname = "";
+        public string LastName
+        {
+            get
+            {
+                return _lastname;
+            }
+            set
+            {
+                if (_lastname != value)
+                {
+                    _lastname = value;
+                }
+                NotifyPropertyChanged("LastName");
+            }
+        }
+        private string _firstname = "";
+        public string FirstName
+        {
+            get
+            {
+                return _firstname;
+            }
+            set
+            {
+
+                if (_firstname != value)
+                {
+                    _firstname = value;
+                }
+                NotifyPropertyChanged("FirstName");
+
+            }
+
+        }
         // keep Prospect field for legacy purposes
         public int Prospect { get; set; }
-        
-        public string Phone { get; set; }
-        
-        public string Email { get; set; }
 
-        public virtual ObservableCollection<Attendance_Info> AttendanceList { get; private set; } 
-        public virtual ObservableCollection<ActivityPair> ActivityList { get; private set; } 
+        private string _phone = "";
+        public string Phone
+        {
+            get
+            {
+                return _phone;
+            }
+            set
+            {
 
+                if (_phone != value)
+                {
+                    _phone = value;
+                }
+                NotifyPropertyChanged("Phone");
+
+            }
+        }
+
+        private string _email = "";
+        public string Email
+        {
+            get
+            {
+                return _email;
+            }
+            set
+            {
+
+                if (_email != value)
+                {
+                    _email = value;
+                }
+                NotifyPropertyChanged("Email");
+
+            }
+        }
+
+        public virtual ObservableCollection<Attendance_Info> AttendanceList { get; private set; }
+        public virtual ObservableCollection<ActivityPair> ActivityList { get; private set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
-    public class Attendance_Info
+    public class Attendance_Info 
     {
 
-       
+
         public int Attendance_InfoId { get; set; }
         public int AttendeeId { get; set; }
 
-        public DateTime Date { get; set; }
+
+
+
+        // public event PropertyChangedEventHandler PropertyChanged;
+        //  public static readonly DependencyProperty DateProperty = DependencyProperty.Register("Date", typeof(DateTime), typeof(DateTime));
+
+        public string DateString { get; private set; }
+        private DateTime _date;
+        public DateTime Date
+        {
+            get
+            {
+                return _date;
+            }
+
+            set
+            {
+                if (_date != value)
+                {
+                    _date = value;
+                    DateString = _date.ToString("MM-dd-yyyy");
+
+                   
+                }
+            }
+        }
+
+
+
         public string Status { get; set; }
 
         public virtual Attendee Attendee { get; set; }
@@ -140,7 +243,7 @@ namespace CAOGAttendeeProject
 
         
         public string DateString { get; private set; }
-
+        private DateTime? _date = null;
         public DateTime? Date
         {
             get
@@ -161,7 +264,7 @@ namespace CAOGAttendeeProject
         }
         private string _parenttaskname = "";
         private string _childtaskname = "";
-        private DateTime? _date = null;
+       
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -172,7 +275,213 @@ namespace CAOGAttendeeProject
 
 
     }
-    public class ActivityTableRow : INotifyPropertyChanged
+
+    public class DefaultTableRow : IComparable<DefaultTableRow> ,  INotifyPropertyChanged
+    {
+
+
+       // public virtual Attendee ChurchAttendee { get; set; }
+
+        public DefaultTableRow()
+        {
+            ActivityList = new ObservableCollection<ActivityPair>() { };
+
+        }
+        public int AttendeeId { get; set; }
+
+        public string FirstLastName { get; set; }
+
+        private string _lastname = "";
+        public string LastName
+        {
+            get
+            {
+                return _lastname;
+            }
+            set
+            {
+                if (_lastname != value)
+                {
+                    _lastname = value;
+                }
+                NotifyPropertyChanged("LastName");
+            }
+        }
+        private string _firstname = "";
+        public string FirstName
+        {
+            get
+            {
+                return _firstname;
+            }
+            set
+            {
+                
+                    if (_firstname != value)
+                    {
+                        _firstname = value;
+                    }
+                    NotifyPropertyChanged("FirstName");
+                
+            }
+
+        }
+        public string Activity { get; set; }
+
+        private ObservableCollection<ActivityPair> _activitylist = new ObservableCollection<ActivityPair>() { };
+        private ObservableCollection<Attendance_Info> _attendancelist = new ObservableCollection<Attendance_Info>() { };
+
+        public ObservableCollection<ActivityPair> ActivityList
+        {
+            get
+            {
+                return _activitylist;
+            }
+
+            set
+            {
+
+
+                _activitylist = value;
+                NotifyPropertyChanged("ActivityList");
+
+            }
+        }
+        public ObservableCollection<Attendance_Info> AttendanceList
+        {
+            get
+            {
+                return _attendancelist;
+            }
+
+            set
+            {
+
+
+                _attendancelist = value;
+                NotifyPropertyChanged("AttendanceList");
+
+            }
+        }
+
+        //public string DateString { get; private set; }
+
+
+        public string Church_Last_Attended { get; set; }
+      
+        public string Activity_Last_Attended { get; set; }
+        public string ChurchStatus { get; set; }
+
+        private string _phone = "";
+        public string Phone
+        {
+            get
+            {
+                return _phone;
+            }
+            set
+            {
+
+                if (_phone != value)
+                {
+                    _phone = value;
+                }
+                NotifyPropertyChanged("Phone");
+
+            }
+        }
+
+        private string _email = "";
+        public string Email
+        {
+            get
+            {
+                return _email;
+            }
+            set
+            {
+
+                if (_email != value)
+                {
+                    _email = value;
+                }
+                NotifyPropertyChanged("Email");
+
+            }
+        }
+
+       
+
+       
+
+        public event PropertyChangedEventHandler PropertyChanged;
+      
+     
+
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+
+        public int CompareTo(DefaultTableRow other)
+        {
+            return LastName.CompareTo(other.LastName);
+        }
+
+       
+    }
+    public class AttendanceTableRow : INotifyPropertyChanged
+    {
+        public AttendanceTableRow()
+        {
+            IsNewrow = false;
+            IsModifiedrow = false;
+            
+        }
+        private int _attendeeId = 0;
+
+        public bool IsNewrow { get; set; }
+        public bool IsModifiedrow { get; set; }
+
+        public int AttendeeId
+        {
+            get
+            {
+                return _attendeeId;
+            }
+
+            set
+            {
+                if (_attendeeId != value)
+                {
+                    _attendeeId = value;
+                    NotifyPropertyChanged("AttendeeId");
+                }
+            }
+
+        }
+        public string FirstLastName { get; set; }
+        public string LastName { get; set; }
+        public string FirstName { get; set; }
+        public string DateString { get; set; }
+
+    
+        public bool Attended { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        //public int CompareTo(AttendanceTableRow other)
+        //{
+        //    return LastName.CompareTo(other.LastName);
+        //}
+    }
+    public class ActivityTableRow : IComparable<ActivityTableRow>, INotifyPropertyChanged
     {
 
         public ActivityTableRow()
@@ -181,23 +490,8 @@ namespace CAOGAttendeeProject
            
         }
         public int AttendeeId { get; set; }
-        string _firstlastname = "";
-        public string FirstLastName
-        {
-            get
-            {
-                return _firstlastname;
-            }
-
-            set
-            {
-                if (_firstlastname != value)
-                {
-                    _firstlastname = value;
-                }
-            }
-         }
-
+        
+        public string FirstLastName { get; set; }
         public string LastName { get; set; }
         public string FirstName { get; set; }
 
@@ -229,10 +523,12 @@ namespace CAOGAttendeeProject
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-
+        public int CompareTo(ActivityTableRow other)
+        {
+            return LastName.CompareTo(other.LastName);
+        }
 
     }
-
 
     public class ActivityRecord
     {
@@ -249,6 +545,7 @@ namespace CAOGAttendeeProject
         public string fname;
         public string lname;
         public DateTime? date;
+
         public string status;
         public string activity_date;
         public string activity;
@@ -261,8 +558,6 @@ namespace CAOGAttendeeProject
 
 
     }
-
-  
 
     public class TabState
     {

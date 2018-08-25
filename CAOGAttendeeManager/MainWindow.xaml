@@ -8,11 +8,29 @@
         Title="CAOG Attendee Manager" Height="800" Width="1000"
         Loaded="Window_Loaded"
         Closing="Window_Closing">
-   <!-- <Window.Resources>
-        <CollectionViewSource x:Key="attendeeViewSource" d:DesignSource="{d:DesignInstance {x:Type local:Attendee}, CreateList=True}"/>
-        
+    <Window.Resources>
+        <!--<CollectionViewSource x:Key="attendeeViewSource" d:DesignSource="{d:DesignInstance {x:Type local:Attendee}, CreateList=True}"/>-->
 
-    </Window.Resources>-->
+
+        <DataTemplate x:Key="ActivityPairItemsTemplate">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding ActivityGroup}" FontSize="10" FontWeight="Bold"/>
+                <Label Content="->" FontSize="10"/>
+                <TextBlock Text="{Binding ParentTaskName}" Margin="5,0,0,0" FontSize="10"/>
+                <Label Content="->" FontSize="10"/>
+                <TextBlock Text="{Binding ChildTaskName}" Margin="10,0,0,0" FontSize="10"/>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="chkAttendanceItemsTemplate">
+            <CheckBox Name="chkAttendedStatus" IsChecked="{Binding Attended}" />
+        </DataTemplate>
+
+        <!--<Style x:Key="CenterAligned" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>-->
+        
+    </Window.Resources>
 
 
     <DockPanel>
@@ -213,34 +231,145 @@
                 
             </StackPanel>
 
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Left" Background="#FF0C7AB9"/>
-
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Left" Background="#007acc"/>
+                <!-- Tab control ############################################################################################################################################## -->
             <TabControl Name="GridsTabControl" SelectionChanged="GridsTabControl_SelectionChanged" MouseUp="GridsTabControl_MouseUp" Grid.Column="2">
+                <!-- Active Tab################################################################################################################################################ -->
                 <TabItem Header="Active" Name="ActiveTab">
                     <Grid>
                         <Grid.Resources>
                             <Style TargetType="{x:Type ScrollViewer}">
                                 <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
                             </Style>
+
                             
-                         
                             
+
                         </Grid.Resources>
-                        <DataGrid x:Name="dataGrid" 
-                                AutoGenerateColumns="True"
+                        <DataGrid x:Name="dataGrid"
+                                LoadingRowDetails="dataGrid_LoadingRowDetails"
+                                RowDetailsVisibilityMode="Collapsed"
+                                CellEditEnding="dataGrid_CellEditEnding"
+                                AutoGenerateColumns="False"
                                 CanUserAddRows="False" 
                                 CanUserDeleteRows="False"
                                 CanUserReorderColumns="False"
-                                MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
+                                CanUserResizeColumns="True"
                                 ClipboardCopyMode="IncludeHeader"
-                                SelectionMode="Extended"
+                                SelectedCellsChanged="dataGrid_SelectedCellsChanged"
                                 ColumnWidth="120" 
                                 CanUserResizeRows="False" 
-                                ItemsSource="{Binding}"/>
+                                ItemsSource="{Binding}">
 
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
+                                <DataGridTextColumn Header="FirstLastName" Binding="{Binding FirstLastName}"/>
+                                <DataGridTemplateColumn Width="8">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Width="14" RenderOptions.BitmapScalingMode="NearestNeighbor" Name="btnExpandHistory" Click="btnExpandHistory_Click" BorderThickness="0" Background="White">
+                                                <Image Height="19">
+                                                    <Image.Source>
+                                                        <BitmapImage UriSource="Resources\DropdownArrow2.ico" Rotation="Rotate180"/>
+                                                    </Image.Source>
+                                                </Image>
+                                            </Button>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}"/>
+                                <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}"/>
+                                <DataGridTextColumn Header="Church Last Attended" Binding="{Binding Church_Last_Attended}" Width="130"/>
+                                <DataGridTextColumn Header="Status" Binding="{Binding ChurchStatus}" Width="60"/>
+                                <DataGridTextColumn Header="Activity" Width="100" Binding="{Binding Activity}"/>
+
+
+
+
+
+                                <DataGridTextColumn Header="Activity Last Attended" Binding="{Binding Activity_Last_Attended}"/>
+                                <DataGridTextColumn Header="Phone" Binding="{Binding Phone}"/>
+                                <DataGridTextColumn Header="Email" Binding="{Binding Email}"/>
+
+                            </DataGrid.Columns>
+
+                            <DataGrid.RowDetailsTemplate>
+                                <DataTemplate>
+                                  
+                                    <StackPanel Name="spAttendanceList">
+                                            <ToolBar Name="tbarDeleteRec" MinHeight="33">
+                                            
+                                            <Button Name="btnAddUpdateActivity"
+                                                    BorderBrush="Azure"
+                                                    BorderThickness="1"
+                                                    Click="btnAddUpdateActivity_Click"
+                                                    ToolTip="Add/Update an activity to the selected attendee's activity list">
+                                                <Image Height="20" Source="Resources\Checklist2.ico"/>
+
+
+                                            </Button>
+                                                <Button Name="btnDelete"
+                                                        Click="btnDelete_Click"
+                                                        ToolTip="Delete Attendee Record from selected table...">
+                                                        <Image Height="20" Source="Resources\Delete.ico"/>
+                                                </Button>
+                                            
+                                        </ToolBar>
+
+                                            <TextBlock Name="txtblkAttendanceList" Text="Attendance list" MinHeight="16"/>
+
+                                        <DataGrid Height="200" Name="GrdAttendee_InfoList" ItemsSource="{Binding}"
+                                                        MinHeight="200"
+                                                        AutoGenerateColumns="False"
+                                                        SelectionMode="Extended"
+                                                        CanUserDeleteRows="False"
+                                                        SelectedCellsChanged="GrdAttendee_InfoList_SelectedCellsChanged"
+                                                        IsReadOnly="True">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
+                                                <DataGridTextColumn Header="Date" Binding="{Binding DateString}"/>
+                                                <DataGridTextColumn Header="Status" Binding="{Binding Status}"/>
+                                            </DataGrid.Columns>
+
+                                        </DataGrid>
+
+                                        <TextBlock Name="txtblkActivities" Text="Activities list"/>
+
+                                        <DataGrid Height="200" Name="GrdAttendee_ActivityList" ItemsSource="{Binding}"
+                                                        MinHeight="200"
+                                                        AutoGenerateColumns="False"
+                                                        SelectionMode="Extended"
+                                                        CanUserDeleteRows="False"
+                                                        SelectedCellsChanged="GrdAttendee_ActivityList_SelectedCellsChanged"
+                                                        IsReadOnly="True">
+
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
+                                                <DataGridTextColumn Header="Date" Binding="{Binding DateString}"/>
+                                                <DataGridTemplateColumn Header="Activity">
+                                                    <DataGridTemplateColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel>
+                                                                <TextBlock Text="{Binding ActivityGroup}" FontSize="10" FontWeight="Bold"/>
+                                                                <TextBlock Text="{Binding ParentTaskName}" Margin="5,0,0,0" FontSize="10"/>
+                                                                <TextBlock Text="{Binding ChildTaskName}" Margin="10,0,0,0" FontSize="10"/>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </DataGridTemplateColumn.CellTemplate>
+                                                </DataGridTemplateColumn>
+
+
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+
+                                    </StackPanel>
+                                   
+                                </DataTemplate>
+                            </DataGrid.RowDetailsTemplate>
+                        </DataGrid>
                     </Grid>
                 </TabItem>
-
+                <!-- Prospect Tab ####################################################################################################################################################-->
                 <TabItem Header="Prospect List" Name="ProspectListTab">
                     <Grid>
                         <Grid.Resources>
@@ -248,21 +377,41 @@
                                 <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
                             </Style>
                         </Grid.Resources>
-                        <DataGrid Name="dataGrid_prospect"
-                      CanUserSortColumns="False"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      ItemsSource="{Binding IsAsync=True}" 
-                      CanUserReorderColumns="False"
-                      MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
-                      ClipboardCopyMode="IncludeHeader"
-                      SelectionMode="Extended"
-                      ColumnWidth="120" 
-                      CanUserResizeRows="False"/>
-                    </Grid>
 
+
+
+
+                        <DataGrid Name="dataGrid_prospect"
+                                  SelectedCellsChanged="dataGrid_prospect_SelectedCellsChanged"
+                                  CanUserSortColumns="False"
+                                  CanUserAddRows="False"
+                                  AutoGenerateColumns="False"
+                                  CanUserDeleteRows="False"
+                                  ItemsSource="{Binding IsAsync=True}" 
+                                  CanUserReorderColumns="False"
+                                  ClipboardCopyMode="IncludeHeader"
+                                  ColumnWidth="120" 
+                                  CanUserResizeRows="False">
+
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}" />
+                                <DataGridTextColumn Header="FirstLastName" Binding="{Binding FirstLastName}"/>
+                                <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" />
+                                <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}"/>
+                                <DataGridTextColumn Header="Church Last Attended" Binding="{Binding DateString}" />
+                                <DataGridTemplateColumn Header="Attended" Width="60">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Name="cmbAttendanceInfo" IsChecked="{Binding Attended}" Checked="cmbAttendanceInfo_Checked" Unchecked="cmbAttendanceInfo_Unchecked"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
                 </TabItem>
-               
+               <!--  Activity Tab ################################################################################################################################################-->
                 <TabItem Header="Activity &amp; Info" Name="ActivityTab">
                     <Grid>
                         <Grid.Resources>
@@ -271,21 +420,14 @@
                                 <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
                             </Style>
 
-
-                            <!--<ControlTemplate x:Key="Default" TargetType='{x:Type ListViewItem}'>
-                                <StackPanel Background="Beige">
-                                    <GridViewRowPresenter Content="{TemplateBinding Content}" Columns="{TemplateBinding GridView.ColumnCollection}"/>
-                                </StackPanel>
-                            </ControlTemplate>-->
-                           
-
                         </Grid.Resources>
                         <DataGrid Name="dataGrid_activity" CanUserAddRows="False" CanUserDeleteRows="False"
                                     ItemsSource="{Binding IsAsync=True}" 
                                     AutoGenerateColumns="False"
+                                    LoadingRowDetails="dataGrid_activity_LoadingRowDetails"
                                     SelectedCellsChanged="dataGrid_activity_SelectedCellsChanged"
                                     CanUserReorderColumns="False"
-                                    MouseRightButtonUp="dataGrid_MouseRightButtonUp" 
+                                    IsReadOnly="False"
                                     ClipboardCopyMode="IncludeHeader"
                                     SelectionMode="Single"
                                     ColumnWidth="120" 
@@ -303,12 +445,7 @@
                                 <DataTemplate>
                                   
                                         <ListView Name="lstActivity" ItemsSource="{Binding ActivityList}" SelectionChanged="lstActivity_SelectionChanged">
-                                        <!--<ListView.ItemContainerStyle>
-                                            <Style TargetType="{x:Type ListViewItem}"  >
-                                                <Setter Property="Template" Value="{StaticResource Default}"/>
-                                        
-                                            </Style>
-                                        </ListView.ItemContainerStyle>-->
+                                     
                                             
                                         <ListView.View>
                                             <GridView>

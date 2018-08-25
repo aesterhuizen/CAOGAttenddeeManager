@@ -31,102 +31,234 @@ namespace CAOGAttendeeProject
 
 
             queryAttendanceList = from att in dbcontext.Attendees.Local.AsQueryable()
-                        join attinfo in dbcontext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
-                        where att.FirstName == fname && att.LastName == lname
-                        orderby attinfo.Date ascending
-                        select new AttRecord {
-                            id = attinfo.Attendance_InfoId,
-                            fname = att.FirstName,
-                            lname = att.LastName,
-                            date = attinfo.Date,
-                            status = attinfo.Status };
+                                  join attinfo in dbcontext.Attendance_Info.Local on att.AttendeeId equals attinfo.AttendeeId
+                                  where att.FirstName == fname && att.LastName == lname
+                                  orderby attinfo.Date ascending
+                                  select new AttRecord
+                                  {
+                                      id = attinfo.Attendance_InfoId,
+                                      fname = att.FirstName,
+                                      lname = att.LastName,
+                                      date = attinfo.Date,
+                                      status = attinfo.Status
+                                  };
 
 
             queryActivityList = from att in m_dbContext.Attendees.Local.AsQueryable()
-                        join activity in m_dbContext.Activities.Local on att.AttendeeId equals activity.AttendeeId
-                        where att.FirstName == fname && att.LastName == lname
-                        orderby activity.Date ascending
-                        select new ActivityRecord
-                        {
-                            id = activity.ActivityPairId,
-                            fname = att.FirstName,
-                            lname = att.LastName,
-                            activity_date = activity.DateString,
-                            activity = activity.ToString()
-                           
-                        };
+                                join activity in m_dbContext.Activities.Local on att.AttendeeId equals activity.AttendeeId
+                                where att.FirstName == fname && att.LastName == lname
+                                orderby activity.Date ascending
+                                select new ActivityRecord
+                                {
+                                    id = activity.ActivityPairId,
+                                    fname = att.FirstName,
+                                    lname = att.LastName,
+                                    activity_date = activity.DateString,
+                                    activity = activity.ToString()
+
+                                };
 
 
 
 
             UpdateDataTable(queryActivityList, queryAttendanceList);
-          
+
 
         }
 
         private ModelDb m_dbContext;
-       
+        private DataSet m_DataSet = new DataSet() { };
+
         private string m_query = "0";
 
+        private void DeleteRecordFromActivitiesTable(System.Collections.IList row_select)
+        {
+            DataTable ActivityStatusTableCopy = m_DataSet.Tables["ActivityStatusTable"].Copy();
+
+
+            foreach (DataRowView drv in row_select)
+            {
+                bool bconv = int.TryParse(drv.Row["ActivityPairId"].ToString(), out int result);
+
+                if (result == 0)
+                {
+                    // convert fail because AttendeeId = "", this is a added row but user want to delete it
+                }
+                else
+                {
+                    var Activityrec = m_dbContext.Activities.Local.SingleOrDefault(id => id.ActivityPairId == result);
+
+
+
+                    if (Activityrec != null)
+                    {
+                        m_dbContext.Activities.Local.Remove(Activityrec);
+                    }
+
+                    // get row index of datarow to remove from ActivityStatus DataTable
+                    int rowindex = m_DataSet.Tables["ActivityStatusTable"].Rows.IndexOf(drv.Row);
+                   
+                 
+                    
+                            //delete the row at the index in the copied table
+                            ActivityStatusTableCopy.Rows[rowindex].Delete();
+                        
+
+
+
+                  
+                }
+            }
+
+            ActivityStatusTableCopy.AcceptChanges();
+
+            m_DataSet.Tables["ActivityStatusTable"].Clear();
+            for (int i = 0; i <= ActivityStatusTableCopy.Rows.Count - 1; i++)
+            {
+                m_DataSet.Tables["ActivityStatusTable"].ImportRow(ActivityStatusTableCopy.Rows[i]);
+
+            }
+
+            GrdAttendee_ActivityList.DataContext = m_DataSet.Tables["ActivityStatusTable"];
+
+                
+
+        }
+        private void DeleteRecordFromAttendanceInfoTable(System.Collections.IList row_select)
+        {
+            DataTable StatusTableCopy = m_DataSet.Tables["StatusTable"].Copy();
+
+
+            foreach (DataRowView drv in row_select)
+            {
+                bool bconv = int.TryParse(drv.Row["AttendeeInfoId"].ToString(), out int result);
+
+                if (result == 0)
+                {
+                    // convert fail because AttendeeId = "", this is a added row but user want to delete it
+                }
+                else
+                {
+                    var AttInforec = m_dbContext.Attendance_Info.Local.SingleOrDefault(id => id.Attendance_InfoId == result);
+
+
+
+
+                   if (AttInforec != null)
+                   {
+                        m_dbContext.Attendance_Info.Remove(AttInforec);
+                   }
+                        
+                 
+
+                }
+
+
+
+                // get row index of datarow to remove from AttendeeList DataTable
+                int rowindex = m_DataSet.Tables["StatusTable"].Rows.IndexOf(drv.Row);
+
+                              
+                        StatusTableCopy.Rows[rowindex].Delete();
+              
+            }
+
+            StatusTableCopy.AcceptChanges();
+          
+            m_DataSet.Tables["StatusTable"].Clear();
+            for (int i = 0; i <= StatusTableCopy.Rows.Count - 1; i++)
+            {
+                m_DataSet.Tables["StatusTable"].ImportRow(StatusTableCopy.Rows[i]);
+
+            }
+
+            GrdAttendee_InfoList.DataContext = m_DataSet.Tables["StatusTable"];
+
+
+
+        }
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             Cursor = Cursors.Wait;
-            var row_select = GrdAttendee_InfoList.SelectedItems;
-            row_select = GrdAttendee_ActivityList.SelectedItems;
+            var AttendanceInfoRow_select = GrdAttendee_InfoList.SelectedItems;
+            var ActivityRow_select = GrdAttendee_ActivityList.SelectedItems;
 
-            if (row_select.Count != 0)
+            if (AttendanceInfoRow_select.Count != 0)
+            {
+
+                DeleteRecordFromAttendanceInfoTable(AttendanceInfoRow_select);
+
+                //foreach (DataRow dr in AttendanceInfoRow_select)
+                //{
+                //    int AttendeeInfoId = int.Parse(dr["AttendeeInfoId"].ToString());
+                //    var queryAttendeeInfo = (from inforec in m_dbContext.Attendance_Info.Local
+                //                             where inforec.Attendance_InfoId == AttendeeInfoId
+                //                             select inforec).ToArray().FirstOrDefault();
+
+                //    if (queryAttendeeInfo != null)
+                //    {
+                //        m_dbContext.Attendance_Info.Local.Remove(queryAttendeeInfo);
+
+                //    }
+
+
+                Cursor = Cursors.Arrow;
+
+                MessageBox.Show("Attendance record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
+
+            }
+            else if (ActivityRow_select.Count != 0)
             {
 
 
-                foreach (DataRow dr in row_select)
-                {
-                    int AttendeeInfoId = int.Parse(dr["AttendeeInfoId"].ToString());
-                    var queryAttendeeInfo = (from inforec in m_dbContext.Attendance_Info.Local
-                                             where inforec.Attendance_InfoId == AttendeeInfoId
-                                             select inforec).ToArray().FirstOrDefault();
+                DeleteRecordFromActivitiesTable(ActivityRow_select);
+                //foreach (DataRow dr in ActivityRow_select)
+                //{
+                //    int ActivityId = int.Parse(dr["ActivityPairId"].ToString());
+                //    var queryActivity = (from activityrec in m_dbContext.Activities.Local
+                //                             where activityrec.ActivityPairId == ActivityId
+                //                             select activityrec).ToArray().FirstOrDefault();
 
-                    if (queryAttendeeInfo != null)
-                    {
-                        m_dbContext.Attendance_Info.Local.Remove(queryAttendeeInfo);
+                //    if (queryActivity != null)
+                //    {
+                //        m_dbContext.Activities.Local.Remove(queryActivity);
 
-                    }
+                //    }
 
-                    //m_dbContext.SaveChanges();
-                    Cursor = Cursors.Arrow;
-                    // UpdateDataTable(,m_query);
-                    MessageBox.Show("Attendee record removed successfully.", "Remove Record", MessageBoxButton.OK, MessageBoxImage.None);
-                }
+
+                Cursor = Cursors.Arrow;
+
+                MessageBox.Show("Activity record removed successfully.\n\nChanges has not been saved to the database until the Save button is clicked.", "Records removed", MessageBoxButton.OK, MessageBoxImage.None);
             }
+        }
+    
                            
-       }
+       
 
-        private void UpdateDataTable(IQueryable<ActivityRecord> linqquery, IQueryable<AttRecord> linqquery2)
+        private void UpdateDataTable(IQueryable<ActivityRecord> linqActivity, IQueryable<AttRecord> linqAttendance)
         {
-            //SqlDataAdapter myAdapter = new SqlDataAdapter(query,m_sqlconnnection);
+           
 
-            //DataTable dt = new DataTable();
-           // myAdapter.Fill(dt);
-
-
-            DataTable StatusTable = new DataTable();
-
+            
+            DataTable StatusTable = new DataTable("StatusTable");
+            DataTable ActivityStatusTable = new DataTable("ActivityStatusTable");
 
             StatusTable.Columns.Add(new DataColumn("AttendeeInfoId"));
             StatusTable.Columns.Add(new DataColumn("First Name"));
             StatusTable.Columns.Add(new DataColumn("Last Name"));
-            StatusTable.Columns.Add(new DataColumn("Church Last Attended"));
+            StatusTable.Columns.Add(new DataColumn("Date"));
             StatusTable.Columns.Add(new DataColumn("Status"));
             
 
-            DataTable ActivityStatusTable = new DataTable();
+            
 
             ActivityStatusTable.Columns.Add(new DataColumn("ActivityPairId"));
             ActivityStatusTable.Columns.Add(new DataColumn("First Name"));
             ActivityStatusTable.Columns.Add(new DataColumn("Last Name"));
-            ActivityStatusTable.Columns.Add(new DataColumn("Activity Last Attended"));
+            ActivityStatusTable.Columns.Add(new DataColumn("Date"));
             ActivityStatusTable.Columns.Add(new DataColumn("Activity"));
 
-            foreach (var rec in linqquery2)
+            foreach (var rec in linqAttendance)
             {
 
                 DataRow newrow = StatusTable.NewRow();
@@ -134,14 +266,14 @@ namespace CAOGAttendeeProject
                 newrow["AttendeeInfoId"] = rec.id;
                 newrow["First Name"] = rec.fname;
                 newrow["Last Name"] = rec.lname;
-                newrow["Church Last Attended"] = rec.date?.ToString("MM-dd-yyyy");
+                newrow["Date"] = rec.date?.ToString("MM-dd-yyyy");
                 newrow["Status"] = rec.status;
 
                 StatusTable.Rows.Add(newrow);
             }
 
 
-            foreach (var rec in linqquery)
+            foreach (var rec in linqActivity)
             {
                 DataRow newActivityRow = ActivityStatusTable.NewRow();
 
@@ -157,10 +289,10 @@ namespace CAOGAttendeeProject
 
                 if (rec.activity_date != null)
                 {
-                    newActivityRow["Activity Last Attended"] = rec.activity_date;
+                    newActivityRow["Date"] = rec.activity_date;
                 }
                 else
-                    newActivityRow["Activity Last Attended"] = "n/a";
+                    newActivityRow["Date"] = "n/a";
 
 
 
@@ -169,16 +301,35 @@ namespace CAOGAttendeeProject
 
             //GrdAttendeeInfo.ItemsSource = linqquery;
 
-
+            //Add tables to dataset
+            if (!m_DataSet.Tables.Contains("StatusTable"))
+            {
+                m_DataSet.Tables.Add(StatusTable);
+            }
+            else
+            {
+                m_DataSet.Tables.Remove("StatusTable");
+                m_DataSet.Tables.Add(StatusTable);
+            }
+            
+            if (!m_DataSet.Tables.Contains("ActivityStatusTable") )
+            {
+                m_DataSet.Tables.Add(ActivityStatusTable);
+            }
+            else
+            {
+                m_DataSet.Tables.Remove("ActivityStatusTable");
+                m_DataSet.Tables.Add(ActivityStatusTable);
+            }
 
             
             //swap first name last name column
             StatusTable.Columns[1].SetOrdinal(2);
             GrdAttendee_InfoList.DataContext = StatusTable;
             GrdAttendee_InfoList.ColumnWidth = 100;
-          
-                
 
+            m_DataSet.Tables["StatusTable"].AcceptChanges();
+            m_DataSet.Tables["ActivityStatusTable"].AcceptChanges();
             //swap first name last name column
             ActivityStatusTable.Columns[1].SetOrdinal(2);
             

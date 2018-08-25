@@ -75,6 +75,7 @@
         
             <DataGrid Height="Auto" Name="GrdAttendee_ActivityList" ItemsSource="{Binding}"
                             MinHeight="200"
+                             AutoGenerateColumns="True"
                              CanUserDeleteRows="False"
                              SelectedCellsChanged="GrdAttendee_ActivityList_SelectedCellsChanged"
                              IsReadOnly="True"/>
