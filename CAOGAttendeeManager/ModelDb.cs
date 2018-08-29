@@ -276,11 +276,11 @@ namespace CAOGAttendeeProject
 
     }
 
-    public class DefaultTableRow : IComparable<DefaultTableRow> ,  INotifyPropertyChanged
+    public class DefaultTableRow : INotifyPropertyChanged
     {
 
 
-       // public virtual Attendee ChurchAttendee { get; set; }
+        // public virtual Attendee ChurchAttendee { get; set; }
 
         public DefaultTableRow()
         {
@@ -424,10 +424,7 @@ namespace CAOGAttendeeProject
         }
 
 
-        public int CompareTo(DefaultTableRow other)
-        {
-            return LastName.CompareTo(other.LastName);
-        }
+        
 
        
     }
@@ -602,14 +599,15 @@ namespace CAOGAttendeeProject
         public bool? ActivityTab_isActivityDateChecked { get; set; }
 
     }
-   
+
     public class ActivityGroup : INotifyPropertyChanged
     {
         public ActivityGroup()
         {
             this.lstActivityTasks = new ObservableCollection<ActivityTask>();
         }
-        
+
+        public string Parent {get; set;}
         public string ActivityName { get; set; }
         private bool _IsSelected = false;
 
@@ -643,9 +641,11 @@ namespace CAOGAttendeeProject
         }
 
         public int ActivityId {get;set; }
+        public string Parent { get; set; }
         public string TaskName { get; set; }
         public string Description { get; set; }
         private bool _IsSelected = false;
+        
 
         public event PropertyChangedEventHandler PropertyChanged;
 
