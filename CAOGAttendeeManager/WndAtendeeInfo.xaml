@@ -5,35 +5,85 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CAOGAttendeeProject"
         mc:Ignorable="d"
+        Name="AttInfoWindow"
         Title="Attendee Information" 
-        Height="500" Width="700"
+        Height="500" Width="934"
         Loaded="Window_Loaded"
+        SizeChanged="Window_SizeChanged"
         >
 
 
-    <DockPanel>
+    <Grid Name="grd_AttInfoLists">
+        <Grid.RowDefinitions>
+            <RowDefinition MinHeight="200"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition MinHeight="200"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
 
 
-        <!--
-       <ToolBar DockPanel.Dock="Top">
-            <Button Name="btnDelete" 
-                    Click="btnDelete_Click"
-                    ToolTip="Delete Attendee Record...">
+
+
+        <StackPanel Name="spAttendanceList" Grid.Row="0" Grid.Column="0">
+          
+            <ToolBar Name="tbarDeleteRec" MinHeight="33">
+                    <Button Name="btnDelete" 
+                           Click="BtnDelete_Click"
+                              ToolTip="Delete Attendee Record from selected table...">
+
+                        <Image Height="20" Source="Resources\Delete.ico"/>
+                    </Button>
+
+                </ToolBar>
+
+
+
+                <TextBlock Name="txtblkAttendanceList" Text="Attendance list" MinHeight="16"/>
+           
                 
-                <Image Height="20" Source="Resources\Delete.ico"/>
-            </Button>
-  
-        </ToolBar>
-     -->
+            
+                <DataGrid Height="Auto" Name="GrdAttendee_InfoList" ItemsSource="{Binding}"
+                          MinHeight="200"
+                       CanUserDeleteRows="False"
+                       SelectedCellsChanged="GrdAttendeeInfo_SelectedCellsChanged"
+                       IsReadOnly="True" SelectionChanged="GrdAttendeeInfo_SelectionChanged"/>
 
-        <DataGrid DockPanel.Dock="Bottom" Name="GrdAttendeeInfo" ItemsSource="{Binding}"
-                  CanUserDeleteRows="False"
-                  SelectedCellsChanged="GrdAttendeeInfo_SelectedCellsChanged"
-                  IsReadOnly="True"/>
+           
 
-
-
-    </DockPanel>
+        </StackPanel>
 
 
+
+        <GridSplitter Name="Gsplitter_lists" Grid.Row="1" 
+                  HorizontalAlignment="Stretch" 
+                  VerticalAlignment="Center" 
+                  Background = "#FF00BFFF" 
+                  Height="5"
+                  DragCompleted="Gsplitter_lists_DragCompleted"/>
+
+        <StackPanel Name="spActivityList"  Grid.Row="2" Grid.Column="0" >
+            
+
+                <TextBlock Name="txtblkActivities" Text="Activities list"/>
+
+           
+                
+            
+        
+            <DataGrid Height="Auto" Name="GrdAttendee_ActivityList" ItemsSource="{Binding}"
+                            MinHeight="200"
+                             AutoGenerateColumns="True"
+                             CanUserDeleteRows="False"
+                             SelectedCellsChanged="GrdAttendee_ActivityList_SelectedCellsChanged"
+                             IsReadOnly="True"/>
+           
+        </StackPanel>
+
+         
+       
+
+        </Grid>
 </Window>
