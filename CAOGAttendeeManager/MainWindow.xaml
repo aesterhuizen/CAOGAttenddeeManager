@@ -188,7 +188,7 @@
                             <Expander.Header>
                                 <StackPanel Name="spActivityExpanderHeader" Orientation="Horizontal" >
                                     <CheckBox Margin="0,5,0,0" Content="Activity"  Name="chkActivityFilter" Checked="chkActivityFilter_Checked" Unchecked="chkActivityFilter_Unchecked" RenderTransformOrigin="0.797,-0.5"/>
-                                    <Button Margin="129,0,0,0" Name="btnAddActivity" Content="Add" BorderThickness="0" Click="btnAddActivity_Click_1"
+                                    <Button Margin="84,0,0,0" Name="btnPanelAddActivity" Content="Add Activity" BorderThickness="1" Click="btnPanelAddActivity_Click"
                                             ToolTip="Add Activity">
                                       
                                     </Button>
@@ -196,7 +196,7 @@
                                 </StackPanel>
                             </Expander.Header>
                             
-                            <TreeView Name="trvActivities" TreeViewItem.Selected="trvActivities_Selected">
+                            <TreeView Name="trvActivities" >
                                 <TreeView.ItemContainerStyle>
                                     <Style TargetType="{x:Type TreeViewItem}">
                                         <Setter Property="IsExpanded" Value="True"/>
@@ -273,7 +273,7 @@
                                             <Button Width="14" RenderOptions.BitmapScalingMode="NearestNeighbor" 
                                                     Name="btnExpandHistory" 
                                                     Margin="0,0,0,0"
-                                                    Click="btnExpandHistory_Click" 
+                                                    Click="btnExpandHistory_Click"
                                                     BorderThickness="0" 
                                                     Background="White"
                                                     ToolTip="Dropdown list displaying attendee's details">
@@ -423,69 +423,7 @@
                         </DataGrid>
                     </Grid>
                 </TabItem>
-               <!--  Activity Tab ################################################################################################################################################-->
-                <!--<TabItem Header="Activity &amp; Info" Name="ActivityTab">
-                    <Grid>
-                        <Grid.Resources>
-
-                            <Style TargetType="{x:Type ScrollViewer}">
-                                <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
-                            </Style>
-
-                        </Grid.Resources>
-                        <DataGrid Name="dataGrid_activity" CanUserAddRows="False" CanUserDeleteRows="False"
-                                    ItemsSource="{Binding IsAsync=True}" 
-                                    AutoGenerateColumns="False"
-                                    LoadingRowDetails="dataGrid_activity_LoadingRowDetails"
-                                    SelectedCellsChanged="dataGrid_activity_SelectedCellsChanged"
-                                    CanUserReorderColumns="False"
-                                    IsReadOnly="False"
-                                    ClipboardCopyMode="IncludeHeader"
-                                    SelectionMode="Single"
-                                    ColumnWidth="120" 
-                                    CanUserResizeRows="False"
-                                    RowDetailsVisibilityMode="VisibleWhenSelected" >
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
-                                <DataGridTextColumn Header="FirstLastName" Binding="{Binding FirstLastName}"/>
-                                <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}"/>
-                                <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}"/>
-                             
-                            </DataGrid.Columns>
-
-                            <DataGrid.RowDetailsTemplate>
-                                <DataTemplate>
-                                  
-                                        <ListView Name="lstActivity" ItemsSource="{Binding ActivityList}" SelectionChanged="lstActivity_SelectionChanged">
-                                     
-                                            
-                                        <ListView.View>
-                                            <GridView>
-                                                <GridViewColumn Header="Activity" Width="230">
-                                                    <GridViewColumn.CellTemplate>
-                                                        <DataTemplate>
-                                                            <StackPanel>
-                                                                <TextBlock Text="{Binding ActivityGroup}" FontSize="10" FontWeight="Bold"/>
-                                                                <TextBlock Text="{Binding ParentTaskName}" Margin="5,0,0,0" FontSize="10"/>
-                                                                <TextBlock Text="{Binding ChildTaskName}" Margin="10,0,0,0" FontSize="10"/>
-                                                            </StackPanel>
-                                                        </DataTemplate>
-                                                    </GridViewColumn.CellTemplate>
-                                                </GridViewColumn>
-                                                
-                                                <GridViewColumn Header="Date" Width="100" DisplayMemberBinding="{Binding DateString}"/>
-
-                                            </GridView>
-                                                
-                                            </ListView.View>
-                                        </ListView>
-                                
-                                </DataTemplate> 
-                            </DataGrid.RowDetailsTemplate>
-                        </DataGrid>
-                    </Grid>
-
-                </TabItem>-->
+            
             </TabControl>
 
 

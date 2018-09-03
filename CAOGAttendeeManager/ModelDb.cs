@@ -186,6 +186,42 @@ namespace CAOGAttendeeProject
 
         public string ActivityGroup { get; set; }
 
+        public static bool operator!= (ActivityPair A, ActivityPair B)
+        {
+
+            if (!(A is null) && !(B is null))
+            {
+                if (!(A.ToString().Equals(B.ToString())))
+                {
+                    return true;
+                }
+            }
+            
+                return false;
+
+        }
+
+        public static bool operator ==(ActivityPair A, ActivityPair B)
+        {
+
+           
+            if (!(A is null) && !(B is null) )
+            {
+                if (A.ToString().Equals(B.ToString()))
+                {
+                    return true;
+
+                }
+            }
+            
+                return false;
+            
+          
+                
+          
+
+        }
+
         public override string ToString()
         {
             if (ParentTaskName == "" && ChildTaskName == "")
@@ -195,11 +231,11 @@ namespace CAOGAttendeeProject
             else if (ChildTaskName == "")
             {
 
-                return ActivityGroup + "->" + " " + ParentTaskName;
+                return ActivityGroup + "->" + ParentTaskName;
             }
             else if (ParentTaskName != "" && ChildTaskName != "")
             {
-                return ActivityGroup + "->" + "  " + ParentTaskName + "->" + "   " + ChildTaskName;
+                return ActivityGroup + "->" + ParentTaskName + "->" + ChildTaskName;
             }
             else
             {
@@ -566,37 +602,38 @@ namespace CAOGAttendeeProject
 
             
 
-            ProspectTab_isFilterbyDateChecked = false;
+            ProspectPanel_isFilterbyDateChecked = false;
 
-            ActiveTab_isFilterbyActivityDateChecked = false;
-            ActiveTab_isActivityChecked = false;
+            ActivePanel_isFilterbyActivityDateChecked = false;
+            ActivePanel_isActivityChecked = false;
 
-            ActiveTab_isFilterbyDateChecked = false;
-            ActivityTab_isActivityDateChecked = false;
-            ActivityTab_isActivityChecked = false;
+            ActivePanel_isFilterbyDateChecked = false;
 
-            ActiveTab_isAttendedChecked = false;
-            ActiveTab_isRespondedChecked = false;
-            ActiveTab_isFollowUpChecked = false;
-            ActiveTab_isChurchStatusChecked = false;
+            ActivityPanel_isActivityDateChecked = false;
+            ActivityPanel_isActivityChecked = false;
+
+            ActivePanel_isAttendedChecked = false;
+            ActivePanel_isRespondedChecked = false;
+            ActivePanel_isFollowUpChecked = false;
+            ActivePanel_isChurchStatusChecked = false;
         }
         public string txtSearchActiveState { get; set; }
         public string txtSearchProspectState { get; set; }
         public string txtSearchActivityState { get; set; }
 
-        public bool? ActiveTab_isAttendedChecked { get; set;  }
-        public bool? ActiveTab_isRespondedChecked { get; set; }
-        public bool? ActiveTab_isFollowUpChecked { get; set; }
-        public bool? ActiveTab_isActivityChecked { get; set; }
-        public bool? ActiveTab_isChurchStatusChecked { get; set; }
+        public bool? ActivePanel_isAttendedChecked { get; set;  }
+        public bool? ActivePanel_isRespondedChecked { get; set; }
+        public bool? ActivePanel_isFollowUpChecked { get; set; }
+        public bool? ActivePanel_isActivityChecked { get; set; }
+        public bool? ActivePanel_isChurchStatusChecked { get; set; }
 
-        public bool? ActiveTab_isFilterbyDateChecked { get; set; }
-        public bool? ProspectTab_isFilterbyDateChecked { get; set; }
+        public bool? ActivePanel_isFilterbyDateChecked { get; set; }
+        public bool? ProspectPanel_isFilterbyDateChecked { get; set; }
 
-        public bool? ActiveTab_isFilterbyActivityDateChecked { get; set; }
-        public bool? ActivityTab_isActivityChecked { get; set; }
+        public bool? ActivePanel_isFilterbyActivityDateChecked { get; set; }
+        public bool? ActivityPanel_isActivityChecked { get; set; }
 
-        public bool? ActivityTab_isActivityDateChecked { get; set; }
+        public bool? ActivityPanel_isActivityDateChecked { get; set; }
 
     }
 
@@ -632,6 +669,8 @@ namespace CAOGAttendeeProject
 
         public ObservableCollection<ActivityTask> lstActivityTasks { get; set; }
     }
+
+
     public class ActivityTask : INotifyPropertyChanged
     {
 
@@ -642,11 +681,33 @@ namespace CAOGAttendeeProject
 
         public int ActivityId {get;set; }
         public string Parent { get; set; }
+      
         public string TaskName { get; set; }
         public string Description { get; set; }
         private bool _IsSelected = false;
-        
 
+        //public override string ToString()
+        //{
+        //    if (Task == "" && ChildTaskName == "")
+        //    {
+        //        return "n/a";
+        //    }
+        //    else if (ChildTaskName == "")
+        //    {
+
+        //        return ActivityGroup + "->" + ParentTaskName;
+        //    }
+        //    else if (ParentTaskName != "" && ChildTaskName != "")
+        //    {
+        //        return ActivityGroup + "->" + ParentTaskName + "->" + ChildTaskName;
+        //    }
+        //    else
+        //    {
+        //        return "n/a";
+        //    }
+
+
+        //}
         public event PropertyChangedEventHandler PropertyChanged;
 
         #region INotifyPropertyChanged Members
