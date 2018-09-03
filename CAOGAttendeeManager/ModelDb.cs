@@ -196,7 +196,10 @@ namespace CAOGAttendeeProject
                     return true;
                 }
             }
-            
+            else if (!(A is null) && B is null)
+            {
+                return true;
+            }
                 return false;
 
         }

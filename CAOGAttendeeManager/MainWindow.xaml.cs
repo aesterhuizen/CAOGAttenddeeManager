@@ -192,7 +192,7 @@ namespace CAOGAttendeeProject
         // the current selected activity Pair
         ActivityPair m_currentSelected_ActivityPair = null;
         ActivityPair m_previousSelected_ActivityPair = null;
-        private Timer aTimer;
+        private Timer aTimer = null;
 
         private bool m_NoCredFile = false;
         private int m_activitychecked_count = 0;
@@ -231,7 +231,7 @@ namespace CAOGAttendeeProject
 
         private void Set_btnAddActivityState()
         {
-            if (m_activitychecked_count == 1 && m_ActivityDateSelected !=null)
+            if (m_activitychecked_count == 1 && (m_ActivityDateSelected !=null && m_dateIsValid))
             {
                 btnPanelAddActivity.IsEnabled = true;
             }
@@ -243,7 +243,14 @@ namespace CAOGAttendeeProject
         delegate void setbtn_state();
 
         
-
+        private void StopTimer()
+        {
+            if (aTimer != null)
+            {
+                aTimer.Enabled = false;
+            }
+            
+        }
         private void SetTimer()
         {
             aTimer = new Timer(100);
@@ -1491,13 +1498,7 @@ namespace CAOGAttendeeProject
                     m_DataSet.Tables["AttendeeListTable"].DefaultView.RowFilter = String.Empty;
 
                 }
-                else if (m_activityView)
-                {
-
-                   // dataGrid_activity.DataContext = m_lstactivityTableRows;
-
-
-                }
+             
 
 
                 //----------------------Textbox search has text-----------------------------------------------------------------------------------
@@ -1531,12 +1532,7 @@ namespace CAOGAttendeeProject
                 {
                     m_DataSet.Tables["AttendeeListTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
                 }
-                else if (m_activityView)
-                {
-                    //m_DataSet.Tables["ActivityTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
-                   //var filteredActivityList = m_lstactivityTableRows.Where(row => row.FirstLastName.Contains(text) );
-                    //dataGrid_activity.DataContext = filteredActivityList;
-                }
+              
 
 
 
@@ -1731,7 +1727,15 @@ namespace CAOGAttendeeProject
                 Cursor = Cursors.Wait;
                 if (m_alistView)
                 {
+
                     m_alistDateSelected = datec;
+
+                    int ret_error = check_date_bounds();
+
+                    if (ret_error == 1)
+                        return;
+
+
                     string date = m_alistDateSelected.ToString("MM-dd-yyyy");
 
                     if (datec.DayOfWeek == DayOfWeek.Sunday)
@@ -1787,58 +1791,14 @@ namespace CAOGAttendeeProject
                 {
                     m_ActivityDateSelected = datec;
 
+                    int ret_error = check_date_bounds();
 
+                    if (ret_error == 1)
+                        return;
+                    else
+                        m_dateIsValid = true;
+                   
 
-                    string date = m_ActivityDateSelected?.ToString("MM-dd-yyyy");
-
-                    //if (m_activity_row_selected != null)
-                    //{
-                    //    if (m_activityPairs_selectedFromListView.Count != 0)
-                    //    {
-
-                    //        foreach (ActivityPair ap in m_activityPairs_selectedFromListView)
-                    //        {
-                    //            //Find activity in Attendee List
-                    //            var qFindActivityInList = m_activity_row_selected.ActivityList.SingleOrDefault(apair => apair.AttendeeId == m_activity_row_selected.AttendeeId &&
-                    //                                                                              apair.ActivityGroup == ap.ActivityGroup &&
-                    //                                                                              apair.ParentTaskName == ap.ParentTaskName &&
-                    //                                                                              apair.ChildTaskName == ap.ChildTaskName);
-
-                    //            //Activity is in List, create new activity and add it to the activity list with updated date
-                    //            if (qFindActivityInList != null)
-                    //            {
-                    //                ActivityPair nap = new ActivityPair() { };
-                    //                nap.Date = m_ActivityDateSelected;
-                    //                nap.AttendeeId = m_activity_row_selected.AttendeeId;
-                    //                nap.ActivityGroup = ap.ActivityGroup;
-                    //                nap.ParentTaskName = ap.ParentTaskName;
-                    //                nap.ChildTaskName = ap.ChildTaskName;
-
-                    //                m_activity_row_selected.ActivityList.Add(nap);
-                    //                //reflect activity last attended of attendee in default table row
-                    //                DefaultTableRow selectdefaultrow = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == m_activity_row_selected.AttendeeId);
-                    //                //get last activity record
-                    //                ActivityPair lastActivityRec = selectdefaultrow.ActivityList.OrderByDescending(rec => rec.Date).ToList().FirstOrDefault();
-                    //                //display last activity in Default Table
-                    //                selectdefaultrow.Activity = lastActivityRec.ToString();
-                    //                selectdefaultrow.Activity_Last_Attended = lastActivityRec.DateString;
-
-                    //            }
-
-
-
-
-
-
-                                    
-
-                       
-
-
-                    //        }
-                    //    }
-                        
-                    //}
                 }
 
 
@@ -2195,12 +2155,14 @@ namespace CAOGAttendeeProject
             {
                 LoadActivePanelState();
                 Show_activeview_Panel();
+                StopTimer();
             }
           
            
         }
         private int check_date_bounds()
         {
+           
             DateTime curdate = DateTime.Now;
             DateTime datelimit;
             List<DateTime> lstsundays = new List<DateTime>();
@@ -2227,8 +2189,9 @@ namespace CAOGAttendeeProject
 
             if (datelimit != null)
             {
-                if (m_alistDateSelected > datelimit)
+                if ( (m_ActivityDateSelected > datelimit) || (m_alistDateSelected > datelimit) )
                 {
+                    m_dateIsValid = false;
                     MessageBox.Show($"Date limit is {datelimit.ToShortDateString()}.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
                     Cursor = Cursors.Arrow;
                     return 1;
@@ -2266,18 +2229,6 @@ namespace CAOGAttendeeProject
                 //end all edits and update the datagrid with changes
                 dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
                 dataGrid_prospect.UpdateLayout();
-
-
-
-
-                int ret_error = check_date_bounds();
-
-                if (ret_error == 1)
-                    return;
-
-
-
-
 
 
                 // m_DataSet.Tables["AttendeeListTable"].DefaultView.RowFilter = "";
@@ -3437,10 +3388,6 @@ namespace CAOGAttendeeProject
                 m_dbContext.SaveChanges();
 
 
-                m_DataSet.AcceptChanges();
-                //  ShowFiltered_Or_DefaultTable();
-
-
                 MessageBox.Show("Changes were succesfully saved to the database.");
 
 
@@ -3571,11 +3518,11 @@ namespace CAOGAttendeeProject
                             if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected)
                             {
                                 m_activitychecked_count++;
-                               
+
                                 ActivityPair selectedActivity = new ActivityPair
                                 {
                                     ActivityGroup = activity_group.ActivityName,
-                                    ActivityPairId = subtask.ActivityId,
+                                    AttendeeId = m_default_row_selected.AttendeeId,
                                     ParentTaskName = task.TaskName,
                                     ChildTaskName = subtask.TaskName
                                 };
@@ -3613,7 +3560,7 @@ namespace CAOGAttendeeProject
                             ActivityPair selectedActivity = new ActivityPair
                             {
                                 ActivityGroup = activity_group.ActivityName,
-                                ActivityPairId = task.ActivityId,
+                                AttendeeId = m_default_row_selected.AttendeeId,
                                 ParentTaskName = task.TaskName,
                                 ChildTaskName = "n/a"
                             };
@@ -4821,33 +4768,31 @@ namespace CAOGAttendeeProject
                     }
 
 
-
+                    SaveProspectPanelState();
+                    LoadActivePanelState();
 
 
                     // save current state of side panel
-                    if (m_AttendanceView)
-                    {
-                        SaveActivePanelState();
+                    //if (m_AttendanceView)
+                    //{
+                    //    LoadActivePanelState();
 
-                    }
-                    else if (m_alistView)
-                    {
-                        SaveProspectPanelState();
-                    }
-                    else if (m_activityView)
-                    {
+                    //}
+                    //else if (m_alistView)
+                    //{
+                    //    SaveProspectPanelState();
+                    //}
+                    //else if (m_activityView)
+                    //{
 
-                        SaveActivityPanelState();
-                    }
+                    //    SaveActivityPanelState();
+                    //}
 
                    
 
-                    // load ActiveTab state from TabState class
-                    txtSearch.Text = "";
-                    txtSearch.Text = m_TabState.txtSearchActiveState;
-
+                   
                     ClearTreeView();
-                    LoadActivePanelState();
+                  
 
 
 
@@ -4873,21 +4818,23 @@ namespace CAOGAttendeeProject
                     m_AttendanceView = false;
                     m_activityView = false;
 
-                    // save current state of side panel
-                    if (m_AttendanceView)
-                    {
-                        SaveActivePanelState();
+                    SaveActivePanelState();
 
-                    }
-                    else if (m_alistView)
-                    {
-                        SaveProspectPanelState();
-                    }
-                    else if (m_activityView)
-                    {
-                        SaveActivityPanelState();
+                    //// save current state of side panel
+                    //if (m_AttendanceView)
+                    //{
+                    //   
 
-                    }
+                    //}
+                    //else if (m_alistView)
+                    //{
+                    //    SaveProspectPanelState();
+                    //}
+                    //else if (m_activityView)
+                    //{
+                    //    SaveActivityPanelState();
+
+                    //}
 
 
 
@@ -4903,12 +4850,13 @@ namespace CAOGAttendeeProject
                     btnNewRec.IsEnabled = true;
                     btnDelete.IsEnabled = false;
 
-                    Display_AttendeeListTable_in_Grid();
+                   
                     if (!m_IsPanelProspectView)
                     {
                         Show_prospectview_Panel();
                     }
-                    
+
+                    Display_AttendeeListTable_in_Grid();
                 }
             }
          
@@ -4920,7 +4868,7 @@ namespace CAOGAttendeeProject
         {
             txtSearch.IsEnabled = false;
             chkActivityDateFilter.IsChecked = m_TabState.ActivityPanel_isActivityChecked;
-            chkActivityDateFilter.IsChecked = m_TabState.ActivityPanel_isActivityDateChecked;
+            chkActivityDateFilter.IsChecked = true;
         }
         private void SaveActivityPanelState()
         {
@@ -4949,13 +4897,16 @@ namespace CAOGAttendeeProject
         private void LoadProspectPanelState()
         {
            
-            txtSearch.Text = "";
+
             txtSearch.Text = m_TabState.txtSearchProspectState;
             chkChurchDateFilter.IsChecked = m_TabState.ProspectPanel_isFilterbyDateChecked;
         }
         private void LoadActivePanelState()
         {
-           
+
+
+
+            txtSearch.Text = m_TabState.txtSearchActiveState;
             chkAttended.IsChecked = m_TabState.ActivePanel_isAttendedChecked;
             chkFollowup.IsChecked = m_TabState.ActivePanel_isFollowUpChecked;
             chkResponded.IsChecked = m_TabState.ActivePanel_isRespondedChecked;
@@ -5517,22 +5468,10 @@ namespace CAOGAttendeeProject
             SaveActivePanelState();
             LoadActivityPanelState();
 
-
-
-               
-
-                btnNewRec.IsEnabled = false;
-
-
-                btnImportRecords.IsEnabled = false;
-                btnDelete.IsEnabled = false;
-
-
-        
-            chkActivityFilter.IsChecked = true;
-
-
-
+            btnNewRec.IsEnabled = false;
+            btnImportRecords.IsEnabled = false;
+            btnDelete.IsEnabled = false;
+       
 
             if (!m_IsActivityPanelView)
             {
@@ -5581,88 +5520,11 @@ namespace CAOGAttendeeProject
         }
 
 
-        private void BtnAddActivity_Checked(object sender, RoutedEventArgs e)
-        {
-
-
-            
-                SetTimer();
-
-            //SaveActiveList current state of side panel
-
-
-                SaveActivePanelState();
-
-
-
-                // save current state of side panel
-
-
-                m_alistView = false;
-                m_AttendanceView = true;
-                m_activityView = true;
-                btnNewRec.IsEnabled = false;
-
-
-                btnImportRecords.IsEnabled = false;
-                btnDelete.IsEnabled = false;
-
-
-            // load Activity state from TabState class
-            LoadActivityPanelState();
-
-
-
-
-            // Display_ActivityTable_in_Grid();
-            if (!m_IsActivityPanelView)
-            {
-                Show_Activity_Panel();
-            }
-            
-
-        }
-
-        private void btnExpandHistory_Checked(object sender, RoutedEventArgs e)
-        {
-            if (dataGrid.RowDetailsVisibilityMode == DataGridRowDetailsVisibilityMode.Collapsed)
-            {
-                dataGrid.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
-            
-            }
-
-           // btnAddActivity_Unchecked(sender, null);
-            Disable_Filters();
-        }
-
-        private void btnExpandHistory_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (dataGrid.RowDetailsVisibilityMode == DataGridRowDetailsVisibilityMode.VisibleWhenSelected)
-            {
-                dataGrid.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.Collapsed;
-                
-
-            }
-
-          //  btnAddActivity_Unchecked(sender, null);
-            if (m_IsActivePanelView)
-            {
-                Enable_Filters();
-            }
-        }
-
-        private void btnAddActivity_Unchecked(object sender, RoutedEventArgs e)
-        {
-           if (!m_IsActivePanelView)
-            {
-                Show_activeview_Panel();
-            }
-        }
-
         private void btnPanelAddActivity_Click(object sender, RoutedEventArgs e)
         {
             m_currentSelected_ActivityPair.Date = m_ActivityDateSelected;
             m_default_row_selected.ActivityList.Add(m_currentSelected_ActivityPair);
+           // m_dbContext.Activities.Local.Add(m_currentSelected_ActivityPair);
 
             //reflect activity last attended of attendee in default table row
             DefaultTableRow selectdefaultrow = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == m_default_row_selected.AttendeeId);
@@ -5678,9 +5540,13 @@ namespace CAOGAttendeeProject
             btnPanelAddActivity.IsEnabled = false;
             m_currentSelected_ActivityPair = null;
             m_activitychecked_count = 0;
-
+            txtSearch.IsEnabled = true;
             Display_ActivityList_in_Grid();
-            Display_DefaultTable_in_Grid();
+            if (txtSearch.Text == "")
+            {
+                Display_DefaultTable_in_Grid();
+            }
+            
         }
     }
 
