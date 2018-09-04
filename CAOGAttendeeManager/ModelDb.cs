@@ -184,6 +184,8 @@ namespace CAOGAttendeeProject
         public int ActivityPairId {get; set; }
         public int AttendeeId { get; set; }
 
+        public virtual Attendee Attendee { get; set;
+        }
         public string ActivityGroup { get; set; }
 
         public static bool operator!= (ActivityPair A, ActivityPair B)
@@ -196,10 +198,11 @@ namespace CAOGAttendeeProject
                     return true;
                 }
             }
-            else if (!(A is null) && B is null)
+            else if ( !(A is null) && (B is null) )
             {
                 return true;
             }
+         
                 return false;
 
         }
@@ -216,8 +219,12 @@ namespace CAOGAttendeeProject
 
                 }
             }
-            
-                return false;
+            else if ((A is null) && (B is null))
+            {
+                return true;
+            }
+
+            return false;
             
           
                 
@@ -365,7 +372,22 @@ namespace CAOGAttendeeProject
             }
 
         }
-        public string Activity { get; set; }
+        private string _activity = "";
+
+        public string Activity
+        {
+            get
+            {
+                return _activity;
+            }
+
+            set
+            {
+                _activity = value;
+                NotifyPropertyChanged("Activity");
+            }
+
+        }
 
         private ObservableCollection<ActivityPair> _activitylist = new ObservableCollection<ActivityPair>() { };
         private ObservableCollection<Attendance_Info> _attendancelist = new ObservableCollection<Attendance_Info>() { };
@@ -407,8 +429,24 @@ namespace CAOGAttendeeProject
 
 
         public string Church_Last_Attended { get; set; }
-      
-        public string Activity_Last_Attended { get; set; }
+
+        private string _activity_last_attended = "";
+        public string Activity_Last_Attended
+        {
+            get
+            {
+                return _activity_last_attended;
+            }
+
+            set
+            {
+
+
+                _activity_last_attended = value;
+                NotifyPropertyChanged("Activity_Last_Attended");
+
+            }
+        }
         public string ChurchStatus { get; set; }
 
         private string _phone = "";

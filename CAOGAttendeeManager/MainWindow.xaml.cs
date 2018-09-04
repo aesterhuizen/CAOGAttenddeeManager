@@ -262,7 +262,20 @@ namespace CAOGAttendeeProject
 
         private void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
-            Dispatcher.Invoke(Set_btnAddActivityState);
+            //Set_btnAddActivityState
+            Dispatcher.Invoke( () =>
+            {
+                if (m_activitychecked_count == 1 && (m_ActivityDateSelected != null && m_dateIsValid))
+                {
+                    btnPanelAddActivity.IsEnabled = true;
+                }
+                else
+                {
+                    btnPanelAddActivity.IsEnabled = false;
+                }
+
+
+            });
             
 
 
@@ -1455,6 +1468,7 @@ namespace CAOGAttendeeProject
             CalendarExpander.IsEnabled = false;
             ChurchStatusExpander.IsEnabled = false;
             ActivityExpander.IsEnabled = false;
+           
             //chkAttended.IsEnabled = false;
             //chkFollowup.IsEnabled = false;
             //chkResponded.IsEnabled = false;
@@ -1495,7 +1509,7 @@ namespace CAOGAttendeeProject
                 }
                 else if (m_alistView)
                 {
-                    m_DataSet.Tables["AttendeeListTable"].DefaultView.RowFilter = String.Empty;
+                    Display_AttendeeListTable_in_Grid();
 
                 }
              
@@ -1530,7 +1544,8 @@ namespace CAOGAttendeeProject
                 }
                 else if (m_alistView)
                 {
-                    m_DataSet.Tables["AttendeeListTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+                    var filteredAttendeeListTable = m_lstattendanceTableRows.Where(row => row.FirstLastName.Contains(text));
+                    dataGrid.DataContext = filteredAttendeeListTable;
                 }
               
 
@@ -1683,11 +1698,12 @@ namespace CAOGAttendeeProject
             m_isAttendedChecked = false;
             m_isQueryTableShown = false;
 
-            Cursor = Cursors.Wait;
-
-
-            BuildQuery_and_UpdateGrid();
-            Cursor = Cursors.Arrow;
+            if (!m_IsActivityPanelView)
+            {
+                Cursor = Cursors.Wait;
+                BuildQuery_and_UpdateGrid();
+                Cursor = Cursors.Arrow;
+            }
         }
 
         private void chkFollowup_Unchecked(object sender, RoutedEventArgs e)
@@ -1697,11 +1713,12 @@ namespace CAOGAttendeeProject
             m_isQueryTableShown = false;
 
 
-            Cursor = Cursors.Wait;
-
-            BuildQuery_and_UpdateGrid();
-            Cursor = Cursors.Arrow;
-
+            if (m_AttendanceView && !m_IsActivityPanelView)
+            {
+                Cursor = Cursors.Wait;
+                BuildQuery_and_UpdateGrid();
+                Cursor = Cursors.Arrow;
+            }
         }
 
         private void chkResponded_Unchecked(object sender, RoutedEventArgs e)
@@ -1710,8 +1727,13 @@ namespace CAOGAttendeeProject
             m_isRespondedChecked = false;
             m_isQueryTableShown = false;
 
-            BuildQuery_and_UpdateGrid();
-            Cursor = Cursors.Arrow;
+            if (m_AttendanceView && !m_IsActivityPanelView)
+            {
+                Cursor = Cursors.Wait;
+                BuildQuery_and_UpdateGrid();
+                Cursor = Cursors.Arrow;
+            }
+            
         }
 
 
@@ -1743,7 +1765,7 @@ namespace CAOGAttendeeProject
                         m_alistdateIsValid = true;
 
                         UpdateAttendeeListTableWithDateFilter();
-                        dataGrid.DataContext = m_DataSet.Tables["AttendeeListTable"];
+                   
 
                     }
 
@@ -2772,12 +2794,13 @@ namespace CAOGAttendeeProject
             if (m_alistView)
                 return;
 
-
-            Cursor = Cursors.Wait;
-
-            BuildQuery_and_UpdateGrid();
-
-            Cursor = Cursors.Arrow;
+            if (m_AttendanceView && !m_IsActivityPanelView)
+            {
+                Cursor = Cursors.Wait;
+                BuildQuery_and_UpdateGrid();
+                Cursor = Cursors.Arrow;
+            }
+            
 
         }
 
@@ -3453,12 +3476,16 @@ namespace CAOGAttendeeProject
         {
             m_isActivityFilterChecked = false;
             trvActivities.IsEnabled = false;
+            Cursor = Cursors.Wait;
+
             foreach (ActivityGroup group in trvActivities.ItemsSource)
             {
                 group.IsSelected = false;
             }
 
-            BuildQuery_and_UpdateGrid();
+            if (m_AttendanceView && !m_IsActivityPanelView)
+                BuildQuery_and_UpdateGrid();
+
             Cursor = Cursors.Arrow;
         }
 
@@ -3933,7 +3960,7 @@ namespace CAOGAttendeeProject
             if (m_AttendanceView)
             {
                 
-                if (m_currentSelected_ActivityTask != null)
+                if (m_currentSelected_ActivityPair != null)
                 {
                     strActivity = m_currentSelected_ActivityPair.ToString();
                 }
@@ -4590,7 +4617,10 @@ namespace CAOGAttendeeProject
                 m_lstQueryTableRows = querylinq.ToList();
             }
             else
-                dataGrid.DataContext = m_lstdefaultTableRows;
+            {
+                Display_DefaultTable_in_Grid();
+            }
+                
 
 
             Cursor = Cursors.Arrow;
@@ -4867,7 +4897,7 @@ namespace CAOGAttendeeProject
         private void LoadActivityPanelState()
         {
             txtSearch.IsEnabled = false;
-            chkActivityDateFilter.IsChecked = m_TabState.ActivityPanel_isActivityChecked;
+            chkActivityDateFilter.IsChecked = true;
             chkActivityDateFilter.IsChecked = true;
         }
         private void SaveActivityPanelState()
@@ -4896,24 +4926,26 @@ namespace CAOGAttendeeProject
         }
         private void LoadProspectPanelState()
         {
-           
 
-            txtSearch.Text = m_TabState.txtSearchProspectState;
-            chkChurchDateFilter.IsChecked = m_TabState.ProspectPanel_isFilterbyDateChecked;
+
+            txtSearch.Text = "";// m_TabState.txtSearchProspectState;
+            txtSearch.IsEnabled = true;
+            chkChurchDateFilter.IsChecked = false;// m_TabState.ProspectPanel_isFilterbyDateChecked;
         }
         private void LoadActivePanelState()
         {
 
 
 
-            txtSearch.Text = m_TabState.txtSearchActiveState;
-            chkAttended.IsChecked = m_TabState.ActivePanel_isAttendedChecked;
-            chkFollowup.IsChecked = m_TabState.ActivePanel_isFollowUpChecked;
-            chkResponded.IsChecked = m_TabState.ActivePanel_isRespondedChecked;
-            chkChurchDateFilter.IsChecked = m_TabState.ActivePanel_isFilterbyDateChecked;
-            chkActivityDateFilter.IsChecked = m_TabState.ActivePanel_isFilterbyActivityDateChecked;
-            chkActivityFilter.IsChecked = m_TabState.ActivePanel_isActivityChecked;
-            chkChurchStatusFilter.IsChecked = m_TabState.ActivePanel_isChurchStatusChecked;
+            txtSearch.Text = ""; //m_TabState.txtSearchActiveState;
+            txtSearch.IsEnabled = true;
+            chkAttended.IsChecked = false;//m_TabState.ActivePanel_isAttendedChecked;
+            chkFollowup.IsChecked = false;//m_TabState.ActivePanel_isFollowUpChecked;
+            chkResponded.IsChecked = false;//m_TabState.ActivePanel_isRespondedChecked;
+            chkChurchDateFilter.IsChecked = false;//m_TabState.ActivePanel_isFilterbyDateChecked;
+            chkActivityDateFilter.IsChecked = false;//m_TabState.ActivePanel_isFilterbyActivityDateChecked;
+            chkActivityFilter.IsChecked = false;//m_TabState.ActivePanel_isActivityChecked;
+            chkChurchStatusFilter.IsChecked = false;//m_TabState.ActivePanel_isChurchStatusChecked;
         }
         private void Show_activeview_Panel()
         {
@@ -5062,7 +5094,7 @@ namespace CAOGAttendeeProject
 
             if (m_alistView)
                 return;
-            else
+            else if (!m_IsActivityPanelView)
             {
 
                 Cursor = Cursors.Wait;
@@ -5101,10 +5133,13 @@ namespace CAOGAttendeeProject
             chkFollowup.IsEnabled = false;
             chkResponded.IsEnabled = false;
 
-
-            Cursor = Cursors.Wait;
-            BuildQuery_and_UpdateGrid();
-            Cursor = Cursors.Arrow;
+            if (m_AttendanceView && !m_IsActivityPanelView)
+            {
+                Cursor = Cursors.Wait;
+                BuildQuery_and_UpdateGrid();
+                Cursor = Cursors.Arrow;
+            }
+            
 
         }
 
@@ -5322,20 +5357,29 @@ namespace CAOGAttendeeProject
             {
                 dataGrid.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
                 Disable_Filters();
+               
+                // user was on the add activity page and clicked the expander button
+                if (m_IsActivityPanelView)
+                {
+                    LoadActivePanelState();
+
+                    Show_activeview_Panel();
+                }
+                txtSearch.IsEnabled = false;
             }
             else
             {
                 dataGrid.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.Collapsed;
-                Enable_Filters(); 
-              
-            }
+                Enable_Filters();
+                txtSearch.IsEnabled = true;
 
-            if (!m_IsActivePanelView)
-            {
-                Show_activeview_Panel();
+
             }
+            
+
+
         }
-     
+
 
         private void dataGrid_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
         {
@@ -5506,14 +5550,15 @@ namespace CAOGAttendeeProject
 
                 spFilterOptions.Children.Add(CalendarExpander);
                 spFilterOptions.Children.Add(ActivityExpander);
-
+                chkActivityFilter.IsChecked = true;
+                
                 txtblkTaskDescription.Text = "";
 
                 m_IsActivePanelView = false;
                 m_IsActivityPanelView = true;
                 m_IsPanelProspectView = false;
 
-                Enable_Filters();
+              // Enable_Filters();
           
 
 
@@ -5523,16 +5568,21 @@ namespace CAOGAttendeeProject
         private void btnPanelAddActivity_Click(object sender, RoutedEventArgs e)
         {
             m_currentSelected_ActivityPair.Date = m_ActivityDateSelected;
-            m_default_row_selected.ActivityList.Add(m_currentSelected_ActivityPair);
-           // m_dbContext.Activities.Local.Add(m_currentSelected_ActivityPair);
+             // Updating the dbcontext automatically update the m_default_row_selected activitylist!
+             m_dbContext.Activities.Local.Add(m_currentSelected_ActivityPair);
 
-            //reflect activity last attended of attendee in default table row
-            DefaultTableRow selectdefaultrow = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == m_default_row_selected.AttendeeId);
-            //get last activity record
-            ActivityPair lastActivityRec = selectdefaultrow.ActivityList.OrderByDescending(rec => rec.Date).ToList().FirstOrDefault();
+            if (!m_default_row_selected.ActivityList.Contains(m_currentSelected_ActivityPair) )
+            {
+                m_default_row_selected.ActivityList.Add(m_currentSelected_ActivityPair);
+            }
+            ////get last activity record
+            //ActivityPair lastActivityRec = m_default_row_selected.ActivityList.OrderByDescending(rec => rec.Date).ToList().FirstOrDefault();
+
             //display last activity in Default Table
-            selectdefaultrow.Activity = lastActivityRec.ToString();
-            selectdefaultrow.Activity_Last_Attended = lastActivityRec.DateString;
+            m_default_row_selected.Activity = m_currentSelected_ActivityPair.ToString();
+                m_default_row_selected.Activity_Last_Attended = m_currentSelected_ActivityPair.DateString;
+           
+
 
             ClearTreeView();
             //DateCalendar.DisplayDate
@@ -5542,10 +5592,10 @@ namespace CAOGAttendeeProject
             m_activitychecked_count = 0;
             txtSearch.IsEnabled = true;
             Display_ActivityList_in_Grid();
-            if (txtSearch.Text == "")
-            {
-                Display_DefaultTable_in_Grid();
-            }
+            //if (txtSearch.Text == "")
+            //{
+            //    Display_DefaultTable_in_Grid();
+            //}
             
         }
     }
