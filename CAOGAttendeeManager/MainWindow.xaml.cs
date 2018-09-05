@@ -3506,14 +3506,17 @@ namespace CAOGAttendeeProject
             m_ActivityName = checkbox.Content.ToString();
 
 
-            if (m_AttendanceView && m_IsActivePanelView)
-            {
-                Do_treeview_ActiveView();
-            }
-           else if (m_IsActivityPanelView && m_AttendanceView)
-            {
-                Do_treeview_ActivityView();
-            }
+          
+                if (m_AttendanceView && m_IsActivePanelView)
+                {
+                    Do_treeview_ActiveView();
+                }
+                else if (m_IsActivityPanelView && m_AttendanceView)
+                {
+                    Do_treeview_ActivityView();
+                }
+
+        
 
 
         }
@@ -3664,7 +3667,10 @@ namespace CAOGAttendeeProject
         private void Do_treeview_ActiveView()
         {
 
+            m_parent_taskId = 0;
+            m_child_taskId = 0;
 
+            
 
             foreach (ActivityGroup activity_group in m_lstActivities)
             {
@@ -3672,34 +3678,39 @@ namespace CAOGAttendeeProject
                 {
 
 
+
+
                     if (task.lstsubTasks.Count != 0) // task has children
                     {
-                      
+
                         foreach (ActivityTask subtask in task.lstsubTasks)
                         {
-                         
+
+
+                            // if user selected child node
                             if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected)
                             {
+                                m_activitychecked_count++;
+
                                 ActivityPair selectedActivity = new ActivityPair
                                 {
                                     ActivityGroup = activity_group.ActivityName,
-                                    ActivityPairId = subtask.ActivityId,
+                                    AttendeeId = 0,
                                     ParentTaskName = task.TaskName,
                                     ChildTaskName = subtask.TaskName
                                 };
-
-                                ActivityTask mytask = new ActivityTask { ActivityId = task.ActivityId };
+                               
                                 m_child_taskId = subtask.ActivityId;
                                 m_parent_taskId = task.ActivityId;
 
                                 m_currentSelected_ActivityPair = selectedActivity;
-                                m_currentSelected_ActivityTask = mytask;
+                               
+
 
                                 if (m_activitychecked_count == 1)
                                 {
-                                    m_previousSelected_ActivityTask = m_currentSelected_ActivityTask;
+                                    m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
                                 }
-
 
                                 txtblkTaskDescription.Text = subtask.Description;
                                 task.IsSelected = true; //check parent
@@ -3707,48 +3718,55 @@ namespace CAOGAttendeeProject
                                 break;
                             }
 
+
+
+
                         }
                     }
                     else if (task.lstsubTasks.Count == 0) // task has no children
                     {
-          
+
 
                         if ((m_ActivityName == task.TaskName) && task.IsSelected)
                         {
+                            m_activitychecked_count++;
                             ActivityPair selectedActivity = new ActivityPair
                             {
                                 ActivityGroup = activity_group.ActivityName,
-                                ActivityPairId = task.ActivityId,
+                                AttendeeId = 0,
                                 ParentTaskName = task.TaskName,
                                 ChildTaskName = "n/a"
                             };
-                            ActivityTask mytask = new ActivityTask { ActivityId = task.ActivityId };
-
                             m_parent_taskId = task.ActivityId;
 
                             m_currentSelected_ActivityPair = selectedActivity;
-                            m_currentSelected_ActivityTask = mytask;
+                         
 
                             if (m_activitychecked_count == 1)
                             {
-                                m_previousSelected_ActivityTask = m_currentSelected_ActivityTask;
+                                m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
+
                             }
 
                             txtblkTaskDescription.Text = task.Description;
                             break;
                         }
 
-                            
+
 
                     }
                     else { }
 
-                  
+
                 }
             }
-           
+
+
             m_activitychecked_count = 1;
             ClearTreeViewCheckboxes_except_clickedOne(m_child_taskId, m_parent_taskId);
+            m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
+
+
             BuildQuery_and_UpdateGrid();
            
         }
@@ -4627,132 +4645,16 @@ namespace CAOGAttendeeProject
         }
         private void ActivityTreeView_Checkbox_UnChecked(object sender, RoutedEventArgs e)
         {
-            //m_isActivityChecked = false;
-            //var checkbox = sender as CheckBox;
-            //m_ActivityName = checkbox.Content.ToString();
+            m_isActivityChecked = false;
+            if (m_currentSelected_ActivityPair != null)
+            {
+                ClearTreeView();
+                m_currentSelected_ActivityPair = null;
 
+                BuildQuery_and_UpdateGrid();
+            }
+            
 
-
-            //if (m_AttendanceView)
-            //{
-            //    foreach (ActivityGroup activity_group in m_lstActivities)
-            //    {
-            //        foreach (ActivityTask task in activity_group.lstActivityTasks)
-            //        {
-
-
-            //            if (task.lstsubTasks.Count != 0) // task has children
-            //            {
-            //                foreach (ActivityTask subtask in task.lstsubTasks)
-            //                {
-
-
-            //                    if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected)
-            //                    {
-
-            //                        BuildQuery_and_UpdateGrid();
-
-            //                        txtblkTaskDescription.Text = subtask.Description;
-            //                        task.IsSelected = true; //check parent
-            //                        break;
-            //                    }
-
-            //                }
-            //            }
-            //            else if ((m_ActivityName == task.TaskName) && task.IsSelected)
-            //            {
-            //                BuildQuery_and_UpdateGrid();
-            //                txtblkTaskDescription.Text = task.Description;
-
-            //                break;
-
-            //            }
-            //        }
-            //    }
-            //}
-            //else if (m_activityView)
-            //{
-               // m_activity_row_select = (List<ActivityTableRow>)dataGrid_activity.SelectedItems;
-               //FIX ME
-                //if (m_activity_row_select.AttendeeId != m_old_activityRow_attendeeId)
-                //{
-
-
-                   
-
-
-                    //if (m_activity_row_selected != null)
-                    //{
-
-
-                    //    int attendeeid = m_activity_row_selected.AttendeeId;
-
-
-                    //    foreach (ActivityGroup activity_group in m_lstActivities)
-                    //    {
-                    //        foreach (ActivityTask task in activity_group.lstActivityTasks)
-                    //        {
-
-
-                    //            if (task.lstsubTasks.Count != 0) // task has children
-                    //            {
-                    //                foreach (ActivityTask subtask in task.lstsubTasks)
-                    //                {
-
-                    //                    if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected == false)
-                    //                    {
-                    //                        task.IsSelected = false; //check parent
-                    //                        int parentId = task.ActivityId;
-                    //                        int childId = subtask.ActivityId;
-
-                    //                            ActivityPair ap = new ActivityPair() { };
-                    //                            ap.AttendeeId = attendeeid;
-                    //                            ap.ActivityGroup = activity_group.ActivityName;
-                    //                            ap.ChildTaskName = subtask.TaskName;
-                    //                            ap.ParentTaskName = task.TaskName;
-
-                    //                    RemoveActivity_from_ActivityTableRowAttendeeActivityList(ref ap);
-
-
-                    //                        // UpdateActivityFromLookUpTable(attendeeId, task.TaskName, subtask.TaskName);
-
-                    //                        txtblkTaskDescription.Text = subtask.Description;
-
-
-                    //                        break;
-                    //                    }
-
-                    //                }
-                    //            }
-                    //            else if ((m_ActivityName == task.TaskName) && task.IsSelected == false)
-                    //            {
-                    //                int parentId = task.ActivityId;
-                    //                int childId = task.ActivityId;
-
-                    //                //  DeleteActivityFromLookUpTable(attendeeId, parentId, childId);
-
-                    //                // UpdateActivityFromLookUpTable(attendeeId, task.TaskName, "");
-                    //                txtblkTaskDescription.Text = task.Description;
-
-                    //                break;
-
-                    //            }
-                    //        }
-                    //        // }
-                    //    }
-
-                    //}
-                    //else
-                    //{
-                    //    MessageBox.Show("Must select at least one row", "Must select row...", MessageBoxButton.OK, MessageBoxImage.Error);
-                    //}
-
-                //}
-                //else
-                //{
-                //    // Do Nothing uncheck is evoked by user selecting a different row
-                //}
-          //  }
 
         }
 

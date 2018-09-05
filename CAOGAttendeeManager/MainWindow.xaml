@@ -216,7 +216,8 @@
 
                                     <HierarchicalDataTemplate DataType="{x:Type local:ActivityTask }" ItemsSource="{Binding lstsubTasks}">
                                         <StackPanel Orientation="Horizontal">
-                                            <CheckBox  Name="chkActivity" Content="{Binding TaskName}" Margin="5,0,0,0" Checked="ActivityTreeView_Checkbox_Checked" 
+                                            <CheckBox  Name="chkActivity" Content="{Binding TaskName}" Margin="5,0,0,0" Checked="ActivityTreeView_Checkbox_Checked"
+                                                       Unchecked="ActivityTreeView_Checkbox_UnChecked"
                                                       IsChecked="{Binding IsSelected}" />
                                         </StackPanel>
                                     </HierarchicalDataTemplate>
