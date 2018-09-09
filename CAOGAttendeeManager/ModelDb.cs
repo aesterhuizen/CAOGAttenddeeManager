@@ -39,8 +39,8 @@ namespace CAOGAttendeeProject
 
         public Attendee()
         {
-            AttendanceList = new ObservableCollection<Attendance_Info>() { };
-            ActivityList = new ObservableCollection<ActivityPair>() { };
+            AttendanceList = new List<Attendance_Info>() { };
+            ActivityList = new List<ActivityPair>() { };
 
         }
         public int AttendeeId { get; set; }
@@ -115,15 +115,15 @@ namespace CAOGAttendeeProject
                 {
                     _email = value;
                 }
-                NotifyPropertyChanged("Email");
+              //  NotifyPropertyChanged("Email");
 
             }
         }
 
-        public virtual ObservableCollection<Attendance_Info> AttendanceList { get; private set; }
-        public virtual ObservableCollection<ActivityPair> ActivityList { get; private set; }
+        public virtual IList<Attendance_Info> AttendanceList { get; private set; } 
+        public virtual IList<ActivityPair> ActivityList { get; private set; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -140,9 +140,7 @@ namespace CAOGAttendeeProject
 
 
 
-        // public event PropertyChangedEventHandler PropertyChanged;
-        //  public static readonly DependencyProperty DateProperty = DependencyProperty.Register("Date", typeof(DateTime), typeof(DateTime));
-
+     
         public string DateString { get; private set; }
         private DateTime _date;
         public DateTime Date
@@ -184,8 +182,7 @@ namespace CAOGAttendeeProject
         public int ActivityPairId {get; set; }
         public int AttendeeId { get; set; }
 
-        public virtual Attendee Attendee { get; set;
-        }
+        public virtual Attendee Attendee { get; set;}
         public string ActivityGroup { get; set; }
 
         public static bool operator!= (ActivityPair A, ActivityPair B)
@@ -326,11 +323,12 @@ namespace CAOGAttendeeProject
     {
 
 
-        // public virtual Attendee ChurchAttendee { get; set; }
+      
 
         public DefaultTableRow()
         {
-            ActivityList = new ObservableCollection<ActivityPair>() { };
+            AttendanceList = new List<Attendance_Info>() { };
+            ActivityList = new List<ActivityPair>() { };
 
         }
         public int AttendeeId { get; set; }
@@ -389,41 +387,9 @@ namespace CAOGAttendeeProject
 
         }
 
-        private ObservableCollection<ActivityPair> _activitylist = new ObservableCollection<ActivityPair>() { };
-        private ObservableCollection<Attendance_Info> _attendancelist = new ObservableCollection<Attendance_Info>() { };
+        public virtual IList<ActivityPair> ActivityList { get; set; }
 
-        public ObservableCollection<ActivityPair> ActivityList
-        {
-            get
-            {
-                return _activitylist;
-            }
-
-            set
-            {
-
-
-                _activitylist = value;
-                NotifyPropertyChanged("ActivityList");
-
-            }
-        }
-        public ObservableCollection<Attendance_Info> AttendanceList
-        {
-            get
-            {
-                return _attendancelist;
-            }
-
-            set
-            {
-
-
-                _attendancelist = value;
-                NotifyPropertyChanged("AttendanceList");
-
-            }
-        }
+        public virtual IList<Attendance_Info> AttendanceList { get; set; }
 
         //public string DateString { get; private set; }
 
@@ -443,7 +409,7 @@ namespace CAOGAttendeeProject
 
 
                 _activity_last_attended = value;
-                NotifyPropertyChanged("Activity_Last_Attended");
+              //  NotifyPropertyChanged("Activity_Last_Attended");
 
             }
         }
@@ -550,59 +516,9 @@ namespace CAOGAttendeeProject
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        //public int CompareTo(AttendanceTableRow other)
-        //{
-        //    return LastName.CompareTo(other.LastName);
-        //}
+       
     }
-    public class ActivityTableRow : IComparable<ActivityTableRow>, INotifyPropertyChanged
-    {
-
-        public ActivityTableRow()
-        {
-            ActivityList = new ObservableCollection<ActivityPair>() { };
-           
-        }
-        public int AttendeeId { get; set; }
-        
-        public string FirstLastName { get; set; }
-        public string LastName { get; set; }
-        public string FirstName { get; set; }
-
-
-
-        private ObservableCollection<ActivityPair> _activitylist = new ObservableCollection<ActivityPair>() { };
-
-        public ObservableCollection<ActivityPair> ActivityList
-        {
-            get
-            {
-                return _activitylist;
-            }
-
-            set
-            {
-
-
-                _activitylist = value;
-                NotifyPropertyChanged("ActivityList");
-
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void NotifyPropertyChanged(string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public int CompareTo(ActivityTableRow other)
-        {
-            return LastName.CompareTo(other.LastName);
-        }
-
-    }
+  
 
     public class ActivityRecord
     {
@@ -682,7 +598,7 @@ namespace CAOGAttendeeProject
     {
         public ActivityGroup()
         {
-            this.lstActivityTasks = new ObservableCollection<ActivityTask>();
+            lstActivityTasks = new ObservableCollection<ActivityTask>();
         }
 
         public string Parent {get; set;}
@@ -727,28 +643,7 @@ namespace CAOGAttendeeProject
         public string Description { get; set; }
         private bool _IsSelected = false;
 
-        //public override string ToString()
-        //{
-        //    if (Task == "" && ChildTaskName == "")
-        //    {
-        //        return "n/a";
-        //    }
-        //    else if (ChildTaskName == "")
-        //    {
-
-        //        return ActivityGroup + "->" + ParentTaskName;
-        //    }
-        //    else if (ParentTaskName != "" && ChildTaskName != "")
-        //    {
-        //        return ActivityGroup + "->" + ParentTaskName + "->" + ChildTaskName;
-        //    }
-        //    else
-        //    {
-        //        return "n/a";
-        //    }
-
-
-        //}
+       
         public event PropertyChangedEventHandler PropertyChanged;
 
         #region INotifyPropertyChanged Members

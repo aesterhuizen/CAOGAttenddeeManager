@@ -148,7 +148,7 @@ namespace CAOGAttendeeProject
        
         
         // current selected row in the data tables
-        private ActivityTableRow m_activity_row_selected;
+     
         private DefaultTableRow m_default_row_selected;
         private AttendanceTableRow m_attendance_row_selected;
       
@@ -158,8 +158,6 @@ namespace CAOGAttendeeProject
 
         //List of query rows
         private List<DefaultTableRow> m_lstQueryTableRows = new List<DefaultTableRow>() { };
-        //list of activity Rows
-        private List<ActivityTableRow> m_lstactivityTableRows = new List<ActivityTableRow>() { };
         //List of default Table rows
         private List<DefaultTableRow> m_lstdefaultTableRows = new List<DefaultTableRow>() { };
 
@@ -714,8 +712,8 @@ namespace CAOGAttendeeProject
                             m_dbContext.Attendance_Info.Add(newfollowUpRecord);
                         }
                         //re-initialize table with new added information
-                        InitDataSet();
-                        Display_DefaultTable_in_Grid();
+                       // InitDataSet();
+                      //  Display_DefaultTable_in_Grid();
                     }
                     // }
                 } //end if
@@ -1091,13 +1089,6 @@ namespace CAOGAttendeeProject
 
         } // end sub
 
-        private void Display_ActivityTable_in_Grid()
-        {
-           
-
-            //dataGrid_activity.DataContext = m_lstactivityTableRows;
-           // dataGrid_activity.Items.Refresh();
-        }
         private void Display_AttendeeListTable_in_Grid()
         {
 
@@ -1119,15 +1110,13 @@ namespace CAOGAttendeeProject
         private void Display_DefaultTable_in_Grid()
         {
 
-            //  m_lstdefaultTableRows.Sort();
-            //   dataGrid.ItemsSource = m_lstdefaultTableRows;
-            
-            dataGrid.DataContext = m_lstdefaultTableRows.OrderBy(rec => rec.LastName); 
-            dataGrid.Items.Refresh();
+           
+            dataGrid.DataContext = m_lstdefaultTableRows.OrderBy(rec => rec.LastName).ToList(); 
+           dataGrid.Items.Refresh();
 
 
 
-        } // end  private void Display_Database_in_Grid()
+        } 
 
      
 
@@ -1139,13 +1128,7 @@ namespace CAOGAttendeeProject
             m_dbContext.Activities.Load();
 
 
-            //--------------------- Make DEFAULT TABLE---------------------------------------------------------------------------
-
-
-            //DataTable Default_Data_Table = new DataTable("DefaultTable");
-            //DataTable AttendeeListTable = new DataTable("AttendeeListTable");
-           // DataTable ActivityTable = new DataTable("ActivityTable");
-
+          
             string date = "Date Not Valid";
 
 
@@ -1176,6 +1159,7 @@ namespace CAOGAttendeeProject
                     //----Construct AttendeeLisTable-------------------------------------------------------------------------------------
                     
                     // fill Attendance table columns. Add to list for each row
+               
                     m_lstattendanceTableRows.Add(new AttendanceTableRow()
                     {
                         AttendeeId = AttendeeRec.AttendeeId,
@@ -1291,9 +1275,8 @@ namespace CAOGAttendeeProject
 
                     if (DefaultTabledr.AttendeeId != 0)
                         m_lstdefaultTableRows.Add(DefaultTabledr);
-                 
-                 
 
+                   
                 } // end foreach
 
               
@@ -2060,13 +2043,14 @@ namespace CAOGAttendeeProject
 
         private void dataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
-           
-            var selectedItems = sender as DataGrid;
-           
+         
+            
+            var grid = sender as DataGrid;
 
-            if (selectedItems.SelectedItem != null)
+          
+            if (grid.SelectedItem != null)
             {
-                m_default_row_selected = (DefaultTableRow)selectedItems.SelectedItem;
+                m_default_row_selected = (DefaultTableRow)grid.SelectedItem;
                
             }
 
@@ -2773,17 +2757,40 @@ namespace CAOGAttendeeProject
             // attendance_InfoViewSource.Source = [generic data source]
         }
 
-        private void CopyDataGridtoClipboard(object sender, DataGridRowClipboardEventArgs e)
+        private void columnHeaderClick(object sender, RoutedEventArgs e)
         {
+            var columnHeader = sender as DataGridColumnHeader;
 
-            var selectedcells = sender as DataGrid;
-            var currentCell = e.ClipboardRowContent[dataGrid.CurrentCell.Column.DisplayIndex - 1];
-            e.ClipboardRowContent.Add(currentCell);
-            if (e.ClipboardRowContent.Count > 3)
+           
+
+
+
+            if (columnHeader != null)
             {
-                e.ClipboardRowContent.RemoveAt(4);
+
+              
+                if (!Keyboard.IsKeyDown(Key.LeftCtrl))
+                {
+                    dataGrid.SelectedCells.Clear();
+                }
+
+                foreach (var item in dataGrid.Items)
+                {
+                    dataGrid.SelectedCells.Add(new DataGridCellInfo(item, columnHeader.Column));
+                }
             }
 
+        }
+
+        private void CopyDataGridtoClipboard(object sender, DataGridRowClipboardEventArgs e)
+        {
+            var grid = sender as DataGrid;
+            // e.ClipboardRowContent.Clear();
+            //e.ClipboardRowContent.Add(new DataGridClipboardCellContent(e.Item, grid.Columns[grid.CurrentColumn.DisplayIndex -1], ((DefaultTableRow)grid.CurrentItem).ToString()));
+            //if (e.ClipboardRowContent.Count > 3)
+            //{
+            //    e.ClipboardRowContent.RemoveAt(4);
+            //}
 
         }
 
@@ -3391,7 +3398,23 @@ namespace CAOGAttendeeProject
 
         private void btnCopy_Click(object sender, RoutedEventArgs e)
         {
+            //var selectedcells = dataGrid.SelectedCells;
 
+           
+            //DataGridRowClipboardEventArgs dataRowcellContent = new DataGridRowClipboardEventArgs(dataGrid, 2, 5, true);
+
+            //CopyDataGridtoClipboard(dataGrid, dataRowcellContent);
+
+            //DataGridCellClipboardEventArgs cells_to_copy = new DataGridCellClipboardEventArgs(dataGrid, dataGrid.CurrentColumn, dataGrid.CurrentItem);
+            
+            //DataGridClipboardCellContent cellContent = new DataGridClipboardCellContent(dataGrid.CurrentItem, dataGrid.CurrentColumn, dataGrid.CurrentItem.ToString());
+
+            // dataRowcellContent.ClipboardRowContent.Add(cellContent);
+           
+            //if (e.ClipboardRowContent.Count > 3)
+            //{
+            //    e.ClipboardRowContent.RemoveAt(4);
+            //}
             // DataGridCellClipboardEventArgs clip = new DataGridCellClipboardEventArgs()
             // CopyDataGridtoClipboard(dataGrid, );
         }
@@ -3669,197 +3692,7 @@ namespace CAOGAttendeeProject
             BuildQuery_and_UpdateGrid();
            
         }
-        //private void Do_treeview_CheckedActivity()
-        //{
-
-        //    // check if we have a activity pair selected
-
-
-
-           
-        //        int attendeeId = m_activity_row_selected.AttendeeId;
-
-        
-        //        // if cell already contain activity that is being selected then do not update the table, this function was called from an indirect selection
-        //        // only reflect activity status
-
-
-        //        foreach (ActivityGroup activity_group in m_lstActivities)
-        //        {
-        //            foreach (ActivityTask task in activity_group.lstActivityTasks)
-        //            {
-
-
-        //                if (task.lstsubTasks.Count != 0) // task has children
-        //                {
-        //                    foreach (ActivityTask subtask in task.lstsubTasks)
-        //                    {
-
-        //                        if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected)
-        //                        {
-        //                            task.IsSelected = true; //check parent
-        //                        string activityName = activity_group.ActivityName;
-        //                        string ParentName = task.TaskName;
-        //                        string ChildName = subtask.TaskName;
-
-        //                            m_activitychecked_count++;
-
-
-
-
-        //                        /* Check if selected activity is already in the attendee list
-        //                         * If already in list, display a message box telling user the activity is already in the list
-        //                         * and he should select a date to update the activity
-        //                         */
-
-        //                        var qActivityIsInList = m_activity_row_selected.ActivityList.SingleOrDefault(apair => apair.AttendeeId == m_activity_row_selected.AttendeeId &&
-        //                                                                                                   apair.ActivityGroup == activityName &&
-        //                                                                                                   apair.ParentTaskName == ParentName &&
-        //                                                                                                   apair.ChildTaskName == ChildName);
-                                                         
-                              
-
-        //                        // activity not in list, add new activity to list
-        //                        if (qActivityIsInList == null)
-        //                        {
-        //                            ActivityPair nap = new ActivityPair() { };
-        //                            nap.AttendeeId = m_activity_row_selected.AttendeeId;
-        //                            nap.ActivityGroup = activityName;
-        //                            nap.ParentTaskName = ParentName;
-        //                            nap.ChildTaskName = ChildName;
-
-        //                            // add activity to activitylist for activityTableRow
-        //                            m_activity_row_selected.ActivityList.Add(nap);
-        //                            // Add activity to DefaultTableRow
-        //                            DefaultTableRow selectdefaultrow = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == attendeeId);
-        //                            selectdefaultrow.ActivityList.Add(nap);
-
-        //                            //reflect activity last attended of attendee in default table row
-
-        //                            if (selectdefaultrow.ActivityList.Any() )
-        //                            {
-        //                                ActivityPair lastActivityRec = selectdefaultrow.ActivityList.OrderByDescending(rec => rec.Date).ToList().FirstOrDefault();
-        //                                selectdefaultrow.Activity = lastActivityRec.ToString();
-                                        
-
-        //                            }
-                              
-        //                        }
-        //                        /*Activity in list*/
-        //                        else
-        //                        {
-        //                            MessageBox.Show("Activity already in list, please select an activity date to update the activity", "Activity already exist", MessageBoxButton.OK, MessageBoxImage.Exclamation);    
-        //                        }
-                                
-
-                             
-                             
-                             
-                                    
-                               
-                               
-        //                            txtblkTaskDescription.Text = subtask.Description;
-
-
-        //                            break;
-        //                        }
-
-        //                    }
-        //                }
-        //                else if ((m_ActivityName == task.TaskName) && task.IsSelected)
-        //                {
-                            
-        //                    task.IsSelected = true;
-        //                        string activityName = activity_group.ActivityName;
-        //                        string ParentName = task.TaskName;
-                                
-
-        //                     m_activitychecked_count++;
-
-        //                /* Check if selected activity is already in the attendee list
-        //                   * If already in list, only update date, if not in list create and add a new activity to the list
-        //                   */
-
-        //                var qActivityIsInList = m_activity_row_selected.ActivityList.SingleOrDefault(apair => apair.AttendeeId == m_activity_row_selected.AttendeeId &&
-        //                                                                                           apair.ActivityGroup == activityName &&
-        //                                                                                           apair.ParentTaskName == ParentName);
-
-
-
-        //                // activity not in list, add new activity to list
-        //                if (qActivityIsInList == null)
-        //                {
-        //                    ActivityPair nap = new ActivityPair() { };
-        //                    nap.AttendeeId = m_activity_row_selected.AttendeeId;
-        //                    nap.ActivityGroup = activityName;
-        //                    nap.ParentTaskName = ParentName;
-
-
-        //                    // activity automatically gets added to m_dbcontext.activities withth new activity!
-        //                    m_activity_row_selected.ActivityList.Add(nap);
-        //                    //reflect activity list of attendee in default table row
-        //                    var selectdefaultrow = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == attendeeId);
-        //                    selectdefaultrow.ActivityList = m_activity_row_selected.ActivityList;
-        //                }
-        //                /*Activity in list*/
-        //                else
-        //                {
-        //                    MessageBox.Show("Activity already in list, please select an activity date to update the activity", "Activity already exist", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-        //                }
-
-
-
-
-
-        //                txtblkTaskDescription.Text = task.Description;
-
-        //                    break;
-
-        //                }
-        //            }
-        //        }
-            
-        //}
-
-      
-      
-           
-
-      
-
-        private void RemoveActivity_from_ActivityTableRowAttendeeActivityList(ref ActivityPair ap)
-        {
-
-            List<int> idx = new List<int> { };
-
-            int i = 0;
-           
-
-
-                foreach (ActivityPair activity in m_activity_row_selected.ActivityList)
-                {
-                    if (activity.AttendeeId == ap.AttendeeId &&
-                        activity.ActivityGroup == ap.ActivityGroup &&
-                        activity.ParentTaskName == ap.ParentTaskName &&
-                        activity.ChildTaskName == ap.ChildTaskName)
-                    {
-                        idx.Add(m_activity_row_selected.ActivityList.IndexOf(activity) );
-                        
-                    }
-                    
-                }
-
-                foreach (int idxx in idx)
-                {
-                    m_activity_row_selected.ActivityList.RemoveAt(idxx);
-                }
-                
-           
-        }
-
-
-      
-
+     
 
         private void BuildQuery_and_UpdateGrid()
         {
@@ -4948,23 +4781,6 @@ namespace CAOGAttendeeProject
 
         }
 
-        private void dataGrid_activity_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
-        {
-            
-            var selectedItems = sender as DataGrid;
-
-            if (selectedItems.SelectedItem != null)
-            {
-                m_activity_row_selected = (ActivityTableRow)selectedItems.SelectedItem;
-              
-            }
-
-
-            ClearTreeView();
-         
-        }
-
-
         private void ClearTreeView()
         {
 
@@ -5137,27 +4953,12 @@ namespace CAOGAttendeeProject
             }
             
         }
-        private void GrdAttendee_InfoList_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
-        {
-
-        }
-
-        private void GrdAttendee_InfoList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-
-        private void GrdAttendee_ActivityList_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
-        {
-
-        }
-
-     
+          
 
         private void btnExpandHistory_Click(object sender, RoutedEventArgs e)
         {
                       
-
+            
             if (dataGrid.RowDetailsVisibilityMode == DataGridRowDetailsVisibilityMode.Collapsed)
             {
                 dataGrid.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
@@ -5180,8 +4981,8 @@ namespace CAOGAttendeeProject
 
 
             }
-            
 
+         
 
         }
 
@@ -5425,6 +5226,8 @@ namespace CAOGAttendeeProject
             
             Cursor = Cursors.Arrow;
         }
+
+      
     }
 
 }

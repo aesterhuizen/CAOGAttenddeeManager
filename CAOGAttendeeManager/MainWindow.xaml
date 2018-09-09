@@ -247,7 +247,7 @@
                             </Style>
 
                             
-                            
+
 
                         </Grid.Resources>
                         <DataGrid x:Name="dataGrid"
@@ -258,12 +258,21 @@
                                 CanUserAddRows="False" 
                                 CanUserDeleteRows="False"
                                 CanUserReorderColumns="False"
+                                CanUserSortColumns="True"
+                               
                                 CanUserResizeColumns="True"
                                 ClipboardCopyMode="IncludeHeader"
                                 SelectedCellsChanged="dataGrid_SelectedCellsChanged"
-                                ColumnWidth="120" 
+                                ColumnWidth="120"
                                 CanUserResizeRows="False" 
                                 ItemsSource="{Binding}">
+                            <!--<DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <EventSetter Event="Click" Handler="columnHeaderClick"/>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>-->
+                        
+
 
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
@@ -307,7 +316,7 @@
                                 <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}"/>
                                 <DataGridTextColumn Header="Church Last Attended" Binding="{Binding Church_Last_Attended}" Width="130"/>
                                 <DataGridTextColumn Header="Status" Binding="{Binding ChurchStatus}" Width="60"/>
-                                <DataGridTextColumn Header="Activity" Width="100" Binding="{Binding Activity}" ToolTipService.ToolTip="Hellp"/>
+                                <DataGridTextColumn Header="Activity" Width="100" Binding="{Binding Activity}"/>
                                 <DataGridTextColumn Header="Activity Last Attended" Binding="{Binding Activity_Last_Attended}"/>
                                 <DataGridTextColumn Header="Phone" Binding="{Binding Phone}"/>
                                 <DataGridTextColumn Header="Email" Binding="{Binding Email}"/>
@@ -336,7 +345,6 @@
                                                         AutoGenerateColumns="False"
                                                         SelectionMode="Extended"
                                                         CanUserDeleteRows="False"
-                                                        SelectedCellsChanged="GrdAttendee_InfoList_SelectedCellsChanged"
                                                         IsReadOnly="True">
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
@@ -353,7 +361,6 @@
                                                         AutoGenerateColumns="False"
                                                         SelectionMode="Extended"
                                                         CanUserDeleteRows="False"
-                                                        SelectedCellsChanged="GrdAttendee_ActivityList_SelectedCellsChanged"
                                                         IsReadOnly="True">
 
                                             <DataGrid.Columns>
@@ -404,7 +411,8 @@
                                   CanUserReorderColumns="False"
                                   ClipboardCopyMode="IncludeHeader"
                                   ColumnWidth="120" 
-                                  CanUserResizeRows="False">
+                                  CanUserResizeRows="False"
+                                  IsReadOnly="True">
 
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}" />
