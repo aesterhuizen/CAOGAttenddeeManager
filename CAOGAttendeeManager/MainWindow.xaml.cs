@@ -1113,7 +1113,8 @@ namespace CAOGAttendeeProject
            
             dataGrid.DataContext = m_lstdefaultTableRows.OrderBy(rec => rec.LastName).ToList(); 
            dataGrid.Items.Refresh();
-
+            m_isQueryTableShown = false;
+            btnDelete.IsEnabled = true;
 
 
         } 
@@ -1351,7 +1352,7 @@ namespace CAOGAttendeeProject
             CalendarExpander.IsEnabled = false;
             ChurchStatusExpander.IsEnabled = false;
             ActivityExpander.IsEnabled = false;
-           
+          
             //chkAttended.IsEnabled = false;
             //chkFollowup.IsEnabled = false;
             //chkResponded.IsEnabled = false;
@@ -1370,7 +1371,7 @@ namespace CAOGAttendeeProject
             if (txtSearch.Text == "")
             {
                 Enable_Filters();
-                btnDelete.IsEnabled = true;
+                
 
                 if (m_isFilterByDateChecked || m_isActivityfilterByDateChecked)
                     DateCalendar.IsEnabled = true;
@@ -1404,7 +1405,7 @@ namespace CAOGAttendeeProject
             {
                 Disable_Filters();
                 DateCalendar.IsEnabled = false;
-                btnDelete.IsEnabled = false;
+               
 
                 string text = txtSearch.Text.ToUpper();
 
@@ -2624,8 +2625,7 @@ namespace CAOGAttendeeProject
             CalendarExpander.IsEnabled = true;
             ChurchStatusExpander.IsEnabled = true;
             ActivityExpander.IsEnabled = true;
-           
-
+          
 
         }
 
@@ -3709,7 +3709,9 @@ namespace CAOGAttendeeProject
 
             if (m_AttendanceView)
             {
-                
+                if (m_isQueryTableShown)
+                    btnDelete.IsEnabled = false;
+
                 if (m_currentSelected_ActivityPair != null)
                 {
                     strActivity = m_currentSelected_ActivityPair.ToString();

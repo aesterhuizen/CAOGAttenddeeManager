@@ -39,8 +39,8 @@ namespace CAOGAttendeeProject
 
         public Attendee()
         {
-            AttendanceList = new List<Attendance_Info>() { };
-            ActivityList = new List<ActivityPair>() { };
+            AttendanceList = new ObservableCollection<Attendance_Info>() { };
+            ActivityList = new ObservableCollection<ActivityPair>() { };
 
         }
         public int AttendeeId { get; set; }
@@ -120,8 +120,8 @@ namespace CAOGAttendeeProject
             }
         }
 
-        public virtual IList<Attendance_Info> AttendanceList { get; private set; } 
-        public virtual IList<ActivityPair> ActivityList { get; private set; }
+        public virtual ObservableCollection<Attendance_Info> AttendanceList { get; private set; } 
+        public virtual ObservableCollection<ActivityPair> ActivityList { get; private set; }
 
     public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(string propertyName = "")
@@ -327,8 +327,8 @@ namespace CAOGAttendeeProject
 
         public DefaultTableRow()
         {
-            AttendanceList = new List<Attendance_Info>() { };
-            ActivityList = new List<ActivityPair>() { };
+            AttendanceList = new ObservableCollection<Attendance_Info>() { };
+            ActivityList = new ObservableCollection<ActivityPair>() { };
 
         }
         public int AttendeeId { get; set; }
@@ -387,9 +387,9 @@ namespace CAOGAttendeeProject
 
         }
 
-        public virtual IList<ActivityPair> ActivityList { get; set; }
+        public virtual ObservableCollection<ActivityPair> ActivityList { get; set; }
 
-        public virtual IList<Attendance_Info> AttendanceList { get; set; }
+        public virtual ObservableCollection<Attendance_Info> AttendanceList { get; set; }
 
         //public string DateString { get; private set; }
 
