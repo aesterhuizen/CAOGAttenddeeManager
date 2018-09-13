@@ -391,11 +391,22 @@ namespace CAOGAttendeeProject
 
         public virtual ObservableCollection<Attendance_Info> AttendanceList { get; set; }
 
-        //public string DateString { get; private set; }
+     
 
 
-        public string Church_Last_Attended { get; set; }
-
+        private string _church_last_attended = "";
+        public string Church_Last_Attended
+        {
+            get
+            {
+                return _church_last_attended;
+            }
+            set
+            {
+                _church_last_attended = value;
+                NotifyPropertyChanged("Church_Last_Attended");
+            }
+        }
         private string _activity_last_attended = "";
         public string Activity_Last_Attended
         {
@@ -409,12 +420,23 @@ namespace CAOGAttendeeProject
 
 
                 _activity_last_attended = value;
-              //  NotifyPropertyChanged("Activity_Last_Attended");
+                NotifyPropertyChanged("Activity_Last_Attended");
 
             }
         }
-        public string ChurchStatus { get; set; }
-
+        private string _church_status = "";
+        public string ChurchStatus
+        {
+            get
+            {
+                return _church_status;
+            }
+            set
+            {
+                _church_status = value;
+                NotifyPropertyChanged("ChurchStatus");
+            }
+        }
         private string _phone = "";
         public string Phone
         {
