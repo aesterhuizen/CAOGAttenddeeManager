@@ -3378,7 +3378,7 @@ namespace CAOGAttendeeProject
         {
             m_isActivityFilterChecked = true;
             trvActivities.IsEnabled = true;
-            DateCalendar.SelectedDates.Clear();
+            
 
         }
 
@@ -3725,7 +3725,8 @@ namespace CAOGAttendeeProject
 
 
 
-                    querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Attended"  || info.Status == "Responded" && info.Date == m_DateSelected)
+                    querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Attended"  || info.Status == "Responded" )
+                                                                                  .Where(info=> info.Date == m_DateSelected)
                                  join activity in m_dbContext.Activities.Local.Where(info => info.ToString().Contains(strActivity))
                                  on attinfo.AttendeeId equals activity.AttendeeId
                                  select new DefaultTableRow
@@ -3945,7 +3946,8 @@ namespace CAOGAttendeeProject
                     {
 
 
-                    querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Attended" || info.Status == "Responded" && info.Date == m_DateSelected)
+                    querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Attended" || info.Status == "Responded")
+                                                                                  .Where(info=> info.Date == m_DateSelected)
                                 join activty in m_dbContext.Activities.Local on attinfo.AttendeeId equals activty.AttendeeId into list1
                                 from l1 in list1.DefaultIfEmpty()
                                 select new DefaultTableRow
@@ -4040,7 +4042,7 @@ namespace CAOGAttendeeProject
                                  }).AsQueryable();
                 }
                     //Date, activity
-                    else if (m_isFilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && m_isActivityFilterChecked && m_isActivityChecked)
+                    else if (m_isFilterByDateChecked && m_dateIsValid && (!m_isChurchStatusFilterChecked || m_isChurchStatusFilterChecked) && m_isActivityFilterChecked && m_isActivityChecked)
                     {
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Date == m_DateSelected)
                                  join activity in m_dbContext.Activities.Local.Where(info => info.ToString().Contains(strActivity) )
@@ -4847,6 +4849,12 @@ namespace CAOGAttendeeProject
                 m_default_row_selected.ActivityList.Remove(dr);
             }
 
+            if (!m_default_row_selected.ActivityList.Any() )
+            {
+                m_default_row_selected.Activity = "n/a";
+                m_default_row_selected.Activity_Last_Attended = "n/a";
+            }
+        
             Display_ActivityList_in_Grid();
 
         }
@@ -4872,6 +4880,11 @@ namespace CAOGAttendeeProject
 
             }
 
+            if (!m_default_row_selected.AttendanceList.Any())
+            {
+                m_default_row_selected.ChurchStatus = "n/a";
+                m_default_row_selected.Church_Last_Attended = "n/a";
+            }
             Display_AttendanceList_in_Grid();
 
         }
