@@ -259,7 +259,6 @@
                                 CanUserDeleteRows="False"
                                 CanUserReorderColumns="False"
                                 CanUserSortColumns="True"
-                               
                                 CanUserResizeColumns="True"
                                 ClipboardCopyMode="IncludeHeader"
                                 SelectedCellsChanged="dataGrid_SelectedCellsChanged"
@@ -411,8 +410,7 @@
                                   CanUserReorderColumns="False"
                                   ClipboardCopyMode="IncludeHeader"
                                   ColumnWidth="120" 
-                                  CanUserResizeRows="False"
-                                  IsReadOnly="True">
+                                  CanUserResizeRows="False">
 
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}" />

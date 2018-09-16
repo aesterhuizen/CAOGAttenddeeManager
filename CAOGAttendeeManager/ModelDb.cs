@@ -79,8 +79,6 @@ namespace CAOGAttendeeProject
             }
 
         }
-        // keep Prospect field for legacy purposes
-        public int Prospect { get; set; }
 
         private string _phone = "";
         public string Phone
@@ -284,7 +282,7 @@ namespace CAOGAttendeeProject
             }
         }
 
-        
+    
         public string DateString { get; private set; }
         private DateTime? _date = null;
         public DateTime? Date
@@ -589,7 +587,7 @@ namespace CAOGAttendeeProject
             ActivePanel_isFilterbyDateChecked = false;
 
             ActivityPanel_isActivityDateChecked = false;
-            ActivityPanel_isActivityChecked = false;
+            ActivityPanel_isActivityFilterChecked = false;
 
             ActivePanel_isAttendedChecked = false;
             ActivePanel_isRespondedChecked = false;
@@ -610,7 +608,8 @@ namespace CAOGAttendeeProject
         public bool? ProspectPanel_isFilterbyDateChecked { get; set; }
 
         public bool? ActivePanel_isFilterbyActivityDateChecked { get; set; }
-        public bool? ActivityPanel_isActivityChecked { get; set; }
+        public bool? ActivityPanel_isActivityFilterChecked { get; set; }
+
 
         public bool? ActivityPanel_isActivityDateChecked { get; set; }
 
