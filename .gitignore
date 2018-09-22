@@ -1,5 +1,5 @@
-/CAOGAttendeeManager/bin
-/CAOGAttendeeManager/obj
-/.vs
-/Doc_pics
-/WpfExperiments
+CAOGAttendeeManager/bin
+CAOGAttendeeManager/obj
+.vs/
+Doc_pics/
+WpfExperiments/
