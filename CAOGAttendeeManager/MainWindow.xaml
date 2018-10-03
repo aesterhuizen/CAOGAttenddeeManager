@@ -279,18 +279,20 @@
                                 <DataGridTemplateColumn Width="8">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Button Width="14" RenderOptions.BitmapScalingMode="NearestNeighbor" 
-                                                    Name="btnExpandHistory" 
+                                            <Button Width="14" 
+                                                    RenderOptions.BitmapScalingMode="NearestNeighbor" 
+                                                    Name="btnExpandHistory"
+                                                    Content="\/"
                                                     Margin="0,0,0,0"
                                                     Click="btnExpandHistory_Click"
                                                     BorderThickness="0" 
                                                     Background="White"
                                                     ToolTip="Dropdown list displaying attendee's details">
-                                                <Image Height="19">
+                                                <!--<Image Height="19">
                                                     <Image.Source>
                                                         <BitmapImage UriSource="Resources\DropdownArrow2.ico" Rotation="Rotate180"/>
                                                     </Image.Source>
-                                                </Image>
+                                                </Image>-->
                                             </Button>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
