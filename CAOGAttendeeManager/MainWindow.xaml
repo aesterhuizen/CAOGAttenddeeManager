@@ -122,7 +122,6 @@
                             <Label HorizontalAlignment="Left" Width="60">Active:</Label>
                             <TextBlock Margin="9,0,0,0" Name="lblAttendenceMetrics" 
                                    Width="40" 
-                                   Text="{Binding ElementName=dataGrid, Path=Items.Count}"
                                    TextAlignment="Right" VerticalAlignment="Center"/>
                         </StackPanel>
                      

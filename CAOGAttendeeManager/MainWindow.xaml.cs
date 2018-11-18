@@ -926,6 +926,7 @@ namespace CAOGAttendeeProject
             
             dataGrid_prospect.DataContext = m_lstattendanceTableRows.OrderBy(rec => rec.LastName).ToList();
             dataGrid_prospect.Items.Refresh();
+            lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
 
 
 
@@ -943,6 +944,7 @@ namespace CAOGAttendeeProject
            
             dataGrid.DataContext = m_lstdefaultTableRows.OrderBy(rec => rec.LastName).ToList(); 
            dataGrid.Items.Refresh();
+            lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
             m_isQueryTableShown = false;
             btnDelete.IsEnabled = true;
             dataGrid.IsReadOnly = false;
@@ -1205,13 +1207,17 @@ namespace CAOGAttendeeProject
 
                 if (m_AttendanceView)
                 {
-                    if (!m_IsActivityPanelView && ( m_isFilterByDateChecked || m_isActivityfilterByDateChecked ||
-                            m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked || m_isActivityChecked) )
+                    if (!m_IsActivityPanelView && (m_isFilterByDateChecked || m_isActivityfilterByDateChecked ||
+                            m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked || m_isActivityChecked))
                     {
                         dataGrid.DataContext = m_lstQueryTableRows;
+                        lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
                     }
                     else
+                    {
                         dataGrid.DataContext = m_lstdefaultTableRows;
+                        lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
+                    }
 
                 }
                 else if (m_alistView)
@@ -1240,18 +1246,21 @@ namespace CAOGAttendeeProject
                     { 
                         var filteredQueryTable = m_lstQueryTableRows.Where(row => row.FirstLastName.Contains(text));
                         dataGrid.DataContext = filteredQueryTable;
+                        lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
                     }
                     else
                     {
                         var filteredDefaultTable = m_lstdefaultTableRows.Where(row => row.FirstLastName.Contains(text));
                         dataGrid.DataContext = filteredDefaultTable;
+                        lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
                     }
 
                 }
                 else if (m_alistView)
                 {
                     var filteredAttendeeListTable = m_lstattendanceTableRows.Where(row => row.FirstLastName.Contains(text));
-                    dataGrid.DataContext = filteredAttendeeListTable;
+                    dataGrid_prospect.DataContext = filteredAttendeeListTable;
+                    lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
                 }
               
 
@@ -2275,7 +2284,7 @@ namespace CAOGAttendeeProject
             }
 
 
-
+            lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
 
         }
 
@@ -3729,7 +3738,8 @@ namespace CAOGAttendeeProject
             if (querylinq != null)
             {
                 m_lstQueryTableRows = querylinq.ToList();
-                dataGrid.DataContext = m_lstQueryTableRows; 
+                dataGrid.DataContext = m_lstQueryTableRows;
+                lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
                 dataGrid.IsReadOnly = true;
                 m_isQueryTableShown = true;
             }
@@ -3876,7 +3886,7 @@ namespace CAOGAttendeeProject
 
                     // load ProspectTab state from TabState class
                     LoadProspectPanelState();
-
+                  
 
 
                     btnImportRecords.IsEnabled = true;
