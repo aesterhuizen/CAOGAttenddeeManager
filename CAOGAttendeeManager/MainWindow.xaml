@@ -402,6 +402,7 @@
 
 
                         <DataGrid Name="dataGrid_prospect"
+                                  DataContextChanged="dataGrid_prospect_DataContextChanged"
                                   SelectedCellsChanged="dataGrid_prospect_SelectedCellsChanged"
                                   CanUserSortColumns="False"
                                   CanUserAddRows="False"
@@ -419,12 +420,12 @@
                                 <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" />
                                 <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}"/>
                                 <DataGridTextColumn Header="Church Last Attended" Binding="{Binding DateString}" />
-                                <DataGridTemplateColumn Header="Attended" Width="60">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox Name="cmbAttendanceInfo" IsChecked="{Binding Attended}" Checked="cmbAttendanceInfo_Checked" Unchecked="cmbAttendanceInfo_Unchecked"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn Header="Attended">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Name="cmbAttendanceInfo" IsChecked="{Binding Attended}" Checked="cmbAttendanceInfo_Checked" Unchecked="cmbAttendanceInfo_Unchecked"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
                             </DataGrid.Columns>

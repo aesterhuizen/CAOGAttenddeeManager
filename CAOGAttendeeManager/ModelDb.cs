@@ -500,9 +500,26 @@ namespace CAOGAttendeeProject
             
         }
         private int _attendeeId = 0;
+        private bool _isModified = false;
 
         public bool IsNewrow { get; set; }
-        public bool IsModifiedrow { get; set; }
+        public bool IsModifiedrow
+        {
+            get
+            {
+                return _isModified;
+            }
+            set
+            {
+                if (_isModified != value)
+                {
+                    _isModified = value;
+                   // NotifyPropertyChanged("isModifiedRow");
+                }
+                
+            }
+
+        }
 
         public int AttendeeId
         {

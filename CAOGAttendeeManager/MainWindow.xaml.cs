@@ -1258,8 +1258,9 @@ namespace CAOGAttendeeProject
                 }
                 else if (m_alistView)
                 {
-                    var filteredAttendeeListTable = m_lstattendanceTableRows.Where(row => row.FirstLastName.Contains(text));
-                    dataGrid_prospect.DataContext = filteredAttendeeListTable;
+                    /*var filteredAttendeeListTable */
+                    dataGrid_prospect.DataContext = m_lstattendanceTableRows.Where(row => row.FirstLastName.Contains(text));
+                     //= filteredAttendeeListTable;
                     lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
                 }
               
@@ -3945,7 +3946,7 @@ namespace CAOGAttendeeProject
 
 
             txtSearch.Text = "";// m_TabState.txtSearchProspectState;
-            txtSearch.IsEnabled = true;
+            txtSearch.IsEnabled = false; /*change from true to false in v3.0.8 to workaround visualization bug that erase filtered prospect table checkboxes */
             chkChurchDateFilter.IsChecked = false;// m_TabState.ProspectPanel_isFilterbyDateChecked;
         }
         private void LoadActivePanelState()
@@ -4497,8 +4498,12 @@ namespace CAOGAttendeeProject
 
         private void cmbAttendanceInfo_Unchecked(object sender, RoutedEventArgs e)
         {
+            
+
             m_attendance_row_selected.Attended = false;
             m_attendance_row_selected.IsModifiedrow = false;
+           
+            
             
             
         }
@@ -4615,7 +4620,15 @@ namespace CAOGAttendeeProject
             Cursor = Cursors.Arrow;
         }
 
-      
+        private void cmbAttendanceInfo_LayoutUpdated(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void dataGrid_prospect_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+           // dataGrid_prospect.Items.Refresh();
+        }
     }
 
 }
