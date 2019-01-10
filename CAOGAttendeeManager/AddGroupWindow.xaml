@@ -1,0 +1,21 @@
+﻿<Window x:Class="CAOGAttendeeProject.WndAddGroup"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Add new activity ..." Height="228" Width="429"
+        WindowStyle="ToolWindow"
+        ResizeMode="NoResize">
+    <Grid  Background="Gray">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Label Name="lblActivity" Content="Activity Group:" HorizontalAlignment="Left" Margin="15,15,0,0" VerticalAlignment="Top" Width="197"/>
+        <TextBox Name="txtActivityName" HorizontalAlignment="Left" Height="23" TabIndex="0" Margin="15,41,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="162"/>
+        <Button Name="btnOK" Content="OK" HorizontalAlignment="Left" TabIndex="2" Margin="238,159,0,0" VerticalAlignment="Top" Width="75" Click="BtnOK_Click"/>
+        <Button Name="btnCancel" Content="Cancel" HorizontalAlignment="Left" TabIndex="3" Margin="328,159,0,0" VerticalAlignment="Top" Width="75" Click="BtnCancel_Click"/>
+        <Label Name ="lblDescription" Content="Description:" HorizontalAlignment="Left" Margin="15,69,0,0" VerticalAlignment="Top" />
+        <TextBox Name="txtTaskDescription" HorizontalAlignment="Left" Height="49" TabIndex="1" Margin="15,95,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="388"/>
+    </Grid>
+</Window>

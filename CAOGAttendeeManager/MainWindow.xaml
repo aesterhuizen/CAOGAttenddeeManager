@@ -66,6 +66,11 @@
                                   ToolTip="Save changes to the database" />
 
 
+                    <RibbonButton Name="btnExecQuery"
+                                  Label="Execute Query"
+                                  LargeImageSource="Resources\ApplyQuery.ico"
+                                  Click="BtnExecQuery_Click" 
+                                  ToolTip="Execute current database query"/>
 
                 </RibbonGroup>
 
@@ -91,12 +96,7 @@
                                   Click="ImportRows_Click" 
                                   ToolTip="Update changes made in Prospect List or Activity &amp; Info tabs to the Active table that will be saved to the database when the user click on the Save button."/>
 
-                    <!--<RibbonButton Name="btnCopy"
-                                  Label="Copy"
-                                  LargeImageSource="Resources\Copy.ico"
-                                  Click="btnCopy_Click" 
-                                  ToolTip="Copy the contents of data table to the clipboard"/>-->
-
+                  
                     <RibbonButton Name="btnDelete" 
                                   Label="Delete Record"
                                   LargeImageSource="Resources\Delete.ico"
@@ -107,6 +107,22 @@
 
                 </RibbonGroup>
 
+                <RibbonGroup Header="Manage Activities">
+                    <RibbonButton Name="btnPanelNewActivity" BorderThickness="1" Click="BtnPanelNewActivity_Click"
+                                            ToolTip="Add a new activity to the activities list"
+                                            Margin="10,0,0,0"
+                                            Label="New Activity"
+                                            LargeImageSource="Resources\NewActivity.ico"/>
+                    
+                    <RibbonButton Margin="11,0,0,0" Name="btnPanelAddActivity" BorderThickness="1" Click="btnPanelAddActivity_Click"
+                                            ToolTip="Add activity to selected attendee's activity list"
+                                            Label="Add Activity"
+                                            LargeImageSource="Resources\AddActivity.ico"/>
+
+                    
+
+                </RibbonGroup>
+                
                 <RibbonGroup Header="Attendance Metrics" Width="200">
 
 
@@ -186,16 +202,18 @@
                         <Expander Name="ActivityExpander" IsExpanded="True" Height="300">
                             <Expander.Header>
                                 <StackPanel Name="spActivityExpanderHeader" Orientation="Horizontal" >
-                                    <CheckBox Margin="0,5,0,0" Content="Activity"  Name="chkActivityFilter" Checked="chkActivityFilter_Checked" Unchecked="chkActivityFilter_Unchecked" RenderTransformOrigin="0.797,-0.5"/>
-                                    <Button Margin="84,0,0,0" Name="btnPanelAddActivity" Content="Add Activity" BorderThickness="1" Click="btnPanelAddActivity_Click"
-                                            ToolTip="Add Activity">
-                                      
-                                    </Button>
-
+                                    <CheckBox Margin="5,0,0,0" Content="Activity"  Name="chkActivityFilter" Checked="chkActivityFilter_Checked" Unchecked="chkActivityFilter_Unchecked" RenderTransformOrigin="0.797,-0.5"/>
+                                   
                                 </StackPanel>
                             </Expander.Header>
                             
-                            <TreeView Name="trvActivities" >
+                            <TreeView Name="trvActivities" SelectedItemChanged="TrvActivities_SelectedItemChanged" DataContextChanged="TrvActivities_DataContextChanged">
+                                <TreeView.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Add New Activity Group ..." Click="MenuItem_AddNewGroup_Click"/>
+                                        
+                                    </ContextMenu>
+                                </TreeView.ContextMenu>
                                 <TreeView.ItemContainerStyle>
                                     <Style TargetType="{x:Type TreeViewItem}">
                                         <Setter Property="IsExpanded" Value="True"/>
@@ -206,10 +224,22 @@
                                     <Style TargetType="{x:Type ScrollViewer}">
                                         <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
                                     </Style>
+
                                    
-                                    <HierarchicalDataTemplate DataType="{x:Type local:ActivityGroup }" ItemsSource="{Binding lstActivityTasks}">
+
+                                
+                                    <HierarchicalDataTemplate DataType="{x:Type local:ActivityGroup }" ItemsSource="{Binding lstActivityTasks}" >
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding ActivityName}" FontWeight="Bold" />
+                                            <TextBlock Text="{Binding ActivityName}" FontWeight="Bold" >
+                                                <TextBlock.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="Add New Activity" Click="MenuItem_AddNewActivity_Click"/>
+                                                        <Separator/>
+                                                        <MenuItem Header="Delete Activity Group" Click="MenuItem_DeleteActivityGroup_Click"/>
+                                                    </ContextMenu>
+                                                </TextBlock.ContextMenu>
+                                            </TextBlock>
+
                                         </StackPanel>
                                     </HierarchicalDataTemplate>
 
@@ -217,7 +247,15 @@
                                         <StackPanel Orientation="Horizontal">
                                             <CheckBox  Name="chkActivity" Content="{Binding TaskName}" Margin="5,0,0,0" Checked="ActivityTreeView_Checkbox_Checked"
                                                        Unchecked="ActivityTreeView_Checkbox_UnChecked"
-                                                      IsChecked="{Binding IsSelected}" />
+                                                      IsChecked="{Binding IsSelected}" >
+                                                <CheckBox.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="Add New Activity ..." Click="MenuItem_AddNewActivity_Click"/>
+                                                        <Separator/>
+                                                        <MenuItem Header="Delete Activity" Click="MenuItem_DeleteActivity_Click"/>
+                                                    </ContextMenu>
+                                                </CheckBox.ContextMenu>
+                                            </CheckBox>
                                         </StackPanel>
                                     </HierarchicalDataTemplate>
                                 </TreeView.Resources>
@@ -305,8 +343,8 @@
                                                     Background="White"
                                                     BorderThickness="1"
                                                     Click="btnAddActivity_Click"
-                                                    ToolTip="Add an activity to the selected attendee's activity list">
-                                                <Image Height="19" Source="Resources\AddActivity.ico"/>
+                                                    ToolTip="Open activity panel to add an activity to the selected attendee's activity list">
+                                                <Image Height="19" Source="Resources\ActivityPanel.ico"/>
                                             </Button>
                                             
                                         </DataTemplate>
@@ -432,8 +470,10 @@
                         </DataGrid>
                     </Grid>
                 </TabItem>
-            
+                
+
             </TabControl>
+            <Label Name="lblTableShown" Grid.Column="2" HorizontalAlignment="Left" Margin="126,-2,0,0" VerticalAlignment="Top"/>
 
 
         </Grid>

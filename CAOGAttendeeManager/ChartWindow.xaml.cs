@@ -23,7 +23,7 @@ namespace CAOGAttendeeProject
     /// </summary>
     public partial class ChartWindow : Window
     {
-        public ChartWindow(ModelDb db)
+        public ChartWindow(ref ModelDb db)
         {
             InitializeComponent();
 

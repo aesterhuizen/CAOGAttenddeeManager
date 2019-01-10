@@ -2,30 +2,21 @@
 using System.IO;
 
 //using System.Runtime.InteropServices;
-using Microsoft.Win32;
 using System.Timers;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 using System.Linq;
+using System.Xml.Linq;
+using System.Xml;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Data.Entity;
-using System.Data.SqlClient;
 using System.Data.OleDb;
 using System.Data;
 using System.Text.RegularExpressions;
-using System.Configuration;
 
 //using System.Windows.Forms;
 
@@ -48,7 +39,7 @@ namespace CAOGAttendeeProject
 
             InitActivityTreeView();
 
-
+            
 
 
 #if (DEBUG)
@@ -92,14 +83,18 @@ namespace CAOGAttendeeProject
                         }
 
                     }
-
+#if (init_db)
                     m_dbContext = new ModelDb(m_constr);
+                    InitDataSet();
+#endif
 
-                    //correctDBerrors();
+#if (correctDB_errors)
+                    correctDBerrors();
+#endif
 
-                        InitDataSet();
-                        Display_DefaultTable_in_Grid();
-                  
+
+                    Display_DefaultTable_in_Grid();
+
 
                 }
                 else
@@ -138,23 +133,23 @@ namespace CAOGAttendeeProject
 
 
         private ModelDb m_dbContext;
-       
+
         private DateTime m_DateSelected;
         private DateTime m_alistDateSelected;
         private DateTime? m_ActivityDateSelected;
         private DataSet m_DataSet = new DataSet();
 
-       
-       
-        
+
+
+
         // current selected row in the data tables
-     
+
         private DefaultTableRow m_default_row_selected;
         private AttendanceTableRow m_attendance_row_selected;
-      
+
         // pointer to datagrid within RowDetailsTemplate
-        DataGrid m_AttendeeInfo_grid = null;
-        DataGrid m_Activity_grid = null;
+        private DataGrid m_AttendeeInfo_grid = null;
+        private DataGrid m_Activity_grid = null;
 
         //List of query rows
         private List<DefaultTableRow> m_lstQueryTableRows = new List<DefaultTableRow>() { };
@@ -164,20 +159,23 @@ namespace CAOGAttendeeProject
         private List<AttendanceTableRow> m_lstattendanceTableRows = new List<AttendanceTableRow>() { };
         //list of Activities
         private List<ActivityGroup> m_lstActivities = new List<ActivityGroup> { };
-        private List<ActivityTask> m_lstActivityTask = new List<ActivityTask> { };
+        bool m_IsListActivitiesDirty = false;
+        
+        private List<ActivityTask> m_lstActivityTasks = new List<ActivityTask> { };
 
         private TabState m_TabState = new TabState();
         //Activity control
-        string m_ActivityName = "";
-        int m_old_ActivityId = 0;
+        private string m_ActivityName = "";
+        private int m_old_ActivityId = 0;
         ActivityTask m_currentSelected_ActivityTask = null;
         ActivityTask m_previousSelected_ActivityTask = null;
-        int m_child_taskId = 0;
+        private int m_child_taskId = 0;
         int m_parent_taskId = 0;
-
+        private int m_lstActivitiesCount = 0;
+        private int m_newlstActivitiesCount = 0;
         // the current selected activity Pair
-        ActivityPair m_currentSelected_ActivityPair = null;
-        ActivityPair m_previousSelected_ActivityPair = null;
+        private ActivityPair m_currentSelected_ActivityPair = null;
+        private ActivityPair m_previousSelected_ActivityPair = null;
         private Timer aTimer = null;
 
         private bool m_NoCredFile = false;
@@ -212,12 +210,12 @@ namespace CAOGAttendeeProject
 
         private string m_constr = "";
 
-     
+
         private int m_NewAttendeeId = 0;
 
         private void Set_btnAddActivityState()
         {
-            if (m_activitychecked_count == 1 && (m_ActivityDateSelected !=null && m_dateIsValid))
+            if (m_activitychecked_count == 1 && (m_ActivityDateSelected != null && m_dateIsValid))
             {
                 btnPanelAddActivity.IsEnabled = true;
             }
@@ -226,16 +224,15 @@ namespace CAOGAttendeeProject
                 btnPanelAddActivity.IsEnabled = false;
             }
         }
-        delegate void setbtn_state();
 
-        
+
         private void StopTimer()
         {
             if (aTimer != null)
             {
                 aTimer.Enabled = false;
             }
-            
+
         }
         private void SetTimer()
         {
@@ -246,29 +243,43 @@ namespace CAOGAttendeeProject
             aTimer.Enabled = true;
         }
 
-        private void OnTimedEvent(Object source, ElapsedEventArgs e)
+        private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            
-            Dispatcher.Invoke( () =>
+
+            Dispatcher.Invoke(() =>
+           {
+               if (!m_isQueryTableShown && m_activitychecked_count == 1 && m_ActivityDateSelected != null)
+               {
+                   btnPanelAddActivity.IsEnabled = true;
+               }
+               else
+               {
+                   btnPanelAddActivity.IsEnabled = false;
+               }
+
+
+           });
+
+            Dispatcher.Invoke(() =>
             {
-                if (!m_isQueryTableShown && m_activitychecked_count == 1 && m_ActivityDateSelected != null )
+                var selectedTreeItem = trvActivities.SelectedItem;
+
+                if (selectedTreeItem != null)
                 {
-                    btnPanelAddActivity.IsEnabled = true;
+                    btnPanelNewActivity.IsEnabled = true;
                 }
                 else
                 {
-                    btnPanelAddActivity.IsEnabled = false;
+                    btnPanelNewActivity.IsEnabled = false;
                 }
-
-
             });
-            
 
 
 
-           }
 
-     
+        }
+
+       
 
         private void correctDBerrors()
         {
@@ -282,176 +293,185 @@ namespace CAOGAttendeeProject
                                where rec.AttendeeId == 0
                                select rec;
 
-            
-                m_dbContext.Attendees.RemoveRange(querynullrec);
-            
-             m_dbContext.SaveChanges();
+
+            m_dbContext.Attendees.RemoveRange(querynullrec);
+
+            m_dbContext.SaveChanges();
 
 
         }
-    
+
         private void InitActivityTreeView()
         {
 
-
-
-            ActivityGroup Caring = new ActivityGroup() { Parent="", ActivityName = "Caring" };
-            ActivityGroup Central_Christian_Academy = new ActivityGroup() {Parent = "", ActivityName = "Central Christian Academy" };
-            ActivityGroup Central_Kids_Elementry_K5th_Grade = new ActivityGroup() { Parent = "", ActivityName = "Central Kids: Elementry (K-5th Grade)" };
-            ActivityGroup Central_Kids_Nursery_8WKS_2YRS = new ActivityGroup() { Parent = "", ActivityName = "Central Kids: Nursery (8WKS-2YRS)" };
-            ActivityGroup Central_Kids_Preschool3_5YRS_old = new ActivityGroup() { Parent = "", ActivityName = "Central Kids: Preschool (3-5YRS old)" };
-            ActivityGroup Central_Kids_Outreach_Events = new ActivityGroup() { Parent = "", ActivityName = "Central Kids: Outreach Events" };
-            ActivityGroup Creative_Arts = new ActivityGroup() { Parent = "", ActivityName = "Creative Arts" };
-            ActivityGroup Helps = new ActivityGroup() { Parent = "", ActivityName = "Helps" };
-            ActivityGroup Hospitality = new ActivityGroup() { Parent = "", ActivityName = "Hospitality" };
-            ActivityGroup Outreach_Local_Missions = new ActivityGroup() { Parent = "", ActivityName = "Outreach: Local Missions" };
-            ActivityGroup Students_The_Rock6_12th_Grade = new ActivityGroup() { Parent = "", ActivityName = "Students: The Rock (6-12th Grade)" };
-
-
-            Caring.lstActivityTasks.Add(new ActivityTask() { Parent="Caring", ActivityId = 1, TaskName = "Hospitality", Description = "Briefely visit(on a day of your choosing) and pray with individuals who are in local hospitals - Church office will supply admission information." });
-            Caring.lstActivityTasks.Add(new ActivityTask() { Parent = "Caring", ActivityId = 2, TaskName = "Shut-In Visitation", Description = "Call to arrange convenient times fora home visit - Communion may also be served." });
-            Caring.lstActivityTasks.Add(new ActivityTask() { Parent = "Caring", ActivityId = 3, TaskName = "Nursing Home Visitation", Description = "Visit local nursing homes during anassigned week each month to encourage those in need." });
-
-            m_lstActivityTask.AddRange(Caring.lstActivityTasks);
-
-
-            ActivityTask General_Volunteer = new ActivityTask {Parent= "Central_Christian_Academy", ActivityId = 4, TaskName = "General Volenteer" };
-            General_Volunteer.lstsubTasks.Add(new ActivityTask() {Parent="General_Volunteer", ActivityId = 5, TaskName = "Box Tops Collector", Description = "Cut, collect and count Box Tops." });
-            General_Volunteer.lstsubTasks.Add(new ActivityTask() { Parent = "General_Volunteer", ActivityId = 6, TaskName = "Library Helper", Description = "Proof read library books before we put them on the shelves." });
-            General_Volunteer.lstsubTasks.Add(new ActivityTask() { Parent = "General_Volunteer", ActivityId = 7, TaskName = "Lunch Monitor", Description = "Help to supervise the children during lunchtime." });
-            General_Volunteer.lstsubTasks.Add(new ActivityTask() { Parent = "General_Volunteer",ActivityId = 8, TaskName = "Office Helper", Description = "Help to prepare mass mailings for fundraisers." });
-
-            m_lstActivityTask.Add(General_Volunteer);
-            m_lstActivityTask.AddRange(General_Volunteer.lstsubTasks);
-
-            Central_Christian_Academy.lstActivityTasks.Add(General_Volunteer);
-
-            ActivityTask Sunday_mornings = new ActivityTask {Parent = "Central_Kids_Elementry_K5th_Grade", ActivityId = 9, TaskName = "Sunday Mornings: Super Church" };
-            Sunday_mornings.lstsubTasks.Add(new ActivityTask() { Parent = "Sunday_mornings", ActivityId = 10, TaskName = "Leader/Teacher & Assistant", Description = "Facilitate the lessons, crafts & classroom management. Provide a godly example." });
-            Sunday_mornings.lstsubTasks.Add(new ActivityTask() { Parent = "Sunday_mornings", ActivityId = 11, TaskName = "Check-in Greeter", Description = "Greet families while checking-in kids with our computerized system at the beginning of the service." });
-
-            m_lstActivityTask.Add(Sunday_mornings);
-            m_lstActivityTask.AddRange(Sunday_mornings.lstsubTasks);
-
-            ActivityTask Wednesday_evenings = new ActivityTask { Parent = "Central_Kids_Elementry_K5th_Grade", ActivityId = 12, TaskName = "Wednesday Evenings: M-Pact Girls Club & Royal Rangers" };
-            Wednesday_evenings.lstsubTasks.Add(new ActivityTask() { Parent = "Wednesday_evenings", ActivityId = 13, TaskName = "Leader/Teacher & Assistant", Description = "Facilitate the lessons, crafts & classroom management. Provide a godly example." });
-            Wednesday_evenings.lstsubTasks.Add(new ActivityTask() { Parent = "Wednesday_evenings", ActivityId = 14, TaskName = "Check-in Greeter", Description = "Greet families while checking-in kids with our computerized system at the beginning of the service." });
-
-            m_lstActivityTask.Add(Wednesday_evenings);
-            m_lstActivityTask.AddRange(Wednesday_evenings.lstsubTasks);
-
-            ActivityTask Sunday_Mornings_Wednesday_Evenings = new ActivityTask { Parent = "Central_Kids_Nursery_8WKS_2YRS", ActivityId = 15, TaskName = "Sunday Mornings & Wednesday Evenings" };
-            Sunday_Mornings_Wednesday_Evenings.lstsubTasks.Add(new ActivityTask() { Parent = "Sunday_Mornings_Wednesday_Evenings", ActivityId = 16, TaskName = "Leader/Assistant", Description = "Minister to nursery age children and their needs." });
-            Sunday_Mornings_Wednesday_Evenings.lstsubTasks.Add(new ActivityTask() { Parent = "Sunday_Mornings_Wednesday_Evenings", ActivityId = 17, TaskName = "Rocker", Description = "Hold and rock infants as you minister in the nursery." });
-            Sunday_Mornings_Wednesday_Evenings.lstsubTasks.Add(new ActivityTask() { Parent = "Sunday_Mornings_Wednesday_Evenings", ActivityId = 18, TaskName = "Check-in Greeter", Description = "Greet families while checking in kids with our computerized system at the begining of  service." });
-
-            m_lstActivityTask.Add(Sunday_Mornings_Wednesday_Evenings);
-            m_lstActivityTask.AddRange(Sunday_Mornings_Wednesday_Evenings.lstsubTasks);
-
-            ActivityTask Childrens_church = new ActivityTask { Parent = "Central_Kids_Preschool3_5YRS_old", ActivityId = 19, TaskName = "Children's Church (Sunday) & Rainbows Club (Wednesdays)" };
-            Childrens_church.lstsubTasks.Add(new ActivityTask() { Parent = "Childrens_church", ActivityId = 20, TaskName = "Leader/Teacher & Assistant", Description = "Facilitate the lessons, crafts & classroom management. Provide a godly example." });
-
-            m_lstActivityTask.Add(Childrens_church);
-            m_lstActivityTask.AddRange(Childrens_church.lstsubTasks);
-
-            Central_Kids_Preschool3_5YRS_old.lstActivityTasks.Add(Childrens_church);
-            Central_Kids_Nursery_8WKS_2YRS.lstActivityTasks.Add(Sunday_Mornings_Wednesday_Evenings);
-
-            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { Parent = "Central_Kids_Outreach_Events", ActivityId = 21, TaskName = "Concessions", Description = "Prepare and serve food to children." });
-            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { Parent = "Central_Kids_Outreach_Events", ActivityId = 22, TaskName = "Leader & Assistant", Description = "Minister to children and their needs at these events." });
-            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { Parent = "Central_Kids_Outreach_Events", ActivityId = 23, TaskName = "Recreation", Description = "Register children as they enter each day's event." });
-            Central_Kids_Outreach_Events.lstActivityTasks.Add(new ActivityTask() { Parent = "Central_Kids_Outreach_Events", ActivityId = 24, TaskName = "Security", Description = "Monitoring and securing the grounds at each event." });
+            Load_ChurchActivities_From_XMLFile();
 
             
-            m_lstActivityTask.AddRange(Central_Kids_Outreach_Events.lstActivityTasks);
-
-            Central_Kids_Elementry_K5th_Grade.lstActivityTasks.Add(Sunday_mornings);
-            Central_Kids_Elementry_K5th_Grade.lstActivityTasks.Add(Wednesday_evenings);
-
-            Creative_Arts.lstActivityTasks.Add(new ActivityTask() { Parent = "Creative_Arts", ActivityId = 25, TaskName = "Workshop Team (Vocal & Instrumental", Description = "Use your talents to assist in leading the congregation into worship during our weekly services." });
-            Creative_Arts.lstActivityTasks.Add(new ActivityTask() { Parent = "Creative_Arts", ActivityId = 26, TaskName = "Technical Multimedia Team", Description = "Apply your skills in the area of sound, videography, and computer technology during our weekly worship services." });
-
-            m_lstActivityTask.AddRange(Creative_Arts.lstActivityTasks);
-
-            ActivityTask GroundsTeam = new ActivityTask {Parent="Helps", ActivityId = 27, TaskName = "Grounds Team" };
-            GroundsTeam.lstsubTasks.Add(new ActivityTask() { Parent = "GroundsTeam", ActivityId = 28, TaskName = "Construction", Description = "Use your skills to help with special projects on campus." });
-            GroundsTeam.lstsubTasks.Add(new ActivityTask() { Parent = "GroundsTeam", ActivityId = 29, TaskName = "Housekeeping", Description = "Help keep our facilities clean by volunteering to clean in certain areas." });
-            GroundsTeam.lstsubTasks.Add(new ActivityTask() { Parent = "GroundsTeam", ActivityId = 30, TaskName = "Lanscaping", Description = "Groom and care for landscaping and mulchbeds around church and parsonage." });
-            GroundsTeam.lstsubTasks.Add(new ActivityTask() { Parent = "GroundsTeam", ActivityId = 31, TaskName = "Lawn Maintenance", Description = "Join a rotaion to keep the lawn on campus mowed." });
-
-            m_lstActivityTask.Add(GroundsTeam);
-            m_lstActivityTask.AddRange(GroundsTeam.lstsubTasks);
-
-            ActivityTask kitchenHelp = new ActivityTask { Parent = "Helps", ActivityId = 32, TaskName = "Kitchen Help" };
-            kitchenHelp.lstsubTasks.Add(new ActivityTask() { Parent = "kitchenHelp", ActivityId = 33, TaskName = "Funeral Dinners", Description = "Cook and serve dinners to the families and friends of those whoare grievingafter funeral services." });
-            kitchenHelp.lstsubTasks.Add(new ActivityTask() { Parent = "kitchenHelp", ActivityId = 34, TaskName = "Special Events", Description = "Throughout the year their are events that will require assistance with cooking, food preparation and setup." });
-
-            m_lstActivityTask.Add(kitchenHelp);
-            m_lstActivityTask.AddRange(kitchenHelp.lstsubTasks);
-
-            Helps.lstActivityTasks.Add(new ActivityTask() { Parent = "Helps", ActivityId = 35, TaskName = "Medical Ministry Team", Description = "Be a first responder in the event of a medical emergency on the church campus or at a church event (special training and certification required)." });
-
-            ActivityTask Office_Volunteers = new ActivityTask { Parent = "", ActivityId = 36, TaskName = "Office Volunteers" };
-            GroundsTeam.lstsubTasks.Add(new ActivityTask() { Parent = "Office_Volunteers", ActivityId = 37, TaskName = "General Volunteer", Description = "Support the office staff on a regular basis - answering phones, type & copy documents as needed, basic computer skills and a pleasant personality will be required." });
-            GroundsTeam.lstsubTasks.Add(new ActivityTask() { Parent = "Office_Volunteers", ActivityId = 38, TaskName = "Special Projects", Description = "Help on an as-needed basis with a wide variety of tasks such as mailings, packet assembly, cutting, sorting, etc." });
-
-
-            m_lstActivityTask.AddRange(Helps.lstActivityTasks);
-
-            m_lstActivityTask.Add(Office_Volunteers);
-            m_lstActivityTask.AddRange(GroundsTeam.lstsubTasks);
-
-
-            Helps.lstActivityTasks.Add(GroundsTeam);
-            Helps.lstActivityTasks.Add(kitchenHelp);
-            Helps.lstActivityTasks.Add(new ActivityTask() { Parent = "Helps", ActivityId = 38, TaskName = "Security Team", Description = "Be a part of a ministry team to help ensure the safety of all who choose to worship at Central." });
-            Helps.lstActivityTasks.Add(new ActivityTask() { Parent = "Helps", ActivityId = 39, TaskName = "Transportation", Description = "Drive school bus (CDL license required) or church vans for special events throughout the year for children, youth and adult groups." });
-
-            m_lstActivityTask.Add(GroundsTeam);
-            m_lstActivityTask.Add(kitchenHelp);
-            m_lstActivityTask.AddRange(Helps.lstActivityTasks);
-
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { Parent = "Hospitality", ActivityId = 40, TaskName = "Communion Team(set-up, Condense, or Clean-up)", Description = "Prayerfully prepare the communion elements to be served monthly - includes clean-up (gathering cups from the pews and emptying/cleaning communion trays." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { Parent = "Hospitality", ActivityId = 41, TaskName = "Welcome Center Assistance", Description = "To welcome new people to Central by giving them a gift bag, offering a tour of the campus, and helping them finding their children's classes." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { Parent = "Hospitality", ActivityId = 42, TaskName = "Doorkeeper", Description = "Open the doors for people as they arrive to make them fell welcome." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { Parent = "Hospitality", ActivityId = 43, TaskName = "Greeter", Description = "Greeting people with your talents and abilities to connect with God and others in the church." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { Parent = "Hospitality", ActivityId = 44, TaskName = "Information Center Assistant", Description = "Supply congregation with up-to-date information regarding events, visitor information, ficility directions, and money collection for various items." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { Parent = "Hospitality", ActivityId = 45, TaskName = "Parking Lot Attendant", Description = "Direct traffic flow, assist anyone who needs help getting into the church, and ensure a great first impression for everyone." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { Parent = "Hospitality", ActivityId = 46, TaskName = "Usher Misistry", Description = "Help seat guests, hand out bulletins, handle crowed control, answer questions, take offering and serve communion during our Sunday services and special events." });
-            Hospitality.lstActivityTasks.Add(new ActivityTask() { Parent = "Hospitality", ActivityId = 47, TaskName = "Golf Cart Drivers", Description = "Shuttle people to and from their cars on Sunday mornings and special events." });
-
-            m_lstActivityTask.AddRange(Hospitality.lstActivityTasks);
-
-            Outreach_Local_Missions.lstActivityTasks.Add(new ActivityTask() {Parent= "Outreach_Local_Missions", ActivityId = 48, TaskName = "Special Projects", Description = "Help with local outreach projects including minor building repairs, painting, collecting and distriburting clothing & food, etc." });
-
-            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { Parent = "Students_The_Rock6_12th_Grade", ActivityId = 49, TaskName = "Administrative", Description = "Guest follow-up, parent communication, mailing/emailing, Website." });
-            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { Parent = "Students_The_Rock6_12th_Grade", ActivityId = 50, TaskName = "Adio/Technicl Team", Description = "Prepare, manage, maintain and operate the sound, video, computer and lighting systems to enhance services." });
-            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { Parent = "Students_The_Rock6_12th_Grade", ActivityId = 51, TaskName = "Cafe Team", Description = "Serving food, snacks and beverage items to the students on Wednesday nights and special events." });
-            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { Parent = "Students_The_Rock6_12th_Grade", ActivityId = 52, TaskName = "Junior High Ministry Team", Description = "Serve by teaching/assisting in our Sunday Morning Junior High Class with students in grades 6-8" });
-            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { Parent = "Students_The_Rock6_12th_Grade", ActivityId = 53, TaskName = "Ministry Team Volunteer", Description = "Serve by assisting during Wednesday night meetings in the areas of check-in, leading activities, small group discussions, events, student discipleship and leader retreats." });
-            Students_The_Rock6_12th_Grade.lstActivityTasks.Add(new ActivityTask() { Parent = "Students_The_Rock6_12th_Grade", ActivityId = 54, TaskName = "Evangelic Outreach", Description = "Shate the love of Christ with others by partnering with missionschurches' events, outreaches, VBS, etc." });
-
-            m_lstActivityTask.AddRange(Outreach_Local_Missions.lstActivityTasks);
-            m_lstActivityTask.AddRange(Students_The_Rock6_12th_Grade.lstActivityTasks);
-
-            //  lstsubTasks = new System.Collections.ObjectModel.ObservableCollection<ActivityTask>().Add(subtask1)
-
-            m_lstActivities.Add(Caring);
-            m_lstActivities.Add(Central_Christian_Academy);
-            m_lstActivities.Add(Central_Kids_Elementry_K5th_Grade);
-            m_lstActivities.Add(Central_Kids_Nursery_8WKS_2YRS);
-            m_lstActivities.Add(Central_Kids_Preschool3_5YRS_old);
-            m_lstActivities.Add(Central_Kids_Outreach_Events);
-            m_lstActivities.Add(Creative_Arts);
-            m_lstActivities.Add(Helps);
-            m_lstActivities.Add(Hospitality);
-            m_lstActivities.Add(Outreach_Local_Missions);
-            m_lstActivities.Add(Students_The_Rock6_12th_Grade);
-
-
 
             trvActivities.ItemsSource = m_lstActivities;
 
+
+
+        }
+
+        private void Save_ChurchActivities_To_XMLFile()
+        {
+            
+            List<XNode> lstdocNodes = new List<XNode>() { };
+            var doc_root = new XElement("XmlDocument");
+
+            int intId = 0;
+            Cursor = Cursors.Wait;
+
+            foreach (ActivityGroup Agroup in m_lstActivities)
+            {
+                XElement ActivityGroupElement = new XElement("ActivityGroup", new XAttribute("ActivityName", Agroup.ActivityName));
+
+                //ActivityTask Element
+                foreach (ActivityTask task in Agroup.lstActivityTasks)
+                {
+                    List<XAttribute> lstAttributes = new List<XAttribute>();
+
+                    XAttribute attId = new XAttribute("Id", intId++);
+                    lstAttributes.Add(attId);
+                    XAttribute attTaskName = new XAttribute("TaskName", task.TaskName);
+                    lstAttributes.Add(attTaskName);
+                    if (task.Description != null)
+                    {
+                        XAttribute attDescription = new XAttribute("Description", task.Description);
+                        lstAttributes.Add(attDescription);
+
+                    }
+                    XElement ActivityTaskElement = new XElement("ActivityTask", lstAttributes);
+
+                    
+                    //task has subtasks
+                    if (task.lstsubTasks.Count != 0)
+                    {
+
+                        // ActivitySubTask Element
+                        foreach (ActivityTask subTask in task.lstsubTasks)
+                        {
+                            List<XAttribute> lstsubAttributes = new List<XAttribute>();
+
+                            XAttribute subattId = new XAttribute("Id", intId++);
+                            lstsubAttributes.Add(subattId);
+                            XAttribute subattTaskName = new XAttribute("TaskName", subTask.TaskName);
+                            lstsubAttributes.Add(subattTaskName);
+                            if (subTask.Description != null)
+                            {
+                                XAttribute subattDescription = new XAttribute("Description", subTask.Description);
+                                lstsubAttributes.Add(subattDescription);
+                            }
+                            XElement ActivitySubTaskElement = new XElement("ActivitySubTask", lstsubAttributes);
+                            //add sub element to the ActivityTask elelemnt
+                            ActivityTaskElement.Add(ActivitySubTaskElement);
+                        }
+                        // add activityTask element to ActivityGroup element
+                        ActivityGroupElement.Add(ActivityTaskElement);
+                    }
+                    else
+                    {
+                        //ActivityTask has no subtasks so add ActivityTask to ActivityGroup
+                        ActivityGroupElement.Add(ActivityTaskElement);
+                    }
+
+                }
+
+                // add ActivityGroup elements to doc_root Element of the DOM document
+                lstdocNodes.Add(ActivityGroupElement);
+
+            }
+            //add root node list of element nodes
+            doc_root.Add(lstdocNodes);
+            // Create DOM with lst of nodes 'lstdocNodes'
+            XDocument DOMdoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), doc_root);
+            var executingPath = Directory.GetCurrentDirectory();
+
+            try
+            {
+
+
+                if (File.Exists($"{executingPath}\\ChurchActivities.xml"))
+                {
+
+                    var fsXML = new FileStream($"{executingPath}\\ChurchActivities.xml", FileMode.Create, FileAccess.ReadWrite);
+
+                    DOMdoc.Save(fsXML);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Cursor = Cursors.Arrow;
+                MessageBox.Show("No Activities file found!");
+            }
+
+            Cursor = Cursors.Arrow;
+
+        }
+
+        private void Load_ChurchActivities_From_XMLFile()
+        {
+
+            XmlReaderSettings reader_settings = new XmlReaderSettings
+            {
+                IgnoreWhitespace = true
+            };
+            using (XmlReader xreader = XmlReader.Create("ChurchActivities.xml", reader_settings))
+            {
+                xreader.ReadStartElement("XmlDocument");
+                while (xreader.Name == "ActivityGroup")
+                {
+                    XElement ActivityGroupElement = (XElement)XNode.ReadFrom(xreader);
+                    
+                  string xmlAttName = (string)ActivityGroupElement.Attribute("ActivityName");
+                  ActivityGroup trv_activityGroup = new ActivityGroup { Parent="", ActivityName = xmlAttName };
+                    m_lstActivitiesCount++; // increments activity list count to later compare if the list has changed
+
+                        foreach (XElement ActivityTaskElement in ActivityGroupElement.Elements() )
+                        {
+                            int id = (int)ActivityTaskElement.Attribute("Id");
+                            string name = (string)ActivityTaskElement.Attribute("TaskName");
+                            string description = (string)ActivityTaskElement.Attribute("Description");
+
+                            ActivityTask trv_activityTask = new ActivityTask { Parent = "", ActivityId = id, TaskName = name, Description= description };
+                            m_lstActivitiesCount++;
+
+                            if (ActivityTaskElement.HasElements )
+                            {
+                                foreach (XElement subActivity in ActivityTaskElement.Elements() )
+                                {
+                                    int subtaskId = (int)subActivity.Attribute("Id");
+                                    string subtaskName = (string)subActivity.Attribute("TaskName");
+                                    string subtaskdescription = (string)subActivity.Attribute("Description");
+
+                                ActivityTask trv_activitysubTask = new ActivityTask { Parent = "", ActivityId = subtaskId, TaskName = subtaskName, Description = subtaskdescription };
+                                //add subtask to lstActivityTask
+                                trv_activityTask.lstsubTasks.Add(trv_activitysubTask);
+                                m_lstActivityTasks.Add(trv_activitysubTask);
+                                m_lstActivitiesCount++; // increments activity list count to later compare if the list has changed
+
+                            }
+                                
+                            }
+
+                            //add activity tasks to activity group
+                            trv_activityGroup.lstActivityTasks.Add(trv_activityTask);
+                            m_lstActivityTasks.Add(trv_activityTask);
+
+                    }
+                        
+                    //add groups to lstActivities list
+                   
+                    m_lstActivities.Add(trv_activityGroup);
+
+
+
+                }
+                xreader.ReadEndElement();
+            }
+          
 
 
         }
@@ -946,8 +966,10 @@ namespace CAOGAttendeeProject
            dataGrid.Items.Refresh();
             lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
             m_isQueryTableShown = false;
+
             btnDelete.IsEnabled = true;
             dataGrid.IsReadOnly = false;
+            txtSearch.IsEnabled = true;
 
 
         } 
@@ -1136,7 +1158,7 @@ namespace CAOGAttendeeProject
 
             m_isRespondedChecked = true;
       
-            BuildQuery_and_UpdateGrid();
+           
 
             Cursor = Cursors.Arrow;
 
@@ -1150,9 +1172,9 @@ namespace CAOGAttendeeProject
             chkAttended.IsChecked = false;
             chkResponded.IsChecked = false;
             m_isFollowupChecked = true;
-          
+            m_isQueryTableShown = true;
 
-            BuildQuery_and_UpdateGrid();
+            // BuildQuery_and_UpdateGrid();
             Cursor = Cursors.Arrow;
         }
 
@@ -1162,16 +1184,15 @@ namespace CAOGAttendeeProject
             //generate list of all attended attendees
 
 
-            Cursor = Cursors.Wait;
-
+         
             chkResponded.IsChecked = false;
             chkFollowup.IsChecked = false;
 
             m_isAttendedChecked = true;
         
 
-            BuildQuery_and_UpdateGrid();
-            Cursor = Cursors.Arrow;
+           
+         
         }
 
 
@@ -1258,10 +1279,9 @@ namespace CAOGAttendeeProject
                 }
                 else if (m_alistView)
                 {
-                    /*var filteredAttendeeListTable */
-                    dataGrid_prospect.DataContext = m_lstattendanceTableRows.Where(row => row.FirstLastName.Contains(text));
-                     //= filteredAttendeeListTable;
-                    lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
+                    var filteredAttendeeListTable = m_lstattendanceTableRows.Where(row => row.FirstLastName.Contains(text));
+                    dataGrid_prospect.DataContext = filteredAttendeeListTable;
+                   lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
                 }
               
 
@@ -1276,43 +1296,26 @@ namespace CAOGAttendeeProject
         {
 
             m_isAttendedChecked = false;
-            m_isQueryTableShown = false;
+         
 
-            if (!m_IsActivityPanelView)
-            {
-                Cursor = Cursors.Wait;
-                BuildQuery_and_UpdateGrid();
-                Cursor = Cursors.Arrow;
-            }
+          
         }
 
         private void chkFollowup_Unchecked(object sender, RoutedEventArgs e)
         {
 
             m_isFollowupChecked = false;
-            m_isQueryTableShown = false;
+          
 
-
-            if (m_AttendanceView && !m_IsActivityPanelView)
-            {
-                Cursor = Cursors.Wait;
-                BuildQuery_and_UpdateGrid();
-                Cursor = Cursors.Arrow;
-            }
         }
 
         private void chkResponded_Unchecked(object sender, RoutedEventArgs e)
         {
 
             m_isRespondedChecked = false;
-            m_isQueryTableShown = false;
+       
 
-            if (m_AttendanceView && !m_IsActivityPanelView)
-            {
-                Cursor = Cursors.Wait;
-                BuildQuery_and_UpdateGrid();
-                Cursor = Cursors.Arrow;
-            }
+          
             
         }
 
@@ -1385,7 +1388,7 @@ namespace CAOGAttendeeProject
                     }
 
 
-                    BuildQuery_and_UpdateGrid();
+                    // BuildQuery_and_UpdateGrid();
 
                 }
                 // ActivityView-------------------------------------------------------------------------------------------------------------------
@@ -1742,7 +1745,7 @@ namespace CAOGAttendeeProject
             if (!txtSearch.IsEnabled)
                 txtSearch.IsEnabled = true;
 
-            if (!btnDelete.IsEnabled)
+            if (!btnDelete.IsEnabled && dataGrid.RowDetailsVisibilityMode != DataGridRowDetailsVisibilityMode.Visible)
                 btnDelete.IsEnabled = true;
 
             if (!m_IsActivePanelView)
@@ -2092,57 +2095,6 @@ namespace CAOGAttendeeProject
             Display_AttendeeListTable_in_Grid();
         }
 
-
-        private void Check_for_only_followup_status(int AttendeeId)
-        {
-            string ldate = "";
-            string lstatus = "";
-            int idx = 0;
-
-
-            var attid = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == AttendeeId);
-
-            var queryLastDateAttended = (from DateRec in attid.AttendanceList
-                                         where DateRec.Status == "Attended" || DateRec.Status == "Responded"
-                                         orderby DateRec.Date ascending
-                                         select DateRec).ToList().LastOrDefault();
-
-            if (queryLastDateAttended == null)
-            {
-
-
-
-                var queryLastDateFollowUp = (from DateRec in attid.AttendanceList
-                                             where DateRec.Status == "Follow-Up"
-                                             orderby DateRec.Date ascending
-                                             select DateRec).ToList().LastOrDefault();
-
-                if (queryLastDateFollowUp != null)
-                {
-
-                    lstatus = queryLastDateFollowUp.Status;
-
-                    foreach (DataRow dr in m_DataSet.Tables["DefaultTable"].Rows)
-                    {
-                        if (int.Parse(dr["AttendeeId"].ToString()) == AttendeeId)
-                        {
-                            m_DataSet.Tables["DefaultTable"].Rows[idx]["Date Last Attended"] = "N/A";
-                            m_DataSet.Tables["DefaultTable"].Rows[idx]["Status"] = "Follow-Up";
-                            break;
-                        }
-                        idx++;
-                    }
-
-
-                }
-
-
-
-            }
-
-        }
-     
-
         private void UpdateAttendeeListTableWithDateFilter()
         {
 
@@ -2219,20 +2171,14 @@ namespace CAOGAttendeeProject
 
 
             m_isFilterByDateChecked = false;
-            m_isQueryTableShown = false;
-
+         
             if (!m_isActivityfilterByDateChecked)
                 DateCalendar.IsEnabled = false;
 
             if (m_alistView)
                 return;
 
-            if (m_AttendanceView && !m_IsActivityPanelView)
-            {
-                Cursor = Cursors.Wait;
-                BuildQuery_and_UpdateGrid();
-                Cursor = Cursors.Arrow;
-            }
+           
 
         }
 
@@ -2242,6 +2188,7 @@ namespace CAOGAttendeeProject
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
 
+
             m_alistView = false;
             m_isActivityfilterByDateChecked = false;
             m_AttendanceView = true;
@@ -2250,16 +2197,20 @@ namespace CAOGAttendeeProject
             m_IsActivityPanelView = false;
             m_IsPanelProspectView = false;
 
-            btnPanelAddActivity.Visibility = Visibility.Hidden;
+            //btnPanelAddActivity.Visibility = Visibility.Hidden;
+            btnPanelNewActivity.IsEnabled = false;
+            btnPanelAddActivity.IsEnabled = false;
+
             btnNewRec.IsEnabled = false;
             btnImportRecords.IsEnabled = false;
             chkAttended.IsEnabled = false;
             chkFollowup.IsEnabled = false;
             chkResponded.IsEnabled = false;
-           
 
+            m_lstActivitiesCount = m_lstActivities.Count();
+            m_newlstActivitiesCount = m_lstActivitiesCount;
             Uncheck_All_Filters();
-
+            SetTimer();
 
 
 
@@ -2286,6 +2237,7 @@ namespace CAOGAttendeeProject
 
 
             lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
+            lblTableShown.Content = "No Query Results";
 
         }
 
@@ -2328,7 +2280,7 @@ namespace CAOGAttendeeProject
 
         private void btnChart_Click(object sender, RoutedEventArgs e)
         {
-            ChartWindow wndCharts = new ChartWindow(m_dbContext);
+            ChartWindow wndCharts = new ChartWindow(ref m_dbContext);
             wndCharts.Show();
 
         }
@@ -2580,7 +2532,7 @@ namespace CAOGAttendeeProject
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             bool isAttendedStatusChecked = false;
-
+            
             if (m_NoCredFile)
             {
                 e.Cancel = false;
@@ -2594,6 +2546,24 @@ namespace CAOGAttendeeProject
 
                 isAttendedStatusChecked = isAttendeeListDirty();
 
+                if (m_lstActivitiesCount != m_newlstActivitiesCount)
+                {
+
+                    MessageBoxResult res = MessageBox.Show("The activity list has changed, save changes?", "Save activity changes", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.OK);
+                    if (res == MessageBoxResult.OK)
+                    {
+
+                        Save_ChurchActivities_To_XMLFile();
+                        
+
+                    }
+                    else
+                    {
+                        // user clicked cance do nothing
+                    }
+                   
+                }
+#if (init_db)
                 if (!m_dbContext.ChangeTracker.HasChanges() && isAttendedStatusChecked)
                 {
 
@@ -2608,7 +2578,11 @@ namespace CAOGAttendeeProject
 
                     }
                     else
+                    {
                         e.Cancel = true;
+                        StopTimer();
+                    }
+                        
 
 
 
@@ -2626,12 +2600,15 @@ namespace CAOGAttendeeProject
                     {
 
                         SaveActiveList();
+                     
+                        
                         e.Cancel = false;
 
                     }
                     else if (res == MessageBoxResult.No)
                     {
                         e.Cancel = false;
+                        StopTimer();
                     }
                     else if (res == MessageBoxResult.Cancel)
                         e.Cancel = true;
@@ -2649,12 +2626,14 @@ namespace CAOGAttendeeProject
                     {
 
                         SaveActiveList();
+                        StopTimer();
                         e.Cancel = false;
 
                     }
                     else if (res == MessageBoxResult.No)
                     {
                         e.Cancel = false;
+                        StopTimer();
                     }
                     else if (res == MessageBoxResult.Cancel)
                         e.Cancel = true;
@@ -2666,7 +2645,9 @@ namespace CAOGAttendeeProject
 
 
                 }
-
+#endif
+                // close all active threads
+                Environment.Exit(0);
             }
 
 
@@ -2824,13 +2805,13 @@ namespace CAOGAttendeeProject
         private void chkActivityFilter_Unchecked(object sender, RoutedEventArgs e)
         {
             m_isActivityFilterChecked = false;
-           
+         
+
             Cursor = Cursors.Wait;
 
             ClearTreeView();
 
-            if (m_AttendanceView && !m_IsActivityPanelView)
-                BuildQuery_and_UpdateGrid();
+           
 
             trvActivities.IsEnabled = false;
            
@@ -2999,7 +2980,7 @@ namespace CAOGAttendeeProject
             if (m_previousSelected_ActivityPair != m_currentSelected_ActivityPair)
             {
             
-                foreach (ActivityTask task in m_lstActivityTask)
+                foreach (ActivityTask task in m_lstActivityTasks)
                 {
                    
                         if ( (task.ActivityId == parenttaskId) || (task.ActivityId == childtaskId) )
@@ -3066,8 +3047,8 @@ namespace CAOGAttendeeProject
                                         
                                     };
 
-                                m_child_taskId = subtask.ActivityId;
-                                m_parent_taskId = task.ActivityId;
+                                    m_child_taskId = subtask.ActivityId;
+                                    m_parent_taskId = task.ActivityId;
 
                                     m_currentSelected_ActivityPair = selectedActivity;
 
@@ -3083,7 +3064,34 @@ namespace CAOGAttendeeProject
 
                                     break;
                                 }
+                                else if  ((m_ActivityName == task.TaskName) && task.IsSelected) // user selected a task with subtasks underneath it
+                                {
+                                    m_activitychecked_count++;
+                                    ActivityPair selectedActivity = new ActivityPair
+                                    {
+                                        ActivityGroup = activity_group.ActivityName,
+                                        AttendeeId = 0,
+                                        ParentTaskName = task.TaskName,
+                                        ChildTaskName = "",
 
+
+                                    };
+                                    m_parent_taskId = task.ActivityId;
+
+                                    m_currentSelected_ActivityPair = selectedActivity;
+
+
+                                    if (m_activitychecked_count == 1)
+                                    {
+                                        m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
+
+                                    }
+
+                                    txtblkTaskDescription.Text = task.Description;
+                                    break;
+
+                              
+                            }
 
 
 
@@ -3135,7 +3143,7 @@ namespace CAOGAttendeeProject
                 m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
 
 
-                BuildQuery_and_UpdateGrid();
+                // BuildQuery_and_UpdateGrid();
             
         }
      
@@ -3313,7 +3321,7 @@ namespace CAOGAttendeeProject
 
                 }
                     //Activity date, Atttended
-                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isAttendedChecked && !m_isActivityFilterChecked)
+                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isAttendedChecked && !m_isActivityChecked)
                     {
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Attended" || info.Status == "Responded")
                                  join activity in m_dbContext.Activities.Local.Where(info => info.Date == m_ActivityDateSelected)
@@ -3336,7 +3344,7 @@ namespace CAOGAttendeeProject
 
                 }
                     //Activity date, FollowUp
-                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && !m_isActivityFilterChecked)
+                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && !m_isActivityChecked)
                     {
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Follow-Up")
                                  join activity in m_dbContext.Activities.Local.Where(info => info.Date == m_ActivityDateSelected)
@@ -3359,7 +3367,7 @@ namespace CAOGAttendeeProject
 
                 }
                     //Activity date, Responded
-                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && !m_isActivityFilterChecked)
+                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && !m_isActivityChecked)
                     {
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Responded")
                                  join activity in m_dbContext.Activities.Local.Where(info => info.Date == m_ActivityDateSelected)
@@ -3383,7 +3391,7 @@ namespace CAOGAttendeeProject
 
                     }
                     //Date, Atttended
-                    else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isAttendedChecked && !m_isActivityFilterChecked)
+                    else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isAttendedChecked && !m_isActivityChecked)
                     {
 
 
@@ -3409,7 +3417,7 @@ namespace CAOGAttendeeProject
                   
                 }
                     //Date, FollowUp
-                    else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && !m_isActivityFilterChecked)
+                    else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && !m_isActivityChecked)
                     {
 
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Follow-Up" && info.Date == m_DateSelected)
@@ -3434,7 +3442,7 @@ namespace CAOGAttendeeProject
 
                 }
                     //Date, Responded
-                    else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && !m_isActivityFilterChecked)
+                    else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && !m_isActivityChecked)
                     {
 
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Responded" && info.Date == m_DateSelected)
@@ -3458,7 +3466,7 @@ namespace CAOGAttendeeProject
                    
                 }
                     //Date
-                    else if (m_isFilterByDateChecked && !m_isAttendedChecked && !m_isFollowupChecked & !m_isRespondedChecked && !m_isActivityFilterChecked)
+                    else if (m_isFilterByDateChecked && !m_isAttendedChecked && !m_isFollowupChecked & !m_isRespondedChecked && !m_isActivityChecked)
                     {
 
 
@@ -3507,7 +3515,7 @@ namespace CAOGAttendeeProject
 
                     }
                     //Activity date
-                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && !m_isActivityFilterChecked)
+                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && !m_isActivityChecked)
                     {
 
                          querylinq = (from attinfo in m_dbContext.Attendance_Info.Local
@@ -3650,7 +3658,7 @@ namespace CAOGAttendeeProject
                                  }).AsQueryable();
                 }
                     //Attended
-                    else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityFilterChecked && m_isChurchStatusFilterChecked && m_isAttendedChecked)
+                    else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityChecked && m_isChurchStatusFilterChecked && m_isAttendedChecked)
                     {
 
 
@@ -3675,7 +3683,7 @@ namespace CAOGAttendeeProject
                                  }).AsQueryable();
                 }
                     //Responded
-                    else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityFilterChecked && m_isChurchStatusFilterChecked && m_isRespondedChecked)
+                    else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityChecked && m_isChurchStatusFilterChecked && m_isRespondedChecked)
                     {
 
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Responded")
@@ -3700,7 +3708,7 @@ namespace CAOGAttendeeProject
 
                 }
                     //Follow-up
-                    else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityFilterChecked && m_isChurchStatusFilterChecked && m_isFollowupChecked)
+                    else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityChecked && m_isChurchStatusFilterChecked && m_isFollowupChecked)
                     {
 
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Follow-Up")
@@ -3743,10 +3751,12 @@ namespace CAOGAttendeeProject
                 lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
                 dataGrid.IsReadOnly = true;
                 m_isQueryTableShown = true;
+                lblTableShown.Content = "Query Results";
             }
             else
             {
                 Display_DefaultTable_in_Grid();
+                lblTableShown.Content = "No Query Results";
             }
                 
 
@@ -3762,8 +3772,7 @@ namespace CAOGAttendeeProject
             {
                 ClearTreeView();
                 m_currentSelected_ActivityPair = null;
-                if (m_AttendanceView && !m_IsActivityPanelView)
-                    BuildQuery_and_UpdateGrid();
+                
             }
 
             Cursor = Cursors.Arrow;
@@ -3789,12 +3798,7 @@ namespace CAOGAttendeeProject
                 dataGrid.UpdateLayout();
             }
 
-            //if (dataGrid_activity.Columns.Count > 1)
-            //{
-            //    dataGrid_activity.CommitEdit(DataGridEditingUnit.Row, true);
-            //    dataGrid_activity.UpdateLayout();
-            //}
-
+            
             if ((GridsTabControl.SelectedItem as TabItem).Name == "ActiveTab")
             {
                
@@ -3815,25 +3819,10 @@ namespace CAOGAttendeeProject
 
 
                     SaveProspectPanelState();
-                    LoadActivePanelState();
+                   
 
 
-                    // save current state of side panel
-                    //if (m_AttendanceView)
-                    //{
-                    //    LoadActivePanelState();
-
-                    //}
-                    //else if (m_alistView)
-                    //{
-                    //    SaveProspectPanelState();
-                    //}
-                    //else if (m_activityView)
-                    //{
-
-                    //    SaveActivityPanelState();
-                    //}
-
+                    
                    
 
                    
@@ -3846,9 +3835,10 @@ namespace CAOGAttendeeProject
                     btnDelete.IsEnabled = true;
                     btnImportRecords.IsEnabled = false;
 
-                    BuildQuery_and_UpdateGrid();
+                    
                     if (!m_IsActivePanelView)
                     {
+                        LoadActivePanelState();
                         Show_activeview_Panel();
                     }
                     
@@ -3866,25 +3856,7 @@ namespace CAOGAttendeeProject
 
                     SaveActivePanelState();
 
-                    //// save current state of side panel
-                    //if (m_AttendanceView)
-                    //{
-                    //   
-
-                    //}
-                    //else if (m_alistView)
-                    //{
-                    //    SaveProspectPanelState();
-                    //}
-                    //else if (m_activityView)
-                    //{
-                    //    SaveActivityPanelState();
-
-                    //}
-
-
-
-
+                    
                     // load ProspectTab state from TabState class
                     LoadProspectPanelState();
                   
@@ -3912,9 +3884,15 @@ namespace CAOGAttendeeProject
 
         private void LoadActivityPanelState()
         {
-           
+
+            btnNewRec.IsEnabled = false;
+            btnImportRecords.IsEnabled = false;
+            btnDelete.IsEnabled = false;
+
             chkActivityDateFilter.IsChecked = true;
             chkActivityFilter.IsChecked = true;
+            btnPanelAddActivity.IsEnabled = true;
+            btnPanelNewActivity.IsEnabled = true;
         }
         private void SaveActivityPanelState()
         {
@@ -3953,6 +3931,8 @@ namespace CAOGAttendeeProject
         {
 
 
+            btnPanelNewActivity.IsEnabled = false;
+            btnPanelAddActivity.IsEnabled = false;
 
             txtSearch.Text = m_TabState.txtSearchActiveState;
             
@@ -4001,7 +3981,7 @@ namespace CAOGAttendeeProject
 
                 }
 
-                btnPanelAddActivity.Visibility = Visibility.Hidden;
+               
 
 
                 spFilterOptions.Children.Add(CalendarExpander);
@@ -4015,6 +3995,9 @@ namespace CAOGAttendeeProject
                 m_IsActivePanelView = true;
                 m_IsPanelProspectView = false;
 
+                btnExecQuery.IsEnabled = true;
+                btnDelete.IsEnabled = true;
+               btnGenerateFollowUps.IsEnabled = true; ;
             
 
 
@@ -4050,6 +4033,10 @@ namespace CAOGAttendeeProject
             spFilterOptions.Children.Add(CalendarExpander);
          
             txtblkTaskDescription.Text = "";
+
+            btnGenerateFollowUps.IsEnabled = false;
+            btnExecQuery.IsEnabled = false;
+            btnDelete.IsEnabled = false;
 
         }
     
@@ -4099,18 +4086,15 @@ namespace CAOGAttendeeProject
         {
 
             m_isActivityfilterByDateChecked = false;
-            if (!m_isFilterByDateChecked)
+            
+           
+
+                if (!m_isFilterByDateChecked)
                 DateCalendar.IsEnabled = false;
 
             if (m_alistView)
                 return;
-            else if (!m_IsActivityPanelView)
-            {
-
-                Cursor = Cursors.Wait;
-                BuildQuery_and_UpdateGrid();
-                Cursor = Cursors.Arrow;
-            }
+           
 
          
 
@@ -4123,11 +4107,12 @@ namespace CAOGAttendeeProject
             chkAttended.IsEnabled = true;
             chkFollowup.IsEnabled = true;
             chkResponded.IsEnabled = true;
+           
 
             if (m_isAttendedChecked || m_isRespondedChecked || m_isFollowupChecked)
             {
                 
-               BuildQuery_and_UpdateGrid();
+              // BuildQuery_and_UpdateGrid();
             }
               
 
@@ -4138,7 +4123,7 @@ namespace CAOGAttendeeProject
         private void chkChurchStatusFilter_Unchecked(object sender, RoutedEventArgs e)
         {
             m_isChurchStatusFilterChecked = false;
-            m_isQueryTableShown = false;
+           
 
             if (chkAttended.IsChecked.Value )
                 chkAttended.IsChecked = false;
@@ -4153,12 +4138,7 @@ namespace CAOGAttendeeProject
             chkFollowup.IsEnabled = false;
             chkResponded.IsEnabled = false;
 
-            if (m_AttendanceView && !m_IsActivityPanelView)
-            {
-                Cursor = Cursors.Wait;
-                BuildQuery_and_UpdateGrid();
-                Cursor = Cursors.Arrow;
-            }
+       
             
 
         }
@@ -4191,6 +4171,8 @@ namespace CAOGAttendeeProject
 
                 }
             }
+            txtblkTaskDescription.Text = "";
+            m_currentSelected_ActivityPair = null;
         }
      
 
@@ -4211,7 +4193,7 @@ namespace CAOGAttendeeProject
                             if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected)
                             {
 
-                                BuildQuery_and_UpdateGrid();
+                               // BuildQuery_and_UpdateGrid();
 
                                 txtblkTaskDescription.Text = subtask.Description;
                                 task.IsSelected = true; //check parent
@@ -4222,7 +4204,7 @@ namespace CAOGAttendeeProject
                     }
                     else if ((m_ActivityName == task.TaskName) && task.IsSelected)
                     {
-                        BuildQuery_and_UpdateGrid();
+                        //BuildQuery_and_UpdateGrid();
                         txtblkTaskDescription.Text = task.Description;
 
                         break;
@@ -4358,6 +4340,9 @@ namespace CAOGAttendeeProject
 
                 Disable_Filters();
                 btnDelete.IsEnabled = false;
+                btnExecQuery.IsEnabled = false;
+                btnGenerateFollowUps.IsEnabled = false;
+
                 // user was on the add activity page and clicked the expander button
                 if (m_IsActivityPanelView)
                 {
@@ -4396,7 +4381,7 @@ namespace CAOGAttendeeProject
 
             m_Activity_grid.DataContext = m_default_row_selected.ActivityList.OrderByDescending(rec => rec.Date);
 
-        
+            btnDelete.IsEnabled = false;
             //hide grid columns
             if (m_AttendeeInfo_grid.Columns.Count > 0)
             {
@@ -4516,16 +4501,20 @@ namespace CAOGAttendeeProject
 
            
 
-            btnNewRec.IsEnabled = false;
-            btnImportRecords.IsEnabled = false;
-            btnDelete.IsEnabled = false;
             
+           
 
-            if (!m_IsActivityPanelView)
+            if (!m_IsActivityPanelView && !m_isQueryTableShown)
             {
                 SaveActivePanelState();
                 LoadActivityPanelState();
                 Show_Activity_Panel();
+                
+
+            }
+            else
+            {
+                MessageBox.Show("Activities can only be added when no database queries are being displayed.\n\nPlease deselect all filter checkboxes and query the database again.","Cannot add activity",MessageBoxButton.OK,MessageBoxImage.Stop);
             }
 
             
@@ -4565,8 +4554,10 @@ namespace CAOGAttendeeProject
                 m_IsActivePanelView = false;
                 m_IsActivityPanelView = true;
                 m_IsPanelProspectView = false;
-                
-                    
+
+                btnExecQuery.IsEnabled = false;
+                btnDelete.IsEnabled = false;
+                btnGenerateFollowUps.IsEnabled = false;
 
 
         }
@@ -4628,6 +4619,155 @@ namespace CAOGAttendeeProject
         private void dataGrid_prospect_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
            // dataGrid_prospect.Items.Refresh();
+        }
+
+
+        private void MenuItem_AddNewActivity_Click(object sender, RoutedEventArgs e)
+        {
+            int WindowMode = 1;
+
+            
+            if (m_currentSelected_ActivityPair != null)
+            {
+                WndAddGroup AddgroupWin = new WndAddGroup(ref m_lstActivities, WindowMode, m_currentSelected_ActivityPair);
+                AddgroupWin.ShowDialog();
+                m_newlstActivitiesCount = m_newlstActivitiesCount + AddgroupWin.GetActivitiesCount;
+                trvActivities.Items.Refresh();
+            }
+            else
+            {
+                MessageBox.Show("Must select an activity first. Select an activity checking by left click on the activity.");
+            }
+            
+
+           
+           
+
+
+
+        }
+
+        private void MenuItem_DeleteActivity_Click(object sender, RoutedEventArgs e)
+        {
+            Cursor = Cursors.Wait;
+
+            if (m_currentSelected_ActivityPair !=null || m_currentSelected_ActivityTask != null)
+            {
+                string childtask = m_currentSelected_ActivityPair.ChildTaskName;
+                string activityGroup = m_currentSelected_ActivityPair.ActivityGroup;
+                string parenttask = m_currentSelected_ActivityPair.ParentTaskName;
+
+                var a_group = m_lstActivities.SingleOrDefault(at => at.ActivityName == activityGroup);
+                var task = a_group.lstActivityTasks.SingleOrDefault(at => at.TaskName == parenttask);
+                var subtask = task.lstsubTasks.SingleOrDefault(st => st.TaskName == childtask);
+
+
+                ////user selected a group
+                if (activityGroup != "" && parenttask == "")
+                {
+                    m_lstActivities.Remove(a_group);
+                }
+                // user selected a task 
+                else if (activityGroup != "" && parenttask != "" && childtask == "")
+                {
+                    a_group.lstActivityTasks.Remove(task);
+                }
+                // user selected a task with child tasks
+                else if (activityGroup != "" && parenttask != "" && childtask != "")
+                {
+                    
+                    a_group.lstActivityTasks.Remove(subtask);
+                }
+
+                ClearTreeView();
+
+                m_newlstActivitiesCount = m_lstActivitiesCount + 1;
+                trvActivities.Items.Refresh();
+                Cursor = Cursors.Arrow;
+
+              
+
+            }
+        }
+     
+
+   
+        private void MenuItem_DeleteActivityGroup_Click(object sender, RoutedEventArgs e)
+        {
+            var deleteActivityGroup = m_lstActivities.SingleOrDefault(ag => ag.ActivityName == m_ActivityName);
+            if (deleteActivityGroup != null)
+            {
+                m_lstActivities.Remove(deleteActivityGroup);
+                
+            }
+                
+
+            trvActivities.Items.Refresh();
+        }
+        private void MenuItem_AddNewGroup_Click(object sender, RoutedEventArgs e)
+        {
+            int WindowMode = 0;
+
+           
+                WndAddGroup groupWin = new WndAddGroup(ref m_lstActivities, WindowMode, m_currentSelected_ActivityPair);
+                groupWin.ShowDialog();
+                m_newlstActivitiesCount = m_newlstActivitiesCount + groupWin.GetActivitiesCount;
+
+                trvActivities.Items.Refresh();
+           
+
+           
+        }
+
+        private void TrvActivities_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            m_ActivityName = ((ActivityGroup)e.NewValue).ActivityName;
+
+
+
+
+         
+            
+
+
+        }
+
+        private void BtnPanelNewActivity_Click(object sender, RoutedEventArgs e)
+        {
+            var IsItemSelected = trvActivities.SelectedItem;
+
+            int WindowMode = 0;
+
+            if (IsItemSelected != null)
+            {
+                WndAddGroup AddgroupWin = new WndAddGroup(ref m_lstActivities, WindowMode, m_currentSelected_ActivityPair);
+                AddgroupWin.ShowDialog();
+                trvActivities.Items.Refresh();
+            }
+            else
+            {
+                MessageBox.Show("Must select an activity item first. Select an item by left click on the activity.");
+            }
+
+        }
+
+        private void BtnExecQuery_Click(object sender, RoutedEventArgs e)
+        {
+            BuildQuery_and_UpdateGrid();
+           
+
+        }
+
+        private void TrvActivities_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            
+            if (m_lstActivitiesCount != m_newlstActivitiesCount)
+            {
+                m_IsListActivitiesDirty = true;
+            }
+            else
+                m_IsListActivitiesDirty = false;
+            
         }
     }
 

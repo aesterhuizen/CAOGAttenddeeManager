@@ -21,7 +21,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;init_db</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>1</WarningLevel>
   </PropertyGroup>
@@ -29,7 +29,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\v3.0.7\</OutputPath>
+    <OutputPath>bin\Release\v3.0.8\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -110,8 +110,8 @@
       <DependentUpon>ChartWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ModelDb.cs" />
-    <Compile Include="WndAtendeeInfo.xaml.cs">
-      <DependentUpon>WndAtendeeInfo.xaml</DependentUpon>
+    <Compile Include="AddGroupWindow.xaml.cs">
+      <DependentUpon>AddGroupWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
@@ -133,7 +133,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="WndAtendeeInfo.xaml">
+    <Page Include="AddGroupWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -221,6 +221,15 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\AddActivity.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\NewActivity.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\ActivityPanel.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\ApplyQuery.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

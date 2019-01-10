@@ -4,4 +4,7 @@
     <StartAction>Project</StartAction>
     <StartProgram>C:\Users\aesterh\Documents\Visual Studio 2015\Projects\CAOGAttendeeManager\CAOGAttendeeManager\bin\Debug\CAOGAttendeeManager.exe</StartProgram>
   </PropertyGroup>
+  <PropertyGroup>
+    <ProjectView>ProjectFiles</ProjectView>
+  </PropertyGroup>
 </Project>

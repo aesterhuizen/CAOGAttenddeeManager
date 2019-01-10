@@ -514,7 +514,7 @@ namespace CAOGAttendeeProject
                 if (_isModified != value)
                 {
                     _isModified = value;
-                   // NotifyPropertyChanged("isModifiedRow");
+                  // NotifyPropertyChanged("IsModifiedrow");
                 }
                 
             }
@@ -637,6 +637,8 @@ namespace CAOGAttendeeProject
         public ActivityGroup()
         {
             lstActivityTasks = new ObservableCollection<ActivityTask>();
+            Parent = "";
+            ActivityName = "";
         }
 
         public string Parent {get; set;}
@@ -672,8 +674,14 @@ namespace CAOGAttendeeProject
         public ActivityTask()
         {
             this.lstsubTasks = new ObservableCollection<ActivityTask>() { };
+            ActivityId = 0;
+            Parent = "";
+            TaskName = "";
+            Description = "";
+
         }
 
+       
         public int ActivityId {get;set; }
         public string Parent { get; set; }
       
