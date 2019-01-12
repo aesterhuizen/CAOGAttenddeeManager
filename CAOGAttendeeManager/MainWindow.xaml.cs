@@ -159,14 +159,14 @@ namespace CAOGAttendeeProject
         private List<AttendanceTableRow> m_lstattendanceTableRows = new List<AttendanceTableRow>() { };
         //list of Activities
         private List<ActivityGroup> m_lstActivities = new List<ActivityGroup> { };
-        bool m_IsListActivitiesDirty = false;
+        
         
         private List<ActivityTask> m_lstActivityTasks = new List<ActivityTask> { };
 
         private TabState m_TabState = new TabState();
         //Activity control
         private string m_ActivityName = "";
-        private int m_old_ActivityId = 0;
+        
     
        
         private int m_child_taskId = 0;
@@ -175,6 +175,8 @@ namespace CAOGAttendeeProject
         private int m_newlstActivitiesCount = 0;
         // the current selected activity Pair
         private ActivityPair m_currentSelected_ActivityPair = null;
+        private ActivityTask m_currentSelect_ActivityTask = null;
+
         private ActivityPair m_previousSelected_ActivityPair = null;
         private Timer aTimer = null;
 
@@ -248,21 +250,25 @@ namespace CAOGAttendeeProject
 
             Dispatcher.Invoke(() =>
            {
-               if (m_IsActivityPanelView &&
+               if (m_currentSelected_ActivityPair !=null && m_currentSelect_ActivityTask != null)
+               {
+                   if (m_IsActivityPanelView &&
                     m_activitychecked_count == 1 &&
                     m_ActivityDateSelected != null &&
 
-                  /*tasks or subtasks can be added as activities*/
-                    m_currentSelected_ActivityPair.ChildTaskName != ""
+                    /*parent tasks with child tasks cannot be added to the activity list*/
+                    m_currentSelect_ActivityTask.lstsubTasks.Count == 0
                    )
 
-               {
-                   btnPanelAddActivity.IsEnabled = true;
+                   {
+                       btnPanelAddActivity.IsEnabled = true;
+                   }
+                   else
+                   {
+                       btnPanelAddActivity.IsEnabled = false;
+                   }
                }
-               else
-               {
-                   btnPanelAddActivity.IsEnabled = false;
-               }
+               
 
 
            });
@@ -272,16 +278,20 @@ namespace CAOGAttendeeProject
 
                 var selected_group = trvActivities.SelectedItem;
 
-                if (selected_group != null || 
-                    (m_currentSelected_ActivityPair != null && 
-                    (m_currentSelected_ActivityPair.ChildTaskName != "" || 
-                    m_currentSelected_ActivityPair.ParentTaskName != "") ) )
+                if (m_currentSelected_ActivityPair != null && m_currentSelect_ActivityTask != null)
                 {
-                    btnPanelNewActivity.IsEnabled = true;
-                }
-                else
-                {
-                    btnPanelNewActivity.IsEnabled = false;
+                    if (selected_group != null ||
+                        (m_currentSelected_ActivityPair != null &&
+                         (m_currentSelect_ActivityTask.lstsubTasks.Count == 0 ||
+                         m_currentSelect_ActivityTask.lstsubTasks.Count != 0)))
+                    {
+                        btnPanelNewActivity.IsEnabled = true;
+                    }
+                    else
+                    {
+                        btnPanelNewActivity.IsEnabled = false;
+                    }
+
                 }
             });
 
@@ -3102,7 +3112,7 @@ namespace CAOGAttendeeProject
                                     m_parent_taskId = task.ActivityId;
 
                                     m_currentSelected_ActivityPair = selectedActivity;
-
+                                    m_currentSelect_ActivityTask = subtask;
 
 
                                     if (m_activitychecked_count == 1)
@@ -3134,7 +3144,7 @@ namespace CAOGAttendeeProject
                                     m_parent_taskId = task.ActivityId;
 
                                     m_currentSelected_ActivityPair = selectedActivity;
-
+                                    m_currentSelect_ActivityTask = task;
 
                                     if (m_activitychecked_count == 1)
                                     {
@@ -3171,9 +3181,9 @@ namespace CAOGAttendeeProject
                                 m_parent_taskId = task.ActivityId;
 
                                 m_currentSelected_ActivityPair = selectedActivity;
+                                m_currentSelect_ActivityTask = task;
 
-
-                                if (m_activitychecked_count == 1)
+                            if (m_activitychecked_count == 1)
                                 {
                                     m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
 
@@ -4883,18 +4893,7 @@ namespace CAOGAttendeeProject
 
         }
 
-        private void TrvActivities_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            
-            if (m_lstActivitiesCount != m_newlstActivitiesCount)
-            {
-                m_IsListActivitiesDirty = true;
-            }
-            else
-                m_IsListActivitiesDirty = false;
-            
-        }
-
+       
        
     }
 
