@@ -123,11 +123,13 @@ namespace CAOGAttendeeProject
                     // add new sub task
                     else if (m_activityPair.ActivityGroup != "" && m_activityPair.ParentTaskName != "" && m_activityPair.ChildTaskName == "")
                     {
-                        var subtask = a_group.lstActivityTasks.SingleOrDefault(ast => ast.TaskName == txtActivityName.Text);
+                        var task = a_group.lstActivityTasks.SingleOrDefault(ast => ast.TaskName == m_activityPair.ParentTaskName);
+                        int task_idx = a_group.lstActivityTasks.IndexOf(task);
+
+                            //activity is a child so make it a subtask of the current selected task in the activities treeview
+                            var subtask = task.lstsubTasks.SingleOrDefault(at => at.TaskName == txtActivityName.Text);
                         if (subtask == null)
                         {
-                            //activity is a child so make it a subtask of the current selected task in the activities treeview
-                            var task = a_group.lstActivityTasks.SingleOrDefault(at => at.TaskName == m_activityPair.ParentTaskName);
 
                             ActivityTask newsubTask = new ActivityTask() { Parent = "", TaskName = txtActivityName.Text, Description = txtTaskDescription.Text };
                             task.lstsubTasks.Add(newsubTask);
@@ -140,6 +142,27 @@ namespace CAOGAttendeeProject
                             MessageBox.Show("Activity already exist.", "Activity already exist", MessageBoxButton.OK, MessageBoxImage.Stop);
                         }
                         
+                    }
+                    else
+                    {
+                        var task = a_group.lstActivityTasks.SingleOrDefault(ast => ast.TaskName == m_activityPair.ParentTaskName);
+                        int task_idx = a_group.lstActivityTasks.IndexOf(task);
+
+                        //activity is a child so make it a subtask of the current selected task in the activities treeview
+                        var subtask = task.lstsubTasks.SingleOrDefault(at => at.TaskName == txtActivityName.Text);
+                        if (subtask == null)
+                        {
+
+                            ActivityTask newsubTask = new ActivityTask() { Parent = "", TaskName = txtActivityName.Text, Description = txtTaskDescription.Text };
+                            task.lstsubTasks.Add(newsubTask);
+                            GetActivitiesCount++;
+
+                            Close();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Activity already exist.", "Activity already exist", MessageBoxButton.OK, MessageBoxImage.Stop);
+                        }
                     }
 
                     

@@ -235,7 +235,7 @@
                                                     <ContextMenu>
                                                         <MenuItem Header="Add New Activity" Click="MenuItem_AddNewActivity_Click"/>
                                                         <Separator/>
-                                                        <MenuItem Header="Delete Activity Group" Click="MenuItem_DeleteActivityGroup_Click"/>
+                                                        <MenuItem Header="Delete Activity" Click="MenuItem_DeleteActivityGroup_Click"/>
                                                     </ContextMenu>
                                                 </TextBlock.ContextMenu>
                                             </TextBlock>

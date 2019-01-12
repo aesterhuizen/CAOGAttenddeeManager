@@ -106,7 +106,7 @@ namespace CAOGAttendeeProject
                 }
 
 
-                //  SetTimer();
+               
 
 
             }
@@ -167,8 +167,8 @@ namespace CAOGAttendeeProject
         //Activity control
         private string m_ActivityName = "";
         private int m_old_ActivityId = 0;
-        ActivityTask m_currentSelected_ActivityTask = null;
-        ActivityTask m_previousSelected_ActivityTask = null;
+    
+       
         private int m_child_taskId = 0;
         int m_parent_taskId = 0;
         private int m_lstActivitiesCount = 0;
@@ -248,7 +248,14 @@ namespace CAOGAttendeeProject
 
             Dispatcher.Invoke(() =>
            {
-               if (!m_isQueryTableShown && m_activitychecked_count == 1 && m_ActivityDateSelected != null)
+               if (m_IsActivityPanelView &&
+                    m_activitychecked_count == 1 &&
+                    m_ActivityDateSelected != null &&
+
+                  /*tasks or subtasks can be added as activities*/
+                    m_currentSelected_ActivityPair.ChildTaskName != ""
+                   )
+
                {
                    btnPanelAddActivity.IsEnabled = true;
                }
@@ -262,9 +269,13 @@ namespace CAOGAttendeeProject
 
             Dispatcher.Invoke(() =>
             {
-                
 
-                if (m_currentSelected_ActivityPair != null && m_currentSelected_ActivityPair.ChildTaskName != "")
+                var selected_group = trvActivities.SelectedItem;
+
+                if (selected_group != null || 
+                    (m_currentSelected_ActivityPair != null && 
+                    (m_currentSelected_ActivityPair.ChildTaskName != "" || 
+                    m_currentSelected_ActivityPair.ParentTaskName != "") ) )
                 {
                     btnPanelNewActivity.IsEnabled = true;
                 }
@@ -2888,15 +2899,15 @@ namespace CAOGAttendeeProject
             m_ActivityName = checkbox.Content.ToString();
 
 
-          
-                if (m_AttendanceView && m_IsActivePanelView)
-                {
-                    Do_treeview_ActiveView();
-                }
-                else if (m_IsActivityPanelView && m_AttendanceView)
-                {
-                    Do_treeview_ActivityView();
-                }
+
+            //if (m_AttendanceView && m_IsActivePanelView)
+            //{
+            Do_treeview_ActiveView();
+             //}
+                //else if (m_IsActivityPanelView && m_AttendanceView)
+                //{
+                //    Do_treeview_ActivityView();
+                //}
 
         
 
@@ -3080,7 +3091,7 @@ namespace CAOGAttendeeProject
                                     ActivityPair selectedActivity = new ActivityPair
                                     {
                                         ActivityGroup = activity_group.ActivityName,
-                                        AttendeeId = 0,
+                                        AttendeeId = m_default_row_selected.AttendeeId,
                                         ParentTaskName = task.TaskName,
                                         ChildTaskName = subtask.TaskName,
                                          
@@ -3114,7 +3125,7 @@ namespace CAOGAttendeeProject
                                     ActivityPair selectedActivity = new ActivityPair
                                     {
                                         ActivityGroup = activity_group.ActivityName,
-                                        AttendeeId = 0,
+                                        AttendeeId = m_default_row_selected.AttendeeId,
                                         ParentTaskName = task.TaskName,
                                         ChildTaskName = "",
 
@@ -3151,7 +3162,7 @@ namespace CAOGAttendeeProject
                                 ActivityPair selectedActivity = new ActivityPair
                                 {
                                     ActivityGroup = activity_group.ActivityName,
-                                    AttendeeId = 0,
+                                    AttendeeId = m_default_row_selected.AttendeeId,
                                     ParentTaskName = task.TaskName,
                                     ChildTaskName = "",
                                    
@@ -4562,9 +4573,13 @@ namespace CAOGAttendeeProject
                 
 
             }
+            else if (m_IsActivityPanelView)
+            {
+                //do nothing
+            }
             else
             {
-                MessageBox.Show("Activities can only be added when no database queries are being displayed.\n\nPlease deselect all filter checkboxes and query the database again.","Cannot add activity",MessageBoxButton.OK,MessageBoxImage.Stop);
+                MessageBox.Show("Activities can only be added when no database queries are being displayed.\n\nPlease deselect all filter checkboxes and query the database again.", "Cannot add activity", MessageBoxButton.OK, MessageBoxImage.Stop);
             }
 
             
@@ -4628,6 +4643,25 @@ namespace CAOGAttendeeProject
               
                     m_dbContext.Activities.Local.Add(m_currentSelected_ActivityPair);
                     m_default_row_selected.ActivityList.Add(m_currentSelected_ActivityPair);
+
+                //Update default row with the last attended activity
+                var lastActivity = (from rec in m_default_row_selected.ActivityList
+                                    orderby rec.Date descending
+                                    select rec).ToList().FirstOrDefault();
+
+                m_default_row_selected.Activity = lastActivity.ToString();
+                m_default_row_selected.Activity_Last_Attended = lastActivity.DateString;
+
+
+
+                ClearTreeView();
+
+                btnPanelAddActivity.IsEnabled = false;
+                m_currentSelected_ActivityPair = null;
+                m_activitychecked_count = 0;
+                txtSearch.IsEnabled = true;
+                Display_ActivityList_in_Grid();
+
             }
             else
             {
@@ -4639,23 +4673,7 @@ namespace CAOGAttendeeProject
 
 
 
-            //Update default row with the last attended activity
-            var lastActivity = (from rec in m_default_row_selected.ActivityList
-                                orderby rec.Date descending
-                                select rec).ToList().FirstOrDefault();
-
-            m_default_row_selected.Activity = lastActivity.ToString();
-            m_default_row_selected.Activity_Last_Attended = lastActivity.DateString;
-
-
-
-            ClearTreeView();
-           
-            btnPanelAddActivity.IsEnabled = false;
-            m_currentSelected_ActivityPair = null;
-            m_activitychecked_count = 0;
-            txtSearch.IsEnabled = true;
-            Display_ActivityList_in_Grid();
+          
             
             
             Cursor = Cursors.Arrow;
@@ -4701,7 +4719,7 @@ namespace CAOGAttendeeProject
         {
             Cursor = Cursors.Wait;
 
-            if (m_currentSelected_ActivityPair !=null || m_currentSelected_ActivityTask != null)
+            if (m_currentSelected_ActivityPair !=null)
             {
                 string childtask = m_currentSelected_ActivityPair.ChildTaskName;
                 string activityGroup = m_currentSelected_ActivityPair.ActivityGroup;
@@ -4709,25 +4727,42 @@ namespace CAOGAttendeeProject
 
                 var a_group = m_lstActivities.SingleOrDefault(at => at.ActivityName == activityGroup);
                 var task = a_group.lstActivityTasks.SingleOrDefault(at => at.TaskName == parenttask);
+                int task_idx = a_group.lstActivityTasks.IndexOf(task);
+
                 var subtask = task.lstsubTasks.SingleOrDefault(st => st.TaskName == childtask);
+               
 
 
-                ////user selected a group
-                if (activityGroup != "" && parenttask == "")
-                {
-                    m_lstActivities.Remove(a_group);
-                }
-                // user selected a task 
-                else if (activityGroup != "" && parenttask != "" && childtask == "")
-                {
-                    a_group.lstActivityTasks.Remove(task);
-                }
                 // user selected a task with child tasks
-                else if (activityGroup != "" && parenttask != "" && childtask != "")
+
+                if (activityGroup != "" && parenttask != "" && childtask != "")
                 {
-                    
-                    a_group.lstActivityTasks.Remove(subtask);
+
+                    if (subtask != null)
+                    {
+                        a_group.lstActivityTasks[task_idx].lstsubTasks.Remove(subtask);
+                    }
                 }
+                // user selected a task with no child tasks
+                else if (activityGroup != "" && parenttask != "" && childtask == "") 
+                {
+                    if (task != null)
+                    {
+                        a_group.lstActivityTasks.Remove(task);
+                    }
+                }
+                //user selected a group
+                else if (activityGroup != "" && parenttask == "") 
+                {
+                    if (a_group != null)
+                    {
+                        m_lstActivities.Remove(a_group);
+                    }
+
+                }
+              
+             
+
 
                 ClearTreeView();
 
@@ -4738,32 +4773,53 @@ namespace CAOGAttendeeProject
               
 
             }
+            else
+            {
+                MessageBox.Show("Must select an activity first.", "Delete Activity", MessageBoxButton.OK, MessageBoxImage.Stop);
+                Cursor = Cursors.Arrow;
+            }
         }
-     
 
-   
+
+
         private void MenuItem_DeleteActivityGroup_Click(object sender, RoutedEventArgs e)
         {
-            var deleteActivityGroup = m_lstActivities.SingleOrDefault(ag => ag.ActivityName == m_ActivityName);
-            if (deleteActivityGroup != null)
+            Cursor = Cursors.Wait;
+            var selected_activity = trvActivities.SelectedItem;
+
+            if (selected_activity != null)
             {
-                m_lstActivities.Remove(deleteActivityGroup);
+                var deleteActivityGroup = m_lstActivities.SingleOrDefault(ag => ag.ActivityName == m_ActivityName);
+                if (deleteActivityGroup != null)
+                {
+                    m_lstActivities.Remove(deleteActivityGroup);
+                    m_newlstActivitiesCount = m_lstActivitiesCount + 1;
+                    trvActivities.Items.Refresh();
+                }
+                Cursor = Cursors.Arrow;
+            }
+            else
+            {
+                Cursor = Cursors.Arrow;
+                MessageBox.Show("Must select an activity to delete first.", "Delete Activity", MessageBoxButton.OK, MessageBoxImage.Stop);
                 
             }
-                
 
-            trvActivities.Items.Refresh();
+           
         }
         private void MenuItem_AddNewGroup_Click(object sender, RoutedEventArgs e)
         {
             int WindowMode = 0;
 
            
+             
                 WndAddGroup groupWin = new WndAddGroup(ref m_lstActivities, WindowMode, m_currentSelected_ActivityPair);
                 groupWin.ShowDialog();
                 m_newlstActivitiesCount = m_newlstActivitiesCount + groupWin.GetActivitiesCount;
 
                 trvActivities.Items.Refresh();
+           
+            
            
 
            
@@ -4838,6 +4894,8 @@ namespace CAOGAttendeeProject
                 m_IsListActivitiesDirty = false;
             
         }
+
+       
     }
 
 }
