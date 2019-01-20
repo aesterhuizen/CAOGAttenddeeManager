@@ -15,7 +15,7 @@ using System.Windows.Controls.DataVisualization.Charting;
 using System.Data;
 using System.Text.RegularExpressions;
 
-namespace CAOGAttendeeProject
+namespace CAOGAttendeeManager
 
 {
     /// <summary>

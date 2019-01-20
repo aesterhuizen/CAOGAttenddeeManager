@@ -1,6 +1,7 @@
-namespace CAOGAttendeeProject
+namespace CAOGAttendeeManager
 {
     using System;
+    using System.IO;
     using System.Windows;
     using System.Data;
     using System.ComponentModel;
@@ -10,7 +11,9 @@ namespace CAOGAttendeeProject
     using System.Linq;
     using System.Collections;
     using System.Collections.Specialized;
-
+    using System.Data.Entity.Infrastructure;
+    
+   // [DbConfigurationType(typeof(MyDbConfiguration))]
     public class ModelDb : DbContext
     {
         // Your context has been configured to use a 'ModelDb' connection string from your application's 
@@ -34,6 +37,22 @@ namespace CAOGAttendeeProject
     //    
     //}
 
+    //public class MyDbConfiguration : DbConfiguration
+
+    //{
+
+    //    public MyDbConfiguration() : base()
+
+    //    {
+
+    //        var path = Path.GetDirectoryName(this.GetType().Assembly.Location);
+
+    //        SetModelStore(new DefaultDbModelStore(path));
+
+
+    //    }
+
+    //}
     public class Attendee : INotifyPropertyChanged
     {
 
@@ -128,7 +147,7 @@ namespace CAOGAttendeeProject
         }
     }
 
-    public class Attendance_Info 
+    public class Attendance_Info : IComparable
     {
 
 
@@ -166,11 +185,16 @@ namespace CAOGAttendeeProject
 
         public virtual Attendee Attendee { get; set; }
 
-        
+        public int CompareTo(object obj)
+        {
+            Attendance_Info d = (Attendance_Info)obj;
+
+            return _date.CompareTo(d._date);
+        }
     }
 
 
-    public class ActivityPair :INotifyPropertyChanged
+    public class ActivityPair : IComparable, INotifyPropertyChanged
     {
        
         public ActivityPair()
@@ -249,6 +273,18 @@ namespace CAOGAttendeeProject
             
 
         }
+
+        public int CompareTo(object obj)
+        {
+            ActivityPair at = (ActivityPair)obj;
+
+            DateTime dt = (DateTime)at._date.GetValueOrDefault();
+
+            DateTime tdt = (DateTime)_date.GetValueOrDefault();
+
+            return tdt.CompareTo(dt);
+        }
+
         public string ParentTaskName
         {
             get
@@ -303,9 +339,10 @@ namespace CAOGAttendeeProject
                 }
             }
         }
+       
         private string _parenttaskname = "";
         private string _childtaskname = "";
-       
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -485,9 +522,6 @@ namespace CAOGAttendeeProject
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-
-        
 
        
     }

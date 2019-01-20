@@ -1,16 +1,16 @@
-﻿<Window x:Class="CAOGAttendeeProject.MainWindow"
+﻿<Window x:Class="CAOGAttendeeManager.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CAOGAttendeeProject"
+        xmlns:local="clr-namespace:CAOGAttendeeManager"
         mc:Ignorable="d"
         Title="CAOG Attendee Manager" Height="900" Width="1300"
         Loaded="Window_Loaded"
         Closing="Window_Closing">
     <Window.Resources>
         <!--<CollectionViewSource x:Key="attendeeViewSource" d:DesignSource="{d:DesignInstance {x:Type local:Attendee}, CreateList=True}"/>-->
-
+        
 
         <DataTemplate x:Key="ActivityPairItemsTemplate">
             <StackPanel Orientation="Horizontal">
@@ -107,22 +107,7 @@
 
                 </RibbonGroup>
 
-                <RibbonGroup Header="Manage Activities">
-                    <RibbonButton Name="btnPanelNewActivity" BorderThickness="1" Click="BtnPanelNewActivity_Click"
-                                            ToolTip="Add a new activity to the activities list"
-                                            Margin="10,0,0,0"
-                                            Label="New Activity"
-                                            LargeImageSource="Resources\NewActivity.ico"/>
-                    
-                    <RibbonButton Margin="11,0,0,0" Name="btnPanelAddActivity" BorderThickness="1" Click="btnPanelAddActivity_Click"
-                                            ToolTip="Add activity to selected attendee's activity list"
-                                            Label="Add Activity"
-                                            LargeImageSource="Resources\AddActivity.ico"/>
-
-                    
-
-                </RibbonGroup>
-                
+                             
                 <RibbonGroup Header="Attendance Metrics" Width="200">
 
 
@@ -168,9 +153,23 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <GroupBox Name="gbFilterOptions" Header="Filter Options">
+                <StackPanel Name="spActifityFilter" Orientation="Horizontal">
 
+                    <ToggleButton Name="btnAddActivity"
+                        Content="Add Activity"
+                        Click="btnAddActivity_Click"
+                        ToolTip="Open activity panel to add an activity to the selected attendee's activity list"/>
+                    <ToggleButton x:Name="btnFilterOpts"
+                         Content="Filter Options"
+                         Click="BtnFilterOpts_Click"
+                         ToolTip="Open filter options panel to search for something"/>
+
+                </StackPanel>
+                <GroupBox Name="gbFilterOptions">
+                   
                     <StackPanel Name="spFilterOptions" MinWidth="200">
+                       
+
                         <Expander Name="CalendarExpander" IsExpanded="True" Margin="0,0,0,10">
                             <Expander.Header>
                                 <StackPanel Name="DateStackPanel" Orientation="Horizontal">
@@ -203,7 +202,19 @@
                             <Expander.Header>
                                 <StackPanel Name="spActivityExpanderHeader" Orientation="Horizontal" >
                                     <CheckBox Margin="5,0,0,0" Content="Activity"  Name="chkActivityFilter" Checked="chkActivityFilter_Checked" Unchecked="chkActivityFilter_Unchecked" RenderTransformOrigin="0.797,-0.5"/>
-                                   
+                                    <Button Name="btnPanelNewActivity" BorderThickness="1" Click="BtnPanelNewActivity_Click"
+                                            Content="New Activity"
+                                            ToolTip="Add a new activity to the activities list"
+                                            Margin="10,0,0,0"/>
+
+
+
+                                    <Button Margin="1,0,0,0" Name="btnPanelAddActivity" BorderThickness="1" Click="btnPanelAddActivity_Click"
+                                            Content="Add"
+                                            Width="66"
+                                            ToolTip="Add activity to selected attendee's activity list"/>
+
+
                                 </StackPanel>
                             </Expander.Header>
                             
@@ -235,7 +246,7 @@
                                                     <ContextMenu>
                                                         <MenuItem Header="Add New Activity" Click="MenuItem_AddNewActivity_Click"/>
                                                         <Separator/>
-                                                        <MenuItem Header="Delete Activity" Click="MenuItem_DeleteActivityGroup_Click"/>
+                                                        <MenuItem Header="Delete Activity" Click="MenuItem_DeleteActivity_Click"/>
                                                     </ContextMenu>
                                                 </TextBlock.ContextMenu>
                                             </TextBlock>
@@ -324,7 +335,7 @@
                                                     Click="btnExpandHistory_Click"
                                                     BorderThickness="0" 
                                                     Background="White"
-                                                    ToolTip="Dropdown list displaying attendee's details">
+                                                    ToolTip="View Profile">
                                                 <!--<Image Height="19">
                                                     <Image.Source>
                                                         <BitmapImage UriSource="Resources\DropdownArrow2.ico" Rotation="Rotate180"/>
@@ -334,22 +345,7 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Width="8">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Name="btnAddActivity"
-                                                    Margin="0,0,0,0"
-                                                    RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                                    Background="White"
-                                                    BorderThickness="1"
-                                                    Click="btnAddActivity_Click"
-                                                    ToolTip="Open activity panel to add an activity to the selected attendee's activity list">
-                                                <Image Height="19" Source="Resources\ActivityPanel.ico"/>
-                                            </Button>
-                                            
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                               
                                 <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}"/>
                                 <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}"/>
                                 <DataGridTextColumn Header="Church Last Attended" Binding="{Binding Church_Last_Attended}" Width="130"/>
