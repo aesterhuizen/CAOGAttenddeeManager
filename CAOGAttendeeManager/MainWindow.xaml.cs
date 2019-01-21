@@ -87,6 +87,7 @@ namespace CAOGAttendeeManager
 
 #if (init_db)
                     m_dbContext = new ModelDb(m_constr);
+                    m_dbContext.Configuration.ProxyCreationEnabled = false;
 
                    // MyDbConfiguration db_config;
                    
@@ -1231,14 +1232,14 @@ namespace CAOGAttendeeManager
                             m_lstdefaultTableRows.Add(DefaultTabledr);
 
 #if (DEBUG)
-                        //i++;
-                        //if (i == 10)
-                        //    break;
+                    //i++;
+                    //if (i == 10)
+                    //    break;
 #endif
-           
 
 
-                    }
+
+                }
             }
             catch (Exception ex)
             {
@@ -1332,8 +1333,7 @@ namespace CAOGAttendeeManager
 
                 if (m_AttendanceView)
                 {
-                    if (!m_IsActivityPanelView && (m_isFilterByDateChecked || m_isActivityfilterByDateChecked ||
-                            m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked || m_isActivityChecked))
+                    if (m_isQueryTableShown)
                     {
                         dataGrid.DataContext = m_lstQueryTableRows;
                         lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
@@ -1343,6 +1343,7 @@ namespace CAOGAttendeeManager
                         dataGrid.DataContext = m_lstdefaultTableRows;
                         lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
                     }
+               
 
                 }
                 else if (m_alistView)
@@ -1366,8 +1367,7 @@ namespace CAOGAttendeeManager
 
                 if (m_AttendanceView)
                 {
-                    if (!m_IsActivityPanelView && ( m_isFilterByDateChecked || m_isActivityfilterByDateChecked ||
-                            m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked || m_isActivityChecked) )
+                    if (m_isQueryTableShown )
                     { 
                         var filteredQueryTable = m_lstQueryTableRows.Where(row => row.FirstLastName.Contains(text));
                         dataGrid.DataContext = filteredQueryTable;
@@ -3327,6 +3327,7 @@ namespace CAOGAttendeeManager
 
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Attended"  || info.Status == "Responded" )
                                                                                   .Where(info=> info.Date == m_DateSelected)
+                                                                                  
                                  join activity in m_dbContext.Activities.Local.Where(info => info.ToString().Contains(strActivity))
                                  on attinfo.AttendeeId equals activity.AttendeeId
                                  select new DefaultTableRow
@@ -3548,6 +3549,7 @@ namespace CAOGAttendeeManager
 
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Attended" || info.Status == "Responded")
                                                                                   .Where(info=> info.Date == m_DateSelected)
+                                                                                  
                                 join activty in m_dbContext.Activities.Local on attinfo.AttendeeId equals activty.AttendeeId into list1
                                 from l1 in list1.DefaultIfEmpty()
                                 select new DefaultTableRow
@@ -3908,6 +3910,7 @@ namespace CAOGAttendeeManager
             else
             {
                 Display_DefaultTable_in_Grid();
+                m_isQueryTableShown = false;
                 lblTableShown.Content = "Attendance View";
             }
                 
@@ -4496,7 +4499,7 @@ namespace CAOGAttendeeManager
         {
             if (m_Activity_grid != null)
             {
-                m_Activity_grid.DataContext = m_default_row_selected.ActivityList;
+                m_Activity_grid.DataContext = m_default_row_selected.ActivityList.OrderByDescending(rec=>rec.Date);
                 m_Activity_grid.Items.Refresh();
             }
             
@@ -4506,7 +4509,7 @@ namespace CAOGAttendeeManager
         {
             if (m_AttendeeInfo_grid != null)
             {
-                m_AttendeeInfo_grid.DataContext = m_default_row_selected.AttendanceList;
+                m_AttendeeInfo_grid.DataContext = m_default_row_selected.AttendanceList.OrderByDescending(rec=>rec.Date).ToList();
                 m_AttendeeInfo_grid.Items.Refresh();
             }
             
@@ -4520,6 +4523,10 @@ namespace CAOGAttendeeManager
             if (dataGrid.RowDetailsVisibilityMode == DataGridRowDetailsVisibilityMode.Collapsed)
             {
                 dataGrid.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
+               // dataGrid_LoadingRowDetails(null, null);
+
+               // Display_AttendanceList_in_Grid();
+               // Display_ActivityList_in_Grid();
 
                 Disable_Filters();
                 btnDelete.IsEnabled = false;
@@ -4563,28 +4570,31 @@ namespace CAOGAttendeeManager
             m_AttendeeInfo_grid = e.DetailsElement.FindName("GrdAttendee_InfoList") as DataGrid;
 
             //var Attendee_AttendeeInfoList = from rec in m_dbContext.Attendance_Info.Local
-            //                            where (rec.AttendeeId == m_default_row_selected.AttendeeId)
-            //                            select rec;
+            //                                where (rec.AttendeeId == m_default_row_selected.AttendeeId)
+            //                                select rec;
 
             //foreach (var attendance in Attendee_AttendeeInfoList)
             //{
             //    m_default_row_selected.AttendanceList.Add(attendance);
             //}
 
-            m_AttendeeInfo_grid.DataContext = m_default_row_selected.AttendanceList.OrderByDescending(rec => rec.Date);
+           // m_AttendeeInfo_grid.DataContext = m_default_row_selected.AttendanceList.OrderByDescending(rec => rec.Date);
             // get GrdAttendee_ActivityList element within the DataTemplate
             m_Activity_grid = e.DetailsElement.FindName("GrdAttendee_ActivityList") as DataGrid;
 
             //var Attendee_ActivityList = from rec in m_dbContext.Activities.Local
-            //                            where (rec.AttendeeId == m_default_row_selected.AttendeeId)
+            //                            where rec.AttendeeId == m_default_row_selected.AttendeeId
             //                            select rec;
 
             //foreach (var activity in Attendee_ActivityList)
             //{
             //    m_default_row_selected.ActivityList.Add(activity);
             //}
-            
-            m_Activity_grid.DataContext = m_default_row_selected.ActivityList.OrderByDescending(rec => rec.Date);
+
+            // m_Activity_grid.DataContext = m_default_row_selected.ActivityList.OrderByDescending(rec => rec.Date);
+
+            Display_ActivityList_in_Grid();
+            Display_AttendanceList_in_Grid();
 
             btnDelete.IsEnabled = false;
             //hide grid columns
@@ -4797,15 +4807,28 @@ namespace CAOGAttendeeManager
            // var activityExistsForAttendee = m_dbContext.Activities.Local.SingleOrDefault(rec => rec.ToString() == m_currentSelected_ActivityPair.ToString() && rec.Date == m_currentSelected_ActivityPair.Date && rec.AttendeeId == m_default_row_selected.AttendeeId);
             if (queryifActivityExistList == null )
             {
+
              
-                 
-               // m_dbContext.Activities.Add(m_currentSelected_ActivityPair);
-                m_default_row_selected.ActivityList.Add(m_currentSelected_ActivityPair);
+                m_dbContext.Activities.Add(m_currentSelected_ActivityPair);
+
+                var ActivityIsinList = m_default_row_selected.ActivityList.SingleOrDefault(rec => rec.ToString() == m_currentSelected_ActivityPair.ToString() && rec.Date == m_currentSelected_ActivityPair.Date);
+                if (ActivityIsinList == null)
+                {
+                    m_default_row_selected.ActivityList.Add(m_currentSelected_ActivityPair);
+                }
+                    
+               
+                
 
                 //Update default row with the last attended activity
-                var lastActivity = (from rec in m_default_row_selected.ActivityList
-                                    orderby rec.Date
-                                    select rec).ToList().LastOrDefault();
+                //var lastActivity = (from rec in m_default_row_selected.ActivityList
+                //                    orderby rec.Date
+                //                    select rec).ToList().LastOrDefault();
+
+                var lastActivity = (from rec in m_dbContext.Activities.Local
+                                    where rec.AttendeeId == m_currentSelected_ActivityPair.AttendeeId
+                                    orderby rec.Date descending
+                                    select rec).ToList().FirstOrDefault();
 
                 m_default_row_selected.Activity = lastActivity.ToString();
                 m_default_row_selected.Activity_Last_Attended = lastActivity.DateString;
@@ -5062,6 +5085,11 @@ namespace CAOGAttendeeManager
                 btnFilterOpts.IsChecked = true;
             }
                 
+
+        }
+
+        private void GrdAttendee_InfoList_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
 
         }
     }

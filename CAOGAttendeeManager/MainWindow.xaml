@@ -379,7 +379,8 @@
                                                         AutoGenerateColumns="False"
                                                         SelectionMode="Extended"
                                                         CanUserDeleteRows="False"
-                                                        IsReadOnly="True">
+                                                        IsReadOnly="True"
+                                                        DataContextChanged="GrdAttendee_InfoList_DataContextChanged">
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
                                                 <DataGridTextColumn Header="Date" Binding="{Binding DateString}"/>

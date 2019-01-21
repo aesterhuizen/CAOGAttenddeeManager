@@ -7,7 +7,7 @@
         Title="Add new activity ..." Height="228" Width="429"
         WindowStyle="ToolWindow"
         ResizeMode="NoResize">
-    <Grid  Background="Gray">
+    <Grid  >
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>

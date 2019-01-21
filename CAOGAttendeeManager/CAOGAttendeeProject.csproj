@@ -102,12 +102,6 @@
     <Compile Include="About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CAOGAttendeeManager.ModelDb.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>CAOGAttendeeManager.ModelDb.edmx</DependentUpon>
-    </Compile>
-    <Compile Include="CAOGAttendeeManager.ModelDb.Views.cs" />
     <Compile Include="ChartWindow.xaml.cs">
       <DependentUpon>ChartWindow.xaml</DependentUpon>
     </Compile>
@@ -158,10 +152,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </Resource>
-    <EntityDeploy Include="CAOGAttendeeManager.ModelDb.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>CAOGAttendeeManager.ModelDb.Designer.cs</LastGenOutput>
-    </EntityDeploy>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
