@@ -88,6 +88,7 @@ namespace CAOGAttendeeManager
 #if (init_db)
                     m_dbContext = new ModelDb(m_constr);
                     m_dbContext.Configuration.ProxyCreationEnabled = false;
+                   
 
                    // MyDbConfiguration db_config;
                    
@@ -1100,7 +1101,7 @@ namespace CAOGAttendeeManager
                 int i = 0;
 
               
-                    foreach (var AttendeeRec in m_dbContext.Attendees.Local)
+                    foreach (var AttendeeRec in m_dbContext.Attendees.Local )
                     {
                         var queryLastDate = (from DateRec in AttendeeRec.AttendanceList
                                              where DateRec.Status == "Attended" || DateRec.Status == "Responded"
@@ -1257,7 +1258,7 @@ namespace CAOGAttendeeManager
         private void chkResponded_Checked(object sender, RoutedEventArgs e)
         {
 
-            Cursor = Cursors.Wait;
+           
             chkAttended.IsChecked = false;
             chkFollowup.IsChecked = false;
 
@@ -1265,28 +1266,28 @@ namespace CAOGAttendeeManager
       
            
 
-            Cursor = Cursors.Arrow;
+           
 
         }
 
         private void chkFollowup_Checked(object sender, RoutedEventArgs e)
         {
 
-            Cursor = Cursors.Wait;
+          
 
             chkAttended.IsChecked = false;
             chkResponded.IsChecked = false;
             m_isFollowupChecked = true;
-            m_isQueryTableShown = true;
+          
 
-            // BuildQuery_and_UpdateGrid();
-            Cursor = Cursors.Arrow;
+          
+          
         }
 
 
         private void chkAttended_Checked(object sender, RoutedEventArgs e)
         {
-            //generate list of all attended attendees
+         
 
 
          
@@ -1622,8 +1623,9 @@ namespace CAOGAttendeeManager
             }
             else
             {
+                Cursor = Cursors.Wait;
                 SaveActiveList();
-          
+                Cursor = Cursors.Arrow;
             }
         }
 
@@ -1667,7 +1669,7 @@ namespace CAOGAttendeeManager
             {
                 int attid = dtr.AttendeeId;
 
-                var Attrec = m_dbContext.Attendees.Local.SingleOrDefault(id => id.AttendeeId == attid);
+                var Attrec = m_dbContext.Attendees.SingleOrDefault(id => id.AttendeeId == attid);
                
 
 
@@ -1903,15 +1905,14 @@ namespace CAOGAttendeeManager
 
         }
 
-        private bool Check_for_dup_AttendeeInfo_inDbase(AttendanceTableRow atr,int id, DateTime AttendeeInfoDate)
+        private bool Check_for_dup_AttendeeInfo_inDbase(AttendanceTableRow atr)
         {
 
 
-            var queryAtt = (from AttInfoRec in m_dbContext.Attendance_Info.Local
-                            where   AttInfoRec.Attendee.FirstName.ToUpper() == atr.FirstName.ToUpper() &&
-                                    AttInfoRec.Attendee.LastName.ToUpper() == atr.LastName.ToUpper() && 
-                                    AttInfoRec.Date == AttendeeInfoDate 
-                            select AttInfoRec).ToList().FirstOrDefault();
+            var queryAtt = m_dbContext.Attendance_Info.AsNoTracking().SingleOrDefault(
+                                                                    AttInfoRec => AttInfoRec.Attendee.FirstName.ToUpper() == atr.FirstName.ToUpper() &&
+                                                                    AttInfoRec.Attendee.LastName.ToUpper() == atr.LastName.ToUpper() && 
+                                                                    AttInfoRec.Date == m_alistDateSelected);
 
 
             if (queryAtt != null)
@@ -1979,7 +1980,7 @@ namespace CAOGAttendeeManager
 
                        
                         //check for duplicate attendance record
-                        bool bcheckdupInfo = Check_for_dup_AttendeeInfo_inDbase(dr, attid, m_alistDateSelected);
+                        bool bcheckdupInfo = Check_for_dup_AttendeeInfo_inDbase(dr);
                         if (bcheckdupInfo)
                         {
                             MessageBox.Show("A record with the same first name, last name and date already exist in the database, choose a difference date, first name or last name.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
@@ -1996,23 +1997,18 @@ namespace CAOGAttendeeManager
 
                             Attendance_Info newRecord = new Attendance_Info { };
 
-                            Attendance_Info lastAttInfoRec = null;
+                           
 
                             newRecord.AttendeeId = attid;
                             newRecord.Date = m_alistDateSelected;
 
-                            var AttendeeIdisInLocalContext = m_dbContext.Attendees.Local.SingleOrDefault(rec => rec.AttendeeId == attid);
-                            
-                            if (AttendeeIdisInLocalContext != null)
-                            {
-                                lastAttInfoRec = (from AttInfo in AttendeeIdisInLocalContext.AttendanceList
-                                                  orderby AttInfo.Date ascending
-                                                  select AttInfo).ToArray().LastOrDefault();
+                            //var AttendeeIdisInLocalContext = m_dbContext.Attendees.Local.SingleOrDefault(rec => rec.AttendeeId == attid);
 
 
+                            var defaultTableRec = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == attid);
+                            var lastAttInfoRec = defaultTableRec.AttendanceList.SingleOrDefault(rec => rec.Date == m_alistDateSelected);
 
-
-                                string flname = AttendeeIdisInLocalContext.FirstName + " " + AttendeeIdisInLocalContext.LastName;
+                            string flname = defaultTableRec.FirstName + " " + defaultTableRec.LastName;
 
                                 if (lastAttInfoRec != null)
                                 {
@@ -2030,16 +2026,12 @@ namespace CAOGAttendeeManager
 
                                 }
 
-                            }
-                            else
-                            {
-                                Console.WriteLine("Attendee is not in local context");
-                            }
+                            
                             //Add attendee info record to attendance_Info context
 
 
                             // Update Default
-                            var defaultTableRec = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == attid);
+                          
 
                             // Add new Record to AttendanceList of attendee
                             // This will automatically update the m_dbcontext.Attendance_Info structure!
@@ -2091,7 +2083,7 @@ namespace CAOGAttendeeManager
                         // if attendee ID present increment by one
                         while (dupID == 1)
                         {
-                            var isAttID_present = m_dbContext.Attendees.Local.SingleOrDefault(rec => rec.AttendeeId == m_NewAttendeeId);
+                            var isAttID_present = m_dbContext.Attendees.AsNoTracking().SingleOrDefault(rec => rec.AttendeeId == m_NewAttendeeId);
                             if (isAttID_present != null)
                                 m_NewAttendeeId += 1;
                             else
@@ -2181,9 +2173,9 @@ namespace CAOGAttendeeManager
         }
         private bool Check_for_dup_Attendee_inDbase(AttendanceTableRow atr)
         {
-            var queryAtt = (from AttRec in m_dbContext.Attendees.Local
-                            where AttRec.FirstName.ToUpper() == atr.FirstName.ToUpper() && AttRec.LastName.ToUpper() == atr.LastName.ToUpper()
-                            select AttRec).ToList().FirstOrDefault();
+            var queryAtt = m_dbContext.Attendance_Info.AsNoTracking().SingleOrDefault(
+                                                               AttInfoRec => AttInfoRec.Attendee.FirstName.ToUpper() == atr.FirstName.ToUpper() &&
+                                                               AttInfoRec.Attendee.LastName.ToUpper() == atr.LastName.ToUpper() );
 
 
             if (queryAtt != null)
@@ -2191,7 +2183,7 @@ namespace CAOGAttendeeManager
 
                 dataGrid_prospect.Focus();
                 int id = atr.AttendeeId;
-                int gridrowIdx = 1;
+                int gridrowIdx = 0;
                 foreach (AttendanceTableRow gridrow in dataGrid_prospect.Items)
                 {
 
@@ -2409,7 +2401,7 @@ namespace CAOGAttendeeManager
 
 
             lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
-            lblTableShown.Content = "Attendance View";
+            lblTableShown.Content = "Main View";
 
         }
 
@@ -2759,13 +2751,14 @@ namespace CAOGAttendeeManager
                 {
 
                     MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet, save changes?", "Changes not saved", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
-                    Cursor = Cursors.Wait;
+                    
                     if (res == MessageBoxResult.Yes)
                     {
 
+                        Cursor = Cursors.Wait;
                         SaveActiveList();
-                     
-                        
+                        Cursor = Cursors.Arrow;
+
                         e.Cancel = false;
 
                         // close all active threads
@@ -2782,7 +2775,7 @@ namespace CAOGAttendeeManager
                     else if (res == MessageBoxResult.Cancel)
                         e.Cancel = true;
 
-                    Cursor = Cursors.Arrow;
+                  
 
                 }
                 else if (m_dbContext.ChangeTracker.HasChanges() && isAttendedStatusChecked)
@@ -2793,10 +2786,10 @@ namespace CAOGAttendeeManager
                     MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet.\n\nThere are checked attendees in the attendee checklist that has not yet been added to the active attendance list.\n\nDiscard checklist changes and save active attendance changes to database?", "Save and discard checklist", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
                     if (res == MessageBoxResult.Yes)
                     {
-
+                        Cursor = Cursors.Wait;
                         SaveActiveList();
                         StopTimer();
-                        
+                        Cursor = Cursors.Arrow;
                         e.Cancel = false;
                         // close all active threads
                         Environment.Exit(0);
@@ -2886,23 +2879,17 @@ namespace CAOGAttendeeManager
         private void SaveActiveList()
         {
 
-            if (m_DataSet.HasChanges())
-            {
-              
-            }
+          
 
 
             if (m_dbContext.ChangeTracker.HasChanges())
             {
-                Cursor = Cursors.Wait;
+             
                 // save contents to database
                 m_dbContext.SaveChanges();
 
-
-                MessageBox.Show("Changes were succesfully saved to the database.");
-
-
-                Cursor = Cursors.Arrow;
+                              
+              
             }
             else
             {
@@ -3306,14 +3293,24 @@ namespace CAOGAttendeeManager
 
 
 
-            IQueryable<DefaultTableRow> querylinq = null;
+            IEnumerable<DefaultTableRow> querylinq = null;
             string strActivity = "";
+            string strChurchdate = "";
+            string strActivityDate = "";
+
             Cursor = Cursors.Wait;
 
             if (m_AttendanceView)
             {
                 if (m_isQueryTableShown)
                     btnDelete.IsEnabled = false;
+
+                //if (m_dateIsValid)
+                //    strChurchdate = m_DateSelected.ToString("MM-dd-yyyy");
+
+                //if (m_isActivityfilterByDateChecked && m_ActivityDateSelected != null)
+                //    strActivityDate = m_ActivityDateSelected?.ToString("MM-dd-yyyy");
+
 
                 if (m_currentSelected_ActivityPair != null)
                 {
@@ -3323,11 +3320,11 @@ namespace CAOGAttendeeManager
                     if (m_isFilterByDateChecked && m_isChurchStatusFilterChecked && m_isAttendedChecked && m_isActivityFilterChecked && m_isActivityChecked)
                     {
 
-                   
 
-                    querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Attended"  || info.Status == "Responded" )
-                                                                                  .Where(info=> info.Date == m_DateSelected)
-                                                                                  
+
+                    querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Attended" || info.Status == "Responded")
+                                                                                  .Where(info => info.Date == m_DateSelected)
+
                                  join activity in m_dbContext.Activities.Local.Where(info => info.ToString().Contains(strActivity))
                                  on attinfo.AttendeeId equals activity.AttendeeId
                                  select new DefaultTableRow
@@ -3345,6 +3342,7 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
+
                 }
 
 
@@ -3371,11 +3369,12 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
+
                 }
                     //Date, Responded, Activity
                     else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && m_isActivityFilterChecked && m_isActivityChecked)
                     {
-                        querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Responded" && info.Date == m_DateSelected)
+                    querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Responded" && info.Date == m_DateSelected)
                                  join activity in m_dbContext.Activities.Local.Where(info => info.ToString().Contains(strActivity))
                                  on attinfo.AttendeeId equals activity.AttendeeId
                                  select new DefaultTableRow
@@ -3393,7 +3392,6 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
-
 
                 }
                     //Activity date, Atttended, Activity
@@ -3419,6 +3417,7 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
+
                 }
                     //Activity date, FollowUp, Activity
                     else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && m_isActivityFilterChecked && m_isActivityChecked)
@@ -3444,8 +3443,8 @@ namespace CAOGAttendeeManager
                                  }).AsQueryable();
 
 
-                
-                    }
+
+                }
                     //Activity date, Responded, Activity
                     else if (m_isActivityfilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && m_isActivityFilterChecked && m_isActivityChecked)
                     {
@@ -3469,7 +3468,7 @@ namespace CAOGAttendeeManager
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
 
-                    
+
 
                 }
                     //Activity date, Atttended
@@ -3541,33 +3540,33 @@ namespace CAOGAttendeeManager
                                  }).AsQueryable();
 
 
-                    }
-                    //Date, Atttended
-                    else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isAttendedChecked && !m_isActivityChecked)
+                }
+                //Date, Atttended
+                else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isAttendedChecked && !m_isActivityChecked)
                     {
 
 
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Attended" || info.Status == "Responded")
-                                                                                  .Where(info=> info.Date == m_DateSelected)
-                                                                                  
-                                join activty in m_dbContext.Activities.Local on attinfo.AttendeeId equals activty.AttendeeId into list1
-                                from l1 in list1.DefaultIfEmpty()
-                                select new DefaultTableRow
-                                {
-                                    AttendeeId = attinfo.AttendeeId,
-                                    FirstName = attinfo.Attendee.FirstName,
-                                    LastName = attinfo.Attendee.LastName,
-                                    FirstLastName = attinfo.Attendee.FirstName.ToUpper() + " " + attinfo.Attendee.LastName.ToUpper(),
-                                    Church_Last_Attended = attinfo.DateString,
-                                    Activity_Last_Attended = l1 == null ? "n/a" : l1.DateString,
-                                    Activity = l1 == null ? "n/a" : l1.ToString(),
-                                    ActivityList = attinfo.Attendee.ActivityList,
-                                    AttendanceList = attinfo.Attendee.AttendanceList,
-                                    Phone = attinfo.Attendee.Phone,
-                                    Email = attinfo.Attendee.Email,
-                                    ChurchStatus = attinfo.Status
-                                }).AsQueryable();
-                  
+                                                                                  .Where(info => info.Date == m_DateSelected)
+
+                                 join activty in m_dbContext.Activities.Local on attinfo.AttendeeId equals activty.AttendeeId into list1
+                                 from l1 in list1.DefaultIfEmpty()
+                                 select new DefaultTableRow
+                                 {
+                                     AttendeeId = attinfo.AttendeeId,
+                                     FirstName = attinfo.Attendee.FirstName,
+                                     LastName = attinfo.Attendee.LastName,
+                                     FirstLastName = attinfo.Attendee.FirstName.ToUpper() + " " + attinfo.Attendee.LastName.ToUpper(),
+                                     Church_Last_Attended = attinfo.DateString,
+                                     Activity_Last_Attended = l1 == null ? "n/a" : l1.DateString,
+                                     Activity = l1 == null ? "n/a" : l1.ToString(),
+                                     ActivityList = attinfo.Attendee.ActivityList,
+                                     AttendanceList = attinfo.Attendee.AttendanceList,
+                                     Phone = attinfo.Attendee.Phone,
+                                     Email = attinfo.Attendee.Email,
+                                     ChurchStatus = attinfo.Status
+                                 }).AsQueryable();
+
                 }
                     //Date, FollowUp
                     else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isFollowupChecked && !m_isActivityChecked)
@@ -3593,13 +3592,14 @@ namespace CAOGAttendeeManager
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
 
+
                 }
-                    //Date, Responded
-                    else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && !m_isActivityChecked)
+                //Date, Responded
+                else if (m_isFilterByDateChecked && m_dateIsValid && m_isChurchStatusFilterChecked && m_isRespondedChecked && !m_isActivityChecked)
                     {
 
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Responded" && info.Date == m_DateSelected)
-                                join activty in m_dbContext.Activities.Local on attinfo.AttendeeId equals activty.AttendeeId into list1
+                                 join activty in m_dbContext.Activities.Local on attinfo.AttendeeId equals activty.AttendeeId into list1
                                  from l1 in list1.DefaultIfEmpty()
                                  select new DefaultTableRow
                                  {
@@ -3616,7 +3616,7 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
-                   
+
                 }
                     //Date
                     else if (m_isFilterByDateChecked && !m_isAttendedChecked && !m_isFollowupChecked & !m_isRespondedChecked && !m_isActivityChecked)
@@ -3624,11 +3624,11 @@ namespace CAOGAttendeeManager
 
 
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Date == m_DateSelected)
-                                join activty in m_dbContext.Activities.Local on attinfo.AttendeeId equals activty.AttendeeId
-                                into list1
-                                from l1 in list1.DefaultIfEmpty()
-                                select new DefaultTableRow
-                                {
+                                 join activty in m_dbContext.Activities.Local on attinfo.AttendeeId equals activty.AttendeeId
+                                 into list1
+                                 from l1 in list1.DefaultIfEmpty()
+                                 select new DefaultTableRow
+                                 {
                                      AttendeeId = attinfo.AttendeeId,
                                      FirstName = attinfo.Attendee.FirstName,
                                      LastName = attinfo.Attendee.LastName,
@@ -3642,12 +3642,14 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
+
+
                 }
-                    //Date, activity
-                    else if (m_isFilterByDateChecked && m_dateIsValid && (!m_isChurchStatusFilterChecked || m_isChurchStatusFilterChecked) && m_isActivityFilterChecked && m_isActivityChecked)
+                //Date, activity
+                else if (m_isFilterByDateChecked && m_dateIsValid && (!m_isChurchStatusFilterChecked || m_isChurchStatusFilterChecked) && m_isActivityFilterChecked && m_isActivityChecked)
                     {
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Date == m_DateSelected)
-                                 join activity in m_dbContext.Activities.Local.Where(info => info.ToString().Contains(strActivity) )
+                                 join activity in m_dbContext.Activities.Local.Where(info => info.ToString().Contains(strActivity))
                                  on attinfo.AttendeeId equals activity.AttendeeId
                                  select new DefaultTableRow
                                  {
@@ -3666,12 +3668,12 @@ namespace CAOGAttendeeManager
                                  }).AsQueryable();
 
 
-                    }
+                }
                     //Activity date
                     else if (m_isActivityfilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && !m_isActivityChecked)
                     {
 
-                         querylinq = (from attinfo in m_dbContext.Attendance_Info.Local
+                    querylinq = (from attinfo in m_dbContext.Attendance_Info.Local
                                  join activity in m_dbContext.Activities.Local.Where(info => info.Date == m_ActivityDateSelected)
                                  on attinfo.AttendeeId equals activity.AttendeeId
                                  select new DefaultTableRow
@@ -3689,10 +3691,10 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
-                    
+
                 }
-                    //Activity date, activity
-                    else if (m_isActivityfilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && m_isActivityFilterChecked && m_isActivityChecked)
+                //Activity date, activity
+                else if (m_isActivityfilterByDateChecked && m_dateIsValid && !m_isChurchStatusFilterChecked && m_isActivityFilterChecked && m_isActivityChecked)
                     {
 
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local
@@ -3713,7 +3715,7 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
-                    
+
                 }
                     //Activity
                     else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isChurchStatusFilterChecked && m_isActivityFilterChecked && m_isActivityChecked)
@@ -3721,7 +3723,7 @@ namespace CAOGAttendeeManager
 
 
                     querylinq = (from attinfo in m_dbContext.Attendance_Info.Local
-                                 join activity in m_dbContext.Activities.Local.Where(info=>info.ToString().Contains(strActivity))
+                                 join activity in m_dbContext.Activities.Local.Where(info => info.ToString().Contains(strActivity))
                                  on attinfo.AttendeeId equals activity.AttendeeId
                                  select new DefaultTableRow
                                  {
@@ -3738,13 +3740,13 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
-
+                  
                 }
                 //Activity, Attended
                 else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && m_isChurchStatusFilterChecked && m_isAttendedChecked && m_isActivityFilterChecked && m_isActivityChecked)
                     {
-                    querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info=>info.Status == "Attended" || info.Status =="Responded")
-                                 join activity in m_dbContext.Activities.Local.Where(info=>info.ToString().Contains(strActivity))
+                    querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Attended" || info.Status == "Responded")
+                                 join activity in m_dbContext.Activities.Local.Where(info => info.ToString().Contains(strActivity))
                                  on attinfo.AttendeeId equals activity.AttendeeId
                                  select new DefaultTableRow
                                  {
@@ -3761,7 +3763,23 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
-
+                    //querylinq = from rec in m_lstdefaultTableRows
+                    //            where (rec.ChurchStatus.Contains("Responded") || rec.ChurchStatus.Contains("Attended") ) && rec.Activity.ToString().Contains(strActivity)
+                    //            select new DefaultTableRow
+                    //            {
+                    //                AttendeeId = rec.AttendeeId,
+                    //                FirstName = rec.FirstName,
+                    //                LastName = rec.LastName,
+                    //                FirstLastName = rec.FirstName.ToUpper() + " " + rec.LastName.ToUpper(),
+                    //                Church_Last_Attended = rec.Church_Last_Attended,
+                    //                Activity_Last_Attended = rec.Activity_Last_Attended,
+                    //                Activity = rec.Activity.ToString(),
+                    //                ActivityList = rec.ActivityList,
+                    //                AttendanceList = rec.AttendanceList,
+                    //                Phone = rec.Phone,
+                    //                Email = rec.Email,
+                    //                ChurchStatus = rec.ChurchStatus
+                    //            };
                 }
                 //Activity, Follow-Up
                 else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && m_isChurchStatusFilterChecked && m_isFollowupChecked && m_isActivityFilterChecked && m_isActivityChecked)
@@ -3785,6 +3803,23 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
+                    //querylinq = from rec in m_lstdefaultTableRows
+                    //            where rec.ChurchStatus.Contains("Follow-Up") && rec.Activity.ToString().Contains(strActivity)
+                    //            select new DefaultTableRow
+                    //            {
+                    //                AttendeeId = rec.AttendeeId,
+                    //                FirstName = rec.FirstName,
+                    //                LastName = rec.LastName,
+                    //                FirstLastName = rec.FirstName.ToUpper() + " " + rec.LastName.ToUpper(),
+                    //                Church_Last_Attended = rec.Church_Last_Attended,
+                    //                Activity_Last_Attended = rec.Activity_Last_Attended,
+                    //                Activity = rec.Activity.ToString(),
+                    //                ActivityList = rec.ActivityList,
+                    //                AttendanceList = rec.AttendanceList,
+                    //                Phone = rec.Phone,
+                    //                Email = rec.Email,
+                    //                ChurchStatus = rec.ChurchStatus
+                    //            };
                 }
                     //Activity, Responded
                     else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && m_isChurchStatusFilterChecked && m_isRespondedChecked && m_isActivityFilterChecked && m_isActivityChecked)
@@ -3809,6 +3844,7 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
+
                 }
                     //Attended
                     else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityChecked && m_isChurchStatusFilterChecked && m_isAttendedChecked)
@@ -3834,6 +3870,8 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
+
+
                 }
                     //Responded
                     else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityChecked && m_isChurchStatusFilterChecked && m_isRespondedChecked)
@@ -3859,6 +3897,7 @@ namespace CAOGAttendeeManager
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
 
+
                 }
                     //Follow-up
                     else if (!m_isActivityfilterByDateChecked && !m_isFilterByDateChecked && !m_isActivityChecked && m_isChurchStatusFilterChecked && m_isFollowupChecked)
@@ -3883,6 +3922,7 @@ namespace CAOGAttendeeManager
                                      Email = attinfo.Attendee.Email,
                                      ChurchStatus = attinfo.Status
                                  }).AsQueryable();
+
                 }
                 else
                     {
@@ -3911,7 +3951,7 @@ namespace CAOGAttendeeManager
             {
                 Display_DefaultTable_in_Grid();
                 m_isQueryTableShown = false;
-                lblTableShown.Content = "Attendance View";
+                lblTableShown.Content = "Main View";
             }
                 
 
@@ -4148,8 +4188,7 @@ namespace CAOGAttendeeManager
 
                     }
 
-                    chkActivityDateFilter.IsChecked = false;
-                     chkChurchDateFilter.IsChecked = true;
+                   
 
                 // spFilterOptions.Children.Add(spActifityFilter);
                 spFilterOptions.Children.Add(CalendarExpander);
@@ -4295,12 +4334,7 @@ namespace CAOGAttendeeManager
             chkResponded.IsEnabled = true;
            
 
-            if (m_isAttendedChecked || m_isRespondedChecked || m_isFollowupChecked)
-            {
-                
-              // BuildQuery_and_UpdateGrid();
-            }
-              
+        
 
 
 
@@ -4751,9 +4785,7 @@ namespace CAOGAttendeeManager
 
             btnPanelNewActivity.Visibility = Visibility.Visible;
             btnPanelAddActivity.Visibility = Visibility.Visible;
-            //btnAddActivity.Visibility = Visibility.Visible;
-            //btnFilterOpts.Visibility = Visibility.Visible;
-
+            
 
             if (DateStackPanel.Children.Contains(chkChurchDateFilter))
                     DateStackPanel.Children.Remove(chkChurchDateFilter);
@@ -4773,7 +4805,7 @@ namespace CAOGAttendeeManager
             chkActivityDateFilter.IsChecked = true;
             chkChurchDateFilter.IsChecked = false;
 
-            // spFilterOptions.Children.Add(spActifityFilter);
+           
             spFilterOptions.Children.Add(CalendarExpander);
                 spFilterOptions.Children.Add(ActivityExpander);
                 chkActivityFilter.IsChecked = true;
@@ -4804,7 +4836,7 @@ namespace CAOGAttendeeManager
             }
             //if activity already exist in dbContext
             var queryifActivityExistList = m_default_row_selected.ActivityList.SingleOrDefault(rec => rec.ToString() == m_currentSelected_ActivityPair.ToString() &&rec.Date == m_currentSelected_ActivityPair.Date);
-           // var activityExistsForAttendee = m_dbContext.Activities.Local.SingleOrDefault(rec => rec.ToString() == m_currentSelected_ActivityPair.ToString() && rec.Date == m_currentSelected_ActivityPair.Date && rec.AttendeeId == m_default_row_selected.AttendeeId);
+           
             if (queryifActivityExistList == null )
             {
 
@@ -4820,12 +4852,8 @@ namespace CAOGAttendeeManager
                
                 
 
-                //Update default row with the last attended activity
-                //var lastActivity = (from rec in m_default_row_selected.ActivityList
-                //                    orderby rec.Date
-                //                    select rec).ToList().LastOrDefault();
-
-                var lastActivity = (from rec in m_dbContext.Activities.Local
+               
+                var lastActivity = (from rec in m_dbContext.Activities.AsNoTracking()
                                     where rec.AttendeeId == m_currentSelected_ActivityPair.AttendeeId
                                     orderby rec.Date descending
                                     select rec).ToList().FirstOrDefault();
@@ -5079,6 +5107,8 @@ namespace CAOGAttendeeManager
 
             if (!m_IsActivePanelView)
             {
+                SaveActivityPanelState();
+                LoadActivePanelState();
                 Show_activeview_Panel();
 
                 btnAddActivity.IsChecked = false;
