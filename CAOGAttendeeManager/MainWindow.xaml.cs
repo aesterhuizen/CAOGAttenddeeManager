@@ -676,367 +676,6 @@ namespace CAOGAttendeeManager
         }
 
 
-
-
-
-
-        private void CreateDatabase_FromXLSX()
-        {
-
-            // create Database from Excel Sheet
-
-
-            Console.WriteLine("Openning Excel datasheet...");
-
-            String connectionString = "Provider=Microsoft.ACE.OLEDB.12.0;" +
-                                        $"Data Source={Directory.GetCurrentDirectory()}\\2017 Absent List - updated.xlsx;" +
-                                        "Extended Properties='Excel 12.0;IMEX=1'";
-
-            string sqlcmd = "SELECT * FROM [Sheet1$]";
-
-
-            using (OleDbConnection oleConnection = new OleDbConnection(connectionString))
-            {
-                // command to select all the data from the database Q1
-                OleDbCommand oleCommand = new OleDbCommand(sqlcmd, oleConnection);
-
-
-                try
-                {
-                    oleConnection.Open();
-                    Console.WriteLine("Database successfully opened!");
-
-                    // create data reader
-                    //OleDbDataReader oleDataReader = oleCommand.ExecuteReader();
-                    OleDbDataAdapter da = new OleDbDataAdapter(oleCommand);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-
-                    Regex string_f = new Regex(@"^F");
-
-                    string year = "";
-                    string lstyear = "";
-
-                    string[] FLname = { "", "" };
-                    string[] md;
-                    string[] arylstAttDate = { };
-
-                    int row = -1;
-
-                    // DateTime lastAttendedDate = new DateTime();
-
-
-                    int isValid_employee = 0;
-                    int att_infoID = 0, attID = 0, attLst_Idx = 0, offset = 0, HasThreeFollowUps = 0;
-                    int NotAttendedCounter = 0;
-
-                    Attendance_Info Attendee_Status = null;
-                    Attendee churchAttendee = null;
-
-                    foreach (DataRow dr in dt.Rows)
-                    {
-
-                        row++;
-                        Console.WriteLine($"Row={row}");
-
-                        //Console.WriteLine($"Row={row}");
-                        //break;
-
-                        if (row == 100)
-                        {
-                            break;
-                        }
-
-                        // if (attID == 100) { break; }
-                        // if year found store it in year variable
-                        // if last attended found populate variable
-                        // if date 
-                        //  1) populate object with date information and set count to 1, loop over array in buckets of 3 until and get attendee status (Attended,Contacted,Responded)
-                        //   loop until end of record
-                        // every 5th row is a name, there are 4 rows in between each name. so loop until you get a name then create a new attendee 
-                        // and fill out the attendeeID info
-
-                        // increase current row counter and attendee ID counter
-
-                        //problem, not all the names is evently spaced.
-                        //solution get row numbers of all the names that has a 1 in front of it and write in in an array
-
-
-                        //----------set conditions for for loop------------------------------------
-                        if (row >= 2)
-                        {
-
-                            //Active church Attendee
-                            if (dr[1].ToString() == "1")
-                            {
-
-
-                                churchAttendee = new Attendee();
-                                NotAttendedCounter = 0;
-
-                                attID++;
-
-
-                                FLname = dr[0].ToString().Trim().Split(' ');
-
-                                if (FLname.Count() == 3)
-                                {
-                                    churchAttendee.FirstName = FLname[1] + " " + FLname[2];
-                                    churchAttendee.LastName = FLname[0];
-                                }
-                                else
-                                {
-
-                                    churchAttendee.FirstName = FLname[1];
-                                    churchAttendee.LastName = FLname[0];
-                                }
-
-
-
-                                //------for each column 1/3-4/30--------------------------------------------------------------------------------------------
-                                for (int col_index = 3; col_index <= 3 + 22; col_index++)
-                                {
-
-
-                                    md = dt.Columns[col_index].ToString().Split('/');
-                                    if (md.Count() == 2)
-                                    {
-                                        ///SetCurrentValue date attended
-                                        DateTime date = new DateTime(2017, int.Parse(md[0]), int.Parse(md[1]));
-
-
-
-
-                                        //attended
-                                        if (dr[col_index].ToString() == "")
-                                        {
-                                            Attendee_Status = new Attendance_Info { };
-                                            //lastAttendedDate = date;
-
-                                            Attendee_Status.AttendeeId = attID;
-                                            // Attendee_Status.Last_Attended = lastAttendedDate;
-                                            Attendee_Status.Date = date;
-                                            if (NotAttendedCounter == 3)
-                                            {
-                                                Attendee_Status.Status = "Responded";
-                                                NotAttendedCounter = 0;
-
-                                            }
-                                            else
-                                            {
-
-                                                Attendee_Status.Status = "Attended";
-                                                NotAttendedCounter = 0;
-                                            }
-
-
-
-
-
-                                            churchAttendee.AttendanceList.Add(Attendee_Status);
-                                        }
-                                        else if (dr[col_index].ToString() == "Start")
-                                        {
-                                            Attendee_Status = new Attendance_Info { };
-                                            Attendee_Status.AttendeeId = attID;
-                                            //Attendee_Status.Last_Attended = date;
-                                            Attendee_Status.Date = date;
-                                            Attendee_Status.Status = "Start";
-                                            NotAttendedCounter = 0;
-                                            churchAttendee.AttendanceList.Add(Attendee_Status);
-                                        }
-                                        else
-                                        {
-                                            //not attended==================================================================
-                                            NotAttendedCounter++;
-                                            if (NotAttendedCounter % 3 == 0)
-                                            {
-                                                //follow-up                                   
-                                                Attendee_Status = new Attendance_Info { };
-                                                Attendee_Status.AttendeeId = attID;
-                                                //Attendee_Status.Last_Attended = lastAttendedDate;
-                                                Attendee_Status.Date = date;
-                                                Attendee_Status.Status = "Follow-Up";
-                                                churchAttendee.AttendanceList.Add(Attendee_Status);
-                                                NotAttendedCounter = 3;
-
-                                            }
-                                        }
-                                    }
-
-
-                                }    // end for col_index
-                                     //------end for column 1/7-8/6--------------------------------------------------------------------------------------------
-                                for (int col_index = 24; col_index <= 24 + 17; col_index++)
-                                {
-
-
-                                    md = dt.Columns[col_index].ToString().Split('/');
-                                    if (md.Count() == 2)
-                                    {
-                                        ///SetCurrentValue date attended
-                                        DateTime date = new DateTime(2017, int.Parse(md[0]), int.Parse(md[1]));
-
-
-
-
-                                        //attended
-                                        if (dr[col_index].ToString() == "1")
-                                        {
-                                            Attendee_Status = new Attendance_Info { };
-                                            //lastAttendedDate = date;
-
-                                            Attendee_Status.AttendeeId = attID;
-                                            // Attendee_Status.Last_Attended = lastAttendedDate;
-                                            Attendee_Status.Date = date;
-                                            if (NotAttendedCounter == 3)
-                                            {
-                                                Attendee_Status.Status = "Responded";
-                                                NotAttendedCounter = 0;
-
-                                            }
-                                            else
-                                            {
-
-                                                Attendee_Status.Status = "Attended";
-                                                NotAttendedCounter = 0;
-                                            }
-
-
-
-
-
-                                            churchAttendee.AttendanceList.Add(Attendee_Status);
-                                        }
-                                        else if (dr[col_index].ToString() == "Start")
-                                        {
-                                            Attendee_Status = new Attendance_Info { };
-                                            Attendee_Status.AttendeeId = attID;
-                                            //Attendee_Status.Last_Attended = date;
-                                            Attendee_Status.Date = date;
-                                            Attendee_Status.Status = "Start";
-                                            NotAttendedCounter = 0;
-                                            churchAttendee.AttendanceList.Add(Attendee_Status);
-                                        }
-                                        else
-                                        {
-                                            //not attended==================================================================
-                                            NotAttendedCounter++;
-                                            if (NotAttendedCounter % 3 == 0)
-                                            {
-                                                //follow-up                                   
-                                                Attendee_Status = new Attendance_Info { };
-                                                Attendee_Status.AttendeeId = attID;
-                                                //Attendee_Status.Last_Attended = lastAttendedDate;
-                                                Attendee_Status.Date = date;
-                                                Attendee_Status.Status = "Follow-Up";
-                                                churchAttendee.AttendanceList.Add(Attendee_Status);
-                                                NotAttendedCounter = 3;
-
-                                            }
-                                        }
-                                    }
-
-
-                                }    // end for col_index
-
-                                m_dbContext.Attendees.Add(churchAttendee);
-                                m_dbContext.Attendance_Info.Add(Attendee_Status);
-
-                            } // end if
-                              //-Prospect list------------------------------------------------------------------------------------
-                            else
-                            {
-                                churchAttendee = new Attendee();
-
-                                DateTime dateLA;
-                                attID++;
-
-
-                                FLname = dr[0].ToString().Trim().Split(' ');
-                                if (FLname.Count() == 3)
-                                {
-                                    churchAttendee.FirstName = FLname[1] + " " + FLname[2];
-                                    churchAttendee.LastName = FLname[0];
-
-
-                                }
-                                else
-                                {
-
-                                    churchAttendee.FirstName = FLname[1];
-                                    churchAttendee.LastName = FLname[0];
-
-                                }
-
-
-                                if (dr["Last attended"].ToString() != "")
-                                {
-                                    Attendee_Status = new Attendance_Info { };
-                                    string[] arydateLA = dr["Last attended"].ToString().Split('.');
-                                    dateLA = new DateTime(2017, int.Parse(arydateLA[0]), int.Parse(arydateLA[1]));
-
-
-                                    if (FLname.Count() == 3)
-                                    {
-                                        churchAttendee.FirstName = FLname[1] + " " + FLname[2];
-                                        churchAttendee.LastName = FLname[0];
-
-
-                                    }
-                                    else
-                                    {
-
-                                        churchAttendee.FirstName = FLname[1];
-                                        churchAttendee.LastName = FLname[0];
-
-                                    }
-
-
-                                    Attendee_Status.AttendeeId = attID;
-                                    Attendee_Status.Date = dateLA;
-                                    Attendee_Status.Status = "Attended";
-                                    churchAttendee.AttendanceList.Add(Attendee_Status);
-
-                                    m_dbContext.Attendees.Add(churchAttendee);
-                                    m_dbContext.Attendance_Info.Add(Attendee_Status);
-                                }
-                                else
-                                {
-
-
-
-                                    m_dbContext.Attendees.Add(churchAttendee);
-
-                                }
-
-                            }
-                        } // end if row==2
-                    }
-
-
-                    m_dbContext.SaveChanges();
-                    Console.WriteLine("\nDone!\n");
-                    // oleDataReader.Close();
-                } // end try
-
-
-
-
-                catch (Exception ex)
-                {
-                    Console.Write("{0}", ex);
-
-                }
-
-
-
-
-
-            } // end using oleconnection
-
-        } // end sub
-
         private void Display_AttendeeListTable_in_Grid()
         {
 
@@ -3293,7 +2932,7 @@ namespace CAOGAttendeeManager
 
 
 
-            IEnumerable<DefaultTableRow> querylinq = null;
+            IQueryable<DefaultTableRow> querylinq = null;
             string strActivity = "";
             string strChurchdate = "";
             string strActivityDate = "";
@@ -3321,27 +2960,29 @@ namespace CAOGAttendeeManager
                     {
 
 
+                 
+                        querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Attended" || info.Status == "Responded")
+                                                                                .Where(info => info.Date == m_DateSelected)
 
-                    querylinq = (from attinfo in m_dbContext.Attendance_Info.Local.Where(info => info.Status == "Attended" || info.Status == "Responded")
-                                                                                  .Where(info => info.Date == m_DateSelected)
-
-                                 join activity in m_dbContext.Activities.Local.Where(info => info.ToString().Contains(strActivity))
-                                 on attinfo.AttendeeId equals activity.AttendeeId
-                                 select new DefaultTableRow
-                                 {
-                                     AttendeeId = attinfo.AttendeeId,
-                                     FirstName = attinfo.Attendee.FirstName,
-                                     LastName = attinfo.Attendee.LastName,
-                                     FirstLastName = attinfo.Attendee.FirstName.ToUpper() + " " + attinfo.Attendee.LastName.ToUpper(),
-                                     Church_Last_Attended = attinfo.DateString,
-                                     Activity_Last_Attended = activity.DateString,
-                                     Activity = activity.ToString(),
-                                     ActivityList = attinfo.Attendee.ActivityList,
-                                     AttendanceList = attinfo.Attendee.AttendanceList,
-                                     Phone = attinfo.Attendee.Phone,
-                                     Email = attinfo.Attendee.Email,
-                                     ChurchStatus = attinfo.Status
-                                 }).AsQueryable();
+                                     join activity in m_dbContext.Activities.Local.Where(info => info.ToString().Contains(strActivity))
+                                     on attinfo.AttendeeId equals activity.AttendeeId
+                                     select new DefaultTableRow
+                                     {
+                                         AttendeeId = attinfo.AttendeeId,
+                                         FirstName = attinfo.Attendee.FirstName,
+                                         LastName = attinfo.Attendee.LastName,
+                                         FirstLastName = attinfo.Attendee.FirstName.ToUpper() + " " + attinfo.Attendee.LastName.ToUpper(),
+                                         Church_Last_Attended = attinfo.DateString,
+                                         Activity_Last_Attended = activity.DateString,
+                                         Activity = activity.ToString(),
+                                         ActivityList = attinfo.Attendee.ActivityList,
+                                         AttendanceList = attinfo.Attendee.AttendanceList,
+                                         Phone = attinfo.Attendee.Phone,
+                                         Email = attinfo.Attendee.Email,
+                                         ChurchStatus = attinfo.Status
+                                     }).AsQueryable();
+                    
+                        
 
                 }
 
@@ -3939,7 +3580,7 @@ namespace CAOGAttendeeManager
         
             if (querylinq != null)
             {
-                m_lstQueryTableRows = querylinq.ToList();
+                m_lstQueryTableRows = querylinq.ToList<DefaultTableRow>();
                 dataGrid.DataContext = m_lstQueryTableRows;
                 lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
                 dataGrid.IsReadOnly = true;
@@ -5121,6 +4762,49 @@ namespace CAOGAttendeeManager
         private void GrdAttendee_InfoList_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
 
+        }
+
+        private void DataGrid_prospect_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            var datagrid = sender as DataGrid;
+
+            m_attendance_row_selected = (AttendanceTableRow)dataGrid_prospect.SelectedItem;
+            m_default_row_selected = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == m_attendance_row_selected.AttendeeId);
+
+            var queryAttRec = m_dbContext.Attendees.Local.SingleOrDefault(attrec => attrec.AttendeeId == m_default_row_selected.AttendeeId);
+
+            var text = e.EditingElement as TextBox;
+
+            if (e.Column.Header != null)
+            {
+                if (e.Column.Header.ToString() == "First Name")
+                {
+                    if (queryAttRec != null)
+                    {
+                        queryAttRec.FirstName = text.Text;
+
+                    }
+
+                    m_default_row_selected.FirstName = text.Text;
+                    m_default_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_default_row_selected.LastName.ToUpper();
+
+                    m_attendance_row_selected.FirstName = text.Text;
+                    m_attendance_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_attendance_row_selected.LastName.ToUpper();
+                }
+                else if (e.Column.Header.ToString() == "Last Name")
+                {
+                    if (queryAttRec != null)
+                    {
+                        queryAttRec.LastName = text.Text;
+                    }
+
+                    m_default_row_selected.LastName = text.Text;
+                    m_default_row_selected.FirstLastName = m_default_row_selected.FirstName.ToUpper() + " " + text.Text.ToUpper();
+
+                    m_attendance_row_selected.LastName = text.Text;
+                    m_attendance_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_attendance_row_selected.LastName.ToUpper();
+                }
+            }
         }
     }
 

@@ -447,7 +447,8 @@
                                   CanUserReorderColumns="False"
                                   ClipboardCopyMode="IncludeHeader"
                                   ColumnWidth="120" 
-                                  CanUserResizeRows="False">
+                                  CanUserResizeRows="False"
+                                  CellEditEnding="DataGrid_prospect_CellEditEnding">
 
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}" />
