@@ -231,7 +231,7 @@ namespace CAOGAttendeeManager
 
 
         private string m_constr = "";
-
+      
 
         private int m_NewAttendeeId = 0;
 
@@ -2552,7 +2552,7 @@ namespace CAOGAttendeeManager
           
 
 
-            if (m_dbContext.ChangeTracker.HasChanges())
+            if (m_dbContext.ChangeTracker.HasChanges() )
             {
              
                 // save contents to database
@@ -4087,54 +4087,76 @@ namespace CAOGAttendeeManager
 
             m_default_row_selected = (DefaultTableRow)dataGrid.SelectedItem;
 
-            var queryAttRec = m_dbContext.Attendees.Local.SingleOrDefault(attrec => attrec.AttendeeId == m_default_row_selected.AttendeeId);
+            m_attendance_row_selected = m_lstattendanceTableRows.SingleOrDefault(rec => rec.AttendeeId == m_default_row_selected.AttendeeId);
 
-            var text = e.EditingElement as TextBox;
-
-            if (e.Column.Header != null)
+            if (m_attendance_row_selected != null)
             {
-                if (e.Column.Header.ToString() == "Email")
+
+                var queryAttRec = m_dbContext.Attendees.Local.SingleOrDefault(attrec => attrec.AttendeeId == m_default_row_selected.AttendeeId);
+
+                if (queryAttRec != null)
                 {
+                    var text = e.EditingElement as TextBox;
 
-                    if (queryAttRec != null)
+                    if (e.Column.Header != null)
                     {
-                        queryAttRec.Email = text.Text;
+                        if (e.Column.Header.ToString() == "Email")
+                        {
+
+                            if (queryAttRec != null)
+                            {
+                                queryAttRec.Email = text.Text;
+                            }
+                            m_default_row_selected.Email = text.Text;
+                           
+                        }
+                        else if (e.Column.Header.ToString() == "Phone")
+                        {
+
+
+                            if (queryAttRec != null)
+                            {
+                                queryAttRec.Phone = text.Text;
+                            }
+                            m_default_row_selected.Phone = text.Text;
+                          
+                        }
+                        else if (e.Column.Header.ToString() == "First Name")
+                        {
+                            if (queryAttRec != null)
+                            {
+                                queryAttRec.FirstName = text.Text;
+
+                            }
+
+                            m_default_row_selected.FirstName = text.Text;
+                            m_default_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_default_row_selected.LastName.ToUpper();
+
+                            m_attendance_row_selected.FirstName = text.Text;
+                            m_attendance_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_attendance_row_selected.LastName.ToUpper();
+                           
+                        }
+                        else if (e.Column.Header.ToString() == "Last Name")
+                        {
+                            if (queryAttRec != null)
+                            {
+                                queryAttRec.LastName = text.Text;
+                            }
+
+                            m_default_row_selected.LastName = text.Text;
+                            m_default_row_selected.FirstLastName = m_default_row_selected.FirstName.ToUpper() + " " + text.Text.ToUpper();
+
+                            m_attendance_row_selected.LastName = text.Text;
+                            m_attendance_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_attendance_row_selected.LastName.ToUpper();
+                           
+                        }
                     }
-                    m_default_row_selected.Email = text.Text;
-
                 }
-                else if (e.Column.Header.ToString() == "Phone")
-                {
 
-
-                    if (queryAttRec != null)
-                    {
-                        queryAttRec.Phone = text.Text;
-                    }
-                    m_default_row_selected.Phone = text.Text;
-                }
-                else if (e.Column.Header.ToString() == "First Name")
-                {
-                    if (queryAttRec != null)
-                    {
-                        queryAttRec.FirstName = text.Text;
-
-                    }
-
-                    m_default_row_selected.FirstName = text.Text;
-                    m_default_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_default_row_selected.LastName.ToUpper();
-                }
-                else if (e.Column.Header.ToString() == "Last Name")
-                {
-                    if (queryAttRec != null)
-                    {
-                        queryAttRec.LastName = text.Text;
-                    }
-
-                    m_default_row_selected.LastName = text.Text;
-                    m_default_row_selected.FirstLastName = m_default_row_selected.FirstName.ToUpper() + " " + text.Text.ToUpper();
-                }
+                
             }
+            
+            
             
 
 
@@ -4590,6 +4612,7 @@ namespace CAOGAttendeeManager
 
                         m_attendance_row_selected.FirstName = text.Text;
                         m_attendance_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_attendance_row_selected.LastName.ToUpper();
+                       
                     }
                     else if (e.Column.Header.ToString() == "Last Name")
                     {
@@ -4603,6 +4626,7 @@ namespace CAOGAttendeeManager
 
                         m_attendance_row_selected.LastName = text.Text;
                         m_attendance_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_attendance_row_selected.LastName.ToUpper();
+                       
                     }
                 }
             }
