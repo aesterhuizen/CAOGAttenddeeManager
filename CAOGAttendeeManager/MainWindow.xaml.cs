@@ -19,7 +19,7 @@ using System.Data.OleDb;
 using System.Data;
 using System.Text.RegularExpressions;
 
-//using System.Windows.Forms;
+
 
 
 
@@ -98,7 +98,7 @@ namespace CAOGAttendeeManager
                         m_dbContext.Activities.Load();
                     }
 
-#if (DEBUG)
+#if (db_errors)
                     correctDBerrors();
 #endif
 
@@ -328,27 +328,35 @@ namespace CAOGAttendeeManager
             //m_dbContext.Attendance_Info.Load();
             //m_dbContext.Attendees.Load();
 
-             DateTime find_date = new DateTime(2019, 1, 6);
+             DateTime find_date = new DateTime(2019, 2, 24);
             List<Attendance_Info> lstAtt = new List<Attendance_Info>() { };
+            int i = 0;
 
-            foreach (var attendee in m_dbContext.Attendees)
+            var query = from at in m_dbContext.Attendance_Info
+                        where at.Status == "Follow-Up" && at.Date == find_date
+                        select at;
+
+            foreach (var rec in query)
             {
-                var querylatestDate = (from rec in attendee.AttendanceList
-                                       where rec.Date == find_date
-                                       select rec).ToList().LastOrDefault();
+                //    var querylatestDate = (from rec in attendee.AttendanceList
+                //                           where rec.Date == find_date
+                //                           select rec).ToList().LastOrDefault();
 
-                if (querylatestDate != null)
-                {
-                    lstAtt.Add(querylatestDate);
-                }
-                
+                //    if (querylatestDate != null)
+                //    {
+                        lstAtt.Add(rec);
+                //    }
+
+                i++;
+                Console.WriteLine($"Total records: {i}");
+
             }
 
             m_dbContext.Attendance_Info.RemoveRange(lstAtt);
 
 
 
-            m_dbContext.SaveChanges();
+            //m_dbContext.SaveChanges();
 
 
         }
@@ -572,7 +580,7 @@ namespace CAOGAttendeeManager
 
             DateTime greatest_date = new DateTime(2000,1,1);
          
-            //get latest and greatest attended date 
+            //get latest and greatest date 
             for (int i=0; i < m_lstdefaultTableRows.Count; i++)
             {
                 var latest_date_attened = (from d in m_lstdefaultTableRows[i].AttendanceList
@@ -595,18 +603,16 @@ namespace CAOGAttendeeManager
                
             }
 
-            //foreach (var AttendeeRec in m_dbContext.Attendees.Local)
-            //{
+            
+            int nf = 0,gf = 0;
 
-
-            //var lstDateRecs = (from DateRec in AttendeeRec.AttendanceList
-            //                   orderby DateRec.Date ascending
-            //                   select DateRec).ToArray().LastOrDefault();
-
-            for (int i = 0; i < m_lstdefaultTableRows.Count -1; i++)
+        
+            //get latest attended date per attendee
+            for (int i = 0; i <= m_lstdefaultTableRows.Count -1; i++)
             {
                 var lstDateRec = (from rec in m_lstdefaultTableRows[i].AttendanceList
-                                   orderby rec
+                                  where rec.Status == "Attended" || rec.Status == "Responded"
+                                  orderby rec
                                    select rec).ToList().LastOrDefault();
 
 
@@ -618,40 +624,41 @@ namespace CAOGAttendeeManager
 
                     if (timespanSinceDate.Days < 21)
                     {
-                      //  Console.WriteLine($"No Follow-Ups to generate for {lstDateRec.Attendee.LastName} {lstDateRec.Attendee.FirstName} AttendeeId={m_lstdefaultTableRows[i].AttendeeId}");
-                        // do nothing
-                        //Attendee already have a followUp sent so do not generate another followup unil 21 days has
-                        //lapsed since the last followUp        
-
+                        //Console.WriteLine($"No Follow-Ups to generate for {lstDateRec.Attendee.LastName} {lstDateRec.Attendee.FirstName} AttendeeId={m_lstdefaultTableRows[i].AttendeeId}");
+                        //// do nothing
+                        ////Attendee already have a followUp sent so do not generate another followup unil 21 days has
+                        ////lapsed since the last followUp        
+                        //nf++;
 
                     }
                     else
                     {
-                        //generate follow-up if attendee does not have 3 consecutive followups already
-                        //search for sunday
-                       // Console.WriteLine($"Follow-Up written for: {lstDateRec.Attendee.LastName} {lstDateRec.Attendee.FirstName} AttendeeId={m_lstdefaultTableRows[i].AttendeeId}");
+                       
 
-                        //for (DateTime date = lstDateRec.Date; date <= greatest_date; date = date.AddDays(1))
-                        //{
-                        //    if (date.DayOfWeek == DayOfWeek.Sunday)
-                        //    {
-                        //        lstsundays.Add(date);
-                        //    }
-                        //}
+                        var HasAlreadyFollowUpDate = (from rec in m_lstdefaultTableRows[i].AttendanceList
+                                                    where rec.Status == "Follow-Up" && rec.Date == greatest_date
+                                                    orderby rec 
+                                                    select rec).ToList().LastOrDefault();
 
-                        //DateTime lastSunday = lstsundays.LastOrDefault();
-                        //lstsundays.Clear();
-                        //if (lastSunday != null)
-                        //{
+                        //if no follow-up record then generate a follow-up
+                        if (HasAlreadyFollowUpDate == null)
+                        {
                             Attendance_Info newfollowUpRecord = new Attendance_Info { };
                             newfollowUpRecord.AttendeeId = m_lstdefaultTableRows[i].AttendeeId;
                             newfollowUpRecord.Date = greatest_date;
                             newfollowUpRecord.Status = "Follow-Up";
 
                             lstAttendanceInfo.Add(newfollowUpRecord);
-
-
                             generate_one = true;
+
+                            //Console.WriteLine($"Follow-Up written for: {lstDateRec.Attendee.LastName} {lstDateRec.Attendee.FirstName} AttendeeId={m_lstdefaultTableRows[i].AttendeeId}");
+                            //gf++;
+                        }
+
+                        
+
+
+                       
 
                         
                     }
@@ -663,9 +670,9 @@ namespace CAOGAttendeeManager
                 } //end if
             }
 
-            m_dbContext.Attendance_Info.AddRange(lstAttendanceInfo);
-         
-
+             m_dbContext.Attendance_Info.AddRange(lstAttendanceInfo);
+            Console.WriteLine($"Total number of Follow-Ups generated: {gf}");
+            Console.WriteLine($"Total number of No Follow-Ups generated: {nf}");
 
             if (generate_one)
             {
@@ -3021,7 +3028,7 @@ namespace CAOGAttendeeManager
 
                 
 
-                for (int i = 0; i < m_lstdefaultTableRowsCopy.Count - 1; i++)
+                for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
                     
 
@@ -3063,7 +3070,7 @@ namespace CAOGAttendeeManager
                 string ActivityParentName = m_currentSelected_ActivityPair.ParentTaskName;
                 string ActivityChildName = m_currentSelected_ActivityPair.ChildTaskName;
 
-                for (int i = 0; i < m_lstdefaultTableRowsCopy.Count - 1; i++)
+                for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
                     if (m_lstdefaultTableRowsCopy[i].AttendanceList.Count > 0 && m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
@@ -3093,7 +3100,7 @@ namespace CAOGAttendeeManager
                 string ActivityParentName = m_currentSelected_ActivityPair.ParentTaskName;
                 string ActivityChildName = m_currentSelected_ActivityPair.ChildTaskName;
 
-                for (int i = 0; i < m_lstdefaultTableRowsCopy.Count - 1; i++)
+                for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
                     if (m_lstdefaultTableRowsCopy[i].AttendanceList.Count > 0 && m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
@@ -3127,7 +3134,7 @@ namespace CAOGAttendeeManager
                 string ActivityChildName = m_currentSelected_ActivityPair.ChildTaskName;
 
 
-                for (int i = 0; i < m_lstdefaultTableRowsCopy.Count - 1; i++)
+                for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
                     if (m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
@@ -3161,7 +3168,7 @@ namespace CAOGAttendeeManager
                 strChurchStatus += (m_isAttendedChecked) ? "Attended" : "";
                 strChurchStatus += (m_isRespondedChecked) ? "Responded" : "";
 
-                for (int i = 0; i < m_lstdefaultTableRowsCopy.Count - 1; i++)
+                for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
                     if (m_lstdefaultTableRowsCopy[i].AttendanceList.Count > 0 && m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
@@ -3193,7 +3200,7 @@ namespace CAOGAttendeeManager
 
 
 
-                for (int i = 0; i < m_lstdefaultTableRowsCopy.Count - 1; i++)
+                for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
 
@@ -3229,7 +3236,7 @@ namespace CAOGAttendeeManager
 
                 //strChurchStatus = querystring.
 
-                for (int i = 0; i < m_lstdefaultTableRowsCopy.Count - 1; i++)
+                for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
                     var query_row = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("DateString == @0 and Status == @1", strChurchDate, strChurchStatus).ToList().FirstOrDefault();
@@ -3257,7 +3264,7 @@ namespace CAOGAttendeeManager
 
                 //strChurchStatus = querystring.
 
-                for (int i = 0; i < m_lstdefaultTableRowsCopy.Count - 1; i++)
+                for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
                     var query_row = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("Status == @0", strChurchStatus).ToList().FirstOrDefault();
@@ -3279,7 +3286,7 @@ namespace CAOGAttendeeManager
             {
                 
                 string strChurchDate = m_DateSelected.ToString("MM-dd-yyyy");
-                for (int i = 0; i < m_lstdefaultTableRowsCopy.Count - 1; i++)
+                for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
                     var query_row = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("DateString == @0", strChurchDate).ToList().FirstOrDefault();
@@ -3304,7 +3311,7 @@ namespace CAOGAttendeeManager
 
               
 
-                for (int i = 0; i < m_lstdefaultTableRowsCopy.Count - 1; i++)
+                for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
 
@@ -3335,7 +3342,7 @@ namespace CAOGAttendeeManager
 
                
 
-                for (int i = 0; i < m_lstdefaultTableRowsCopy.Count - 1; i++)
+                for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
                     if (m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
@@ -4630,6 +4637,14 @@ namespace CAOGAttendeeManager
                     }
                 }
             }
+        }
+
+        private void BtnAddColumn_Click(object sender, RoutedEventArgs e)
+        {
+            AddColumn AddColumnWindow = new AddColumn();
+
+            AddColumnWindow.Show();
+                
         }
     }
 

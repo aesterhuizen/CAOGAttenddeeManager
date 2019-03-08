@@ -255,7 +255,7 @@
                                     </HierarchicalDataTemplate>
 
                                     <HierarchicalDataTemplate DataType="{x:Type local:ActivityTask }" ItemsSource="{Binding lstsubTasks}">
-                                        <StackPanel Orientation="Horizontal">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                             <CheckBox  Name="chkActivity" Content="{Binding TaskName}" Margin="5,0,0,0" Checked="ActivityTreeView_Checkbox_Checked"
                                                        Unchecked="ActivityTreeView_Checkbox_UnChecked"
                                                       IsChecked="{Binding IsSelected}" >
@@ -313,12 +313,7 @@
                                 ColumnWidth="120"
                                 CanUserResizeRows="False" 
                                 ItemsSource="{Binding}">
-                            <!--<DataGrid.ColumnHeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <EventSetter Event="Click" Handler="columnHeaderClick"/>
-                                </Style>
-                            </DataGrid.ColumnHeaderStyle>-->
-                        
+                           
 
 
                             <DataGrid.Columns>
@@ -362,9 +357,20 @@
                                   
                                     <StackPanel Name="spAttendanceList">
                                             <ToolBar Name="tbarDeleteRec" MinHeight="33">
-                                            
-                                           
-                                                <Button Name="btnDelete"
+
+                                            <!--<DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <EventSetter Event="Click" Handler="columnHeaderClick"/>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>-->
+
+                                            <Button Name="btnAddColumn" 
+                                                    Click="BtnAddColumn_Click"
+                                                    ToolTip="Add a custom coulmn to the attendee profile">
+                                                
+                                                <Image Source="Resources\AddTableColums.ico" Height="20"/>
+                                            </Button>
+                                            <Button Name="btnDelete"
                                                         Click="btnDelete_Click"
                                                         ToolTip="Delete Attendee Record from selected table...">
                                                         <Image Height="20" Source="Resources\Delete.ico"/>
