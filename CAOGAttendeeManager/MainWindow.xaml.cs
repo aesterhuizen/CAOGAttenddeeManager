@@ -773,19 +773,21 @@ namespace CAOGAttendeeManager
                                                      orderby ActivityDateRec.Date ascending
                                                      select ActivityDateRec).ToList().LastOrDefault();
 
-                        //----Construct AttendeeLisTable-------------------------------------------------------------------------------------
+                    //----Construct AttendeeLisTable-------------------------------------------------------------------------------------
 
-                        // fill Attendance table columns. Add to list for each row
+                    // fill Attendance table columns. Add to list for each row
 
-                        m_lstattendanceTableRows.Add(new AttendanceTableRow()
-                        {
-                            AttendeeId = AttendeeRec.AttendeeId,
-                            FirstLastName = AttendeeRec.FirstName.ToUpper() + " " + AttendeeRec.LastName.ToUpper(),
-                            LastName = AttendeeRec.LastName,
-                            FirstName = AttendeeRec.FirstName,
-                            DateString = "Date Not Valid",
-                            Attended = false
-                        });
+                    m_lstattendanceTableRows.Add(new AttendanceTableRow()
+                    {
+                        AttendeeId = AttendeeRec.AttendeeId,
+                        FirstLastName = AttendeeRec.FirstName.ToUpper() + " " + AttendeeRec.LastName.ToUpper(),
+                        LastName = AttendeeRec.LastName,
+                        FirstName = AttendeeRec.FirstName,
+                        DateString = "Date Not Valid",
+                        Attended = AttendeeRec.Checked,
+                        IsModifiedrow = AttendeeRec.Checked
+
+                    });
 
 
                         //------Active Attendee--//---Construct DefaultTableRow-------------------------------------------------------------
@@ -1274,27 +1276,27 @@ namespace CAOGAttendeeManager
             dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
           
 
-            if (isAttendedStatusChecked)
-            {
-                MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list,  save changes already made to the active attendance list?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                if (res == MessageBoxResult.OK)
-                {
-                    Cursor = Cursors.Wait;
-                    SaveActiveList();
+            //if (isAttendedStatusChecked)
+            //{
+            //    MessageBoxResult res = MessageBox.Show("Save Changes...", "Save Changes", MessageBoxButton.OKCancel, MessageBoxImage.None);
+            //    if (res == MessageBoxResult.OK)
+            //    {
+            //        Cursor = Cursors.Wait;
+            //        SaveActiveList();
                   
-                    Cursor = Cursors.Arrow;
-                }
-                else
-                    return;
+            //        Cursor = Cursors.Arrow;
+            //    }
+            //    else
+            //        return;
 
 
-            }
-            else
-            {
+            //}
+            //else
+            //{
                 Cursor = Cursors.Wait;
                 SaveActiveList();
                 Cursor = Cursors.Arrow;
-            }
+           // }
         }
 
         private bool isAttendeeListDirty()
@@ -1675,10 +1677,10 @@ namespace CAOGAttendeeManager
 
 
                             var defaultTableRec = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == attid);
-                            if (defaultTableRec == null)
-                            {
-                                Console.WriteLine("defaultTableRec = NULL");
-                            }
+                            //if (defaultTableRec == null)
+                            //{
+                            //    Console.WriteLine("defaultTableRec = NULL");
+                            //}
                             if (defaultTableRec !=null)
                             {
                                 var lastAttInfoRec = defaultTableRec.AttendanceList.SingleOrDefault(rec => rec.Date == m_alistDateSelected);
@@ -1702,21 +1704,15 @@ namespace CAOGAttendeeManager
                                 }
 
 
-                                //Add attendee info record to attendance_Info context
-
-
-                                // Update Default
-
-
-                                // Add new Record to AttendanceList of attendee
-                                // This will automatically update the m_dbcontext.Attendance_Info structure!
-                                if (defaultTableRec != null)
+                                
+                                //if attendance info rec do not already exist in dbContext attendance list, add it
+                                var queryAttendeeInfoExist = defaultTableRec.AttendanceList.SingleOrDefault(rec => rec.Status == newRecord.Status && rec.Date == m_alistDateSelected);
+                                if (queryAttendeeInfoExist == null )
                                 {
-                                    //adding to the AttendanceList will automatically update the local db context with the new attendance_Info structure object
-
                                     m_dbContext.Attendance_Info.Add(newRecord);
                                     //attendanceList.Add(newRecord);
-                                    defaultTableRec.AttendanceList.Add(newRecord);
+                                    //var queryAttendeeInfo
+                                    //defaultTableRec.AttendanceList.Add(newRecord);
 
                                     //change 'Status_Last_Attended' and 'date last attended' column in default table row to reflect the 
                                     //new record's status
@@ -1725,6 +1721,8 @@ namespace CAOGAttendeeManager
                                     haschanges = true;
 
                                 }
+
+                                //}
                             }
                            
 
@@ -1830,6 +1828,7 @@ namespace CAOGAttendeeManager
                         m_dbContext.Attendance_Info.AddRange(attendanceList);
                     }
                     ClearAttendeeListStatus();
+
                     Display_AttendeeListTable_in_Grid();
                     Cursor = Cursors.Arrow;
                     MessageBox.Show("Attendees succesfully updated.", "Record Updated", MessageBoxButton.OK, MessageBoxImage.None);
@@ -1927,7 +1926,10 @@ namespace CAOGAttendeeManager
                 atr.IsModifiedrow = false;
                 atr.IsNewrow = false;
             }
-
+            foreach (Attendee rec in m_dbContext.Attendees.Local)
+            {
+                rec.Checked = false;
+            }
             Display_AttendeeListTable_in_Grid();
         }
 
@@ -2372,7 +2374,7 @@ namespace CAOGAttendeeManager
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            bool isAttendedStatusChecked = false;
+          //  bool isAttendedStatusChecked = false;
             
             if (m_NoCredFile)
             {
@@ -2385,7 +2387,7 @@ namespace CAOGAttendeeManager
                 dataGrid.UpdateLayout();
                 dataGrid_prospect.UpdateLayout();
 
-                isAttendedStatusChecked = isAttendeeListDirty();
+                //isAttendedStatusChecked = isAttendeeListDirty();
 
                 if (m_lstActivitiesCount != m_newlstActivitiesCount)
                 {
@@ -2393,28 +2395,28 @@ namespace CAOGAttendeeManager
                    
                 }
 #if (init_db)
-                if (!m_dbContext.ChangeTracker.HasChanges() && isAttendedStatusChecked)
-                {
+                //if (!m_dbContext.ChangeTracker.HasChanges() && isAttendedStatusChecked)
+                //{
 
 
 
-                    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list.\n\nDiscard changes and exit anyway?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
-                    if (res == MessageBoxResult.OK)
-                    {
+                //    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list.\n\nDiscard changes and exit anyway?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
+                //    if (res == MessageBoxResult.OK)
+                //    {
 
-                        //Discard_CheckListandSaveActiveList();
-                        e.Cancel = false;
-                        StopTimer();
-                        // close all active threads
-                        Environment.Exit(0);
+                //        //Discard_CheckListandSaveActiveList();
+                //        e.Cancel = false;
+                //        StopTimer();
+                //        // close all active threads
+                //        Environment.Exit(0);
 
-                    }
-                    else
-                    {
-                        e.Cancel = true;
+                //    }
+                //    else
+                //    {
+                //        e.Cancel = true;
                        
 
-                    }
+                //    }
                         
 
 
@@ -2423,44 +2425,44 @@ namespace CAOGAttendeeManager
 
 
 
-                }
-                else if (m_dbContext.ChangeTracker.HasChanges() && !isAttendedStatusChecked)
-                {
+                //}
+                //else if (m_dbContext.ChangeTracker.HasChanges() && !isAttendedStatusChecked)
+                //{
 
-                    MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet, save changes?", "Changes not saved", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
+                //    MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet, save changes?", "Changes not saved", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
                     
-                    if (res == MessageBoxResult.Yes)
-                    {
+                //    if (res == MessageBoxResult.Yes)
+                //    {
 
-                        Cursor = Cursors.Wait;
-                        SaveActiveList();
-                        Cursor = Cursors.Arrow;
+                //        Cursor = Cursors.Wait;
+                //        SaveActiveList();
+                //        Cursor = Cursors.Arrow;
 
-                        e.Cancel = false;
+                //        e.Cancel = false;
 
-                        // close all active threads
-                        Environment.Exit(0);
-                    }
-                    else if (res == MessageBoxResult.No)
-                    {
-                        e.Cancel = false;
-                        StopTimer();
-                        // close all active threads
-                        Environment.Exit(0);
+                //        // close all active threads
+                //        Environment.Exit(0);
+                //    }
+                //    else if (res == MessageBoxResult.No)
+                //    {
+                //        e.Cancel = false;
+                //        StopTimer();
+                //        // close all active threads
+                //        Environment.Exit(0);
 
-                    }
-                    else if (res == MessageBoxResult.Cancel)
-                        e.Cancel = true;
+                //    }
+                //    else if (res == MessageBoxResult.Cancel)
+                //        e.Cancel = true;
 
                   
 
-                }
-                else if (m_dbContext.ChangeTracker.HasChanges() && isAttendedStatusChecked)
+                //}
+                if (m_dbContext.ChangeTracker.HasChanges())
                 {
 
 
 
-                    MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet.\n\nThere are checked attendees in the attendee checklist that has not yet been added to the active attendance list.\n\nDiscard checklist changes and save active attendance changes to database?", "Save and discard checklist", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
+                    MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet. Save Changes?", "Save Changes", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
                     if (res == MessageBoxResult.Yes)
                     {
                         Cursor = Cursors.Wait;
@@ -2493,7 +2495,7 @@ namespace CAOGAttendeeManager
                 else
                 {
                     Cursor = Cursors.Wait;
-
+                  
                     Environment.Exit(0);
 
                     Cursor = Cursors.Arrow;
@@ -2559,19 +2561,16 @@ namespace CAOGAttendeeManager
           
 
 
-            if (m_dbContext.ChangeTracker.HasChanges() )
-            {
+            
              
                 // save contents to database
                 m_dbContext.SaveChanges();
 
                               
               
-            }
-            else
-            {
-                MessageBox.Show("No changes to save.");
-            }
+            
+            
+            
 
 
 
@@ -4132,7 +4131,7 @@ namespace CAOGAttendeeManager
                         {
                             if (queryAttRec != null)
                             {
-                                queryAttRec.FirstName = text.Text;
+                               queryAttRec.FirstName = text.Text;
 
                             }
 
@@ -4171,15 +4170,35 @@ namespace CAOGAttendeeManager
 
         private void cmbAttendanceInfo_Checked(object sender, RoutedEventArgs e)
         {
-            m_attendance_row_selected.Attended = true;
-            if (m_attendance_row_selected.IsNewrow)
+            if (m_attendance_row_selected != null)
             {
-                m_attendance_row_selected.IsModifiedrow = false;
+                m_attendance_row_selected.Attended = true;
+
+
+
+                m_default_row_selected = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == m_attendance_row_selected.AttendeeId);
+
+
+                if (m_default_row_selected != null)
+                {
+                    // get record in datacontext
+                    var queryAttRec = m_dbContext.Attendees.Local.SingleOrDefault(attrec => attrec.AttendeeId == m_default_row_selected.AttendeeId);
+
+                    queryAttRec.Checked = true;
+                }
+
+
+
+                if (m_attendance_row_selected.IsNewrow)
+                {
+                    m_attendance_row_selected.IsModifiedrow = false;
+                }
+                else
+                {
+                    m_attendance_row_selected.IsModifiedrow = true;
+                }
             }
-            else
-            {
-                m_attendance_row_selected.IsModifiedrow = true;
-            }
+            
             
         }
 
@@ -4197,13 +4216,25 @@ namespace CAOGAttendeeManager
         private void cmbAttendanceInfo_Unchecked(object sender, RoutedEventArgs e)
         {
             
+            if (m_attendance_row_selected != null)
+            {
+                m_attendance_row_selected.Attended = false;
+                m_attendance_row_selected.IsModifiedrow = false;
 
-            m_attendance_row_selected.Attended = false;
-            m_attendance_row_selected.IsModifiedrow = false;
-           
-            
-            
-            
+                m_default_row_selected = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == m_attendance_row_selected.AttendeeId);
+
+
+                if (m_default_row_selected != null)
+                {
+                    // get record in datacontext
+                    var queryAttRec = m_dbContext.Attendees.Local.SingleOrDefault(attrec => attrec.AttendeeId == m_default_row_selected.AttendeeId);
+
+                    queryAttRec.Checked = false;
+                }
+
+            }
+
+
         }
 
         private void btnAddActivity_Click(object sender, RoutedEventArgs e)

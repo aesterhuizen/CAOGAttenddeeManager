@@ -62,6 +62,9 @@ namespace CAOGAttendeeManager
             ActivityList = new ObservableCollection<ActivityPair>() { };
 
         }
+
+        public bool Checked { get; set; }
+
         public int AttendeeId { get; set; }
         private string _lastname = "";
         public string LastName
@@ -278,9 +281,9 @@ namespace CAOGAttendeeManager
         {
             ActivityPair at = (ActivityPair)obj;
 
-            DateTime dt = (DateTime)at._date.GetValueOrDefault();
+            DateTime dt = at._date.GetValueOrDefault();
 
-            DateTime tdt = (DateTime)_date.GetValueOrDefault();
+            DateTime tdt = _date.GetValueOrDefault();
 
             return tdt.CompareTo(dt);
         }

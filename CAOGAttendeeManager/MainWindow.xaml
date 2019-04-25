@@ -10,7 +10,7 @@
         Closing="Window_Closing">
     <Window.Resources>
         <!--<CollectionViewSource x:Key="attendeeViewSource" d:DesignSource="{d:DesignInstance {x:Type local:Attendee}, CreateList=True}"/>-->
-        
+
 
         <DataTemplate x:Key="ActivityPairItemsTemplate">
             <StackPanel Orientation="Horizontal">
@@ -29,12 +29,12 @@
         <!--<Style x:Key="CenterAligned" TargetType="TextBlock">
             <Setter Property="HorizontalAlignment" Value="Center"/>
         </Style>-->
-        
+
     </Window.Resources>
 
 
     <DockPanel>
-       
+
         <Ribbon DockPanel.Dock="Top" Title="Attendee Manager" SelectionChanged="Ribbon_SelectionChanged">
             <Ribbon.ApplicationMenu>
                 <RibbonApplicationMenu Label="File" SmallImageSource="Resources\FileCabinet.ico">
@@ -96,7 +96,7 @@
                                   Click="ImportRows_Click" 
                                   ToolTip="Update changes made in Prospect List or Activity &amp; Info tabs to the Active table that will be saved to the database when the user click on the Save button."/>
 
-                  
+
                     <RibbonButton Name="btnDelete" 
                                   Label="Delete Record"
                                   LargeImageSource="Resources\Delete.ico"
@@ -107,7 +107,7 @@
 
                 </RibbonGroup>
 
-                             
+
                 <RibbonGroup Header="Attendance Metrics" Width="200">
 
 
@@ -125,8 +125,8 @@
                                    Width="40" 
                                    TextAlignment="Right" VerticalAlignment="Center"/>
                         </StackPanel>
-                     
-                      
+
+
                         <!-- Text="{Binding ElementName=dataGrid_prospect, Path=Items.Count}"-->
 
 
@@ -140,7 +140,7 @@
 
             </RibbonTab>
         </Ribbon>
-       
+
         <Grid DockPanel.Dock="Left" Margin="2" ShowGridLines="True" >
             <Grid.RowDefinitions>
                 <RowDefinition/>
@@ -166,9 +166,9 @@
 
                 </StackPanel>
                 <GroupBox Name="gbFilterOptions">
-                   
+
                     <StackPanel Name="spFilterOptions" MinWidth="200">
-                       
+
 
                         <Expander Name="CalendarExpander" IsExpanded="True" Margin="0,0,0,10">
                             <Expander.Header>
@@ -182,12 +182,12 @@
                                       DisplayDateChanged="DateCalendar_DisplayDateChanged" 
                                       SelectedDatesChanged="DateCalendar_SelectedDateChanged"/>
                         </Expander>
-                        
+
                         <Expander Name="ChurchStatusExpander" IsExpanded="True" Margin="0,0,0,10">
                             <Expander.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <CheckBox Content="Church Status" Name="chkChurchStatusFilter" Checked="chkChurchStatusFilter_Checked" Unchecked="chkChurchStatusFilter_Unchecked" HorizontalAlignment="Left" />
-                                   
+
                                 </StackPanel>
                             </Expander.Header>
 
@@ -217,12 +217,12 @@
 
                                 </StackPanel>
                             </Expander.Header>
-                            
+
                             <TreeView Name="trvActivities" SelectedItemChanged="TrvActivities_SelectedItemChanged" >
                                 <TreeView.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="Add New Activity Group ..." Click="MenuItem_AddNewGroup_Click"/>
-                                        
+
                                     </ContextMenu>
                                 </TreeView.ContextMenu>
                                 <TreeView.ItemContainerStyle>
@@ -230,15 +230,15 @@
                                         <Setter Property="IsExpanded" Value="True"/>
                                     </Style>
                                 </TreeView.ItemContainerStyle>
-                                
+
                                 <TreeView.Resources>
                                     <Style TargetType="{x:Type ScrollViewer}">
                                         <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
                                     </Style>
 
-                                   
 
-                                
+
+
                                     <HierarchicalDataTemplate DataType="{x:Type local:ActivityGroup }" ItemsSource="{Binding lstActivityTasks}" >
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{Binding ActivityName}" FontWeight="Bold" >
@@ -271,7 +271,7 @@
                                     </HierarchicalDataTemplate>
                                 </TreeView.Resources>
                             </TreeView>
-                            
+
 
 
                         </Expander>
@@ -280,11 +280,11 @@
                     </StackPanel>
                 </GroupBox>
                 <TextBlock Name="txtblkTaskDescription" TextWrapping="Wrap"/>
-                
+
             </StackPanel>
 
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Left" Background="#007acc"/>
-                <!-- Tab control ############################################################################################################################################## -->
+            <!-- Tab control ############################################################################################################################################## -->
             <TabControl Name="GridsTabControl" SelectionChanged="GridsTabControl_SelectionChanged" MouseUp="GridsTabControl_MouseUp" Grid.Column="2">
                 <!-- Active Tab################################################################################################################################################ -->
                 <TabItem Header="Active" Name="ActiveTab">
@@ -294,10 +294,16 @@
                                 <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
                             </Style>
 
-                            
+
 
 
                         </Grid.Resources>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="68*"/>
+                            <ColumnDefinition Width="23*"/>
+                            <ColumnDefinition Width="17*"/>
+                            <ColumnDefinition Width="921*"/>
+                        </Grid.ColumnDefinitions>
                         <DataGrid x:Name="dataGrid"
                                 LoadingRowDetails="dataGrid_LoadingRowDetails"
                                 RowDetailsVisibilityMode="Collapsed"
@@ -312,8 +318,8 @@
                                 SelectedCellsChanged="dataGrid_SelectedCellsChanged"
                                 ColumnWidth="120"
                                 CanUserResizeRows="False" 
-                                ItemsSource="{Binding}">
-                           
+                                ItemsSource="{Binding}" Grid.ColumnSpan="4">
+
 
 
                             <DataGrid.Columns>
@@ -340,7 +346,7 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                               
+
                                 <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}"/>
                                 <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}"/>
                                 <DataGridTextColumn Header="Church Last Attended" Binding="{Binding Church_Last_Attended}" Width="130"/>
@@ -354,9 +360,9 @@
 
                             <DataGrid.RowDetailsTemplate>
                                 <DataTemplate>
-                                  
+
                                     <StackPanel Name="spAttendanceList">
-                                            <ToolBar Name="tbarDeleteRec" MinHeight="33">
+                                        <ToolBar Name="tbarDeleteRec" MinHeight="33">
 
                                             <!--<DataGrid.ColumnHeaderStyle>
                                 <Style TargetType="DataGridColumnHeader">
@@ -367,18 +373,18 @@
                                             <Button Name="btnAddColumn" 
                                                     Click="BtnAddColumn_Click"
                                                     ToolTip="Add a custom coulmn to the attendee profile">
-                                                
+
                                                 <Image Source="Resources\AddTableColums.ico" Height="20"/>
                                             </Button>
                                             <Button Name="btnDelete"
                                                         Click="btnDelete_Click"
                                                         ToolTip="Delete Attendee Record from selected table...">
-                                                        <Image Height="20" Source="Resources\Delete.ico"/>
-                                                </Button>
-                                            
+                                                <Image Height="20" Source="Resources\Delete.ico"/>
+                                            </Button>
+
                                         </ToolBar>
 
-                                            <TextBlock Name="txtblkAttendanceList" Text="Attendance list" MinHeight="16"/>
+                                        <TextBlock Name="txtblkAttendanceList" Text="Attendance list" MinHeight="16"/>
 
                                         <DataGrid Height="200" Name="GrdAttendee_InfoList" ItemsSource="{Binding}"
                                                         MinHeight="200"
@@ -424,7 +430,7 @@
                                         </DataGrid>
 
                                     </StackPanel>
-                                   
+
                                 </DataTemplate>
                             </DataGrid.RowDetailsTemplate>
                         </DataGrid>
@@ -438,6 +444,10 @@
                                 <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
                             </Style>
                         </Grid.Resources>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="16*"/>
+                            <ColumnDefinition Width="1013*"/>
+                        </Grid.ColumnDefinitions>
 
 
 
@@ -454,7 +464,7 @@
                                   ClipboardCopyMode="IncludeHeader"
                                   ColumnWidth="120" 
                                   CanUserResizeRows="False"
-                                  CellEditEnding="DataGrid_prospect_CellEditEnding">
+                                  CellEditEnding="DataGrid_prospect_CellEditEnding" Grid.ColumnSpan="2">
 
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}" />
@@ -463,18 +473,18 @@
                                 <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}"/>
                                 <DataGridTextColumn Header="Church Last Attended" Binding="{Binding DateString}" />
                                 <DataGridTemplateColumn Header="Attended">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <CheckBox Name="cmbAttendanceInfo" IsChecked="{Binding Attended}" Checked="cmbAttendanceInfo_Checked" Unchecked="cmbAttendanceInfo_Unchecked"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Name="cmbAttendanceInfo" IsChecked="{Binding Attended}" Checked="cmbAttendanceInfo_Checked" Unchecked="cmbAttendanceInfo_Unchecked"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>
                 </TabItem>
-                
+
 
             </TabControl>
             <Label Name="lblTableShown" Grid.Column="2" HorizontalAlignment="Left" Margin="126,-2,0,0" VerticalAlignment="Top"/>
