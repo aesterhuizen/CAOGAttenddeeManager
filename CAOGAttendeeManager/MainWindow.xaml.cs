@@ -98,17 +98,17 @@ namespace CAOGAttendeeManager
                         m_dbContext.Activities.Load();
                     }
 
-#if (db_errors)
-                    correctDBerrors();
-#endif
+
 
 
 
                     InitDataSet();
 #endif
 
+#if (db_errors)
+            //        correctDBerrors();
+#endif
 
-                    
 
 
 
@@ -328,35 +328,37 @@ namespace CAOGAttendeeManager
             //m_dbContext.Attendance_Info.Load();
             //m_dbContext.Attendees.Load();
 
-             DateTime find_date = new DateTime(2019, 2, 24);
-            List<Attendance_Info> lstAtt = new List<Attendance_Info>() { };
-            int i = 0;
+            // DateTime find_date = new DateTime(2019, 4, 21);
+            //string datestring = find_date.ToString("MM-dd-yyyy");
 
-            var query = from at in m_dbContext.Attendance_Info
-                        where at.Status == "Follow-Up" && at.Date == find_date
-                        select at;
+            //List<Attendance_Info> lstAtt = new List<Attendance_Info>() { };
+            //int i = 0;
 
-            foreach (var rec in query)
-            {
-                //    var querylatestDate = (from rec in attendee.AttendanceList
-                //                           where rec.Date == find_date
-                //                           select rec).ToList().LastOrDefault();
+            //var query = from rec in m_lstdefaultTableRows
+            //            where rec.ChurchStatus == "Responded" && rec.Church_Last_Attended == datestring
+            //            select rec;
 
-                //    if (querylatestDate != null)
-                //    {
-                        lstAtt.Add(rec);
-                //    }
+            //foreach (var attendee in query)
+            //{
+            //    //var querylatestDate = (from recdate in attendee.AttendanceList
+            //    //                       where recdate.Date = datestring && recdate.Status == "Follow-UP"
+            //    //                       select recdate;
 
-                i++;
-                Console.WriteLine($"Total records: {i}");
+            //        if (querylatestDate != null)
+            //        {
+            //        //    lstAtt.Add(attendee);
+            //        }
 
-            }
+            //    i++;
+            //    Console.WriteLine($"Total records: {i}");
 
-            m_dbContext.Attendance_Info.RemoveRange(lstAtt);
+            //}
+
+            //m_dbContext.Attendance_Info.RemoveRange(lstAtt);
 
 
 
-            //m_dbContext.SaveChanges();
+           // m_dbContext.SaveChanges();
 
 
         }
@@ -785,8 +787,9 @@ namespace CAOGAttendeeManager
                         FirstName = AttendeeRec.FirstName,
                         DateString = "Date Not Valid",
                         Attended = AttendeeRec.Checked,
-                        IsModifiedrow = AttendeeRec.Checked
-
+                        IsModifiedrow = AttendeeRec.Checked,
+                       
+                        
                     });
 
 
@@ -864,7 +867,7 @@ namespace CAOGAttendeeManager
                                 DefaultTabledr.FirstName = AttendeeRec.FirstName;
                                 DefaultTabledr.LastName = AttendeeRec.LastName;
 
-                                DefaultTabledr.Church_Last_Attended = "N/A";
+                                DefaultTabledr.Church_Last_Attended = "n/a";
                                 DefaultTabledr.ChurchStatus = lstatus;
 
                                 if (queryActivityLastDate != null)
@@ -895,10 +898,10 @@ namespace CAOGAttendeeManager
                         if (DefaultTabledr.AttendeeId != 0)
                             m_lstdefaultTableRows.Add(DefaultTabledr);
 
-#if (DEBUG)
-                    //i++;
-                    //if (i == 10)
-                    //    break;
+#if (ONLY10)
+                    i++;
+                    if (i == 10)
+                        break;
 #endif
 
 
@@ -1582,7 +1585,7 @@ namespace CAOGAttendeeManager
             var defaultTableRec = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == atr.AttendeeId);
             if (defaultTableRec != null)
             {
-                var lastAttInfoRec = defaultTableRec.AttendanceList.SingleOrDefault(rec => rec.Date == m_alistDateSelected && rec.Status == "Attended");
+                var lastAttInfoRec = defaultTableRec.AttendanceList.SingleOrDefault(rec => rec.Date == m_alistDateSelected);
 
                 if (lastAttInfoRec != null)
                 {
@@ -1645,6 +1648,7 @@ namespace CAOGAttendeeManager
                 // m_DataSet.Tables["AttendeeListTable"].DefaultView.RowFilter = "";
                 foreach (AttendanceTableRow dr in m_lstattendanceTableRows)
                 {
+                
                     if (dr.IsModifiedrow)
                     {
                         int attid = dr.AttendeeId;
@@ -1654,7 +1658,7 @@ namespace CAOGAttendeeManager
                         bool bcheckdupInfo = Check_for_dup_AttendeeInfo_inDbase(dr);
                         if (bcheckdupInfo)
                         {
-                            MessageBox.Show("A record with the same first name, last name and date already exist in the database, choose a difference date, first name or last name.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
+                            MessageBox.Show("A record with the same date already exist in the database, choose a difference date.", "Duplicate date record found", MessageBoxButton.OK, MessageBoxImage.Stop);
                             return;
                         }
                         else
@@ -1673,23 +1677,25 @@ namespace CAOGAttendeeManager
                             newRecord.AttendeeId = attid;
                             newRecord.Date = m_alistDateSelected;
 
-                            //var AttendeeIdisInLocalContext = m_dbContext.Attendees.Local.SingleOrDefault(rec => rec.AttendeeId == attid);
+                          
 
-
+                            // get Default Table Row with Attendee Id
                             var defaultTableRec = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == attid);
-                            //if (defaultTableRec == null)
-                            //{
-                            //    Console.WriteLine("defaultTableRec = NULL");
-                            //}
+                          
                             if (defaultTableRec !=null)
                             {
-                                var lastAttInfoRec = defaultTableRec.AttendanceList.SingleOrDefault(rec => rec.Date == m_alistDateSelected);
+                                //select the record with the most recent date for this attendee
+                                var lastAttInfoRec = (from rec in defaultTableRec.AttendanceList
+                                                      orderby rec.Date
+                                                      select rec).ToList().LastOrDefault();
 
-                                string flname = defaultTableRec.FirstName + " " + defaultTableRec.LastName;
+                                
 
                                 if (lastAttInfoRec != null)
                                 {
-                                    // If the last record is a follow-up then this record is a responded Status
+                                    
+                                  
+                                    // If the most recent record is a 'Follow-up' then this record is a 'Responded' Status else it is an 'Attended' status
                                     if (lastAttInfoRec.Status == "Follow-Up")
                                         newRecord.Status = "Responded";
                                     else
@@ -1705,15 +1711,14 @@ namespace CAOGAttendeeManager
 
 
                                 
-                                //if attendance info rec do not already exist in dbContext attendance list, add it
-                                var queryAttendeeInfoExist = defaultTableRec.AttendanceList.SingleOrDefault(rec => rec.Status == newRecord.Status && rec.Date == m_alistDateSelected);
+                                ////if attendance info rec do not already exist in dbContext attendance list, add it
+                                var queryAttendeeInfoExist = defaultTableRec.AttendanceList.SingleOrDefault(rec => rec.Status == newRecord.Status && rec.Date == newRecord.Date);
                                 if (queryAttendeeInfoExist == null )
                                 {
                                     m_dbContext.Attendance_Info.Add(newRecord);
-                                    //attendanceList.Add(newRecord);
-                                    //var queryAttendeeInfo
-                                    //defaultTableRec.AttendanceList.Add(newRecord);
+                                    
 
+                                    Display_AttendanceList_in_Grid(ref defaultTableRec);
                                     //change 'Status_Last_Attended' and 'date last attended' column in default table row to reflect the 
                                     //new record's status
                                     defaultTableRec.ChurchStatus = newRecord.Status;
@@ -1737,6 +1742,16 @@ namespace CAOGAttendeeManager
                         /* --Add new Attendee to default table row---
                          *   Add a new Attendee to context
                          */
+
+                        //check if database already contain an attendee with first name and last name, if so append lastname with _1
+                        bool bcheckdup = Check_for_dup_Attendee_inDbase(dr);
+                        if (bcheckdup)
+                        {
+                            MessageBox.Show("A record with the same date already exist in the database, choose a difference date.", "Duplicate date record found", MessageBoxButton.OK, MessageBoxImage.Stop);
+                            return;
+                        }
+
+
                         bool berror = Row_error_checking(dr);
                         if (berror)
                         {
@@ -1744,13 +1759,7 @@ namespace CAOGAttendeeManager
                             return;
                         }
 
-                        //check if database already contain an attendee with first name and last name, if so append lastname with _1
-                        bool bcheckdup = Check_for_dup_Attendee_inDbase(dr);
-                        if (bcheckdup)
-                        {
-                            MessageBox.Show("A record with the same attendee name already exist in the database. Add status to existing attendee or please select a unique name.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
-                            return;
-                        }
+                       
 
 
 
@@ -2086,7 +2095,7 @@ namespace CAOGAttendeeManager
 
             lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
             lblTableShown.Content = "Main View";
-
+            btnClearQuery.IsEnabled = false;
         }
 
         private void columnHeaderClick(object sender, RoutedEventArgs e)
@@ -2995,6 +3004,7 @@ namespace CAOGAttendeeManager
             {
                 Display_DefaultTable_in_Grid();
                 m_isQueryTableShown = false;
+                btnClearQuery.IsEnabled = false;
                 btnDelete.IsEnabled = true;
                 btnGenerateFollowUps.IsEnabled = true;
                 lblTableShown.Content = "Main View";
@@ -3375,6 +3385,7 @@ namespace CAOGAttendeeManager
                 btnGenerateFollowUps.IsEnabled = false;
                 btnDelete.IsEnabled = false;
                 lblTableShown.Content = "Query Results ...";
+                btnClearQuery.IsEnabled = true;
             }
             
                 
@@ -3473,12 +3484,8 @@ namespace CAOGAttendeeManager
                     m_alistView = true;
                     m_AttendanceView = false;
                     m_activityView = false;
-
-                 //   SaveActivePanelState();
-
-                    
-                    // load ProspectTab state from TabState class
-                 //   LoadProspectPanelState();
+                    Enable_Filters();
+        
                   
 
 
@@ -3978,7 +3985,15 @@ namespace CAOGAttendeeManager
             }
             
         }
-
+        
+        private void Display_AttendanceList_in_Grid(ref DefaultTableRow dr)
+        {
+            if (m_AttendeeInfo_grid != null)
+            {
+                m_AttendeeInfo_grid.DataContext = dr.AttendanceList.OrderByDescending(rec => rec.Date).ToList();
+                m_AttendeeInfo_grid.Items.Refresh();
+            }
+        }
         private void Display_AttendanceList_in_Grid()
         {
             if (m_AttendeeInfo_grid != null)
@@ -3997,25 +4012,13 @@ namespace CAOGAttendeeManager
             if (dataGrid.RowDetailsVisibilityMode == DataGridRowDetailsVisibilityMode.Collapsed)
             {
                 dataGrid.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
-               // dataGrid_LoadingRowDetails(null, null);
-
-               // Display_AttendanceList_in_Grid();
-               // Display_ActivityList_in_Grid();
-
+              
                 Disable_Filters();
                 btnDelete.IsEnabled = false;
                 btnExecQuery.IsEnabled = false;
                 btnGenerateFollowUps.IsEnabled = false;
-
-                //// user was on the add activity page and clicked the expander button
-                //if (m_IsActivityPanelView)
-                //{
-                //    LoadActivePanelState();
-
-                //    Show_activeview_Panel();
-                //}
-                //txtSearch.IsEnabled = false;
-
+               
+               
             }
             else
             {
@@ -4039,51 +4042,37 @@ namespace CAOGAttendeeManager
 
             Cursor = Cursors.Wait;
 
-          
+
             // get GrdAttendee_InfoList element within the DataTemplate
-            m_AttendeeInfo_grid = e.DetailsElement.FindName("GrdAttendee_InfoList") as DataGrid;
+            
+                m_AttendeeInfo_grid = e.DetailsElement.FindName("GrdAttendee_InfoList") as DataGrid;
 
-            //var Attendee_AttendeeInfoList = from rec in m_dbContext.Attendance_Info.Local
-            //                                where (rec.AttendeeId == m_default_row_selected.AttendeeId)
-            //                                select rec;
 
-            //foreach (var attendance in Attendee_AttendeeInfoList)
-            //{
-            //    m_default_row_selected.AttendanceList.Add(attendance);
-            //}
 
-           // m_AttendeeInfo_grid.DataContext = m_default_row_selected.AttendanceList.OrderByDescending(rec => rec.Date);
-            // get GrdAttendee_ActivityList element within the DataTemplate
-            m_Activity_grid = e.DetailsElement.FindName("GrdAttendee_ActivityList") as DataGrid;
 
-            //var Attendee_ActivityList = from rec in m_dbContext.Activities.Local
-            //                            where rec.AttendeeId == m_default_row_selected.AttendeeId
-            //                            select rec;
+                // get GrdAttendee_ActivityList element within the DataTemplate
+                m_Activity_grid = e.DetailsElement.FindName("GrdAttendee_ActivityList") as DataGrid;
 
-            //foreach (var activity in Attendee_ActivityList)
-            //{
-            //    m_default_row_selected.ActivityList.Add(activity);
-            //}
 
-            // m_Activity_grid.DataContext = m_default_row_selected.ActivityList.OrderByDescending(rec => rec.Date);
 
-            Display_ActivityList_in_Grid();
-            Display_AttendanceList_in_Grid();
+                Display_ActivityList_in_Grid();
+                Display_AttendanceList_in_Grid();
 
-            btnDelete.IsEnabled = false;
-            //hide grid columns
-            if (m_AttendeeInfo_grid.Columns.Count > 0)
-            {
-                m_AttendeeInfo_grid.Columns[0].Visibility = Visibility.Hidden; //AttedeeId
-         
-            }
-            if (m_Activity_grid.Columns.Count > 0)
-            {
-                m_Activity_grid.Columns[0].Visibility = Visibility.Hidden; // AttendeeId
-                m_Activity_grid.Columns[2].Width = 300; // Activity column
+                btnDelete.IsEnabled = false;
+                //hide grid columns
+                if (m_AttendeeInfo_grid.Columns.Count > 0)
+                {
+                    m_AttendeeInfo_grid.Columns[0].Visibility = Visibility.Hidden; //AttedeeId
 
-            }
+                }
+                if (m_Activity_grid.Columns.Count > 0)
+                {
+                    m_Activity_grid.Columns[0].Visibility = Visibility.Hidden; // AttendeeId
+                    m_Activity_grid.Columns[2].Width = 300; // Activity column
 
+                }
+
+            
             Cursor = Cursors.Arrow;
         }
 
@@ -4337,12 +4326,7 @@ namespace CAOGAttendeeManager
              
                 m_dbContext.Activities.Add(m_currentSelected_ActivityPair);
 
-                var ActivityIsinList = m_default_row_selected.ActivityList.SingleOrDefault(rec => rec.ToString() == m_currentSelected_ActivityPair.ToString() && rec.Date == m_currentSelected_ActivityPair.Date);
-                if (ActivityIsinList == null)
-                {
-                    m_default_row_selected.ActivityList.Add(m_currentSelected_ActivityPair);
-                }
-                    
+                                  
                
                 
 
@@ -4616,11 +4600,6 @@ namespace CAOGAttendeeManager
 
         }
 
-        private void GrdAttendee_InfoList_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-
-        }
-
         private void DataGrid_prospect_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             var datagrid = sender as DataGrid;
@@ -4676,6 +4655,17 @@ namespace CAOGAttendeeManager
 
             AddColumnWindow.Show();
                 
+        }
+
+        private void BtnClearQuery_Click(object sender, RoutedEventArgs e)
+        {
+            Display_DefaultTable_in_Grid();
+            m_isQueryTableShown = false;
+            btnClearQuery.IsEnabled = false;
+            btnDelete.IsEnabled = true;
+            btnGenerateFollowUps.IsEnabled = true;
+            lblTableShown.Content = "Main View";
+
         }
     }
 

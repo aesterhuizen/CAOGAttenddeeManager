@@ -11,7 +11,8 @@
     <Window.Resources>
         <!--<CollectionViewSource x:Key="attendeeViewSource" d:DesignSource="{d:DesignInstance {x:Type local:Attendee}, CreateList=True}"/>-->
 
-
+        <!--<local:AttendanceInfoList x:Key="AttendeeAttendanceList"/>-->
+        
         <DataTemplate x:Key="ActivityPairItemsTemplate">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{Binding ActivityGroup}" FontSize="10" FontWeight="Bold"/>
@@ -163,7 +164,7 @@
                          Content="Filter Options"
                          Click="BtnFilterOpts_Click"
                          ToolTip="Open filter options panel to search for something"/>
-
+                    <Button Margin="37,0,0,0" Name="btnClearQuery" Click="BtnClearQuery_Click" Content="Clear Query"/>
                 </StackPanel>
                 <GroupBox Name="gbFilterOptions">
 
@@ -300,7 +301,8 @@
                         </Grid.Resources>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="68*"/>
-                            <ColumnDefinition Width="23*"/>
+                            <ColumnDefinition Width="8*"/>
+                            <ColumnDefinition Width="15*"/>
                             <ColumnDefinition Width="17*"/>
                             <ColumnDefinition Width="921*"/>
                         </Grid.ColumnDefinitions>
@@ -318,7 +320,7 @@
                                 SelectedCellsChanged="dataGrid_SelectedCellsChanged"
                                 ColumnWidth="120"
                                 CanUserResizeRows="False" 
-                                ItemsSource="{Binding}" Grid.ColumnSpan="4">
+                                ItemsSource="{Binding}" Grid.ColumnSpan="5">
 
 
 
@@ -391,8 +393,8 @@
                                                         AutoGenerateColumns="False"
                                                         SelectionMode="Extended"
                                                         CanUserDeleteRows="False"
-                                                        IsReadOnly="True"
-                                                        DataContextChanged="GrdAttendee_InfoList_DataContextChanged">
+                                                        IsReadOnly="True">
+
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
                                                 <DataGridTextColumn Header="Date" Binding="{Binding DateString}"/>
@@ -487,7 +489,7 @@
 
 
             </TabControl>
-            <Label Name="lblTableShown" Grid.Column="2" HorizontalAlignment="Left" Margin="126,-2,0,0" VerticalAlignment="Top"/>
+            <Label Name="lblTableShown" Grid.Column="2" HorizontalAlignment="Left" Margin="126,-2,0,0" VerticalAlignment="Top" Foreground="Red"/>
 
 
         </Grid>

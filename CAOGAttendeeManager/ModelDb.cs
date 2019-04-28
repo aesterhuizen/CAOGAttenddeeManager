@@ -64,7 +64,7 @@ namespace CAOGAttendeeManager
         }
 
         public bool Checked { get; set; }
-
+       
         public int AttendeeId { get; set; }
         private string _lastname = "";
         public string LastName
@@ -150,7 +150,16 @@ namespace CAOGAttendeeManager
         }
     }
 
-    public class Attendance_Info : IComparable
+    //public class AttendanceInfoList : ObservableCollection<Attendance_Info>
+    //{
+    //    public AttendanceInfoList() : base()
+    //    {
+
+    //    }
+
+    //}
+    
+    public class Attendance_Info : IComparable, INotifyPropertyChanged
     {
 
 
@@ -159,7 +168,7 @@ namespace CAOGAttendeeManager
 
 
 
-
+        
      
         public string DateString { get; private set; }
         private DateTime _date;
@@ -176,7 +185,7 @@ namespace CAOGAttendeeManager
                 {
                     _date = value;
                     DateString = _date.ToString("MM-dd-yyyy");
-
+                    NotifyPropertyChanged();   
                    
                 }
             }
@@ -184,8 +193,19 @@ namespace CAOGAttendeeManager
 
 
 
-        public string Status { get; set; }
-
+        private string _status ="";
+        public string Status
+        {
+            get
+            {
+                return _status;
+            }
+            set
+            {
+                _status = value;
+                NotifyPropertyChanged();
+            }
+        }
         public virtual Attendee Attendee { get; set; }
 
         public int CompareTo(object obj)
@@ -193,6 +213,12 @@ namespace CAOGAttendeeManager
             Attendance_Info d = (Attendance_Info)obj;
 
             return _date.CompareTo(d._date);
+        }
+        
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 
