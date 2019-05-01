@@ -4326,11 +4326,14 @@ namespace CAOGAttendeeManager
              
                 m_dbContext.Activities.Add(m_currentSelected_ActivityPair);
 
-                                  
-               
-                
 
-               
+                //Add this to work a round an issue that will not sync the ActivityList when an entry is added to the m_dbContext.ActivityList   
+                var ActivityExistInList = m_default_row_selected.ActivityList.SingleOrDefault(rec => rec.ToString() == m_currentSelected_ActivityPair.ToString() && rec.Date == m_currentSelected_ActivityPair.Date);
+                if (ActivityExistInList == null)
+                {
+                    m_default_row_selected.ActivityList.Add(m_currentSelected_ActivityPair);
+                }
+
                 var lastActivity = (from rec in m_default_row_selected.ActivityList
                                     where rec.AttendeeId == m_currentSelected_ActivityPair.AttendeeId
                                     orderby rec.Date descending
