@@ -29,7 +29,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\v3.1.12\</OutputPath>
+    <OutputPath>bin\Release\v3.1.13\</OutputPath>
     <DefineConstants>TRACE;init_db</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>3</WarningLevel>

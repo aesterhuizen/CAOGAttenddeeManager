@@ -1204,8 +1204,14 @@ namespace CAOGAttendeeManager
 
         private void DateCalendar_DisplayDateChanged(object sender, CalendarDateChangedEventArgs e)
         {
-            var calendar = sender as Calendar;
-            Add_Blackout_Dates(ref calendar);
+            if (!m_IsActivityPanelView)
+            {
+                var calendar = sender as Calendar;
+
+                Add_Blackout_Dates(ref calendar);
+            }
+
+            
 
         }
 
@@ -1242,8 +1248,12 @@ namespace CAOGAttendeeManager
             m_dateIsValid = false;
 
 
+            if (!m_IsActivityPanelView)
+            {
+                Add_Blackout_Dates(ref calendar);
+            }
 
-            Add_Blackout_Dates(ref calendar);
+            
 
         }
 
@@ -2567,21 +2577,8 @@ namespace CAOGAttendeeManager
         private void SaveActiveList()
         {
 
-          
-
-
-            
-             
                 // save contents to database
                 m_dbContext.SaveChanges();
-
-                              
-              
-            
-            
-            
-
-
 
         }
 
@@ -3636,6 +3633,8 @@ namespace CAOGAttendeeManager
                     btnExecQuery.IsEnabled = true;
                     btnDelete.IsEnabled = true;
                     btnGenerateFollowUps.IsEnabled = true; ;
+
+                Add_Blackout_Dates(ref DateCalendar);
                 }
 
 
@@ -4303,6 +4302,7 @@ namespace CAOGAttendeeManager
                 btnDelete.IsEnabled = false;
                 btnGenerateFollowUps.IsEnabled = false;
 
+            DateCalendar.BlackoutDates.Clear();
 
         }
 
