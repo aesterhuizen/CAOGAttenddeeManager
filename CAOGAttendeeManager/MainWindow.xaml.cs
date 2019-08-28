@@ -18,11 +18,7 @@ using System.Data.Entity;
 using System.Data.OleDb;
 using System.Data;
 using System.Text.RegularExpressions;
-
-
-
-
-
+using System.Windows.Threading;
 
 namespace CAOGAttendeeManager
 {
@@ -44,7 +40,7 @@ namespace CAOGAttendeeManager
 
 
 #if (DEBUG)
-            this.Title = "CAOG Attendee Manager (Debug)";
+           
 #endif
 
 
@@ -99,14 +95,14 @@ namespace CAOGAttendeeManager
                     }
 
 
-
+                    this.Title = $"CAOG Attendee Manager (Debug) - {m_constr}";
 
 
                     InitDataSet();
 #endif
 
 #if (db_errors)
-            //        correctDBerrors();
+                   correctDBerrors();
 #endif
 
 
@@ -328,39 +324,66 @@ namespace CAOGAttendeeManager
             //m_dbContext.Attendance_Info.Load();
             //m_dbContext.Attendees.Load();
 
-            // DateTime find_date = new DateTime(2019, 4, 21);
-            //string datestring = find_date.ToString("MM-dd-yyyy");
+            DateTime find_date = new DateTime(2019, 08, 18);
+            string datestring = find_date.ToString("MM-dd-yyyy");
 
-            //List<Attendance_Info> lstAtt = new List<Attendance_Info>() { };
-            //int i = 0;
 
-            //var query = from rec in m_lstdefaultTableRows
-            //            where rec.ChurchStatus == "Responded" && rec.Church_Last_Attended == datestring
-            //            select rec;
+            List<Attendance_Info> lstAtt = new List<Attendance_Info>() { };
+            int i = 0;
 
-            //foreach (var attendee in query)
+
+
+            //foreach (Attendee rec in m_dbContext.Attendees.Local)
             //{
-            //    //var querylatestDate = (from recdate in attendee.AttendanceList
-            //    //                       where recdate.Date = datestring && recdate.Status == "Follow-UP"
-            //    //                       select recdate;
+            //    //rec.Checked = false;
+            //    if (rec.AttendeeId == 15674)
+            //    {
+            //        var attInforec = from attinfo in m_dbContext.Attendance_Info
+            //                         where attinfo.AttendeeId == rec.AttendeeId
+            //                         select attinfo;
+            //       // m_dbContext.re
+            //        m_dbContext.Attendees.Remove(rec);
+            //    }
+            //}
+            var query = from rec in m_dbContext.Attendees
+                        where rec.AttendeeId == 15674 && rec.AttendeeId == 15675 && rec.AttendeeId == 15676 && rec.AttendeeId == 15677
+                        && rec.AttendeeId == 15678 && rec.AttendeeId == 15679 && rec.AttendeeId == 15680
+                        select rec;
+          
+            ////get latest attended date per attendee
+            //for (i = 0; i <= m_lstdefaultTableRows.Count - 1; i++)
+            //{
+            //    //get last church date attended per attendee history
+            //    var attendeRec = m_lstdefaultTableRows[i].AttendanceList.SingleOrDefault(rec => rec.Date == find_date && rec.Status == "Attended");
 
-            //        if (querylatestDate != null)
-            //        {
-            //        //    lstAtt.Add(attendee);
-            //        }
 
-            //    i++;
-            //    Console.WriteLine($"Total records: {i}");
+            //    if (attendeRec != null)
+            //    {
+            //        //var followup = m_lstdefaultTableRows[i].AttendanceList.SingleOrDefault(rec2 => rec2.Date == new DateTime(2019, 06, 09) && rec2.Status == "Follow-Up");
 
+            //        lstAtt.Add(attendeRec);
+            //    }
             //}
 
-            //m_dbContext.Attendance_Info.RemoveRange(lstAtt);
+
+            ////foreach (int j= 0; j <= lstAtt.Count - 1;j++)
+            ////{
+            //    //    var followuprec = lstAtt[i].
+            //    //}
+            //    m_dbContext.Attendance_Info.RemoveRange(lstAtt);
+            ////}
+            //    //i++;
+            //    //Console.WriteLine($"Total records: {i}");
 
 
 
-           // m_dbContext.SaveChanges();
+            m_dbContext.Attendees.RemoveRange(query);
 
 
+
+            m_dbContext.SaveChanges();
+
+            Console.WriteLine("DB changes successfully saved");
         }
 
         private void InitActivityTreeView()
@@ -581,16 +604,16 @@ namespace CAOGAttendeeManager
             List<Attendance_Info> lstAttendanceInfo = new List<Attendance_Info>() { };
 
             DateTime greatest_date = new DateTime(2000,1,1);
-         
-            //get latest and greatest date 
-            for (int i=0; i < m_lstdefaultTableRows.Count; i++)
+
+            ////get latest and greatest date 
+            for (int i = 0; i < m_lstdefaultTableRows.Count; i++)
             {
                 var latest_date_attened = (from d in m_lstdefaultTableRows[i].AttendanceList
                                            orderby d.Date ascending
                                            select d).ToArray().LastOrDefault();
-                
 
-                if (i == 0 )
+
+                if (i == 0)
                 {
                     greatest_date = latest_date_attened.Date;
                 }
@@ -598,86 +621,90 @@ namespace CAOGAttendeeManager
                 if (latest_date_attened.Date > greatest_date)
                 {
                     greatest_date = latest_date_attened.Date;
-                   
-                }
-              
 
-               
+                }
+
+
+
             }
 
-            
-            int nf = 0,gf = 0;
 
-        
+
+
+
             //get latest attended date per attendee
             for (int i = 0; i <= m_lstdefaultTableRows.Count -1; i++)
             {
+               
+                //get last church date attended per attendee history
                 var lstDateRec = (from rec in m_lstdefaultTableRows[i].AttendanceList
                                   where rec.Status == "Attended" || rec.Status == "Responded"
                                   orderby rec
                                    select rec).ToList().LastOrDefault();
 
-
-                if (lstDateRec != null)
-                {
-                    timespanSinceDate = greatest_date - lstDateRec.Date;
-
-
-
-                    if (timespanSinceDate.Days < 21)
+            
+               // if (lstDateRec.Attendee.LastName == "Bails" && lstDateRec.Attendee.FirstName == "Patricia")
+               // {
+                    if (lstDateRec != null)
                     {
-                        //Console.WriteLine($"No Follow-Ups to generate for {lstDateRec.Attendee.LastName} {lstDateRec.Attendee.FirstName} AttendeeId={m_lstdefaultTableRows[i].AttendeeId}");
-                        //// do nothing
-                        ////Attendee already have a followUp sent so do not generate another followup unil 21 days has
-                        ////lapsed since the last followUp        
-                        //nf++;
+                        timespanSinceDate = greatest_date - lstDateRec.Date;
 
-                    }
-                    else
-                    {
-                       
 
-                        var HasAlreadyFollowUpDate = (from rec in m_lstdefaultTableRows[i].AttendanceList
-                                                    where rec.Status == "Follow-Up" && rec.Date == greatest_date
-                                                    orderby rec 
-                                                    select rec).ToList().LastOrDefault();
 
-                        //if no follow-up record then generate a follow-up
-                        if (HasAlreadyFollowUpDate == null)
+                        if (timespanSinceDate.Days < 21)
                         {
-                            Attendance_Info newfollowUpRecord = new Attendance_Info { };
-                            newfollowUpRecord.AttendeeId = m_lstdefaultTableRows[i].AttendeeId;
-                            newfollowUpRecord.Date = greatest_date;
-                            newfollowUpRecord.Status = "Follow-Up";
+                            //Console.WriteLine($"No Follow-Ups to generate for {lstDateRec.Attendee.LastName} {lstDateRec.Attendee.FirstName} AttendeeId={m_lstdefaultTableRows[i].AttendeeId}");
+                            //// do nothing
+                            ////Attendee already have a followUp sent so do not generate another followup unil 21 days has
+                            ////lapsed since the last followUp        
+                            //nf++;
 
-                            lstAttendanceInfo.Add(newfollowUpRecord);
-                            generate_one = true;
+                        }
+                        else
+                        {
 
-                            //Console.WriteLine($"Follow-Up written for: {lstDateRec.Attendee.LastName} {lstDateRec.Attendee.FirstName} AttendeeId={m_lstdefaultTableRows[i].AttendeeId}");
-                            //gf++;
+
+                            var HasAlreadyFollowUpDate = m_lstdefaultTableRows[i].AttendanceList.SingleOrDefault(rec => rec.Status == "Follow-Up" && rec.Date == greatest_date);
+
+
+                            //if no follow-up record then generate a follow-up
+                            if (HasAlreadyFollowUpDate == null)
+                            {
+                                Attendance_Info newfollowUpRecord = new Attendance_Info { };
+                                newfollowUpRecord.AttendeeId = m_lstdefaultTableRows[i].AttendeeId;
+                                newfollowUpRecord.Date = greatest_date;
+                                newfollowUpRecord.Status = "Follow-Up";
+
+                                lstAttendanceInfo.Add(newfollowUpRecord);
+                                generate_one = true;
+
+                                //Console.WriteLine($"Follow-Up written for: {lstDateRec.Attendee.LastName} {lstDateRec.Attendee.FirstName} AttendeeId={m_lstdefaultTableRows[i].AttendeeId}");
+                                //gf++;
+                            }
+
+
+
+
+
+
+
                         }
 
-                        
-
-
-                       
-
-                        
-                    }
 
 
 
 
-
-                } //end if
+                    } //end if
+                //}
+                
             }
 
-             m_dbContext.Attendance_Info.AddRange(lstAttendanceInfo);
-            Console.WriteLine($"Total number of Follow-Ups generated: {gf}");
-            Console.WriteLine($"Total number of No Follow-Ups generated: {nf}");
+             
+         
 
             if (generate_one)
             {
+                m_dbContext.Attendance_Info.AddRange(lstAttendanceInfo);
                 InitDataSet();
                 Display_DefaultTable_in_Grid();
 
@@ -763,8 +790,9 @@ namespace CAOGAttendeeManager
 
                 int i = 0;
 
-              
-                    foreach (var AttendeeRec in m_dbContext.Attendees.Local )
+                              
+
+                foreach (var AttendeeRec in m_dbContext.Attendees.Local )
                     {
                         var queryLastDate = (from DateRec in AttendeeRec.AttendanceList
                                              where DateRec.Status == "Attended" || DateRec.Status == "Responded"
@@ -778,21 +806,22 @@ namespace CAOGAttendeeManager
                     //----Construct AttendeeLisTable-------------------------------------------------------------------------------------
 
                     // fill Attendance table columns. Add to list for each row
-
-                    m_lstattendanceTableRows.Add(new AttendanceTableRow()
-                    {
-                        AttendeeId = AttendeeRec.AttendeeId,
-                        FirstLastName = AttendeeRec.FirstName.ToUpper() + " " + AttendeeRec.LastName.ToUpper(),
-                        LastName = AttendeeRec.LastName,
-                        FirstName = AttendeeRec.FirstName,
-                        DateString = "Date Not Valid",
-                        Attended = AttendeeRec.Checked,
-                        IsModifiedrow = AttendeeRec.Checked,
-                       
-                        
-                    });
+                    Console.WriteLine($"AttendeeId={AttendeeRec.AttendeeId}, LastName={AttendeeRec.LastName}, FirstName={AttendeeRec.FirstName} ");
+                   
+                        m_lstattendanceTableRows.Add(new AttendanceTableRow()
+                        {
+                            AttendeeId = AttendeeRec.AttendeeId,
+                            FirstLastName = AttendeeRec.FirstName.ToUpper() + " " + AttendeeRec.LastName.ToUpper(),
+                            LastName = AttendeeRec.LastName,
+                            FirstName = AttendeeRec.FirstName,
+                            DateString = "Date Not Valid",
+                            Attended = AttendeeRec.Checked ? "1" : "",
+                            IsModifiedrow = AttendeeRec.Checked,
 
 
+                        });
+                   
+                 
                         //------Active Attendee--//---Construct DefaultTableRow-------------------------------------------------------------
                         DefaultTableRow DefaultTabledr = new DefaultTableRow
                         {
@@ -907,13 +936,7 @@ namespace CAOGAttendeeManager
 
 
                 }
-                // make a copy of m_lstdefaultTableRows
-
-                //DefaultTableRow[] array_defaultTableRows = new DefaultTableRow[m_lstdefaultTableRows.Count];
-                //m_lstdefaultTableRows.CopyTo(array_defaultTableRows);
-
-                //m_lstdefaultTableRowsCopy = new List<DefaultTableRow>(array_defaultTableRows);
-                
+              
             }
             catch (Exception ex)
             {
@@ -1280,48 +1303,53 @@ namespace CAOGAttendeeManager
 
         void Save_Changes(object sender, RoutedEventArgs e)
         {
-            bool isAttendedStatusChecked = false;
 
-            int i = -1;
+            Cursor = Cursors.Wait;
 
+           
+            //  // save last change to list and check for any checked attendees  
+            
+            List<AttendanceTableRow> Checklist = new List<AttendanceTableRow>() { };
 
+            
+                Checklist = getListOfCheckedAttendees();
+                // Mar each attendee that has a checkmark next to it as checked in the dbcontext
+                foreach (AttendanceTableRow dr in Checklist)
+                {
 
-            dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+                    Attendee queryAttendeeInContext = m_dbContext.Attendees.Local.SingleOrDefault(rec => rec.AttendeeId == dr.AttendeeId);
+                    queryAttendeeInContext.Checked = true;
+                }
+               
+                  //if there is no attendees checked then make sure all attendees in the dbcontext is not checked (ie checked = false)
+                if (Checklist.Count == 0)
+                {
+                    foreach (Attendee at in m_dbContext.Attendees)
+                    {
+                        if (at.Checked == true)
+                        {
+                            at.Checked = false;
+                        }
+                    }
+                }
           
+            // save change to db
+            SaveActiveList();
 
-            //if (isAttendedStatusChecked)
-            //{
-            //    MessageBoxResult res = MessageBox.Show("Save Changes...", "Save Changes", MessageBoxButton.OKCancel, MessageBoxImage.None);
-            //    if (res == MessageBoxResult.OK)
-            //    {
-            //        Cursor = Cursors.Wait;
-            //        SaveActiveList();
-                  
-            //        Cursor = Cursors.Arrow;
-            //    }
-            //    else
-            //        return;
-
-
-            //}
-            //else
-            //{
-                Cursor = Cursors.Wait;
-                SaveActiveList();
-                Cursor = Cursors.Arrow;
-           // }
+            Cursor = Cursors.Arrow;
+           
         }
 
-        private bool isAttendeeListDirty()
+        bool isAttendeeModified()
         {
-            bool isAttendedStatusChecked = false;
 
+            bool isAttendedStatusChecked = false;
 
             // save dataGrid edits
             dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
             foreach (AttendanceTableRow dr in m_lstattendanceTableRows)
             {
-                if (dr.Attended)
+                if (dr.IsModifiedrow)
                 {
                     isAttendedStatusChecked = true;
 
@@ -1333,10 +1361,39 @@ namespace CAOGAttendeeManager
                     isAttendedStatusChecked = false;
                 }
             }
-         
+
             return isAttendedStatusChecked;
         }
-    
+
+        List<AttendanceTableRow> getListOfCheckedAttendees()
+        {
+
+            //end all edits and update the datagrid with changes
+            dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
+            dataGrid_prospect.UpdateLayout();
+
+            List<AttendanceTableRow> lstOfCheckedAttendees = new List<AttendanceTableRow>() { };
+
+
+
+            foreach (AttendanceTableRow dr in m_lstattendanceTableRows)
+            {
+                if (dr.Attended == "1")
+                {
+
+
+                    lstOfCheckedAttendees.Add(dr);
+
+                }
+                else
+                {
+
+                }
+            }
+
+            return lstOfCheckedAttendees;
+        }
+
         private void DeleteRecordInDefaultTable(System.Collections.IList row_select)
         {
 
@@ -1461,7 +1518,7 @@ namespace CAOGAttendeeManager
             {
 
                 Cursor = Cursors.Wait;
-                bool isDirty = isAttendeeListDirty();
+                bool isDirty = isAttendeeModified();
 
 
                 if (isDirty)
@@ -1546,6 +1603,12 @@ namespace CAOGAttendeeManager
           
            
         }
+        //private int check_date_bounds_activity()
+        //{
+
+
+        //    return 0;
+        //}
         private int check_date_bounds()
         {
            
@@ -1641,6 +1704,7 @@ namespace CAOGAttendeeManager
             //DateTime? date_t;
             int dupID = 1;
             // add all attendee status and date to database
+            bool isListDirty = false;
 
             List<Attendee> attendeeList = new List<Attendee>() { };
             List<Attendance_Info> attendanceList = new List<Attendance_Info>() { };
@@ -1654,12 +1718,20 @@ namespace CAOGAttendeeManager
                 dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
                 dataGrid_prospect.UpdateLayout();
 
+                
+                List<AttendanceTableRow> Checklist = new List<AttendanceTableRow>() { };
+
+                // get checked attendees
+                Checklist = getListOfCheckedAttendees();
+                   
+                   
+                
 
                 // m_DataSet.Tables["AttendeeListTable"].DefaultView.RowFilter = "";
-                foreach (AttendanceTableRow dr in m_lstattendanceTableRows)
+                foreach (AttendanceTableRow dr in Checklist)
                 {
-                
-                    if (dr.IsModifiedrow)
+                     // attendee has check 
+                    if (dr.Attended == "1" && !dr.IsNewrow)
                     {
                         int attid = dr.AttendeeId;
 
@@ -1674,6 +1746,8 @@ namespace CAOGAttendeeManager
                         else
                         {
                             // attended = true, add attendee info record to attendee attendance list
+                            
+                         
 
                             bool berror = Row_error_checking(dr);
                             if (berror)
@@ -1726,9 +1800,14 @@ namespace CAOGAttendeeManager
                                 if (queryAttendeeInfoExist == null )
                                 {
                                     m_dbContext.Attendance_Info.Add(newRecord);
+                                    if ( (defaultTableRec.AttendanceList.SingleOrDefault(rec => rec.Status == newRecord.Status && rec.Date == newRecord.Date) ) == null)
+                                    {
+                                        m_default_row_selected.ActivityList.Add(m_currentSelected_ActivityPair);
+                                    }
+                                      
                                     
 
-                                    Display_AttendanceList_in_Grid(ref defaultTableRec);
+                                   
                                     //change 'Status_Last_Attended' and 'date last attended' column in default table row to reflect the 
                                     //new record's status
                                     defaultTableRec.ChurchStatus = newRecord.Status;
@@ -1737,7 +1816,7 @@ namespace CAOGAttendeeManager
 
                                 }
 
-                                //}
+                                
                             }
                            
 
@@ -1792,7 +1871,7 @@ namespace CAOGAttendeeManager
                         DefaultTableRow Defaultdr = new DefaultTableRow();
 
 
-
+                      
 
                         // new Attendee
                         newAttendeeRec.AttendeeId = m_NewAttendeeId;
@@ -1800,7 +1879,8 @@ namespace CAOGAttendeeManager
                         newAttendeeRec.LastName = dr.LastName.ToString().Trim();
                         newAttendeeRec.Phone = "";
                         newAttendeeRec.Email = "";
-                        
+                        newAttendeeRec.Checked = false;
+
                         string flname = newAttendeeRec.FirstName.ToUpper() + " " + newAttendeeRec.LastName.ToUpper();
                         string phone = "";
                         string email = "";
@@ -1846,7 +1926,7 @@ namespace CAOGAttendeeManager
 
                         m_dbContext.Attendance_Info.AddRange(attendanceList);
                     }
-                    ClearAttendeeListStatus();
+                    ClearAttendeeListStatus(); // set checked status to false for all attendees;
 
                     Display_AttendeeListTable_in_Grid();
                     Cursor = Cursors.Arrow;
@@ -1907,7 +1987,7 @@ namespace CAOGAttendeeManager
         }
         private bool Row_error_checking(AttendanceTableRow atr)
         {
-                if (atr.LastName == "" || atr.FirstName == "" || atr.DateString == "" || atr.Attended == false)
+                if (atr.LastName == "" || atr.FirstName == "" || atr.DateString == "" /*||*/ /*atr.Attended == false */)
                 {
                     dataGrid_prospect.Focus();
                     int id = atr.AttendeeId;
@@ -1941,7 +2021,7 @@ namespace CAOGAttendeeManager
             foreach (AttendanceTableRow atr in m_lstattendanceTableRows)
             {
                 
-                atr.Attended = false;
+                atr.Attended = "";
                 atr.IsModifiedrow = false;
                 atr.IsNewrow = false;
             }
@@ -2185,9 +2265,8 @@ namespace CAOGAttendeeManager
             else
                 strdate = "Date Not Valid";
 
-
-         
             int last_rowindex = m_lstattendanceTableRows.Count;
+
 
             if (m_lstattendanceTableRows.Last().FirstName != "" ||
                 m_lstattendanceTableRows.Last().LastName != "")
@@ -2200,13 +2279,22 @@ namespace CAOGAttendeeManager
                     LastName = "",
                     FirstLastName = "",
                     DateString = strdate,
-                    Attended = false
+                    Attended = ""
                 };
 
                 
                 m_lstattendanceTableRows.Insert(last_rowindex, newrow);
+               
+
+              
                 dataGrid_prospect.DataContext = m_lstattendanceTableRows;
                 dataGrid_prospect.Items.Refresh();
+
+                // highlight new row
+                dataGrid_prospect.Focus();
+                dataGrid_prospect.SelectedIndex = m_lstattendanceTableRows.Count-1;
+                dataGrid_prospect.ScrollIntoView(dataGrid_prospect.Items[m_lstattendanceTableRows.Count - 1]);
+
             }
 
 
@@ -2406,7 +2494,11 @@ namespace CAOGAttendeeManager
                 dataGrid.UpdateLayout();
                 dataGrid_prospect.UpdateLayout();
 
-                //isAttendedStatusChecked = isAttendeeListDirty();
+               // get checked attendees
+                List<AttendanceTableRow> Checklist = getListOfCheckedAttendees();
+
+                
+
 
                 if (m_lstActivitiesCount != m_newlstActivitiesCount)
                 {
@@ -2414,69 +2506,7 @@ namespace CAOGAttendeeManager
                    
                 }
 #if (init_db)
-                //if (!m_dbContext.ChangeTracker.HasChanges() && isAttendedStatusChecked)
-                //{
-
-
-
-                //    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list.\n\nDiscard changes and exit anyway?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
-                //    if (res == MessageBoxResult.OK)
-                //    {
-
-                //        //Discard_CheckListandSaveActiveList();
-                //        e.Cancel = false;
-                //        StopTimer();
-                //        // close all active threads
-                //        Environment.Exit(0);
-
-                //    }
-                //    else
-                //    {
-                //        e.Cancel = true;
-                       
-
-                //    }
-                        
-
-
-
-
-
-
-
-                //}
-                //else if (m_dbContext.ChangeTracker.HasChanges() && !isAttendedStatusChecked)
-                //{
-
-                //    MessageBoxResult res = MessageBox.Show("Changes has been made but not saved to the database yet, save changes?", "Changes not saved", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
-                    
-                //    if (res == MessageBoxResult.Yes)
-                //    {
-
-                //        Cursor = Cursors.Wait;
-                //        SaveActiveList();
-                //        Cursor = Cursors.Arrow;
-
-                //        e.Cancel = false;
-
-                //        // close all active threads
-                //        Environment.Exit(0);
-                //    }
-                //    else if (res == MessageBoxResult.No)
-                //    {
-                //        e.Cancel = false;
-                //        StopTimer();
-                //        // close all active threads
-                //        Environment.Exit(0);
-
-                //    }
-                //    else if (res == MessageBoxResult.Cancel)
-                //        e.Cancel = true;
-
-                  
-
-                //}
-                if (m_dbContext.ChangeTracker.HasChanges())
+                if (m_dbContext.ChangeTracker.HasChanges() || Checklist.Count != 0)
                 {
 
 
@@ -2531,54 +2561,54 @@ namespace CAOGAttendeeManager
         }
         private void ShowFiltered_Or_DefaultTable()
         {
-            if (m_isFilterByDateChecked || m_isActivityfilterByDateChecked || m_isActivityFilterChecked ||
-                m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked)
+            //if (m_isFilterByDateChecked || m_isActivityfilterByDateChecked || m_isActivityFilterChecked ||
+            //    m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked)
 
-            {
-                if (txtSearch.Text != "")
-                {
-                    m_DataSet.Tables["QueryTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
-                    dataGrid.DataContext = m_DataSet.Tables["QueryTable"];
-                    dataGrid.IsReadOnly = true;
-                }
-                else
-                {
-                    dataGrid.DataContext = m_DataSet.Tables["QueryTable"];
-                    dataGrid.IsReadOnly = true;
-                }
+            //{
+            //    if (txtSearch.Text != "")
+            //    {
+            //        m_DataSet.Tables["QueryTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+            //        dataGrid.DataContext = m_DataSet.Tables["QueryTable"];
+            //        dataGrid.IsReadOnly = true;
+            //    }
+            //    else
+            //    {
+            //        dataGrid.DataContext = m_DataSet.Tables["QueryTable"];
+            //        dataGrid.IsReadOnly = true;
+            //    }
 
-            }
-            else
-            {
+            //}
+            //else
+            //{
 
-                if (txtSearch.Text != "")
-                {
-                    m_DataSet.Tables["DefaultTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
-                    dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
-                    dataGrid.CanUserDeleteRows = false;
-                    dataGrid.CanUserAddRows = false;
-                    dataGrid.IsReadOnly = false;
+            //    if (txtSearch.Text != "")
+            //    {
+            //        m_DataSet.Tables["DefaultTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
+            //        dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
+            //        dataGrid.CanUserDeleteRows = false;
+            //        dataGrid.CanUserAddRows = false;
+            //        dataGrid.IsReadOnly = false;
 
-                }
-                else
-                {
-                    // (dataGrid.DataContext as DataTable).DefaultView.Sort = "[Last Name] ASC";
-                    Display_DefaultTable_in_Grid();
-                }
+            //    }
+            //    else
+            //    {
+            //        // (dataGrid.DataContext as DataTable).DefaultView.Sort = "[Last Name] ASC";
+            //        Display_DefaultTable_in_Grid();
+            //    }
 
-            }
+            //}
 
-            if (dataGrid.Columns.Count > 1)
-            {
-                dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
-                dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
-            }
+            //if (dataGrid.Columns.Count > 1)
+            //{
+            //   // dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
+            //   // dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
+            //}
         }
         private void SaveActiveList()
         {
 
-                // save contents to database
-                m_dbContext.SaveChanges();
+            // save contents to database
+            m_dbContext.SaveChanges();
 
         }
 
@@ -2984,12 +3014,13 @@ namespace CAOGAttendeeManager
             
            
             string strChurchStatus = "";
+            bool bChurchStatusAttended = false;
+            string strChurchStatusResponded = "";
 
 
-            
 
 
-            
+
 
             bool ChurchDate = m_dateIsValid && m_DateSelected !=null && m_isFilterByDateChecked;
             bool Status = m_isChurchStatusFilterChecked && m_DateSelected != null && (m_isFollowupChecked || m_isAttendedChecked || m_isRespondedChecked);
@@ -3031,7 +3062,11 @@ namespace CAOGAttendeeManager
                 strChurchStatus += (m_isFollowupChecked) ? "Follow-Up" : "";
                 strChurchStatus += (m_isAttendedChecked) ? "Attended" : "";
                 strChurchStatus += (m_isRespondedChecked) ? "Responded" : "";
-
+                if (strChurchStatus == "Attended" || strChurchStatus == "Responded")
+                {
+                    bChurchStatusAttended = true;
+                    strChurchStatusResponded = "Responded";
+                }
                 
 
                 for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
@@ -3040,10 +3075,22 @@ namespace CAOGAttendeeManager
 
                     if (m_lstdefaultTableRowsCopy[i].AttendanceList.Count > 0 && m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
                     {
-                        var query_status = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("Status == @0", strChurchStatus).ToList().FirstOrDefault();
-                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("DateString == @0 and ActivityGroup == @1 and ParentTaskName == @2 and ChildTaskName == @3", strActivityDate, ActivityGroup, ActivityParentName, ActivityChildName).ToList().FirstOrDefault();
+                        IQueryable<Attendance_Info> query_status;
+                        IQueryable<ActivityPair> query_activity;
 
-                        if (query_status != null && query_activity != null)
+                        if (bChurchStatusAttended)
+                        {
+                            query_status = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("Status == @0 or Status == @1" , strChurchStatus, strChurchStatusResponded );
+                            query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("DateString == @0 and ActivityGroup == @1 and ParentTaskName == @2 and ChildTaskName == @3", strActivityDate, ActivityGroup, ActivityParentName, ActivityChildName);
+                        }
+                        else
+                        {
+                            query_status = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("Status == @0", strChurchStatus);
+                            query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("DateString == @0 and ActivityGroup == @1 and ParentTaskName == @2 and ChildTaskName == @3", strActivityDate, ActivityGroup, ActivityParentName, ActivityChildName);
+                        }
+                        
+
+                        if (query_status.Count() != 0 && query_activity.Count() != 0 )
                         {
                             m_lstdefaultTableRowsCopy[i].ChurchStatus = strChurchStatus;
                             m_lstdefaultTableRowsCopy[i].Activity = strActivity;
@@ -3076,15 +3123,31 @@ namespace CAOGAttendeeManager
                 string ActivityParentName = m_currentSelected_ActivityPair.ParentTaskName;
                 string ActivityChildName = m_currentSelected_ActivityPair.ChildTaskName;
 
+                if (strChurchStatus == "Attended" || strChurchStatus == "Responded")
+                {
+                    bChurchStatusAttended = true;
+                    strChurchStatusResponded = "Responded";
+                }
+
                 for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
                     if (m_lstdefaultTableRowsCopy[i].AttendanceList.Count > 0 && m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
                     {
-                        var query_dateandstatus = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("DateString == @0 and Status == @1 " , strChurchDate, strChurchStatus).ToList().FirstOrDefault();
-                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityGroup == @0 and ParentTaskName == @1 and ChildTaskName == @2", ActivityGroup, ActivityParentName, ActivityChildName).ToList().FirstOrDefault();
+                        IQueryable<Attendance_Info> query_dateandstatus;
+                        IQueryable<ActivityPair> query_activity;
+                        if (bChurchStatusAttended)
+                        {
+                            query_dateandstatus = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("DateString == @0 and (Status == @1 or Status = @2 )", strChurchDate, strChurchStatus, strChurchStatusResponded);
+                            query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityGroup == @0 and ParentTaskName == @1 and ChildTaskName == @2", ActivityGroup, ActivityParentName, ActivityChildName);
+                        }
+                        else
+                        {
+                            query_dateandstatus = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("DateString == @0 and Status == @1", strChurchDate, strChurchStatus);
+                            query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityGroup == @0 and ParentTaskName == @1 and ChildTaskName == @2", ActivityGroup, ActivityParentName, ActivityChildName);
+                        }
 
-                        if (query_dateandstatus != null && query_activity != null)
+                        if (query_dateandstatus.Count() != 0 && query_activity.Count() != 0)
                         {
                             m_lstdefaultTableRowsCopy[i].ChurchStatus = strChurchStatus;
                             m_lstdefaultTableRowsCopy[i].Church_Last_Attended = strChurchDate;
@@ -3111,10 +3174,10 @@ namespace CAOGAttendeeManager
 
                     if (m_lstdefaultTableRowsCopy[i].AttendanceList.Count > 0 && m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
                     {
-                        var query_dateandstatus = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("DateString == @0", strChurchDate).ToList().FirstOrDefault();
-                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityGroup == @0 and ParentTaskName == @1 and ChildTaskName == @2", ActivityGroup, ActivityParentName, ActivityChildName).ToList().FirstOrDefault();
+                        var query_dateandstatus = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("DateString == @0", strChurchDate);
+                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityGroup == @0 and ParentTaskName == @1 and ChildTaskName == @2", ActivityGroup, ActivityParentName, ActivityChildName);
 
-                        if (query_dateandstatus != null && query_activity != null)
+                        if (query_dateandstatus.Count() != 0 && query_activity.Count() != 0 )
                         {
                             
                             m_lstdefaultTableRowsCopy[i].Church_Last_Attended = strChurchDate;
@@ -3146,9 +3209,9 @@ namespace CAOGAttendeeManager
                     if (m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
                     {
 
-                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("DateString == @0 and ActivityGroup == @1 and ParentTaskName == @2 and ChildTaskName == @3" , strActivityDate, ActivityGroup, ActivityParentName, ActivityChildName).ToList().FirstOrDefault();
+                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("DateString == @0 and ActivityGroup == @1 and ParentTaskName == @2 and ChildTaskName == @3" , strActivityDate, ActivityGroup, ActivityParentName, ActivityChildName);
 
-                        if (query_activity != null)
+                        if (query_activity.Count() != 0 )
                         {
 
 
@@ -3174,15 +3237,32 @@ namespace CAOGAttendeeManager
                 strChurchStatus += (m_isAttendedChecked) ? "Attended" : "";
                 strChurchStatus += (m_isRespondedChecked) ? "Responded" : "";
 
+                if (strChurchStatus == "Attended" || strChurchStatus == "Responded")
+                {
+                    bChurchStatusAttended = true;
+                    strChurchStatusResponded = "Responded";
+                }
+
                 for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
                     if (m_lstdefaultTableRowsCopy[i].AttendanceList.Count > 0 && m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
                     {
-                        var query_dateandstatus = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("Status == @0", strChurchStatus).ToList().FirstOrDefault();
-                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityGroup == @0 and ParentTaskName == @1 and ChildTaskName == @2", ActivityGroup, ActivityParentName, ActivityChildName).ToList().FirstOrDefault();
+                        IQueryable<Attendance_Info> query_dateandstatus;
+                        IQueryable<ActivityPair> query_activity;
 
-                        if (query_dateandstatus != null && query_activity != null)
+                        if (bChurchStatusAttended)
+                        {
+                            query_dateandstatus = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("Status == @0 or Status = @1", strChurchStatus, strChurchStatusResponded);
+                            query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityGroup == @0 and ParentTaskName == @1 and ChildTaskName == @2", ActivityGroup, ActivityParentName, ActivityChildName);
+                        }
+                        else
+                        {
+                            query_dateandstatus = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("Status == @0", strChurchStatus);
+                            query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityGroup == @0 and ParentTaskName == @1 and ChildTaskName == @2", ActivityGroup, ActivityParentName, ActivityChildName);
+                        }
+
+                        if (query_dateandstatus.Count() != 0 && query_activity.Count() != 0 )
                         {
 
                             m_lstdefaultTableRowsCopy[i].ChurchStatus = strChurchStatus;
@@ -3203,7 +3283,11 @@ namespace CAOGAttendeeManager
                 strChurchStatus += (m_isFollowupChecked) ? "Follow-Up" : "";
                 strChurchStatus += (m_isAttendedChecked) ? "Attended" : "";
                 strChurchStatus += (m_isRespondedChecked) ? "Responded" : "";
-
+                if (strChurchStatus == "Attended" || strChurchStatus == "Responded")
+                {
+                    bChurchStatusAttended = true;
+                    strChurchStatusResponded = "Responded";
+                }
 
 
                 for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
@@ -3212,10 +3296,21 @@ namespace CAOGAttendeeManager
 
                     if (m_lstdefaultTableRowsCopy[i].AttendanceList.Count > 0 && m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
                     {
-                        var query_status = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("Status == @0", strChurchStatus).ToList().FirstOrDefault();
-                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("DateString == @0", strActivityDate).ToList().FirstOrDefault();
+                        IQueryable<Attendance_Info> query_status;
+                        IQueryable<ActivityPair> query_activity;
 
-                        if (query_status != null && query_activity != null)
+                        if (bChurchStatusAttended)
+                        {
+                            query_status = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("Status == @0 or Status == @1", strChurchStatus, strChurchStatusResponded);
+                            query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("DateString == @0", strActivityDate);
+                        }
+                        else
+                        {
+                            query_status = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("Status == @0", strChurchStatus);
+                            query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("DateString == @0", strActivityDate);
+                        }
+
+                        if (query_status.Count() != 0  && query_activity.Count() != 0 )
                         {
                             m_lstdefaultTableRowsCopy[i].ChurchStatus = strChurchStatus;
                             m_lstdefaultTableRowsCopy[i].Activity_Last_Attended = strActivityDate;
@@ -3239,24 +3334,42 @@ namespace CAOGAttendeeManager
                 strChurchStatus += (m_isFollowupChecked) ? "Follow-Up" : "";
                 strChurchStatus += (m_isAttendedChecked) ? "Attended" : "";
                 strChurchStatus += (m_isRespondedChecked) ? "Responded" : "";
-
+                if (strChurchStatus == "Attended" || strChurchStatus == "Responded")
+                {
+                    bChurchStatusAttended = true;
+                    strChurchStatusResponded = "Responded";
+                }
                 //strChurchStatus = querystring.
 
                 for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
-                    var query_row = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("DateString == @0 and Status == @1", strChurchDate, strChurchStatus).ToList().FirstOrDefault();
+                  // if (m_lstdefaultTableRowsCopy[i].LastName == "Bails" && m_lstdefaultTableRowsCopy[i].FirstName == "Patricia")
+                  //  {
+                        IQueryable<Attendance_Info> query_row;
+                        if (bChurchStatusAttended)
+                        {
+                            query_row = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("DateString == @0 and (Status == @1 or Status == @2)", strChurchDate, strChurchStatus, strChurchStatusResponded);
+                        }
+                        else
+                        {
+                            query_row = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("DateString == @0 and Status == @1", strChurchDate, strChurchStatus);
+                        }
 
 
 
-                    if (query_row != null)
-                    {
-                        m_lstdefaultTableRowsCopy[i].ChurchStatus = strChurchStatus;
-                        m_lstdefaultTableRowsCopy[i].Church_Last_Attended = strChurchDate;
 
-                        m_lstQueryTableRows.Add(m_lstdefaultTableRowsCopy[i]);
 
-                    }
+                        if (query_row.Count() != 0)
+                        {
+                            m_lstdefaultTableRowsCopy[i].ChurchStatus = strChurchStatus;
+                            m_lstdefaultTableRowsCopy[i].Church_Last_Attended = strChurchDate;
+
+                            m_lstQueryTableRows.Add(m_lstdefaultTableRowsCopy[i]);
+
+                        }
+
+                   //}
                 }
 
             }
@@ -3267,17 +3380,30 @@ namespace CAOGAttendeeManager
                 strChurchStatus += (m_isFollowupChecked) ? "Follow-Up" : "";
                 strChurchStatus += (m_isAttendedChecked) ? "Attended" : "";
                 strChurchStatus += (m_isRespondedChecked) ? "Responded" : "";
-
+                if (strChurchStatus == "Attended" || strChurchStatus == "Responded")
+                {
+                    bChurchStatusAttended = true;
+                    strChurchStatusResponded = "Responded";
+                }
                 //strChurchStatus = querystring.
 
                 for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
+                    IQueryable<Attendance_Info> query_row;
 
-                    var query_row = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("Status == @0", strChurchStatus).ToList().FirstOrDefault();
+                    if (bChurchStatusAttended)
+                    {
+                        query_row = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("Status == @0 or Status == @1", strChurchStatus,strChurchStatusResponded);
+                    }
+                    else
+                    {
+                        query_row = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("Status == @0", strChurchStatus);
+                    }
+                    
 
 
 
-                    if (query_row != null)
+                    if (query_row.Count() != 0 )
                     {
                         m_lstdefaultTableRowsCopy[i].ChurchStatus = strChurchStatus;
                         
@@ -3295,11 +3421,11 @@ namespace CAOGAttendeeManager
                 for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
-                    var query_row = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("DateString == @0", strChurchDate).ToList().FirstOrDefault();
+                    var query_row = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("DateString == @0", strChurchDate);
                                                                                              
 
 
-                    if (query_row != null)
+                    if (query_row.Count() != 0 )
                     {
                         
                         m_lstdefaultTableRowsCopy[i].Church_Last_Attended = strChurchDate;
@@ -3324,9 +3450,9 @@ namespace CAOGAttendeeManager
                     if (m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
                     {
                         
-                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("DateString == @0", strActivityDate).ToList().FirstOrDefault();
+                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("DateString == @0", strActivityDate);
 
-                        if (query_activity != null)
+                        if (query_activity.Count() != 0 )
                         {
                             
                             m_lstdefaultTableRowsCopy[i].Activity_Last_Attended = strActivityDate;
@@ -3354,9 +3480,9 @@ namespace CAOGAttendeeManager
                     if (m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
                     {
                         
-                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityGroup == @0 and ParentTaskName == @1 and ChildTaskName == @2", ActivityGroup, ActivityParentName, ActivityChildName).ToList().FirstOrDefault();
+                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityGroup == @0 and ParentTaskName == @1 and ChildTaskName == @2", ActivityGroup, ActivityParentName, ActivityChildName);
 
-                        if (query_activity != null)
+                        if (query_activity.Count() != 0 )
                         {
 
                             
@@ -4016,8 +4142,9 @@ namespace CAOGAttendeeManager
                 btnDelete.IsEnabled = false;
                 btnExecQuery.IsEnabled = false;
                 btnGenerateFollowUps.IsEnabled = false;
-               
-               
+
+                Display_AttendanceList_in_Grid();
+                Display_ActivityList_in_Grid();
             }
             else
             {
@@ -4102,7 +4229,7 @@ namespace CAOGAttendeeManager
                                 queryAttRec.Email = text.Text;
                             }
                             m_default_row_selected.Email = text.Text;
-                           
+
                         }
                         else if (e.Column.Header.ToString() == "Phone")
                         {
@@ -4113,13 +4240,13 @@ namespace CAOGAttendeeManager
                                 queryAttRec.Phone = text.Text;
                             }
                             m_default_row_selected.Phone = text.Text;
-                          
+
                         }
                         else if (e.Column.Header.ToString() == "First Name")
                         {
                             if (queryAttRec != null)
                             {
-                               queryAttRec.FirstName = text.Text;
+                                queryAttRec.FirstName = text.Text;
 
                             }
 
@@ -4128,7 +4255,7 @@ namespace CAOGAttendeeManager
 
                             m_attendance_row_selected.FirstName = text.Text;
                             m_attendance_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_attendance_row_selected.LastName.ToUpper();
-                           
+
                         }
                         else if (e.Column.Header.ToString() == "Last Name")
                         {
@@ -4142,53 +4269,16 @@ namespace CAOGAttendeeManager
 
                             m_attendance_row_selected.LastName = text.Text;
                             m_attendance_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_attendance_row_selected.LastName.ToUpper();
-                           
+
                         }
                     }
                 }
 
-                
-            }
-            
-            
-            
 
+            }
 
         }
 
-        private void cmbAttendanceInfo_Checked(object sender, RoutedEventArgs e)
-        {
-            if (m_attendance_row_selected != null)
-            {
-                m_attendance_row_selected.Attended = true;
-
-
-
-                m_default_row_selected = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == m_attendance_row_selected.AttendeeId);
-
-
-                if (m_default_row_selected != null)
-                {
-                    // get record in datacontext
-                    var queryAttRec = m_dbContext.Attendees.Local.SingleOrDefault(attrec => attrec.AttendeeId == m_default_row_selected.AttendeeId);
-
-                    queryAttRec.Checked = true;
-                }
-
-
-
-                if (m_attendance_row_selected.IsNewrow)
-                {
-                    m_attendance_row_selected.IsModifiedrow = false;
-                }
-                else
-                {
-                    m_attendance_row_selected.IsModifiedrow = true;
-                }
-            }
-            
-            
-        }
 
         private void dataGrid_prospect_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
@@ -4199,30 +4289,6 @@ namespace CAOGAttendeeManager
                 m_attendance_row_selected = (AttendanceTableRow)selectedItems.SelectedItem;
 
             }
-        }
-
-        private void cmbAttendanceInfo_Unchecked(object sender, RoutedEventArgs e)
-        {
-            
-            if (m_attendance_row_selected != null)
-            {
-                m_attendance_row_selected.Attended = false;
-                m_attendance_row_selected.IsModifiedrow = false;
-
-                m_default_row_selected = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == m_attendance_row_selected.AttendeeId);
-
-
-                if (m_default_row_selected != null)
-                {
-                    // get record in datacontext
-                    var queryAttRec = m_dbContext.Attendees.Local.SingleOrDefault(attrec => attrec.AttendeeId == m_default_row_selected.AttendeeId);
-
-                    queryAttRec.Checked = false;
-                }
-
-            }
-
-
         }
 
         private void btnAddActivity_Click(object sender, RoutedEventArgs e)
@@ -4632,7 +4698,7 @@ namespace CAOGAttendeeManager
 
                         m_attendance_row_selected.FirstName = text.Text;
                         m_attendance_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_attendance_row_selected.LastName.ToUpper();
-                       
+
                     }
                     else if (e.Column.Header.ToString() == "Last Name")
                     {
@@ -4646,7 +4712,7 @@ namespace CAOGAttendeeManager
 
                         m_attendance_row_selected.LastName = text.Text;
                         m_attendance_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_attendance_row_selected.LastName.ToUpper();
-                       
+
                     }
                 }
             }
@@ -4669,6 +4735,49 @@ namespace CAOGAttendeeManager
             btnGenerateFollowUps.IsEnabled = true;
             lblTableShown.Content = "Main View";
 
+        }
+
+    
+
+      
+
+
+        private void DataGridCell_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+
+            var uiElement = e.OriginalSource as UIElement;
+           
+
+
+            DataGridCell cell = sender as DataGridCell;
+            if (cell !=null )
+            {
+
+                if (cell.IsEditing || cell.IsReadOnly)
+                {
+                    if (e.Key == Key.Down)
+                    {
+                        
+                        
+                            e.Handled = true;
+                            uiElement.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down));
+                        
+
+                    }
+                    else if (e.Key == Key.Up)
+                    {
+                        
+                        
+                            e.Handled = true;
+                            uiElement.MoveFocus(new TraversalRequest(FocusNavigationDirection.Up));
+                        
+                    }
+
+                }
+         
+                
+            }
+            
         }
     }
 

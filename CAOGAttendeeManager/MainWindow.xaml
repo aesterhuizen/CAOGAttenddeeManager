@@ -9,9 +9,6 @@
         Loaded="Window_Loaded"
         Closing="Window_Closing">
     <Window.Resources>
-        <!--<CollectionViewSource x:Key="attendeeViewSource" d:DesignSource="{d:DesignInstance {x:Type local:Attendee}, CreateList=True}"/>-->
-
-        <!--<local:AttendanceInfoList x:Key="AttendeeAttendanceList"/>-->
         
         <DataTemplate x:Key="ActivityPairItemsTemplate">
             <StackPanel Orientation="Horizontal">
@@ -27,9 +24,11 @@
             <CheckBox Name="chkAttendedStatus" IsChecked="{Binding Attended}" />
         </DataTemplate>
 
-        <!--<Style x:Key="CenterAligned" TargetType="TextBlock">
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-        </Style>-->
+        
+            <Style TargetType="{x:Type DataGridCell}">
+                <EventSetter Event="PreviewKeyDown"  Handler="DataGridCell_PreviewKeyDown"/>
+              </Style>
+        
 
     </Window.Resources>
 
@@ -63,8 +62,18 @@
                     <RibbonButton Name="btnSave"
                                   Label="Save"
                                   LargeImageSource="Resources\save.ico"
-                                  Click="Save_Changes" 
-                                  ToolTip="Save changes to the database" />
+                                  Click="Save_Changes">
+
+                        <RibbonButton.ToolTip>
+                            <TextBlock>
+                                Save changes to the database.
+                                <LineBreak/>
+                                If there are any check marks in the prospect list save them to the database also, so that you can continue where you left off.
+                            </TextBlock>
+                        </RibbonButton.ToolTip>
+
+                        
+                    </RibbonButton>
 
 
                     <RibbonButton Name="btnExecQuery"
@@ -461,12 +470,12 @@
                                   CanUserAddRows="False"
                                   AutoGenerateColumns="False"
                                   CanUserDeleteRows="False"
-                                  ItemsSource="{Binding IsAsync=True}" 
+                                   ItemsSource="{Binding IsAsync=True}" 
                                   CanUserReorderColumns="False"
                                   ClipboardCopyMode="IncludeHeader"
                                   ColumnWidth="120" 
                                   CanUserResizeRows="False"
-                                  CellEditEnding="DataGrid_prospect_CellEditEnding" Grid.ColumnSpan="2">
+                                  Grid.ColumnSpan="2">
 
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}" />
@@ -474,13 +483,13 @@
                                 <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" />
                                 <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}"/>
                                 <DataGridTextColumn Header="Church Last Attended" Binding="{Binding DateString}" />
-                                <DataGridTemplateColumn Header="Attended">
-                                    <DataGridTemplateColumn.CellTemplate>
+                                <DataGridTextColumn Header="Attended" Binding="{Binding Attended}" />
+                                <!--<DataGridTemplateColumn.CellTemplate> ss
                                         <DataTemplate>
                                             <CheckBox Name="cmbAttendanceInfo" IsChecked="{Binding Attended}" Checked="cmbAttendanceInfo_Checked" Unchecked="cmbAttendanceInfo_Unchecked"/>
                                         </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                                    </DataGridTemplateColumn.CellTemplate>-->
+
 
                             </DataGrid.Columns>
                         </DataGrid>
