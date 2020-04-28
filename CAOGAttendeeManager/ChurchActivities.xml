@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<XmlDocument>
+  <DefaultTableColumns>
+	<TableColumn Header="AttendeeId"/>
+    <TableColumn Header="Last Name"/>
+    <TableColumn Header="First Name"/>
+    <TableColumn Header="Church Last Attended"/>
+    <TableColumn Header="Status"/>
+    <TableColumn Header="Activity"/>
+    <TableColumn Header="Activity Last Attended"/>
+  </DefaultTableColumns>
+  <ActivityHeader Name="Serving Ministries">
+    <ActivityGroup ActivityName="Caring">
+    <ActivityTask Id="1" TaskName="Hospitality" Description="Briefly visit(on a day of your choosing) and pray with individuals who are in local hospitals - Church office will supply admission information." />
+    <ActivityTask Id="2" TaskName="Shut-In Visitation" Description="Call to arrange convenient times for a home visit - Communion may also be served." />
+    <ActivityTask Id="3" TaskName="Nursing Home Visitation" Description="Visit local nursing homes during assigned week each month to encourage those in need." />
+  </ActivityGroup>
+  <ActivityGroup ActivityName="Central Christian Academy">
+    <ActivityTask Id="4" TaskName="General Volunteer">
+      <ActivitySubTask Id="5" TaskName="Box Tops Collector" Description="Cut, collect and count Box Tops." />
+      <ActivitySubTask Id="6" TaskName="Library Helper" Description="Proof read library books before we put them on the shelves." />
+      <ActivitySubTask Id="7" TaskName="Lunch Monitor" Description="Help to supervise the children during lunchtime." />
+      <ActivitySubTask Id="8" TaskName="Office Helper" Description="Help to prepare mass mailings for fund raisers." />
+    </ActivityTask>
+  </ActivityGroup>
+  <ActivityGroup ActivityName="Central Kids: Elementary (K-5th Grade)">
+    <ActivityTask Id="9" TaskName="Sunday Mornings: Super Church">
+      <ActivitySubTask Id="10" TaskName="Leader/Teacher &amp; Assistant" Description="Facilitate the lessons, crafts &amp; classroom management. Provide a godly example." />
+      <ActivitySubTask Id="11" TaskName="Check-in Greeter" Description="Greet families while checking-in kids with our computerized system at the beginning of the service." />
+    </ActivityTask>
+    <ActivityTask Id="12" TaskName="Wednesday Evenings: M-Pact Girls Club &amp;amp; Royal Rangers">
+      <ActivitySubTask Id="13" TaskName="Leader/Teacher &amp; Assistant" Description="Facilitate the lessons, crafts &amp; classroom management. Provide a godly example." />
+      <ActivitySubTask Id="14" TaskName="Check-in Greeter" Description="Greet families while checking-in kids with our computerized system at the beginning of the service." />
+    </ActivityTask>
+  </ActivityGroup>
+  <ActivityGroup ActivityName="Central Kids: Nursery (8WKS-2YRS)">
+    <ActivityTask Id="15" TaskName="Sunday Mornings &amp; Wednesday Evenings">
+      <ActivitySubTask Id="16" TaskName="Leader/Assistant" Description="Minister to nursery age children and their needs." />
+      <ActivitySubTask Id="17" TaskName="Rocker" Description="Hold and rock infants as you minister in the nursery." />
+      <ActivitySubTask Id="18" TaskName="Check-in Greeter" Description="Greet families while checking in kids with our computerized system at the beginning of  service." />
+    </ActivityTask>
+  </ActivityGroup>
+  <ActivityGroup ActivityName="Central Kids: Preschool (3-5YRS old)">
+    <ActivityTask Id="19" TaskName="Children's Church (Sunday) &amp;amp; Rainbows Club (Wednesdays)">
+      <ActivitySubTask Id="20" TaskName="Leader/Teacher &amp;amp; Assistant" Description="Facilitate the lessons, crafts &amp;amp; classroom management. Provide a godly example." />
+    </ActivityTask>
+  </ActivityGroup>
+  <ActivityGroup ActivityName="Central Kids: Outreach Events">
+    <ActivityTask Id="21" TaskName="Concessions" Description="Prepare and serve food to children." />
+    <ActivityTask Id="22" TaskName="Leader &amp; Assistant" Description="Minister to children and their needs at these events." />
+    <ActivityTask Id="23" TaskName="Recreation" Description="Register children as they enter each day's event." />
+    <ActivityTask Id="24" TaskName="Security" Description="Monitoring and securing the grounds at each event." />
+  </ActivityGroup>
+  <ActivityGroup ActivityName="Creative Arts">
+    <ActivityTask Id="25" TaskName="Workshop Team (Vocal &amp;amp; Instrumental" Description="Use your talents to assist in leading the congregation into worship during our weekly services." />
+    <ActivityTask Id="26" TaskName="Technical Multimedia Team" Description="Apply your skills in the area of sound, videography, and computer technology during our weekly worship services." />
+  </ActivityGroup>
+  <ActivityGroup ActivityName="Helps">
+    <ActivityTask Id="35" TaskName="Medical Ministry Team" Description="Be a first responder in the event of a medical emergency on the church campus or at a church event (special training and certification required)." />
+    <ActivityTask Id="27" TaskName="Grounds Team">
+      <ActivitySubTask Id="28" TaskName="Construction" Description="Use your skills to help with special projects on campus." />
+      <ActivitySubTask Id="29" TaskName="Housekeeping" Description="Help keep our facilities clean by volunteering to clean in certain areas." />
+      <ActivitySubTask Id="30" TaskName="Landscaping" Description="Groom and care for landscaping and mulch beds around church and parsonage." />
+      <ActivitySubTask Id="31" TaskName="Lawn Maintenance" Description="Join a rotation to keep the lawn on campus mowed." />
+      <ActivitySubTask Id="37" TaskName="General Volunteer" Description="Support the office staff on a regular basis - answering phones, type &amp; copy documents as needed, basic computer skills and a pleasant personality will be required." />
+      <ActivitySubTask Id="38" TaskName="Special Projects" Description="Help on an as-needed basis with a wide variety of tasks such as mailings, packet assembly, cutting, sorting, etc." />
+    </ActivityTask>
+    <ActivityTask Id="32" TaskName="Kitchen Help">
+      <ActivitySubTask Id="33" TaskName="Funeral Dinners" Description="Cook and serve dinners to the families and friends of those who are grieving after funeral services." />
+      <ActivitySubTask Id="34" TaskName="Special Events" Description="Throughout the year their are events that will require assistance with cooking, food preparation and setup." />
+    </ActivityTask>
+    <ActivityTask Id="38" TaskName="Security Team" Description="Be a part of a ministry team to help ensure the safety of all who choose to worship at Central." />
+    <ActivityTask Id="39" TaskName="Transportation" Description="Drive school bus (CDL license required) or church vans for special events throughout the year for children, youth and adult groups." />
+  </ActivityGroup>
+  <ActivityGroup ActivityName="Hospitality">
+    <ActivityTask Id="40" TaskName="Communion Team(set-up, Condense, or Clean-up)" Description="Prayerfully prepare the communion elements to be served monthly - includes clean-up (gathering cups from the pews and emptying/cleaning communion trays." />
+    <ActivityTask Id="41" TaskName="Welcome Center Assistance" Description="To welcome new people to Central by giving them a gift bag, offering a tour of the campus, and helping them finding their children's classes." />
+    <ActivityTask Id="42" TaskName="Doorkeeper" Description="Open the doors for people as they arrive to make them fell welcome." />
+    <ActivityTask Id="43" TaskName="Greeter" Description="Greeting people with your talents and abilities to connect with God and others in the church." />
+    <ActivityTask Id="44" TaskName="Information Center Assistant" Description="Supply congregation with up-to-date information regarding events, visitor information, facility directions, and money collection for various items." />
+    <ActivityTask Id="45" TaskName="Parking Lot Attendant" Description="Direct traffic flow, assist anyone who needs help getting into the church, and ensure a great first impression for everyone." />
+    <ActivityTask Id="46" TaskName="Usher Ministry" Description="Help seat guests, hand out bulletins, handle crowed control, answer questions, take offering and serve communion during our Sunday services and special events." />
+    <ActivityTask Id="47" TaskName="Golf Cart Drivers" Description="Shuttle people to and from their cars on Sunday mornings and special events." />
+  </ActivityGroup>
+  <ActivityGroup ActivityName="Outreach: Local Missions">
+    <ActivityTask Id="48" TaskName="Special Projects" Description="Help with local outreach projects including minor building repairs, painting, collecting and distributing clothing &amp; food, etc." />
+  </ActivityGroup>
+  <ActivityGroup ActivityName="Students: The Rock (6-12th Grade)">
+    <ActivityTask Id="49" TaskName="Administrative" Description="Guest follow-up, parent communication, mailing/emailing, Website." />
+    <ActivityTask Id="50" TaskName="Audio/Technical Team" Description="Prepare, manage, maintain and operate the sound, video, computer and lighting systems to enhance services." />
+    <ActivityTask Id="51" TaskName="Cafe Team" Description="Serving food, snacks and beverage items to the students on Wednesday nights and special events." />
+    <ActivityTask Id="52" TaskName="Junior High Ministry Team" Description="Serve by teaching/assisting in our Sunday Morning Junior High Class with students in grades 6-8" />
+    <ActivityTask Id="53" TaskName="Ministry Team Volunteer" Description="Serve by assisting during Wednesday night meetings in the areas of check-in, leading activities, small group discussions, events, student discipleship and leader retreats." />
+    <ActivityTask Id="54" TaskName="Evangelic Outreach" Description="Share the love of Christ with others by partnering with missions churches' events, outreaches, VBS, etc." />
+  </ActivityGroup>
+  </ActivityHeader>
+</XmlDocument>
