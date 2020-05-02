@@ -1479,70 +1479,10 @@ namespace CAOGAttendeeManager
 
         private void DeleteRecord(object sender, RoutedEventArgs e)
         {
+            DeleteRecordWindow delrec_win = new DeleteRecordWindow();
+            delrec_win.ShowDialog();
 
-            System.Collections.IList selectedRows = dataGrid.SelectedItems;
-
-
-            //var default_row_selected = selectedRows.Cast<DefaultTableRow>();
-
-
-
-
-            if (selectedRows.Count != 0)
-            {
-
-                Cursor = Cursors.Wait;
-                bool isDirty = isAttendeeModified();
-
-
-                if (isDirty)
-                {
-                    MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list.\n\n" +
-                                                           "Add them first then delete attendees.\n\nDiscard checked attendees in the attendee checklist and delete record anyway?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
-                    if (res == MessageBoxResult.OK)
-                    {
-                        if (m_AttendanceView)
-                        {
-
-                            DeleteRecordInDefaultTable(selectedRows);
-                            DeleteRecordInAttendeeListTable(selectedRows);
-
-
-                        }
-
-
-
-                    }
-
-                    else // isDirty: user pressed the cancel button on the messagebox
-                    {
-                        Cursor = Cursors.Arrow;
-                        return;
-                    }
-
-                }
-                else
-                {
-                    DeleteRecordInDefaultTable(selectedRows);
-                    DeleteRecordInAttendeeListTable(selectedRows);
-                }
-
-
-
-
-            }
-
-            else
-            {
-                Cursor = Cursors.Arrow;
-                MessageBox.Show("At least one record must be selected.", "Select Record", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-
-
-            Cursor = Cursors.Arrow;
-
-            Display_DefaultTable_in_Grid();
-
+           
 
 
 
@@ -4119,14 +4059,19 @@ namespace CAOGAttendeeManager
 
 
             // get GrdAttendee_InfoList element within the DataTemplate
+           
+           if (e.DetailsElement != null)
+           {
+                m_AttendeeInfo_grid = e.DetailsElement.FindName("GrdAttendee_InfoList") as DataGrid;
+                // get GrdAttendee_ActivityList element within the DataTemplate
+                m_Activity_grid = e.DetailsElement.FindName("GrdAttendee_ActivityList") as DataGrid;
+            }
+            
 
-            m_AttendeeInfo_grid = e.DetailsElement.FindName("GrdAttendee_InfoList") as DataGrid;
 
 
 
-
-            // get GrdAttendee_ActivityList element within the DataTemplate
-            m_Activity_grid = e.DetailsElement.FindName("GrdAttendee_ActivityList") as DataGrid;
+           
 
 
 

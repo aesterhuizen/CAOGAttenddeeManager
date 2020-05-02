@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="Delete Records..." Height="274.637" Width="327.673"
         WindowStyle="ToolWindow"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        Loaded="Window_Loaded">
     <Grid >
         <StackPanel>
 
@@ -26,9 +27,10 @@
                         <TextBlock  Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Height="40" Width="124" Text="Delete all church status records with this date:"/>
                         <DatePicker Name="dpChurchDate" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top" Width="140"
                                     SelectedDateChanged="DpChurchDate_SelectedDateChanged"
-                                    
-                                    Loaded="DpChurchDate_Loaded"
-                                    />
+                                    SelectedDateFormat="Short" 
+                                    DisplayDateEnd="2030-01-01" 
+                                    DisplayDateStart="2000-01-01"/>
+                        
                         <Button Name="btnDeleteDateRecords" Grid.Row="1" Grid.Column="1" 
                                 Click="BtnDeleteDateRecords_Click"
                                 Content="Delete Records" 

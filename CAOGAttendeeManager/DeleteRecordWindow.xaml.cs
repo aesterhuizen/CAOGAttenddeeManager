@@ -32,18 +32,81 @@ namespace CAOGAttendeeManager
 
         }
 
+        //private void DeleteSelectedRecs()
         private void BtnDeleteSelectedRecords_Click(object sender, RoutedEventArgs e)
         {
+            //System.Collections.IList selectedRows = dataGrid.SelectedItems;
 
+
+            //var default_row_selected = selectedRows.Cast<DefaultTableRow>();
+
+
+
+
+            //if (selectedRows.Count != 0)
+            //{
+
+            //    Cursor = Cursors.Wait;
+            //    bool isDirty = isAttendeeModified();
+
+
+            //    if (isDirty)
+            //    {
+            //        MessageBoxResult res = MessageBox.Show("There are checked attendees in the attendee checklist that has not yet been added to the active attendance list.\n\n" +
+            //                                               "Add them first then delete attendees.\n\nDiscard checked attendees in the attendee checklist and delete record anyway?", "Attendees not added yet", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
+            //        if (res == MessageBoxResult.OK)
+            //        {
+            //            if (m_AttendanceView)
+            //            {
+
+            //                //DeleteRecordInDefaultTable(selectedRows);
+            //                //DeleteRecordInAttendeeListTable(selectedRows);
+
+
+            //            }
+
+
+
+            //        }
+
+            //        else // isDirty: user pressed the cancel button on the messagebox
+            //        {
+            //            Cursor = Cursors.Arrow;
+            //            return;
+            //        }
+
+            //    }
+            //    else
+            //    {
+            //        DeleteRecordInDefaultTable(selectedRows);
+            //        DeleteRecordInAttendeeListTable(selectedRows);
+            //    }
+
+
+
+
+            //}
+
+            //else
+            //{
+            //    Cursor = Cursors.Arrow;
+            //    MessageBox.Show("At least one record must be selected.", "Select Record", MessageBoxButton.OK, MessageBoxImage.Warning);
+            //}
+
+
+            //Cursor = Cursors.Arrow;
+
+           // Display_DefaultTable_in_Grid();
         }
 
         private void BtnExit_Click(object sender, RoutedEventArgs e)
         {
-
+            Close();
         }
 
         private void BtnDeleteDateRecords_Click(object sender, RoutedEventArgs e)
         {
+            
 
         }
 
@@ -61,13 +124,6 @@ namespace CAOGAttendeeManager
 
 
             }
-        }
-
-        private void DpChurchDate_Loaded(object sender, RoutedEventArgs e)
-        {
-            var date = sender as DatePicker;
-
-            Add_Blackout_Dates(ref dpChurchDate);
         }
 
         private int check_date_bounds()
@@ -136,6 +192,33 @@ namespace CAOGAttendeeManager
             }
         }
 
+        private void Add_Blackout_Dates(ref DatePicker dp_cal)
+        {
+            var dates = new List<DateTime?>();
+            DateTime? date = dp_cal.DisplayDate;
+
+            DateTime? startDate = date?.AddMonths(-10);
+            DateTime? endDate = date?.AddMonths(10);
+
+            for (var dt = startDate; dt <= endDate; dt = dt?.AddDays(1))
+            {
+
+                if (dt?.DayOfWeek != DayOfWeek.Sunday)
+                {
+                    dates.Add(dt);
+                }
+
+
+            }
+            foreach (DateTime d in dates)
+            {
+                dp_cal.BlackoutDates.Add(new CalendarDateRange(d, d));
+            }
+        }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            Add_Blackout_Dates(ref dpChurchDate);
+        }
     }
 
   

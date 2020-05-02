@@ -74,7 +74,7 @@
 
                 </RibbonGroup>
 
-                <RibbonGroup Header="Table Operations">
+                <RibbonGroup Header="Table Operations" Margin="0,1" Width="241">
 
 
 
@@ -98,10 +98,10 @@
 
 
                     <RibbonButton Name="btnDelete" 
-                                  Label="Delete Record"
+                                  Label="Delete Records..."
                                   LargeImageSource="Resources\Delete.ico"
                                   Click="DeleteRecord" 
-                                  ToolTip="Delete Record from Active Attendance table. Attendee will not be removed from the database until you click on the Save button" Width="44"/>
+                                  ToolTip="Delete Record from Active Attendance table. Attendee will not be removed from the database until you click on the Save button" Height="65" Margin="0,0,-21,0"/>
 
 
 
@@ -206,10 +206,7 @@
                                         <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
                                     </Style>
 
-
-
-
-                                    <HierarchicalDataTemplate DataType="{x:Type local:ActivityHeader }" ItemsSource="{Binding Groups}" >
+                                    <HierarchicalDataTemplate DataType="{x:Type local:ActivityHeader}" ItemsSource="{Binding Groups}">
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{Binding Name}" FontWeight="Bold" >
                                                 <TextBlock.ContextMenu>
