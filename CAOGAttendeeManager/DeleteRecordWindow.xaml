@@ -5,13 +5,67 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CAOGAttendeeManager"
         mc:Ignorable="d"
-        Title="Delete Records..." Height="229" Width="291"
+        Title="Delete Records..." Height="274.637" Width="327.673"
         WindowStyle="ToolWindow"
         ResizeMode="NoResize">
-    <Grid>
-        <Button Content="Delete" HorizontalAlignment="Left" Margin="109,168,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="1,4.3"/>
-        <DatePicker HorizontalAlignment="Left" Margin="82,30,0,0" VerticalAlignment="Top"/>
-        <Label Content="Delete all record with this date:" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Height="30" Width="174"/>
+    <Grid >
+        <StackPanel>
 
+            <GroupBox Header="Delete all records by date:" HorizontalAlignment="Left" Height="104" VerticalAlignment="Top" Width="315">
+                <StackPanel>
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock  Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Height="40" Width="124" Text="Delete all church status records with this date:"/>
+                        <DatePicker Name="dpChurchDate" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top" Width="140"
+                                    SelectedDateChanged="DpChurchDate_SelectedDateChanged"
+                                    
+                                    Loaded="DpChurchDate_Loaded"
+                                    />
+                        <Button Name="btnDeleteDateRecords" Grid.Row="1" Grid.Column="1" 
+                                Click="BtnDeleteDateRecords_Click"
+                                Content="Delete Records" 
+                                HorizontalAlignment="Left" 
+                                VerticalAlignment="Top" 
+                                Width="84" 
+                                Margin="63,0,0,0" />
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="Delete selected records:" HorizontalAlignment="Left" Height="100" VerticalAlignment="Top" Width="315">
+                <StackPanel>
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock TextWrapping="Wrap" Text="Delete all selected records from the table:"/>
+                        <Button Name="btnDeleteSelectedRecords" Grid.Row="0" Grid.Column="1" Margin="20,0,0,0" Content="Delete selected records" 
+                                Click="BtnDeleteSelectedRecords_Click"
+                                HorizontalAlignment="Left" 
+                                VerticalAlignment="Top" 
+                                Width="128"/>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+            <Button Name="btnExit" 
+                    Click="BtnExit_Click"
+                    Margin="0,10,10,0" 
+                    Content="Exit" 
+                    HorizontalAlignment="Right" 
+                    VerticalAlignment="Top" Width="75"/>
+        </StackPanel>
     </Grid>
 </Window>

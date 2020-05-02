@@ -26,6 +26,7 @@ namespace CAOGAttendeeManager
     /// Interaction logic for MainWindow.xaml
     /// </summary>
 
+   
     public partial class MainWindow : Window
     {
 
@@ -150,8 +151,8 @@ namespace CAOGAttendeeManager
         private ModelDb m_dbContext;
 
         private DateTime m_DateSelected;
-        private DateTime m_alistDateSelected;
-        private DateTime? m_ActivityDateSelected;
+        private static DateTime m_alistDateSelected;
+        private static DateTime? m_ActivityDateSelected;
         private DataSet m_DataSet = new DataSet();
 
 
@@ -1608,7 +1609,8 @@ namespace CAOGAttendeeManager
 
 
         //    return 0;
-        //}
+        //}\
+       
         private int check_date_bounds()
         {
            
@@ -1642,7 +1644,7 @@ namespace CAOGAttendeeManager
                 {
                     m_dateIsValid = false;
                     MessageBox.Show($"Date limit is {datelimit.ToShortDateString()}.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
-                    Cursor = Cursors.Arrow;
+                   // Cursor = Cursors.Arrow;
                     return 1;
                 }
             }
