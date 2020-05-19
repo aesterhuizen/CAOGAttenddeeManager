@@ -19,209 +19,247 @@ namespace CAOGAttendeeManager
     /// </summary>
     public partial class WndAddGroup : Window
     {
-        public WndAddGroup(ref List<ActivityHeader> trv_activities, int windowMode, ActivityPair activity_pair)
+        public IEnumerable<TreeNode> getTree
+        {
+            get
+            {
+                if (m_tree_changed)
+                    return m_ActivitiesTreeView;
+                else
+                    return null;
+            }
+
+        }
+
+        public bool getTreeChanged => m_tree_changed;
+
+
+        private bool m_tree_changed = false;
+
+        private IEnumerable<TreeNode> m_ActivitiesTreeView = null;
+
+        private int m_header_idx = 0; //index of header
+        private int m_group_idx = 0; //index of group
+        private int m_task_idx = 0; //index of task
+        private int m_subtask_idx = -1; //index of subtask
+       
+        private void InitTree(List<ActivityHeader> tree)
+        {
+            trvActivities.BeginInit();
+            //Add ComboTreeNodes to ComboTreeBox Treeview
+            foreach (var header in tree)
+            {
+                //ActivityHeader
+
+                TreeNode parent = new TreeNode() { Header = header.Name };
+                
+
+                //ActivityGroups
+                foreach (var group in header.Groups)
+                {
+                    TreeNode group_node = new TreeNode() { Header = group.ActivityName };
+
+                    parent.Items.Add(group_node);
+                    
+                    //ActivityTask
+                    foreach (var task in group.lstActivityTasks)
+                    {
+                        TreeNode taskNode = new TreeNode() { Header = task.TaskName, Description = task.Description };
+                        group_node.Items.Add(taskNode);
+
+                        //subTask
+                        foreach (var subtask in task.lstsubTasks)
+                        {
+                            TreeNode subTaskNode = new TreeNode() { Header = subtask.TaskName, Description = subtask.Description };
+                            taskNode.Items.Add(subTaskNode);
+                    
+                        }
+                    }
+
+                }
+                trvActivities.Items.Add(parent);
+            }
+           
+            trvActivities.EndInit();
+            
+        }
+        public WndAddGroup(List<ActivityHeader> tvCurrent)
         {
             InitializeComponent();
+            InitTree(tvCurrent);
 
-            m_ActivitiesTreeview = trv_activities;
-            m_win_mode = windowMode;
-           
-            m_activityPair = activity_pair;
-
+            //trvActivities.ItemsSource = tvCurrent;
+            //m_ActivitiesTreeView = tvCurrent;
+            //m_tree_changed = false;
+            btnAdd.IsEnabled = false;
             
-            switch (windowMode)
-            {
-               
-                case 0: //add new activity group
-                    Title = "Add new group...";
-                    ShowNewGroup_Panel();
-                    
-                    break;
-                case 1: //add activity to group
-                    Title = $"Add New Activity";
-            
-                    Show_AddNewActivity_Panel();
-                    break;
-                case 2: // add new header
-                    Title = "Add new header...";
-                    ShowNewHeader_Pandel();
-                    break;
-
-                default:
-                    lblActivity.Content = "Add New activity:";
-                    break;
-
-            }
          
         }
 
       
-        private void ShowNewHeader_Pandel()
+        private void BtnApply_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            lblActivity.Content = "New activity group name:";
-            lblDescription.Visibility = Visibility.Hidden;
-            txtTaskDescription.Visibility = Visibility.Hidden;
-        }
-        private void ShowNewGroup_Panel()
-        {
-
-            lblActivity.Content = "New activity group name:";
-            lblDescription.Visibility = Visibility.Hidden;
-            txtTaskDescription.Visibility = Visibility.Hidden;
-
-        }
-        private void Show_AddNewActivity_Panel()
-        {
-            lblActivity.Content = "New activity name:";
-            lblDescription.Visibility = Visibility.Visible;
-            txtTaskDescription.Visibility = Visibility.Visible;
-        }
-        private void BtnOK_Click(object sender, RoutedEventArgs e)
-        {
-            //FIX ME
-            //Cursor = Cursors.Wait;
-
-            //switch (m_win_mode)
-            //{
-            //   case 0: //Add activityGroup
-            //       // int idx = m_ActivitiesTreeview.IndexOf()
-            //      //  var groupExist = m_ActivitiesTreeview[idx].Groups.SingleOrDefault(a => a.ActivityName == txtActivityName.Text);
-            //        //if (groupExist == null)
-            //        //{
-            //        //   // m_ActivitiesTreeview.Add(new ActivityGroup { Parent = m_ActivitiesTreeview[idx].Name , ActivityName = txtActivityName.Text });
-            //        //    GetActivitiesCount++;
-                     
-            //        //    Close();
-            //        //}
-            //        //else
-            //        //{
-            //        //    MessageBox.Show("Activity group already exist.","Activity already exist",MessageBoxButton.OK,MessageBoxImage.Stop);
-
-            //        //}
-                    
-            //        break;
-            //    case 1: //Add new activity (task)
-
-            //       // var a_group = m_ActivitiesTreeview.SingleOrDefault(idx => idx.ActivityName == m_activityPair.ActivityGroup);
-
-                    
-            //        //add new task to group
-            //        if (m_activityPair.ActivityGroup != "" && m_activityPair.ParentTaskName == "")
-            //        {
-                        
-            //            // if task already exist
-            //          // var task_exist = a_group.lstActivityTasks.SingleOrDefault(at => at.TaskName == txtActivityName.Text);
-            //            if (task_exist == null)
-            //            {
-            //                //activity is a child so make it a task of the current selected group task in the activities treeview
-
-
-            //                ActivityTask newTask = new ActivityTask() { Parent = a_group.ActivityName, TaskName = txtActivityName.Text, Description = txtTaskDescription.Text };
-            //                a_group.lstActivityTasks.Add(newTask);
-            //                GetActivitiesCount++;
-
-
-
-
-            //                Close();
-
-            //            }
-            //            else
-            //            {
-            //                MessageBox.Show("Activity already exist.", "Activity already exist", MessageBoxButton.OK, MessageBoxImage.Stop);
-            //            }
-
-            //        }
-            //        // add new sub task
-            //        else if (m_activityPair.ActivityGroup != "" && m_activityPair.ParentTaskName != "" && m_activityPair.ChildTaskName == "")
-            //        {
-            //            var task = a_group.lstActivityTasks.SingleOrDefault(ast => ast.TaskName == m_activityPair.ParentTaskName);
-            //            int task_idx = a_group.lstActivityTasks.IndexOf(task);
-
-            //                //activity is a child so make it a subtask of the current selected task in the activities treeview
-            //                var subtask = task.lstsubTasks.SingleOrDefault(at => at.TaskName == txtActivityName.Text);
-            //            if (subtask == null)
-            //            {
-
-            //                ActivityTask newsubTask = new ActivityTask() { Parent = "", TaskName = txtActivityName.Text, Description = txtTaskDescription.Text };
-            //                task.lstsubTasks.Add(newsubTask);
-            //                GetActivitiesCount++;
-
-            //                Close();
-            //            }
-            //            else
-            //            {
-            //                MessageBox.Show("Activity already exist.", "Activity already exist", MessageBoxButton.OK, MessageBoxImage.Stop);
-            //            }
-                        
-            //        }
-            //        else
-            //        {
-            //            var task = a_group.lstActivityTasks.SingleOrDefault(ast => ast.TaskName == m_activityPair.ParentTaskName);
-            //            int task_idx = a_group.lstActivityTasks.IndexOf(task);
-
-            //            //activity is a child so make it a subtask of the current selected task in the activities treeview
-            //            var subtask = task.lstsubTasks.SingleOrDefault(at => at.TaskName == txtActivityName.Text);
-            //            if (subtask == null)
-            //            {
-
-            //                ActivityTask newsubTask = new ActivityTask() { Parent = "", TaskName = txtActivityName.Text, Description = txtTaskDescription.Text };
-            //                task.lstsubTasks.Add(newsubTask);
-            //                GetActivitiesCount++;
-
-            //                Close();
-            //            }
-            //            else
-            //            {
-            //                MessageBox.Show("Activity already exist.", "Activity already exist", MessageBoxButton.OK, MessageBoxImage.Stop);
-            //            }
-            //        }
-
-            //        break;
-            //    case 2: //Add header group
-            //        var headerExist = m_ActivitiesTreeview.SingleOrDefault(a => a.Name == txtActivityName.Text);
-            //        if (headerExist == null)
-            //        {
-            //            m_ActivitiesTreeview.Add(new ActivityHeader { Name = txtActivityName.Text });
-            //            GetActivitiesCount++;
-
-            //            Close();
-            //        }
-
-
-
-
-
-
-
-            //        break;
-
-            //    default:
-            //        Show_AddNewActivity_Panel();
-            //        break;
-
-            //}
-
-            //Cursor = Cursors.Arrow;
-
-            
+     
+            Close();
             
         }
 
-        public int GetActivitiesCount { get; private set; } = 0;
 
-        // private variables
-        private List<ActivityHeader> m_ActivitiesTreeview;
-        private int m_win_mode = 0;
-        private bool m_ActivityListChanged = false;
-        private ActivityPair m_activityPair;
+   
+      
 
-        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        private void BtnCancel_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             Close();
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            
+            btnApply.IsEnabled = false;
+            btnAdd.IsEnabled = false;
+            btnDelete.IsEnabled = false;
+            btnNewFunctionalGrp.IsEnabled = false;
+            txtActivityDescription.IsEnabled = false;
+           
+        }
+
+        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        {
+            int idx = 0;
+            Cursor = Cursors.Wait;
+
+           
+            TreeNode selected_node = (TreeNode)trvActivities.SelectedItem;
+           
+
+
+            if (selected_node != null)
+            {
+                
+                if (!selected_node.Items.Contains(selected_node))
+                {
+                    TreeNode new_item = new TreeNode { Header = txtActivityName.Text, Description = txtActivityDescription.Text };
+                    trvActivities.BeginInit();
+                    selected_node.Items.Add(new_item);
+                    trvActivities.EndInit();
+                    m_tree_changed = true;
+
+                    m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+                    txtActivityName.Text = "";
+                    txtActivityDescription.Text = "";
+                }
+
+            }
+            else
+            {
+                MessageBox.Show("Must select an item first.", "Select an item", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            
+          
+            if (m_tree_changed)
+                btnApply.IsEnabled = true;
+            else
+                btnApply.IsEnabled = false;
+
+            Cursor = Cursors.Arrow;
+        }
+
+
+
+      
+        private void txtActivityName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (txtActivityName.Text != "")
+            {
+                btnAdd.IsEnabled = true;
+                btnNewFunctionalGrp.IsEnabled = true;
+                txtActivityDescription.IsEnabled = true;
+            }
+            else
+            {
+                txtActivityDescription.IsEnabled = false;
+                btnAdd.IsEnabled = false;
+                btnNewFunctionalGrp.IsEnabled = false;
+            }
+                
+
+        }
+
+
+
+        private void btnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            TreeNode selected_node = (TreeNode)trvActivities.SelectedItem;
+
+            if (selected_node != null)
+            {
+                TreeNode Parent = (TreeNode)selected_node.Parent;
+                int idx = Parent.Items.IndexOf(selected_node);
+
+                trvActivities.BeginInit();
+                Parent.Items.RemoveAt(idx);
+                trvActivities.EndInit();
+                m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+                m_tree_changed = true;
+            }
+
+
+            if (m_tree_changed)
+                btnApply.IsEnabled = true;
+            else
+                btnApply.IsEnabled = false;
+
+        }
+
+        private void trvActivities_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            var item = sender as TreeView;
+
+            TreeNode selitem = (TreeNode)item.SelectedItem;
+
+            if (selitem != null )
+            {
+                txtTaskDescription.Text = selitem.Description;
+                btnDelete.IsEnabled = true;
+              
+            }
+            
+
+        }
+
+
+        private void btnNewFunctionalGrp_Click(object sender, RoutedEventArgs e)
+        {
+            
+                TreeNode new_item = new TreeNode
+                {
+                    Header = txtActivityName.Text,
+                    Description = txtActivityDescription.Text
+
+                };
+                trvActivities.Items.Add(new_item);
+                m_tree_changed = true;
+
+                m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+                txtActivityName.Text = "";
+                txtActivityDescription.Text = "";
+        
+        }
+
+      
     }
 
-   
+    public class TreeNode : TreeViewItem
+    {
+        public string Description { get; set; }
+
+        public TreeNode()
+        {
+            Description = "";
+
+        }
+
+    }
    
 }

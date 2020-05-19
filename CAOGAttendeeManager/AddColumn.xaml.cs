@@ -27,23 +27,23 @@ namespace CAOGAttendeeManager
             btnRemove.IsEnabled = false;
         }
 
-        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        private void BtnAdd_Click(object sender, System.Windows.RoutedEventArgs e)
         {
            
         }
 
        
-        private void BtnRemove_Click(object sender, RoutedEventArgs e)
+        private void BtnRemove_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
         }
 
-        private void BtnOK_Click(object sender, RoutedEventArgs e)
+        private void BtnOK_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
         }
 
-        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        private void BtnCancel_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             Close();
         }

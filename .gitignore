@@ -176,6 +176,7 @@ StyleCopReport.xml
 
 *.scc
 
+*.accdb
 
 
 # Chutzpah Test files
@@ -431,6 +432,9 @@ _pkginfo.txt
 # Others
 
 ClientBin/
+WPF_4-5_Unl_code/
+WpfExperiments/
+DropDownControls-1.1.4/
 
 ~$*
 
@@ -680,3 +684,4 @@ ASALocalRun/
 
 healthchecksdb
 WpfExperiments/
+/WPF_4-5_Unl_code

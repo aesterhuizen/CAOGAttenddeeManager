@@ -40,7 +40,7 @@ public class ComboTreeNodeCollection : IList<ComboTreeNode>, IList, INotifyColle
 	/// Fired when the check state of a node in the collection (or one of its children) changes.
 	/// </summary>
 	[Browsable(false)]
-	internal event EventHandler<ComboTreeNodeEventArgs> AfterCheck;
+	internal event EventHandler<EventArgs> AfterCheck;
 
 	/// <summary>
 	/// Initalises a new instance of ComboTreeNodeCollection and associates it with the specified ComboTreeNode.
@@ -200,7 +200,7 @@ public class ComboTreeNodeCollection : IList<ComboTreeNode>, IList, INotifyColle
 	/// Raises the <see cref="AfterCheck"/> event.
 	/// </summary>
 	/// <param name="e"></param>
-	protected virtual void OnAfterCheck(ComboTreeNodeEventArgs e) {
+	protected virtual void OnAfterCheck(EventArgs e) {
 		if (AfterCheck != null) AfterCheck(this, e);
 	}
 
@@ -501,7 +501,7 @@ public class ComboTreeNodeCollection : IList<ComboTreeNode>, IList, INotifyColle
 
 	#endregion
 
-	void item_CheckStateChanged(object sender, EventArgs e) {
-		OnAfterCheck(new ComboTreeNodeEventArgs(sender as ComboTreeNode));
+	void item_CheckStateChanged(object sender, System.EventArgs e) {
+		OnAfterCheck(new EventArgs(sender as ComboTreeNode));
 	}
 }

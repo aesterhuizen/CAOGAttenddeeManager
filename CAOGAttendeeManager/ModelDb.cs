@@ -6,13 +6,12 @@ namespace CAOGAttendeeManager
     using System.Windows;
     using System.Data;
     using System.ComponentModel;
-    using System.Data.Entity;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Collections;
     using System.Collections.Specialized;
-    using System.Data.Entity.Infrastructure;
+    using System.Data.Entity;
 
     // [DbConfigurationType(typeof(MyDbConfiguration))]
 
@@ -25,10 +24,17 @@ namespace CAOGAttendeeManager
         // 
         // If you wish to target a different database and/or database provider, modify the 'ModelDb' 
         // connection string in the application configuration file.
+
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder.UseSqlServer(
+        //        @"Server=(Server=tcp:caogserver.database.windows.net,1433;Initial Catalog=CAOGdb_2018_09_14_Prod;Persist Security Info=False;User ID=sqladmin;Password=RFtgYH56&*;MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30");
+        //}
+
         public ModelDb(string constr) : base(constr)
         {
-        }
 
+        }
         // Add a DbSet for each entity type that you want to include in your model. For more information 
         // on configuring and using a Code First model, see http://go.microsoft.com/fwlink/?LinkId=390109.
 
@@ -106,17 +112,17 @@ namespace CAOGAttendeeManager
         }
 
         private string m_strFunctionSteps = "";
-        public string FunctionSteps
-        {
-            get
-            {
-                return m_strFunctionSteps;
-            }
-            set
-            {
-                m_strFunctionSteps = value;
-            }
-        }
+        //public string FunctionSteps
+        //{
+        //    get
+        //    {
+        //        return m_strFunctionSteps;
+        //    }
+        //    set
+        //    {
+        //        m_strFunctionSteps = value;
+        //    }
+        //}
 
 
         public virtual ObservableCollection<Attendance_Info> AttendanceList { get; private set; }
@@ -142,8 +148,8 @@ namespace CAOGAttendeeManager
 
 
         public string DateString { get; private set; }
-        private DateTime _date;
-        public DateTime Date
+        private DateTime? _date;
+        public DateTime? Date
         {
             get
             {
@@ -155,7 +161,7 @@ namespace CAOGAttendeeManager
                 if (_date != value)
                 {
                     _date = value;
-                    DateString = _date.ToString("MM-dd-yyyy");
+                    DateString = _date?.ToString("MM-dd-yyyy");
                     NotifyPropertyChanged();
 
                 }
@@ -183,7 +189,8 @@ namespace CAOGAttendeeManager
         {
             Attendance_Info d = (Attendance_Info)obj;
 
-            return _date.CompareTo(d._date);
+
+            return (int)_date?.CompareTo(d?._date);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -194,12 +201,27 @@ namespace CAOGAttendeeManager
     }
 
 
-    public class ActivityPair : IComparable, INotifyPropertyChanged
+    public class ActivityPair : INotifyPropertyChanged
     {
-
+                    
         public ActivityPair()
         {
+            ActivityGroup = "";
+            ParentTaskName = "";
+            ChildTaskName = "";
+            ActivityPairId = 0;
+            AttendeeId = 0;
+            Date = null;
+        }
 
+        public void Clear()
+        {
+            ActivityGroup = "";
+            ParentTaskName = "";
+            ChildTaskName = "";
+            Date = null;
+            AttendeeId = 0;
+            ActivityPairId = 0;
         }
         public int ActivityPairId { get; set; }
         public int AttendeeId { get; set; }
@@ -274,16 +296,16 @@ namespace CAOGAttendeeManager
 
         }
 
-        public int CompareTo(object obj)
-        {
-            ActivityPair at = (ActivityPair)obj;
+        //public int CompareTo(object obj)
+        //{
+        //    ActivityPair at = (ActivityPair)obj;
 
-            DateTime dt = at._date.GetValueOrDefault();
+        //    DateTime dt = at._date.GetValueOrDefault();
 
-            DateTime tdt = _date.GetValueOrDefault();
+        //    DateTime tdt = _date.GetValueOrDefault();
 
-            return tdt.CompareTo(dt);
-        }
+        //    return tdt.CompareTo(dt);
+        //}
 
 
         public string ParentTaskName
@@ -512,7 +534,7 @@ namespace CAOGAttendeeManager
             FirstName = "";
             LastName = "";
             Activity = "";
-            Date = new DateTime(2000, 1, 1);
+            Date = null;
             Church_Last_Attended = "";
             Activity_Last_Attended = "";
             ChurchStatus = "";
@@ -693,7 +715,7 @@ namespace CAOGAttendeeManager
             IsModifiedrow = false;
             
         }
-        private int _attendeeId = 0;
+      
         private bool _isModified = false;
 
         public bool IsNewrow { get; set; }
@@ -708,38 +730,73 @@ namespace CAOGAttendeeManager
                 if (_isModified != value)
                 {
                     _isModified = value;
-                  // NotifyPropertyChanged("IsModifiedrow");
+                 
                 }
                 
             }
 
         }
 
-        public int AttendeeId
+        public int AttendeeId { get; set; }
+        
+        private string _lastname = "";
+        public string LastName
         {
             get
             {
-                return _attendeeId;
+                return _lastname;
             }
-
             set
             {
-                if (_attendeeId != value)
+                if (_lastname != value)
                 {
-                    _attendeeId = value;
-                    NotifyPropertyChanged("AttendeeId");
+                    _lastname = value;
                 }
+                NotifyPropertyChanged("LastName");
+            }
+        }
+        private string _firstname = "";
+        public string FirstName
+        {
+            get
+            {
+                return _firstname;
+            }
+            set
+            {
+
+                if (_firstname != value)
+                {
+                    _firstname = value;
+                }
+                NotifyPropertyChanged("FirstName");
+
             }
 
         }
- 
-        public string LastName { get; set; }
-        public string FirstName { get; set; }
         public string DateString { get; set; }
 
-    
-        public string Attended { get; set; }
+        private string _attended = "";
+        public string Attended
+        {
+            get
+            {
+                return _attended;
+            }
+            set
+            {
+                if (_attended != value)
+                {
+                    _attended = value;
+                    NotifyPropertyChanged("Attended");
+                }
+            }
+        }
 
+        private string _activity = "";
+
+        
+    
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void NotifyPropertyChanged(string propertyName = "")

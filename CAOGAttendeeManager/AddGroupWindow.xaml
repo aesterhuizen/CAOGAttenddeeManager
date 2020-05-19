@@ -3,19 +3,105 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CAOGAttendeeManager"
+        
         mc:Ignorable="d"
-        Title="Add new activity ..." Height="228" Width="429"
+        Loaded="Window_Loaded"
+        Title="Add activity ..." Height="622" Width="413"
+        MinHeight="622"
+        MinWidth="413"
         WindowStyle="ToolWindow"
         ResizeMode="NoResize">
     <Grid  >
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="227*"/>
+            <ColumnDefinition Width="180*"/>
         </Grid.ColumnDefinitions>
-        <Label Name="lblActivity" Content="Activity Group:" HorizontalAlignment="Left" Margin="15,15,0,0" VerticalAlignment="Top" Width="197"/>
-        <TextBox Name="txtActivityName" HorizontalAlignment="Left" Height="23" TabIndex="0" Margin="15,41,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="162"/>
-        <Button Name="btnOK" Content="OK" HorizontalAlignment="Left" TabIndex="2" Margin="238,159,0,0" VerticalAlignment="Top" Width="75" Click="BtnOK_Click"/>
-        <Button Name="btnCancel" Content="Cancel" HorizontalAlignment="Left" TabIndex="3" Margin="328,159,0,0" VerticalAlignment="Top" Width="75" Click="BtnCancel_Click"/>
-        <Label Name ="lblDescription" Content="Description:" HorizontalAlignment="Left" Margin="15,69,0,0" VerticalAlignment="Top" />
-        <TextBox Name="txtTaskDescription" HorizontalAlignment="Left" Height="49" TabIndex="1" Margin="15,95,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="388"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="155*"/>
+            <RowDefinition Height="294*"/>
+            <RowDefinition Height="103*"/>
+            <RowDefinition Height="42*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Name="spAddNode" Orientation="Vertical" Margin="15,10,0,0" HorizontalAlignment="Left" Width="211">
+            <Label x:Name="lblActivity" Content="Add new activity:" HorizontalAlignment="Left" VerticalAlignment="Top" Width="166" Height="26"/>
+            <TextBox x:Name="txtActivityName" Margin="5,0,0,0" HorizontalAlignment="Left" Height="23" TabIndex="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="202"
+                     TextChanged="txtActivityName_TextChanged"/>
+            <Label x:Name="lblDescriptionAdd" Content="Activity Description:" HorizontalAlignment="Left" Height="23" TabIndex="0" VerticalAlignment="Top" Width="170"/>
+            <TextBox x:Name="txtActivityDescription" Margin="5,0,0,0" Height="62" TabIndex="0" TextWrapping="Wrap" VerticalAlignment="Top"
+                     TextChanged="txtActivityName_TextChanged" HorizontalAlignment="Left" Width="200"/>
+
+        </StackPanel>
+        <StackPanel x:Name="spbuttons" Orientation="Vertical" Grid.Column="1" Margin="0,38,88,10">
+            <Button x:Name="btnAdd" Content="Add" Click="BtnAdd_Click" Margin="0,0,0,0" Height="25" Width="75" IsDefault="True"
+                    ToolTip="Add new child item underneath selected item"/>
+            <Button x:Name="btnDelete" Content="Delete" Click="btnDelete_Click" Height="25" Margin="0,10,0,0" Width="75"
+                    ToolTip="Delete selected item"/>
+
+        </StackPanel>
+        <Label x:Name ="lblDescription" Content="Description:" HorizontalAlignment="Left" Margin="17,2,0,0" VerticalAlignment="Top" Grid.Row="2" Height="26" Width="73" />
+        <TextBox x:Name="txtTaskDescription" Height="68" TabIndex="1" Margin="17,28,19,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Row="2" Grid.ColumnSpan="2"/>
+        <TreeView x:Name="trvActivities"  SelectedItemChanged="trvActivities_SelectedItemChanged" Margin="17,0,19,19" Grid.Row="1" Grid.ColumnSpan="2" Height="225" VerticalAlignment="Bottom">
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="{x:Type local:TreeNode}">
+                    <Setter Property="IsExpanded" Value="True"/>
+                </Style>
+            </TreeView.ItemContainerStyle>
+            <TreeView.Resources>
+
+
+                <Style TargetType="{x:Type ScrollViewer}">
+                    <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
+                </Style>
+                <!--<HierarchicalDataTemplate DataType="{x:Type local:ActivityHeader}" ItemsSource="{Binding Groups}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Name ="ActivityHeader" Text="{Binding Name}" FontWeight="Bold"
+                                 >
+
+
+
+                        </TextBlock>
+
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+
+                <HierarchicalDataTemplate DataType="{x:Type local:ActivityGroup }" ItemsSource="{Binding lstActivityTasks}">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBlock  Name="txtActivityGroup" Text="{Binding ActivityName}" Margin="5,0,0,0" 
+                                   >
+
+
+
+                        </TextBlock>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+
+                <HierarchicalDataTemplate DataType="{x:Type local:ActivityTask}" ItemsSource="{Binding lstsubTasks}">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBlock  Name="txtActivityTask" Text="{Binding TaskName}" Margin="5,0,0,0"
+                                   >
+
+
+
+
+                        </TextBlock>
+                    </StackPanel>
+                </HierarchicalDataTemplate>-->
+
+            </TreeView.Resources>
+
+
+        </TreeView>
+        <Button Name="btnNewFunctionalGrp" Content="New Funtional Group" HorizontalAlignment="Left" Margin="17,10,0,259" Grid.Row="1"
+                Click="btnNewFunctionalGrp_Click" Width="128"
+                ToolTip="Add new top level item"/>
+        <StackPanel Margin="2,2,0,0" Orientation="Horizontal" Height="26" Grid.Row="3" Grid.Column="1" VerticalAlignment="Top">
+            <Button x:Name="btnApply" Content="OK" HorizontalAlignment="Left" TabIndex="2" VerticalAlignment="Top" Width="75" Click="BtnApply_Click" Height="25"
+                ToolTip="Apply changes from the activity list to the activity dropdown list"/>
+            <Button Margin="10,0,0,0" x:Name="btnCancel" Content="Cancel" TabIndex="3" VerticalAlignment="Top" Width="75" Click="BtnCancel_Click" Height="25"/>
+
+        </StackPanel>
+
+
     </Grid>
 </Window>

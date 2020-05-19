@@ -5,55 +5,56 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CAOGAttendeeManager"
         mc:Ignorable="d"
-        Title="Delete Records..." Height="274.637" Width="327.673"
+        Title="Delete Records..." Height="345.808" Width="447.271"
         WindowStyle="ToolWindow"
         ResizeMode="NoResize"
         Loaded="Window_Loaded">
     <Grid >
         <StackPanel>
 
-            <GroupBox Header="Delete all records by date:" HorizontalAlignment="Left" Height="104" VerticalAlignment="Top" Width="315">
+            <GroupBox Margin="10,10,0,0" Header="Delete all records by date:" HorizontalAlignment="Left" Height="141" VerticalAlignment="Top" Width="376">
                 <StackPanel>
-                    <Grid >
+                    <Grid Margin="0,10,0,0" Height="104">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="78"/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock  Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Height="40" Width="124" Text="Delete all church status records with this date:"/>
+                        <TextBlock  Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Height="78" 
+                                    Width="182" 
+                                    ><Run Text="Delete all church attended records with this date: "/><LineBreak/><Run Text="(changes will not be made to the database until saved)"/></TextBlock>
                         <DatePicker Name="dpChurchDate" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top" Width="140"
                                     SelectedDateChanged="DpChurchDate_SelectedDateChanged"
                                     SelectedDateFormat="Short" 
                                     DisplayDateEnd="2030-01-01" 
-                                    DisplayDateStart="2000-01-01"/>
-                        
+                                    DisplayDateStart="2000-01-01" Height="24" Margin="10,0,0,0"/>
+
                         <Button Name="btnDeleteDateRecords" Grid.Row="1" Grid.Column="1" 
                                 Click="BtnDeleteDateRecords_Click"
                                 Content="Delete Records" 
                                 HorizontalAlignment="Left" 
                                 VerticalAlignment="Top" 
                                 Width="84" 
-                                Margin="63,0,0,0" />
+                                Margin="63,0,0,0" Height="20" />
                     </Grid>
                 </StackPanel>
             </GroupBox>
 
-            <GroupBox Header="Delete selected records:" HorizontalAlignment="Left" Height="100" VerticalAlignment="Top" Width="315">
+            <GroupBox Margin="10,10,0,0" Header="Delete selected records:" HorizontalAlignment="Left" Height="130" VerticalAlignment="Top" Width="376">
                 <StackPanel>
-                    <Grid >
+                    <Grid Margin="0,10,0,0" Height="92">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="50"/>
-                            <RowDefinition/>
+                            <RowDefinition Height="83"/>
                         </Grid.RowDefinitions>
-                        <TextBlock TextWrapping="Wrap" Text="Delete all selected records from the table:"/>
+                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,2"><Run Text="Delete all selected records from the active table:"/><LineBreak/><Run Text="(changes will not be made to the database until saved)"/></TextBlock>
                         <Button Name="btnDeleteSelectedRecords" Grid.Row="0" Grid.Column="1" Margin="20,0,0,0" Content="Delete selected records" 
                                 Click="BtnDeleteSelectedRecords_Click"
                                 HorizontalAlignment="Left" 
@@ -62,12 +63,6 @@
                     </Grid>
                 </StackPanel>
             </GroupBox>
-            <Button Name="btnExit" 
-                    Click="BtnExit_Click"
-                    Margin="0,10,10,0" 
-                    Content="Exit" 
-                    HorizontalAlignment="Right" 
-                    VerticalAlignment="Top" Width="75"/>
         </StackPanel>
     </Grid>
 </Window>

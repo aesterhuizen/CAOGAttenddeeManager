@@ -118,7 +118,7 @@ namespace CAOGAttendeeManager
 
 
 
-        private void RibbonApplicationMenuItem_Click_Exit(object sender, RoutedEventArgs e)
+        private void RibbonApplicationMenuItem_Click_Exit(object sender, System.Windows.RoutedEventArgs e)
         {
             this.Close();
         }
@@ -160,7 +160,7 @@ namespace CAOGAttendeeManager
 
 
 
-        private void DatesRangeCalendar_Loaded(object sender, RoutedEventArgs e)
+        private void DatesRangeCalendar_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
             var calendar = sender as Calendar;
             var displayDate = calendar.DisplayDate;
@@ -255,7 +255,7 @@ namespace CAOGAttendeeManager
         }
     
 
-        private void btnPlot_Click(object sender, RoutedEventArgs e)
+        private void btnPlot_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
             Cursor = Cursors.Wait;
@@ -293,12 +293,12 @@ namespace CAOGAttendeeManager
             Cursor = Cursors.Arrow;
         }
 
-        private void Window_Closed(object sender, EventArgs e)
+        private void Window_Closed(object sender, System.EventArgs e)
         {
 
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void Window_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
 
             if (m_StartDateIsValid)

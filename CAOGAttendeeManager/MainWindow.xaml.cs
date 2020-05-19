@@ -27,7 +27,7 @@ namespace CAOGAttendeeManager
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-
+   
     public partial class MainWindow : Window
     {
 
@@ -38,34 +38,12 @@ namespace CAOGAttendeeManager
             InitializeComponent();
 
 
-
-
-            m_ctbActivity.DroppedDown = false;
-            m_ctbActivity.Location = new System.Drawing.Point(5, 5);
-            m_ctbActivity.Name = "ctbActivityCheckboxes";
-            m_ctbActivity.SelectedNode = null;
-            m_ctbActivity.ShowCheckBoxes = true;
-            m_ctbActivity.Size = new System.Drawing.Size(200, 19);
-            m_ctbActivity.Visible = true;
-
-
-
-
-
-            WindowsFormsHost host = new WindowsFormsHost();
-            host.Child = m_ctbActivity;
-            spActivityHeader.Children.Add(host);
-            m_ctbActivity.ExpandAll();
-            m_ctbActivity.DrawWithVisualStyles = true;
-
             InitActivityTreeView();
+            
+
+            m_version_string = "v3.1.19";
 
 
-
-
-#if (DEBUG)
-            this.Title = $"CAOG Attendee Manager (Debug) - {m_constr}";
-#endif
 
 
             dataGrid.CopyingRowClipboardContent += new EventHandler<DataGridRowClipboardEventArgs>(CopyDataGridtoClipboard);
@@ -105,13 +83,20 @@ namespace CAOGAttendeeManager
 
                     }
 
+#if (DEBUG)
+                    this.Title = $"Attendee Manager " + m_version_string + "(Debug) - " + m_constr;
+#else
+            this.Title = "Attendee Manager " + m_version_string;
+#endif
 
 #if (init_db)
 
                     if (m_dbContext == null)
                     {
+                       
                         m_dbContext = new ModelDb(m_constr);
                         m_dbContext.Configuration.ProxyCreationEnabled = false;
+                        m_dbContext.Configuration.AutoDetectChangesEnabled = true;
                         //load db context
                         m_dbContext.Attendees.Load();
                         m_dbContext.Attendance_Info.Load();
@@ -123,7 +108,7 @@ namespace CAOGAttendeeManager
 
 
                     InitDataSet();
-                    ConvertListToDataTable();
+                   // ConvertListToDataTable();
 #endif
 
 #if (db_errors)
@@ -132,8 +117,8 @@ namespace CAOGAttendeeManager
 
 
 
-
-                    Display_DefaultTable_in_Grid();
+                    // display the attendee records in the table
+                   Display_DefaultTable_in_Grid();
 
 
                 }
@@ -174,17 +159,19 @@ namespace CAOGAttendeeManager
 
         private ModelDb m_dbContext;
 
-        private DateTime m_DateSelected;
-        private DateTime m_alistDateSelected;
-        private DateTime? m_ActivityDateSelected;
+        private DateTime? m_DateSelected = null;
+        private DateTime? m_alistDateSelected = null;
+        private DateTime? m_ActivityDateSelected = null;
+        private DateTime? m_ActivityDateSelectedPr = null;
         private DataSet m_DataSet = new DataSet();
 
 
-
+        bool m_ActivityTreeChanged = false; //check if the user changed the Activity tree
 
         // current selected row in the data tables
 
         private DefaultTableRow m_default_row_selected;
+       
         private AttendanceTableRow m_attendance_row_selected;
 
         // pointer to datagrid within RowDetailsTemplate
@@ -200,37 +187,36 @@ namespace CAOGAttendeeManager
         //List of default Table rows
         private List<DefaultTableRow> m_lstdefaultTableRows = new List<DefaultTableRow>() { };
 
-        private int m_datarow_AttendeeId = 0;
+      
         //array holding the Default table column headers
         private string[] m_aryColumnHeaders = new string[50];
 
-
+        // list holding the rows of the prospect table
         private List<AttendanceTableRow> m_lstattendanceTableRows = new List<AttendanceTableRow>() { };
+
+        //list holding the rows that are selected in the prospect table
+        private System.Collections.IList m_MultiAttendanceRow_Selected;
 
         //ComboTreeBox
         private ComboTreeBox m_ctbActivity = new ComboTreeBox();
-
+        private ComboTreeBox m_ctbActivityProspect = new ComboTreeBox();
 
         //list of Activity headers
         private List<ActivityHeader> m_lstActivityHeaders = new List<ActivityHeader> { };
         private List<ActivityTask> m_lstActivityTasks = new List<ActivityTask> { };
 
 
-        //Activity control
-        private string m_ActivityName = "";
+     
 
 
-
-        private int m_child_taskId = 0;
-        int m_parent_taskId = 0;
-        private int m_lstActivitiesCount = 0;
-        private int m_newlstActivitiesCount = 0;
         // the current selected activity Pair
         private ActivityPair m_currentSelected_ActivityPair = null;
-        private ActivityTask m_currentSelect_ActivityTask = null;
+       
 
-        private ActivityPair m_previousSelected_ActivityPair = null;
+       
         private Timer aTimer = null;
+
+        private string m_version_string = "";
 
         private bool m_NoCredFile = false;
         private int m_activitychecked_count = 0;
@@ -262,25 +248,12 @@ namespace CAOGAttendeeManager
         private bool m_dateIsValid = false;
         private bool m_alistdateIsValid = false;
 
-
-
+        private bool m_loaded = false;
 
         private string m_constr = "";
 
 
         private int m_NewAttendeeId = 0;
-
-        private void Set_btnAddActivityState()
-        {
-            if (m_activitychecked_count == 1 && (m_ActivityDateSelected != null && m_dateIsValid))
-            {
-                btnPanelAddActivity.IsEnabled = true;
-            }
-            else
-            {
-                btnPanelAddActivity.IsEnabled = false;
-            }
-        }
 
 
         private void StopTimer()
@@ -293,7 +266,7 @@ namespace CAOGAttendeeManager
         }
         private void SetTimer()
         {
-            aTimer = new Timer(100);
+            aTimer = new Timer(500);
             // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = true;
@@ -305,91 +278,91 @@ namespace CAOGAttendeeManager
 
             Dispatcher.Invoke(() =>
            {
-               if (m_currentSelected_ActivityPair != null && m_currentSelect_ActivityTask != null)
+               if (m_currentSelected_ActivityPair != null && m_ActivityDateSelected != null && m_MultiAttendanceRow_Selected != null)
                {
-                   if (m_IsActivityPanelView &&
-                    m_activitychecked_count == 1 &&
-                    m_ActivityDateSelected != null &&
 
-                    /*parent tasks with child tasks cannot be added to the activity list*/
-                    m_currentSelect_ActivityTask.lstsubTasks.Count == 0
-                   )
+                   btnPanelAddActivity.IsEnabled = true;
+               }
+               else
+               {
+                   btnPanelAddActivity.IsEnabled = false;
+               }
 
+               foreach (AttendanceTableRow dr in m_lstattendanceTableRows)
+               {
+                   if (dr.Attended == "1" && m_alistdateIsValid)
                    {
-                       btnPanelAddActivity.IsEnabled = true;
+                       btnImport.IsEnabled = true;
+                       break;
                    }
                    else
                    {
-                       btnPanelAddActivity.IsEnabled = false;
+                       btnImport.IsEnabled = false;
                    }
                }
 
+               if (m_dbContext.ChangeTracker.HasChanges() || m_ActivityTreeChanged)
+               {
+                   btnSave.IsEnabled = true;
+
+               }
+               else
+               {
+                   btnSave.IsEnabled = false;
+               }
+
+               if (m_isQueryTableShown)
+                   btnDelete.IsEnabled = false;
+            
 
 
            });
-            // FIX ME
+
             //Dispatcher.Invoke(() =>
             //{
-
-            //    var selected_group = trvActivities.SelectedItem;
-
-            //    if (m_currentSelected_ActivityPair != null && m_currentSelect_ActivityTask != null)
+            //    foreach (AttendanceTableRow dr in m_lstattendanceTableRows)
             //    {
-            //        if (selected_group != null ||
-            //            (m_currentSelected_ActivityPair != null &&
-            //             (m_currentSelect_ActivityTask.lstsubTasks.Count == 0 ||
-            //             m_currentSelect_ActivityTask.lstsubTasks.Count != 0)))
+            //        if (dr.Attended == "1" && m_alistdateIsValid)
             //        {
-            //            btnPanelNewActivity.IsEnabled = true;
+            //            btnImport.IsEnabled = true;
+            //            break;
             //        }
             //        else
             //        {
-            //            btnPanelNewActivity.IsEnabled = false;
+            //            btnImport.IsEnabled = false;
             //        }
-
             //    }
             //});
 
+            //Dispatcher.Invoke(() =>
+            //{
 
 
+            //    if (m_dbContext.ChangeTracker.HasChanges())
+            //    {
+            //        btnSave.IsEnabled = true;
 
+            //    }
+            //    else
+            //    {
+            //        btnSave.IsEnabled = false;
+            //    }
+
+            //});
         }
-
-
 
         private void correctDBerrors()
         {
 
-            //m_dbContext.Attendance_Info.Load();
-            //m_dbContext.Attendees.Load();
-
-            DateTime find_date = new DateTime(2019, 08, 18);
-            string datestring = find_date.ToString("MM-dd-yyyy");
+         
+            //DateTime find_date = new DateTime(2019, 08, 18);
+            //string datestring = find_date.ToString("MM-dd-yyyy");
 
 
-            List<Attendance_Info> lstAtt = new List<Attendance_Info>() { };
-            int i = 0;
+            //List<Attendance_Info> lstAtt = new List<Attendance_Info>() { };
+            //int i = 0;
 
-
-
-            //foreach (Attendee rec in m_dbContext.Attendees.Local)
-            //{
-            //    //rec.Checked = false;
-            //    if (rec.AttendeeId == 15674)
-            //    {
-            //        var attInforec = from attinfo in m_dbContext.Attendance_Info
-            //                         where attinfo.AttendeeId == rec.AttendeeId
-            //                         select attinfo;
-            //       // m_dbContext.re
-            //        m_dbContext.Attendees.Remove(rec);
-            //    }
-            //}
-            var query = from rec in m_dbContext.Attendees
-                        where rec.AttendeeId == 15674 && rec.AttendeeId == 15675 && rec.AttendeeId == 15676 && rec.AttendeeId == 15677
-                        && rec.AttendeeId == 15678 && rec.AttendeeId == 15679 && rec.AttendeeId == 15680
-                        select rec;
-
-            ////get latest attended date per attendee
+            //////get latest attended date per attendee
             //for (i = 0; i <= m_lstdefaultTableRows.Count - 1; i++)
             //{
             //    //get last church date attended per attendee history
@@ -416,24 +389,19 @@ namespace CAOGAttendeeManager
 
 
 
-            m_dbContext.Attendees.RemoveRange(query);
+            //m_dbContext.Attendees.RemoveRange(query);
 
 
 
-            m_dbContext.SaveChanges();
+            //m_dbContext.SaveChanges();
 
-            Console.WriteLine("DB changes successfully saved");
+            //Console.WriteLine("DB changes successfully saved");
         }
 
         private void InitActivityTreeView()
         {
 
             Load_ChurchActivities_From_XMLFile();
-
-
-
-            trvActivities.ItemsSource = m_lstActivityHeaders;
-
 
 
         }
@@ -463,7 +431,7 @@ namespace CAOGAttendeeManager
 
                 DefaultTableColumnElement.Add(TableColumn);
             }
-
+            lstdocNodes.Add(DefaultTableColumnElement);
             foreach (ActivityHeader ahead in m_lstActivityHeaders)
             {
                 XElement ActivityHeaderElement = new XElement("ActivityHeader", new XAttribute("Name", ahead.Name));
@@ -532,7 +500,7 @@ namespace CAOGAttendeeManager
 
 
                 // add ActivityHeader elements to doc_root Element of the DOM document
-                lstdocNodes.Add(DefaultTableColumnElement);
+              
                 lstdocNodes.Add(ActivityHeaderElement);
 
             } // end activity header tag
@@ -550,7 +518,8 @@ namespace CAOGAttendeeManager
 
                 if (File.Exists($"{executingPath}\\ChurchActivities.xml"))
                 {
-
+                    FileAccess fa = new FileAccess();
+                     
                     var fsXML = new FileStream($"{executingPath}\\ChurchActivities.xml", FileMode.Create, FileAccess.ReadWrite);
 
                     DOMdoc.Save(fsXML);
@@ -627,7 +596,7 @@ namespace CAOGAttendeeManager
                                 {
                                     string xmlAttName = (string)ActivityGroups.Attribute("ActivityName");
                                     ActivityGroup trv_activityGroup = new ActivityGroup { Parent = ActivityHeaderName, ActivityName = xmlAttName };
-                                    m_lstActivitiesCount++; // increments activity list count to later compare if the list has changed
+                                  
 
                                     //ActivityTasks
                                     foreach (XElement ActivityTaskElement in ActivityGroups.Elements())
@@ -637,7 +606,7 @@ namespace CAOGAttendeeManager
                                         string description = (string)ActivityTaskElement.Attribute("Description");
 
                                         ActivityTask trv_activityTask = new ActivityTask { Parent = trv_activityGroup.ActivityName, ActivityId = id, TaskName = name, Description = description };
-                                        m_lstActivitiesCount++;
+                                    
 
                                         //if Activity Subtasks
                                         if (ActivityTaskElement.HasElements)
@@ -649,11 +618,11 @@ namespace CAOGAttendeeManager
                                                 string subtaskName = (string)ActivitySubTask.Attribute("TaskName");
                                                 string subtaskdescription = (string)ActivitySubTask.Attribute("Description");
 
-                                                ActivityTask trv_activitysubTask = new ActivityTask { Parent = ActivityTaskElement.Name.ToString(), ActivityId = subtaskId, TaskName = subtaskName, Description = subtaskdescription };
+                                                ActivityTask trv_activitysubTask = new ActivityTask { Parent = trv_activityTask.TaskName, ActivityId = subtaskId, TaskName = subtaskName, Description = subtaskdescription };
                                                 //add subtask to lstActivityTask
                                                 trv_activityTask.lstsubTasks.Add(trv_activitysubTask);
-                                                m_lstActivityTasks.Add(trv_activitysubTask);
-                                                m_lstActivitiesCount++; // increments activity list count to later compare if the list has changed
+                                             
+                                             
 
                                             }
 
@@ -661,7 +630,7 @@ namespace CAOGAttendeeManager
 
                                         //add activity tasks to activity group
                                         trv_activityGroup.lstActivityTasks.Add(trv_activityTask);
-                                        m_lstActivityTasks.Add(trv_activityTask);
+                                   
 
                                     }
 
@@ -677,29 +646,9 @@ namespace CAOGAttendeeManager
                         } // end while
                         xreader.ReadEndElement();
                     }
-
-                    //Add ComboTreeNodes to ComboTreeBox Treeview
-                    foreach (var header in m_lstActivityHeaders)
-                    {
-                        //ActivityHeader
-                        ComboTreeNode parent = m_ctbActivity.Nodes.Add(header.Name);
-                        //ActivityGroups
-                        foreach (var group in header.Groups)
-                        {
-                            ComboTreeNode child = parent.Nodes.Add(group.ActivityName);
-                            //ActivityTask
-                            foreach (var task in group.lstActivityTasks)
-                            {
-                                ComboTreeNode taskNode = child.Nodes.Add(task.TaskName);
-                                //subTask
-                                foreach (var subtask in task.lstsubTasks)
-                                {
-                                    ComboTreeNode subTaskNode = taskNode.Nodes.Add(subtask.TaskName);
-                                }
-                            }
-
-                        }
-                    }
+                    
+                    LoadNewComboTree(m_lstActivityHeaders);
+                   
 
 
                 }
@@ -722,131 +671,236 @@ namespace CAOGAttendeeManager
 
 
         }
+
+        private void Convert_and_SaveNewTreeToActivityHeardersTree(IEnumerable<TreeNode> tree)
+        {
+            List<ActivityHeader> ActivityTree = new List<ActivityHeader>() { };
+
+            foreach (TreeNode header in tree)
+            {
+                ActivityHeader parent = new ActivityHeader { Name = (string)header.Header };
+               
+                //ActivityGroups
+                foreach (TreeNode group in header.Items)
+                {
+                    ActivityGroup aGroup = new ActivityGroup { ActivityName = (string)group.Header };
+
+                    parent.Groups.Add(aGroup);
+
+
+                    //ActivityTask
+                    foreach (TreeNode task in group.Items)
+                    {
+                        ActivityTask aTask = new ActivityTask { TaskName = (string)task.Header, Description = (string)task.Description };
+
+                        aGroup.lstActivityTasks.Add(aTask);
+                        //subTask
+                        foreach (TreeNode subtask in task.Items)
+                        {
+                            ActivityTask subTask = new ActivityTask { TaskName = (string)subtask.Header, Description = (string)subtask.Description };
+
+                            aTask.lstsubTasks.Add(subTask);
+                        }
+                    }
+                }
+                ActivityTree.Add(parent);
+            }
+            
+            // save tree to private class variable
+            m_lstActivityHeaders = ActivityTree;
+
+
+            
+        }
+        private void LoadNewComboTree(List<ActivityHeader> tree)
+        {
+            if (m_ctbActivity.Nodes.Any() && m_ctbActivityProspect.Nodes.Any())
+            {
+                m_ctbActivity.Nodes.Clear();
+                m_ctbActivityProspect.Nodes.Clear();
+            }
+            //Add ComboTreeNodes to ComboTreeBox Treeview
+            foreach (var header in tree)
+            {
+                //ActivityHeader
+                ComboTreeNode parent = m_ctbActivity.Nodes.Add(header.Name);
+                ComboTreeNode parent2 = m_ctbActivityProspect.Nodes.Add(header.Name);
+                //ActivityGroups
+                foreach (var group in header.Groups)
+                {
+                    ComboTreeNode child = parent.Nodes.Add(group.ActivityName);
+                    ComboTreeNode child2 = parent2.Nodes.Add(group.ActivityName);
+                    //ActivityTask
+                    foreach (var task in group.lstActivityTasks)
+                    {
+                        ComboTreeNode taskNode = child.Nodes.Add(task.TaskName);
+                        ComboTreeNode taskNode2 = child2.Nodes.Add(task.TaskName);
+                        //subTask
+                        foreach (var subtask in task.lstsubTasks)
+                        {
+                            ComboTreeNode subTaskNode = taskNode.Nodes.Add(subtask.TaskName);
+                            ComboTreeNode subTaskNode2 = taskNode2.Nodes.Add(subtask.TaskName);
+                        }
+                    }
+
+                }
+            }
+        }
+        private void LoadNewComboTree(IEnumerable<TreeNode> tree)
+        {
+            if (m_ctbActivity.Nodes.Any() && m_ctbActivityProspect.Nodes.Any())
+            {
+                m_ctbActivity.Nodes.Clear();
+                m_ctbActivityProspect.Nodes.Clear();
+            }
+            //Add ComboTreeNodes to ComboTreeBox Treeview
+            foreach (TreeNode header in tree)
+            {
+                ComboTreeNode node = new ComboTreeNode();
+                node.Text = (string)header.Header;
+
+                ComboTreeNode parent = m_ctbActivity.Nodes.Add(node.Text);
+                ComboTreeNode parent2 = m_ctbActivityProspect.Nodes.Add(node.Text);
+                //ActivityGroups
+                foreach (TreeNode group in header.Items)
+                {
+                    ComboTreeNode node2 = new ComboTreeNode();
+                    node2.Text = (string)group.Header;
+
+                    ComboTreeNode child = parent.Nodes.Add(node2.Text);
+                    ComboTreeNode child2 = parent2.Nodes.Add(node2.Text);
+                    //ActivityTask
+                    foreach (TreeNode task in group.Items)
+                    {
+                        ComboTreeNode node3 = new ComboTreeNode();
+                        node3.Text = (string)task.Header;
+
+                        ComboTreeNode taskNode = child.Nodes.Add(node3.Text);
+                        ComboTreeNode taskNode2 = child2.Nodes.Add(node3.Text);
+                        //subTask
+                        foreach (TreeNode subtask in task.Items)
+                        {
+                            ComboTreeNode node4= new ComboTreeNode();
+                            node4.Text = (string)subtask.Header;
+
+                            ComboTreeNode subTaskNode = taskNode.Nodes.Add(node4.Text);
+                            ComboTreeNode subTaskNode2 = taskNode2.Nodes.Add(node4.Text);
+                        }
+                    }
+
+                }
+            }
+        }
         private bool GenerateDBFollowUps()
         {
-            //FIX ME//problem
-            //// Generate Follow-Ups for each Attendee that missed 28 days of church
+           
+            // Generate Follow-Ups for each Attendee that missed 28 days of church
 
-            ////Solution
-            ////1)look and last date attended for each AttendeeId and see if attendee attended 4 weeks (28 days) in the past from now
-            ////2)if attendee did not attend 4 weeks in the past, generate a new database entry with status follow-up for corresponding AttendeeId
-            ////3) if attendee has 3 follow-ups in a row, flag attendee and don't consider him for another follow-up entry. 
-
-
-            //// DateTime curdate = DateTime.Now;
-            //// get last date that was just entered
-            //// int addEntity = 0;
-            //List<DateTime> lstsundays = new List<DateTime>();
-            //bool generate_one = false;
-            //TimeSpan timespanSinceDate = new TimeSpan();
-            //List<Attendance_Info> lstAttendanceInfo = new List<Attendance_Info>() { };
-
-            //DateTime greatest_date = new DateTime(2000,1,1);
-
-            //////get latest and greatest date 
-            //for (int i = 0; i < m_lstdefaultTableRows.Count; i++)
-            //{
-            //    var latest_date_attened = (from d in m_lstdefaultTableRows[i].AttendanceList
-            //                               orderby d.Date ascending
-            //                               select d).ToArray().LastOrDefault();
+            //Solution
+            //1)look and last date attended for each AttendeeId and see if attendee attended 4 weeks (28 days) in the past from now
+            //2)if attendee did not attend 4 weeks in the past, generate a new database entry with status follow-up for corresponding AttendeeId
+            //3) if attendee has 3 follow-ups in a row, flag attendee and don't consider him for another follow-up entry. 
 
 
-            //    if (i == 0)
-            //    {
-            //        greatest_date = latest_date_attened.Date;
-            //    }
+            // DateTime curdate = DateTime.Now;
+            // get last date that was just entered
+            // int addEntity = 0;
+            List<DateTime> lstsundays = new List<DateTime>();
+            bool generate_one = false;
+            TimeSpan? timespanSinceDate = new TimeSpan();
+            List<Attendance_Info> lstAttendanceInfo = new List<Attendance_Info>() { };
 
-            //    if (latest_date_attened.Date > greatest_date)
-            //    {
-            //        greatest_date = latest_date_attened.Date;
+            DateTime? greatest_date = null;
 
-            //    }
+            ////get latest and greatest date 
+            for (int i = 0; i < m_lstdefaultTableRows.Count; i++)
+            {
+                var latest_date_attened = (from d in m_lstdefaultTableRows[i].AttendanceList
+                                           orderby d?.Date ascending
+                                           select d).ToArray().LastOrDefault();
 
+                if (latest_date_attened != null)
+                {
+                    if (i == 0)
+                    {
+                        greatest_date = latest_date_attened.Date;
+                    }
 
+                    if (latest_date_attened.Date > greatest_date)
+                    {
+                        greatest_date = latest_date_attened.Date;
 
-            //}
-
+                    }
+                }
+                
 
 
 
-
-            ////get latest attended date per attendee
-            //for (int i = 0; i <= m_lstdefaultTableRows.Count -1; i++)
-            //{
-
-            //    //get last church date attended per attendee history
-            //    var lstDateRec = (from rec in m_lstdefaultTableRows[i].AttendanceList
-            //                      where rec.Status == "Attended" || rec.Status == "Responded"
-            //                      orderby rec
-            //                       select rec).ToList().LastOrDefault();
-
-
-            //   // if (lstDateRec.Attendee.LastName == "Bails" && lstDateRec.Attendee.FirstName == "Patricia")
-            //   // {
-            //        if (lstDateRec != null)
-            //        {
-            //            timespanSinceDate = greatest_date - lstDateRec.Date;
-
-
-
-            //            if (timespanSinceDate.Days < 21)
-            //            {
-            //                //Console.WriteLine($"No Follow-Ups to generate for {lstDateRec.Attendee.LastName} {lstDateRec.Attendee.FirstName} AttendeeId={m_lstdefaultTableRows[i].AttendeeId}");
-            //                //// do nothing
-            //                ////Attendee already have a followUp sent so do not generate another followup unil 21 days has
-            //                ////lapsed since the last followUp        
-            //                //nf++;
-
-            //            }
-            //            else
-            //            {
-
-
-            //                var HasAlreadyFollowUpDate = m_lstdefaultTableRows[i].AttendanceList.SingleOrDefault(rec => rec.Status == "Follow-Up" && rec.Date == greatest_date);
-
-
-            //                //if no follow-up record then generate a follow-up
-            //                if (HasAlreadyFollowUpDate == null)
-            //                {
-            //                    Attendance_Info newfollowUpRecord = new Attendance_Info { };
-            //                    newfollowUpRecord.AttendeeId = m_lstdefaultTableRows[i].AttendeeId;
-            //                    newfollowUpRecord.Date = greatest_date;
-            //                    newfollowUpRecord.Status = "Follow-Up";
-
-            //                    lstAttendanceInfo.Add(newfollowUpRecord);
-            //                    generate_one = true;
-
-            //                    //Console.WriteLine($"Follow-Up written for: {lstDateRec.Attendee.LastName} {lstDateRec.Attendee.FirstName} AttendeeId={m_lstdefaultTableRows[i].AttendeeId}");
-            //                    //gf++;
-            //                }
+            }
 
 
 
 
 
+            //get latest attended date per attendee
+            for (int i = 0; i <= m_lstdefaultTableRows.Count - 1; i++)
+            {
+
+                //get last church date attended per attendee history
+                var lstDateRec = (from rec in m_lstdefaultTableRows[i].AttendanceList
+                                  where rec.Status == "Attended" || rec.Status == "Responded"
+                                  orderby rec
+                                  select rec).ToList().LastOrDefault();
 
 
-            //            }
+                if (lstDateRec != null)
+                {
+                    timespanSinceDate = greatest_date - lstDateRec?.Date;
 
 
 
+                    if (timespanSinceDate?.Days < 21)
+                    {
+                        
+                        //// do nothing
+                        ////Attendee already have a followUp sent so do not generate another followup unil 21 days has
+                        ////lapsed since the last followUp        
 
 
-            //        } //end if
-            //    //}
-
-            //}
-
+                    }
+                    else
+                    {
 
 
+                        var HasAlreadyFollowUpDate = m_lstdefaultTableRows[i].AttendanceList.SingleOrDefault(rec => rec.Status == "Follow-Up" && rec.Date == greatest_date);
 
-            //if (generate_one)
-            //{
-            //    m_dbContext.Attendance_Info.AddRange(lstAttendanceInfo);
-            //    InitDataSet();
-            //    Display_DefaultTable_in_Grid();
 
-            //}
+                        //if no follow-up record then generate a follow-up
+                        if (HasAlreadyFollowUpDate == null)
+                        {
+                            Attendance_Info newfollowUpRecord = new Attendance_Info { };
+                            newfollowUpRecord.AttendeeId = m_lstdefaultTableRows[i].AttendeeId;
+                            newfollowUpRecord.Date = greatest_date;
+                            newfollowUpRecord.Status = "Follow-Up";
+
+                            lstAttendanceInfo.Add(newfollowUpRecord);
+                            generate_one = true;
+
+                        }
+
+                    }
+
+                } //end if
+
+            }
+
+            if (generate_one)
+            {
+                m_dbContext.Attendance_Info.AddRange(lstAttendanceInfo);
+                InitDataSet();
+                Display_DefaultTable_in_Grid();
+
+            }
 
 
             return true;//generate_one;
@@ -876,19 +930,14 @@ namespace CAOGAttendeeManager
         private void Display_DefaultTable_in_Grid()
         {
 
-            //DataView dv = m_DataSet.Tables["defaultDT"].AsDataView();
-
-            //dv.Sort = "Lastname ASC";
-
-            //dataGrid.DataContext = dv;
-
+            
             dataGrid.DataContext = m_lstdefaultTableRows.OrderBy(rec => rec.LastName).ToList();
 
 
             dataGrid.Items.Refresh();
             lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
             m_isQueryTableShown = false;
-
+            dataGrid.IsReadOnly = false;
             btnDelete.IsEnabled = true;
             btnGenerateFollowUps.IsEnabled = true;
 
@@ -904,18 +953,21 @@ namespace CAOGAttendeeManager
         private void InitDataSet()
         {
 
-            if (m_lstdefaultTableRows.Count > 0)
+            if (m_lstdefaultTableRows.Any() )
             {
                 m_lstdefaultTableRows.Clear();
 
             }
-            if (m_lstattendanceTableRows.Count > 0)
+            if (m_lstattendanceTableRows.Any() )
             {
                 m_lstattendanceTableRows.Clear();
             }
             string date = "Date Not Valid";
+          
+            
 
 
+          
 
             try
             {
@@ -940,49 +992,39 @@ namespace CAOGAttendeeManager
                                                  orderby ActivityDateRec.Date ascending
                                                  select ActivityDateRec).ToList().LastOrDefault();
 
-                    //----Construct AttendeeLisTable-------------------------------------------------------------------------------------
-
-                    // fill Attendance table columns. Add to list for each row
-
-
-                    m_lstattendanceTableRows.Add(new AttendanceTableRow()
-                    {
-                        AttendeeId = AttendeeRec.AttendeeId,
-                        LastName = AttendeeRec.LastName,
-                        FirstName = AttendeeRec.FirstName,
-                        DateString = "Date Not Valid",
-                        Attended = AttendeeRec.Checked ? "1" : "",
-                        IsModifiedrow = AttendeeRec.Checked,
-
-
-                    });
-
-
-                    //------Active Attendee--//---Construct DefaultTableRow-------------------------------------------------------------
-                    DefaultTableRow DefaultTabledr = new DefaultTableRow
-                    {
-                        AttendanceList = AttendeeRec.AttendanceList,
-                        Columns = m_aryColumnHeaders
-
-                    };
-
-
-
-                    //make known the columns of the datagrid to the DefaultTabledr class
-                    if (AttendeeRec.FunctionSteps != null)
-                    {
-                        DefaultTabledr.FunctionSteps = AttendeeRec.FunctionSteps;
-                    }
-                    else
-                    {
-                        DefaultTabledr.FunctionSteps = "";
-                    }
-
+                
 
 
                     if (queryLastDate != null)
                     {
-                        ldate = queryLastDate.Date.ToString("MM-dd-yyyy");
+                        //----Construct AttendeeLisTable-------------------------------------------------------------------------------------
+
+                        // fill Attendance table columns. Add to list for each row
+
+
+                        AttendanceTableRow AttendanceTabledr = new AttendanceTableRow
+                        {
+                            AttendeeId = AttendeeRec.AttendeeId,
+                            LastName = AttendeeRec.LastName,
+                            FirstName = AttendeeRec.FirstName,
+                            DateString = "Date Not Valid",
+                            Attended = AttendeeRec.Checked ? "1" : "",
+                            IsModifiedrow = AttendeeRec.Checked,
+
+
+                        };
+
+                        DefaultTableRow DefaultTabledr = new DefaultTableRow
+                        {
+                            AttendanceList = AttendeeRec.AttendanceList,
+                            Columns = m_aryColumnHeaders
+
+                        };
+
+                        DefaultTabledr.PropertyChanged += DefaultTabledr_PropertyChanged;
+                        AttendanceTabledr.PropertyChanged += AttendanceTabledr_PropertyChanged;
+
+                        ldate = queryLastDate.Date?.ToString("MM-dd-yyyy");
                         if (queryActivityLastDate != null)
                             adate = queryActivityLastDate.Date?.ToString("MM-dd-yyyy");
 
@@ -993,7 +1035,7 @@ namespace CAOGAttendeeManager
 
                         DefaultTabledr.AttendeeId = AttendeeRec.AttendeeId;
 
-
+                      
                         DefaultTabledr.FirstName = AttendeeRec.FirstName;
                         DefaultTabledr.LastName = AttendeeRec.LastName;
 
@@ -1015,7 +1057,9 @@ namespace CAOGAttendeeManager
                             DefaultTabledr.Activity = "n/a";
                         }
 
-
+                        //Add to the rows to the datagirds
+                        m_lstattendanceTableRows.Add(AttendanceTabledr);
+                        m_lstdefaultTableRows.Add(DefaultTabledr);
 
 
 
@@ -1029,14 +1073,38 @@ namespace CAOGAttendeeManager
 
                         if (queryLastDateFollowUp != null)
                         {
+                            //----Construct AttendeeLisTable-------------------------------------------------------------------------------------
 
+                            // fill Attendance table columns. Add to list for each row
+
+
+                            AttendanceTableRow AttendanceTabledr = new AttendanceTableRow
+                            {
+                                AttendeeId = AttendeeRec.AttendeeId,
+                                LastName = AttendeeRec.LastName,
+                                FirstName = AttendeeRec.FirstName,
+                                DateString = "Date Not Valid",
+                                Attended = AttendeeRec.Checked ? "1" : "",
+                                IsModifiedrow = AttendeeRec.Checked,
+
+
+                            };
+                            DefaultTableRow DefaultTabledr = new DefaultTableRow
+                            {
+                                AttendanceList = AttendeeRec.AttendanceList,
+                                Columns = m_aryColumnHeaders
+
+                            };
+
+                            DefaultTabledr.PropertyChanged += DefaultTabledr_PropertyChanged;
+                            AttendanceTabledr.PropertyChanged += AttendanceTabledr_PropertyChanged;
 
                             lstatus = queryLastDateFollowUp.Status;
 
 
 
                             m_NewAttendeeId = AttendeeRec.AttendeeId;
-
+                         
 
                             DefaultTabledr.AttendeeId = AttendeeRec.AttendeeId;
 
@@ -1061,31 +1129,29 @@ namespace CAOGAttendeeManager
                                 DefaultTabledr.Activity = "n/a";
                             }
 
-
-
-
-
-
+                            //Add to the rows to the datagirds
+                            m_lstattendanceTableRows.Add(AttendanceTabledr);
+                            m_lstdefaultTableRows.Add(DefaultTabledr);
                         }
 
 
                     }
 
                     // DefaultTabledr.MakeDynamicProperties();
+#if (ONLY10)
 
-
-
-
-                    m_lstdefaultTableRows.Add(DefaultTabledr);
-
-
-
-#if (ONLY100)
-
-                    if (i == 100)
+                    if (i == 10)
                         break;
 #endif
                     i++;
+
+
+
+                  
+
+
+
+
                 }
 
 
@@ -1105,10 +1171,113 @@ namespace CAOGAttendeeManager
 
         }
 
+        private void AttendanceTabledr_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (m_loaded)
+            {
+
+                var editRow = sender as AttendanceTableRow;
+
+
+                m_attendance_row_selected = editRow;
+
+                if (m_attendance_row_selected != null)
+                {
+                    m_default_row_selected = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == m_attendance_row_selected.AttendeeId);
+                    if (m_default_row_selected != null)
+                        m_default_row_selected.PropertyChanged -= DefaultTabledr_PropertyChanged; // temporary disable the property changed from the default table row record
+                }
+                    
 
 
 
 
+                if (m_attendance_row_selected != null && m_default_row_selected != null)
+                {
+                    //Find the Attendee record in the database context
+                    var queryAttRec = m_dbContext.Attendees.Local.SingleOrDefault(attrec => attrec.AttendeeId == m_default_row_selected.AttendeeId);
+                    if (queryAttRec != null)
+                    {
+                        if (e.PropertyName == "FirstName")
+                        {
+                            queryAttRec.FirstName = editRow.FirstName;
+
+                         
+                            m_default_row_selected.FirstName = editRow.FirstName;
+                          
+                            
+                        }
+                        else if (e.PropertyName == "LastName")
+                        {
+                            queryAttRec.LastName = editRow.LastName;
+                         
+                            m_default_row_selected.LastName = editRow.LastName;
+                          
+                        }
+                        else if (e.PropertyName == "Attended")
+                        {
+                            queryAttRec.Checked = true;
+                        }
+                    }
+
+                    m_default_row_selected.PropertyChanged += DefaultTabledr_PropertyChanged;
+                }
+
+            }
+        }
+
+        private void DefaultTabledr_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (m_loaded)
+            {
+
+                var editRow = sender as DefaultTableRow;
+                
+                
+                    m_default_row_selected = editRow;
+
+
+
+                if (m_default_row_selected != null)
+                {
+                    m_attendance_row_selected = m_lstattendanceTableRows.SingleOrDefault(rec => rec.AttendeeId == m_default_row_selected.AttendeeId);
+                    if (m_attendance_row_selected !=null)
+                        m_attendance_row_selected.PropertyChanged -= AttendanceTabledr_PropertyChanged; // temporary disable the property changed from the attendance record
+                }
+
+
+                if (m_attendance_row_selected != null && m_default_row_selected != null)
+                {
+                    //Find the Attendee record in the database context
+                    var queryAttRec = m_dbContext.Attendees.Local.SingleOrDefault(attrec => attrec.AttendeeId == m_default_row_selected.AttendeeId);
+                    if (queryAttRec != null)
+                    {
+                        if (e.PropertyName == "FirstName")
+                        {
+                         
+                            queryAttRec.FirstName = editRow.FirstName;
+                            m_attendance_row_selected.FirstName = editRow.FirstName;
+
+                            
+
+
+                        }
+                        else if (e.PropertyName == "LastName")
+                        {
+                          
+                            queryAttRec.LastName = editRow.LastName;
+                            m_attendance_row_selected.LastName = editRow.LastName;
+                         
+                        }
+                      
+                    }
+
+                    m_attendance_row_selected.PropertyChanged += AttendanceTabledr_PropertyChanged;
+                }
+
+            }
+
+        }
 
         private void Disable_Filters()
         {
@@ -1116,9 +1285,13 @@ namespace CAOGAttendeeManager
             m_ctbActivity.Enabled = false;
             dpChurchLastAttended.IsEnabled = false;
             dpHeaderActivityLastAttended.IsEnabled = false;
-            ActivityExpander.IsEnabled = false;
 
-
+            m_ctbActivityProspect.Enabled = false;
+            dpChurchLastAttendedPr.IsEnabled = false;
+            dpHeaderActivityPr.IsEnabled = false;
+            btnPanelAddActivity.IsEnabled = false;
+            dpHeaderActivityPr.IsEnabled = false;
+            btnPanelNewActivity.IsEnabled = false;
 
 
 
@@ -1137,7 +1310,7 @@ namespace CAOGAttendeeManager
                 Disable_Filters();
 
 
-                m_isFirstNamefiltered = true;
+            
 
 
                 if (m_AttendanceView)
@@ -1167,7 +1340,7 @@ namespace CAOGAttendeeManager
             }
             else // txt = ""
             {
-                m_isFirstNamefiltered = false;
+             
                 Enable_Filters();
                 if (m_isQueryTableShown)
                 {
@@ -1194,7 +1367,7 @@ namespace CAOGAttendeeManager
                 Disable_Filters();
 
 
-                m_isLastNamefiltered = true;
+             
 
 
                 if (m_AttendanceView)
@@ -1235,7 +1408,7 @@ namespace CAOGAttendeeManager
             }
             else //tx == ""
             {
-                m_isLastNamefiltered = false;
+               
                 Enable_Filters();
                 if (m_isQueryTableShown)
                 {
@@ -1276,7 +1449,7 @@ namespace CAOGAttendeeManager
             }
         }
 
-        void Save_Changes(object sender, RoutedEventArgs e)
+        void Save_Changes(object sender, System.Windows.RoutedEventArgs e)
         {
 
             Cursor = Cursors.Wait;
@@ -1360,10 +1533,7 @@ namespace CAOGAttendeeManager
                     lstOfCheckedAttendees.Add(dr);
 
                 }
-                else
-                {
-
-                }
+                
             }
 
             return lstOfCheckedAttendees;
@@ -1372,118 +1542,143 @@ namespace CAOGAttendeeManager
         private void DeleteRecordInDefaultTable(System.Collections.IList row_select)
         {
 
-
-
             // copy default table to m_defaultTableRowsCopy
-            Copy_ContentsOfDefaultTable();
+          //  Copy_ContentsOfDefaultTable();
 
+            int idx = 0;
 
-
-
-            foreach (DefaultTableRow dtr in row_select)
+            for (int i = 0; i <= row_select.Count -1;i++)
             {
-                int attid = dtr.AttendeeId;
+                DefaultTableRow tr = (DefaultTableRow)row_select[i];
+                tr.PropertyChanged -= DefaultTabledr_PropertyChanged;
 
-                var Attrec = m_dbContext.Attendees.SingleOrDefault(id => id.AttendeeId == attid);
+                idx = m_lstdefaultTableRows.IndexOf(tr);
 
 
-
-                // remove attendee from the db context
-                if (Attrec != null)
+                if (tr.AttendanceList.Any() )
                 {
-                    m_dbContext.Attendees.Remove(Attrec);
-
-                    if (Attrec.AttendanceList.Any())
-                    {
-                        for (int idx = 0; idx <= Attrec.AttendanceList.Count() - 1; idx++)
-                        {
-                            m_dbContext.Attendance_Info.Remove(Attrec.AttendanceList[idx]);
-                        }
-                    }
-
-                    if (Attrec.ActivityList.Count() != 0)
-                    {
-                        for (int idx = 0; idx <= Attrec.AttendanceList.Count() - 1; idx++)
-                        {
-                            m_dbContext.Activities.Remove(Attrec.ActivityList[idx]);
-                        }
-                    }
-
-
-
+                  m_dbContext.Attendance_Info.RemoveRange(tr.AttendanceList);
                 }
 
-                //get index of row to remove in copy and remove it
-                for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count() - 1; i++)
+                if (tr.ActivityList.Any())
                 {
-                    if (m_lstdefaultTableRowsCopy[i].AttendeeId == attid)
-                        m_lstdefaultTableRowsCopy.RemoveAt(i);
-
-                    break;
-
+                   m_dbContext.Activities.RemoveRange(tr.ActivityList);
                 }
 
+                m_lstdefaultTableRows.RemoveAt(idx);
             }
 
-            // clear the list 
-            m_lstdefaultTableRows.Clear();
-
-            // copy the list with the deleted rows to the main list that display the default attendance table
-            m_lstdefaultTableRows.AddRange(m_lstdefaultTableRowsCopy);
-
-
         }
-
 
 
         private void DeleteRecordInAttendeeListTable(System.Collections.IList row_select)
         {
 
-            AttendanceTableRow[] array_attendanceTableRows = new AttendanceTableRow[m_lstattendanceTableRows.Count];
+            int idx = 0;
 
-
-            //int index = 0;
-            m_lstattendanceTableRows.CopyTo(array_attendanceTableRows);
-
-
-            var AttendanceTableCopy = new List<AttendanceTableRow>(array_attendanceTableRows);
-
-            foreach (DefaultTableRow dr in row_select)
+           
+            for (int j =0; j <= row_select.Count -1; j++)
             {
+                int attendeeId = ((DefaultTableRow)row_select[j]).AttendeeId;
+                var AttendanceRow = m_lstattendanceTableRows.SingleOrDefault(x => x.AttendeeId == attendeeId);
 
+                AttendanceRow.PropertyChanged -= AttendanceTabledr_PropertyChanged;
+                idx = m_lstattendanceTableRows.IndexOf(AttendanceRow);
 
-                //get index of row to remove in copyand remove it
-                for (int i = 0; i <= array_attendanceTableRows.Count() - 1; i++)
-                {
-                    if (array_attendanceTableRows[i].AttendeeId == dr.AttendeeId)
-                    {
-                        AttendanceTableCopy.RemoveAt(i);
-
-                        break;
-                    }
-                }
-
+                m_lstattendanceTableRows.RemoveAt(idx);
             }
-
-
-
-            // clear the list 
-            m_lstattendanceTableRows.Clear();
-
-            // copy the list with the deleted rows to the mail list that display the default attendance table
-            m_lstattendanceTableRows.AddRange(AttendanceTableCopy);
-
+            
 
 
         }
 
-        private void DeleteRecord(object sender, RoutedEventArgs e)
+        private void DeleteRecord(object sender, System.Windows.RoutedEventArgs e)
         {
-            DeleteRecordWindow delrec_win = new DeleteRecordWindow();
+            DataGrid dg = sender as DataGrid;
+
+            System.Collections.IList selectedRows = dataGrid.SelectedItems;
+
+            DeleteRecordWindow delrec_win = new DeleteRecordWindow(selectedRows);
             delrec_win.ShowDialog();
+            DateTime? date_to_be_deleted = delrec_win.getDateToDelete;
+            List<Attendance_Info> lstDeleteRecs = new List<Attendance_Info>() { };
+
+            Cursor = Cursors.Wait;
+
+
+            var default_row_selected = selectedRows.Cast<DefaultTableRow>();
+            int idx = 0;
+
+            if (date_to_be_deleted != null)
+            {
+                //find all date records with the 'date_to_be_deleted' date in all attendee's attendance_info history
+
+                for (int i = 0; i <= m_lstdefaultTableRows.Count -1; i++)
+                {
+                   m_lstdefaultTableRows[i].PropertyChanged -= DefaultTabledr_PropertyChanged;  // temporary de-register property changed event
+
+                    var attinforec = m_lstdefaultTableRows[i].AttendanceList.SingleOrDefault(x => x.Date == date_to_be_deleted);
+                   
+
+                    if (attinforec != null)
+                    {
+                        idx = m_lstdefaultTableRows[i].AttendanceList.IndexOf(attinforec);
+                        // remove attendance_info recs from the attendee's attendance_info history
+                        m_lstdefaultTableRows[i].AttendanceList.RemoveAt(idx);
+
+                        // get the next latest attended date
+                        var latestAttRec = (from rec in m_lstdefaultTableRows[i].AttendanceList
+                                            where rec.Status == "Attended" || rec.Status == "Responded"
+                                            orderby rec.Date descending
+                                            select rec).FirstOrDefault();
+
+                        if (latestAttRec !=null)
+                        {
+                            m_lstdefaultTableRows[i].Church_Last_Attended = latestAttRec.DateString;
+                            m_lstdefaultTableRows[i].ChurchStatus = latestAttRec.Status;
+                        }
+                        else
+                        {
+                            m_lstdefaultTableRows[i].ChurchStatus = "n/a";
+                            m_lstdefaultTableRows[i].Church_Last_Attended = "n/a";
+                            // attendee does not have any attendance records
+                            if (!m_lstdefaultTableRows[i].AttendanceList.Any())
+                            {
+                                m_lstdefaultTableRows[i].ChurchStatus = "n/a";
+                                m_lstdefaultTableRows[i].Church_Last_Attended = "n/a";
+                            }
+                        }
+
+                        
+                        lstDeleteRecs.Add(attinforec);
+                        
+                    }
+                   
+                }
+                // remove all attendance_info records from the datastructure
+                m_dbContext.Attendance_Info.RemoveRange(lstDeleteRecs);
+                MessageBox.Show("Records successfully deleted!", "Records deleted...", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            }
+            else
+            {
+
+               if (selectedRows.Count != 0 )
+                {
+                    DeleteRecordInDefaultTable(selectedRows);
+                    DeleteRecordInAttendeeListTable(selectedRows);
+                    Display_DefaultTable_in_Grid();
+                    MessageBox.Show("Records successfully deleted!", "Records deleted...", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                
+            }
+
+
+          
+
+            Cursor = Cursors.Arrow;
 
            
-
 
 
         }
@@ -1500,32 +1695,34 @@ namespace CAOGAttendeeManager
             {
 
                 m_default_row_selected = (DefaultTableRow)grid.SelectedItem;
+                m_default_row_selected.PropertyChanged += DefaultTabledr_PropertyChanged;
 
             }
 
 
-
-
-
-            if (!btnDelete.IsEnabled && dataGrid.RowDetailsVisibilityMode != DataGridRowDetailsVisibilityMode.Visible)
-                btnDelete.IsEnabled = true;
-
-            if (!m_IsActivePanelView)
+            if (m_isQueryTableShown)
+                btnDelete.IsEnabled = false;
+            else
             {
-                //LoadActivePanelState();
-                Show_activeview_Panel();
-                StopTimer();
+                if (dataGrid.RowDetailsVisibilityMode != DataGridRowDetailsVisibilityMode.Visible)
+                    btnDelete.IsEnabled = true;
             }
+                
+
+
+
+            
+            
+
+
+
+
+        
 
 
         }
-        private int check_date_bounds_activity()
-        {
-
-
-            return 0;
-        }
-        private int check_date_bounds()
+      
+        private int check_date_bounds(DateTime SelectedDate)
         {
 
             DateTime curdate = DateTime.Now;
@@ -1554,7 +1751,7 @@ namespace CAOGAttendeeManager
 
             if (datelimit != null)
             {
-                if ((m_ActivityDateSelected > datelimit) || (m_alistDateSelected > datelimit))
+                if ((SelectedDate > datelimit) )
                 {
                     m_dateIsValid = false;
                     MessageBox.Show($"Date limit is {datelimit.ToShortDateString()}.", "Invalid date", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1571,33 +1768,33 @@ namespace CAOGAttendeeManager
         {
 
 
-            ////FIX ME var defaultTableRec = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == atr.AttendeeId);
-            // if (defaultTableRec != null)
-            // {
-            //     var lastAttInfoRec = defaultTableRec.AttendanceList.SingleOrDefault(rec => rec.Date == m_alistDateSelected);
+           var defaultTableRec = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == atr.AttendeeId);
+            if (defaultTableRec != null)
+            {
+                var lastAttInfoRec = defaultTableRec.AttendanceList.SingleOrDefault(rec => rec.Date == m_alistDateSelected);
 
-            //     if (lastAttInfoRec != null)
-            //     {
-            //         dataGrid_prospect.Focus();
-            //         int aid = atr.AttendeeId;
-            //         int gridrowIdx = 0;
-            //         foreach (AttendanceTableRow gridrow in dataGrid_prospect.Items)
-            //         {
+                if (lastAttInfoRec != null)
+                {
+                    dataGrid_prospect.Focus();
+                    int aid = atr.AttendeeId;
+                    int gridrowIdx = 0;
+                    foreach (AttendanceTableRow gridrow in dataGrid_prospect.Items)
+                    {
 
-            //             if (gridrow.AttendeeId == aid)
-            //             {
-            //                 dataGrid_prospect.SelectedIndex = gridrowIdx;
-            //                 break;
-            //             }
-            //             gridrowIdx++;
-            //         }
-            //         dataGrid_prospect.ScrollIntoView(dataGrid_prospect.Items[gridrowIdx]);
-            //         Cursor = Cursors.Arrow;
+                        if (gridrow.AttendeeId == aid)
+                        {
+                            dataGrid_prospect.SelectedIndex = gridrowIdx;
+                            break;
+                        }
+                        gridrowIdx++;
+                    }
+                    dataGrid_prospect.ScrollIntoView(dataGrid_prospect.Items[gridrowIdx]);
+                    Cursor = Cursors.Arrow;
 
-            //         return true;
+                    return true;
 
-            //     }
-            // }
+                }
+            }
 
 
 
@@ -1605,7 +1802,7 @@ namespace CAOGAttendeeManager
             return false;
 
         }
-        private void ImportRows_Click(object sender, RoutedEventArgs e)
+        private void ImportRows_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
 
@@ -1613,7 +1810,7 @@ namespace CAOGAttendeeManager
 
             bool haschanges = false;
 
-            string date = m_alistDateSelected.ToString("MM-dd-yyyy");
+            string date = m_alistDateSelected?.ToString("MM-dd-yyyy");
 
             string firstname = "";
             string lastname = "";
@@ -1643,11 +1840,11 @@ namespace CAOGAttendeeManager
 
 
 
-                // m_DataSet.Tables["AttendeeListTable"].DefaultView.RowFilter = "";
+              
                 foreach (AttendanceTableRow dr in Checklist)
                 {
-                    // attendee has check 
-                    if (dr.Attended == "1" && !dr.IsNewrow)
+                    // attendee is not a new attendee
+                    if (!dr.IsNewrow)
                     {
                         int attid = dr.AttendeeId;
 
@@ -1716,10 +1913,9 @@ namespace CAOGAttendeeManager
                                 if (queryAttendeeInfoExist == null)
                                 {
                                     m_dbContext.Attendance_Info.Add(newRecord);
-                                    if ((defaultTableRec.AttendanceList.SingleOrDefault(rec => rec.Status == newRecord.Status && rec.Date == newRecord.Date)) == null)
-                                    {
-                                        m_default_row_selected.ActivityList.Add(m_currentSelected_ActivityPair);
-                                    }
+                                    if (!defaultTableRec.AttendanceList.Contains(newRecord) )
+                                      m_default_row_selected.AttendanceList.Add(newRecord);
+                                    
 
 
 
@@ -1727,7 +1923,7 @@ namespace CAOGAttendeeManager
                                     //change 'Status_Last_Attended' and 'date last attended' column in default table row to reflect the 
                                     //new record's status
                                     defaultTableRec.ChurchStatus = newRecord.Status;
-                                    defaultTableRec.Church_Last_Attended = newRecord.Date.ToString("MM-dd-yyyy");
+                                    defaultTableRec.Church_Last_Attended = newRecord.Date?.ToString("MM-dd-yyyy");
                                     haschanges = true;
 
                                 }
@@ -1810,7 +2006,7 @@ namespace CAOGAttendeeManager
                         Defaultdr.AttendanceList.Add(newAttInfoRec);
 
                         Defaultdr.ChurchStatus = newAttInfoRec.Status;
-                        Defaultdr.Church_Last_Attended = newAttInfoRec.Date.ToString("MM-dd-yyyy");
+                        Defaultdr.Church_Last_Attended = newAttInfoRec.Date?.ToString("MM-dd-yyyy");
                         Defaultdr.Activity = "n/a";
                         Defaultdr.Activity_Last_Attended = "n/a";
 
@@ -1951,7 +2147,7 @@ namespace CAOGAttendeeManager
             string date;
 
             if (m_alistdateIsValid)
-                date = m_alistDateSelected.ToString("MM-dd-yyyy");
+                date = m_alistDateSelected?.ToString("MM-dd-yyyy");
             else
                 date = "Date Not Valid.";
 
@@ -1978,8 +2174,13 @@ namespace CAOGAttendeeManager
             m_ctbActivity.Enabled = true;
             dpChurchLastAttended.IsEnabled = true;
             dpHeaderActivityLastAttended.IsEnabled = true;
-            ActivityExpander.IsEnabled = true;
 
+            m_ctbActivityProspect.Enabled = true;
+            dpChurchLastAttendedPr.IsEnabled = true;
+            dpHeaderActivityPr.IsEnabled = true;
+            btnPanelAddActivity.IsEnabled = true;
+            dpHeaderActivityPr.IsEnabled = true;
+            btnPanelNewActivity.IsEnabled = true;
 
 
         }
@@ -1999,7 +2200,7 @@ namespace CAOGAttendeeManager
 
 
 
-        private void chkChurchDateFiler_Checked(object sender, RoutedEventArgs e)
+        private void chkChurchDateFiler_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
 
 
@@ -2016,106 +2217,219 @@ namespace CAOGAttendeeManager
         }
 
 
+        public void e_SelectedNodeChanged(object sender, EventArgs e)
+        {
+          
 
+          
+                
+        }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+      
+        private void Window_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
             dpChurchLastAttended.DisplayDate = DateTime.Today;
             
             Add_Blackout_Dates(ref dpChurchLastAttended);
             Add_Blackout_Dates(ref dpChurchLastAttendedPr);
+            Add_Blackout_Dates(ref dpHeaderActivityLastAttended);
+            Add_Blackout_Dates(ref dpHeaderActivityPr);
 
+            // ComboTreeBox 1 and 2////////////////////////////////////////////////////////////////////////////////////////
+            m_ctbActivity.DroppedDown = false;
+            m_ctbActivity.Location = new System.Drawing.Point(0, 0);
+            m_ctbActivity.Name = "ctbActivityCheckboxes";
+            m_ctbActivity.SelectedNode = null;
+            m_ctbActivity.ShowCheckBoxes = true;
+            m_ctbActivity.Size = new System.Drawing.Size(200, 19);
+            m_ctbActivity.DrawWithVisualStyles = true;
+            m_ctbActivity.Visible = true;
+            m_ctbActivity.ExpandAll();
+            m_ctbActivity.DropDownWidth = 350;
+            m_ctbActivity.DropDownHeight = 350;
+            
+           
 
+            m_ctbActivity.DropDownClosed += M_ctbActivity_DropDownClosed;
+            //m_ctbActivity.KeyUp += M_ctbActivity_KeyUp;
+            m_ctbActivity.DropDown += M_ctbActivity_DropDown;
+          
+           // m_ctbActivityProspect.DroppedDown = false;
+            m_ctbActivityProspect.Location = new System.Drawing.Point(0, 0);
+            m_ctbActivityProspect.Name = "ctbActivityPrCheckboxes";
+            m_ctbActivityProspect.SelectedNode = null;
+            m_ctbActivityProspect.ShowCheckBoxes = true;
+            m_ctbActivityProspect.Size = new System.Drawing.Size(200, 19);
+            m_ctbActivityProspect.DrawWithVisualStyles = true;
+            m_ctbActivityProspect.Visible = true;
+            m_ctbActivityProspect.ExpandAll();
+            m_ctbActivityProspect.DropDownWidth = 350;
+            m_ctbActivityProspect.DropDownHeight = 350;
+           
+            
 
+            m_ctbActivityProspect.DropDownClosed += M_ctbActivityProspect_DropDownClosed;
+            m_ctbActivityProspect.DropDown += M_ctbActivityProspect_DropDown;
+            
 
+            WindowsFormsHost host = new WindowsFormsHost();
+            host.Child = m_ctbActivity;
+          //  host.KeyUp += Host_KeyUp;
+            spActivityHeader.Children.Add(host);
 
+            WindowsFormsHost host2 = new WindowsFormsHost();
+            host2.Child = m_ctbActivityProspect;
+           //host2.MouseRightButtonUp += Host2_MouseRightButtonUp;
+            spActivityHeaderPr.Children.Add(host2);
 
-
+            ///////////////////////////////////////////////////////////////////////////////////////////////
             m_alistView = false;
             m_isActivityfilterByDateChecked = false;
             m_AttendanceView = true;
+            btnSave.IsEnabled = false;
+        
 
-            m_IsActivePanelView = true;
-            m_IsActivityPanelView = false;
-            m_IsPanelProspectView = false;
-
-
-
+            SetTimer();
 
 
 
 
             btnNewRec.IsEnabled = false;
-            btnImportRecords.IsEnabled = false;
+           //btnImportRecords.IsEnabled = false;
             btnGenerateFollowUps.IsEnabled = true;
-            //btnFilterOpts.IsChecked = true;
-            btnAddActivity.IsChecked = false;
-
-            //chkAttended.IsEnabled = false;
-            //chkFollowup.IsEnabled = false;
-            //chkResponded.IsEnabled = false;
-
-            m_lstActivitiesCount = m_lstActivityTasks.Count();
-            m_newlstActivitiesCount = m_lstActivitiesCount;
+          
+          
             Uncheck_All_Filters();
-            SetTimer();
+            
 
 
 
             m_dateIsValid = false;
 
             // commit datagrid edits and return DataContext to show all records
-            if (dataGrid.Columns.Count > 1)
+            if (dataGrid.Columns.Any() )
             {
                 dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
             }
 
-            //if (btnFilterOpts.IsChecked.GetValueOrDefault())
+        
+            lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
+            m_loaded = true;
+
+        }
+
+        private void M_ctbActivityProspect_DropDown(object sender, System.EventArgs e)
+        {
+            m_ctbActivityProspect.ExpandAll();
+        }
+
+        private void M_ctbActivity_DropDown(object sender, System.EventArgs e)
+        {
+            
+            m_ctbActivity.ExpandAll();
+
+        }
+
+        private void M_ctbActivity_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            //if (e.KeyCode == System.Windows.Forms.Keys.Escape)
             //{
-            //    btnPanelNewActivity.Visibility = Visibility.Hidden;
-            //    btnPanelAddActivity.Visibility = Visibility.Hidden;
+            //    m_isActivityChecked = false;
+            //    m_ctbActivity.UncheckAll();
+            //    BuildQuery_and_UpdateGrid();
             //}
 
-
-
-
-            if (dataGrid.Columns.Count > 1)
-            {
-                dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
-                                                                    // dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
-                                                                    // dataGrid.Columns[dataGrid.Columns.Count +1].hea
-            }
-
-
-            lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
-
-
         }
 
-        private void columnHeaderClick(object sender, RoutedEventArgs e)
+        private void M_ctbActivityProspect_DropDownClosed(object sender, System.EventArgs e)
         {
-            var columnHeader = sender as DataGridColumnHeader;
-
-
-
-
-
-            if (columnHeader != null)
+            ComboTreeBox ctb = sender as ComboTreeBox;
+            IEnumerable<ComboTreeNode> chkNodes = ctb.CheckedNodes;
+            if (chkNodes.Any())
             {
+                ComboTreeNode firstNode = chkNodes.First();
+               
 
-
-                if (!Keyboard.IsKeyDown(Key.LeftCtrl))
+                if (firstNode != null && firstNode.Parent != null && firstNode.Parent.Parent != null)
                 {
-                    dataGrid.SelectedCells.Clear();
+                    if (m_currentSelected_ActivityPair == null)
+                    {
+                        m_currentSelected_ActivityPair = new ActivityPair();
+
+                    }
+
+                    m_currentSelected_ActivityPair.ChildTaskName = firstNode.Text;
+                    m_currentSelected_ActivityPair.ParentTaskName = firstNode.Parent.Text;
+                    m_currentSelected_ActivityPair.ActivityGroup = firstNode.Parent.Parent.Text;
+
+                }
+                else if (firstNode != null && firstNode.Parent != null && firstNode.Parent.Parent == null)
+                {
+
+                    if (m_currentSelected_ActivityPair == null)
+                    {
+                        m_currentSelected_ActivityPair = new ActivityPair();
+
+                    }
+
+                    
+                    m_currentSelected_ActivityPair.ParentTaskName = firstNode.Text;
+                    m_currentSelected_ActivityPair.ActivityGroup = firstNode.Parent.Text;
+                }
+                else
+                {
+                    m_currentSelected_ActivityPair = null;
+                    m_ctbActivityProspect.UncheckAll();
+                    MessageBox.Show("Activity is not an activity, check activity","Select an activity",MessageBoxButton.OK,MessageBoxImage.Error);
+
                 }
 
-                foreach (var item in dataGrid.Items)
+
+
+
+                m_isActivityChecked = true;
+
+            }
+        }
+
+        private void M_ctbActivity_DropDownClosed(object sender, System.EventArgs e)
+        {
+            
+            ComboTreeBox ctb = sender as ComboTreeBox;
+            IEnumerable<ComboTreeNode> chkNodes = ctb.CheckedNodes;
+            if (chkNodes.Any() )
+            {
+                ComboTreeNode firstNode = chkNodes.First();
+                if (firstNode != null && firstNode.Parent != null && firstNode.Parent.Parent != null)
                 {
-                    dataGrid.SelectedCells.Add(new DataGridCellInfo(item, columnHeader.Column));
+                    if (m_currentSelected_ActivityPair == null)
+                    {
+                        m_currentSelected_ActivityPair = new ActivityPair();
+
+                    }
+
+                    m_currentSelected_ActivityPair.ChildTaskName = firstNode.Text;
+                    m_currentSelected_ActivityPair.ParentTaskName = firstNode.Parent.Text;
+                    m_currentSelected_ActivityPair.ActivityGroup = firstNode.Parent.Parent.Text;
+                    m_isActivityChecked = true;
+
+                    BuildQuery_and_UpdateGrid();
                 }
+                else
+                    m_isActivityChecked = false;
+
+            }
+            else
+            {
+                // nothing is selected, user pressed escape
+                m_isActivityChecked = false;
+
+               
             }
 
+            
         }
+
 
         private void CopyDataGridtoClipboard(object sender, DataGridRowClipboardEventArgs e)
         {
@@ -2129,21 +2443,21 @@ namespace CAOGAttendeeManager
 
         }
 
-        private void btnChart_Click(object sender, RoutedEventArgs e)
+        private void btnChart_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             ChartWindow wndCharts = new ChartWindow(ref m_dbContext);
             wndCharts.Show();
 
         }
 
-        private void RibbonApplicationMenuItem_Click_About(object sender, RoutedEventArgs e)
+        private void RibbonApplicationMenuItem_Click_About(object sender, System.Windows.RoutedEventArgs e)
         {
-            AboutWindow about = new AboutWindow();
+            AboutWindow about = new AboutWindow(m_version_string);
             about.ShowDialog();
 
         }
 
-        private void RibbonApplicationMenuItem_Click_Exit(object sender, RoutedEventArgs e)
+        private void RibbonApplicationMenuItem_Click_Exit(object sender, System.Windows.RoutedEventArgs e)
         {
 
             this.Close();
@@ -2151,7 +2465,7 @@ namespace CAOGAttendeeManager
 
 
 
-        private void btnNewRec_Click(object sender, RoutedEventArgs e)
+        private void btnNewRec_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
 
@@ -2165,7 +2479,7 @@ namespace CAOGAttendeeManager
             string strdate;
 
             if (m_alistdateIsValid)
-                strdate = m_alistDateSelected.ToString("MM-dd-yyyy");
+                strdate = m_alistDateSelected?.ToString("MM-dd-yyyy");
             else
                 strdate = "Date Not Valid";
 
@@ -2206,118 +2520,9 @@ namespace CAOGAttendeeManager
 
         }
 
-        private void Ribbon_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //if (tabAttendeeList.IsSelected)
-            //{
+    
 
-            //    m_alistView = true;
-            //    m_AttendanceView = false;
-            //    DateCalendar.IsEnabled = true;
-
-            //    FilterOptionsGroupbox.Header = "Date";
-            //    DateStackPanel.Visibility = Visibility.Hidden;
-            //    //ActivityExpander.Visibility = Visibility.Hidden;
-            //    ChurchStatusExpander.Visibility = Visibility.Hidden;
-
-
-            //    if (m_alistdateIsValid)
-            //    {
-            //        DateCalendar.SelectedDates.Clear();
-            //      //  alisttxtDate.Text = m_alistDateSelected.ToString("MM-dd-yyyy");
-            //        DateCalendar.DisplayDate = m_alistDateSelected;
-            //        DateCalendar.SelectedDate = m_alistDateSelected;
-
-            //        // DateCalendar_SelectedDateChanged(null, null);
-
-            //    }
-            //    else
-            //    {
-            //        DateCalendar.SelectedDates.Clear();
-            //        // DateCalendar.SelectedDate = DateTime.Today;
-
-            //    }
-
-
-            //    Display_AttendeeListTable_in_Grid(); FIX ME
-
-
-
-
-            // }
-            //--------Home Tab -----------------------------------------------------------------------------------------
-            // if (tabHome.IsSelected)
-            // {
-
-            m_alistView = false;
-            m_activityView = false;
-            m_AttendanceView = true;
-
-            gbFilterOptions.Header = "Filter Options";
-            //DateStackPanel.Visibility = Visibility.Visible;
-            // ActivityExpander.Visibility = Visibility.Visible;
-            //ChurchStatusExpander.Visibility = Visibility.Visible;
-            // commit datagrid edits and return DataContext to show all records
-            if (dataGrid.Columns.Count > 1)
-            {
-                dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
-            }
-
-            if (!(m_isFilterByDateChecked || m_isActivityfilterByDateChecked))
-            {
-                // DateCalendar.IsEnabled = false;
-            }
-
-            if (m_dateIsValid && m_isFilterByDateChecked)
-            {
-                // DateCalendar.SelectedDates.Clear();
-                // txtDate.Text = m_DateSelected.ToString("MM-dd-yyyy"); //FIX ME
-                // DateCalendar.DisplayDate = m_DateSelected;
-                //  DateCalendar.SelectedDate = m_DateSelected;
-
-                // DateCalendar_SelectedDateChanged(null, null);
-
-            }
-            else if (m_isActivityfilterByDateChecked)
-            {
-                // DateCalendar.SelectedDates.Clear();
-
-                // DateCalendar.DisplayDate = (DateTime)m_ActivityDateSelected;
-                //  DateCalendar.SelectedDate = m_ActivityDateSelected;
-            }
-            else
-            {
-                //  DateCalendar.SelectedDates.Clear();
-                // DateCalendar.SelectedDate = DateTime.Today;
-            }
-
-
-
-            ShowFiltered_Or_DefaultTable();
-
-            //}
-
-        }
-
-
-
-
-
-
-        //private void btnCopy_Click(object sender, RoutedEventArgs e)
-        //{
-
-        //    //CopyDataGridtoClipboard(dataGrid, e);
-
-
-        //}
-
-        ////private void dataGrid_KeyUp(object sender, MouseButtonEventArgs e)
-        ////{
-
-        ////}
-
-        private void btnPrint_Click(object sender, RoutedEventArgs e)
+        private void btnPrint_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
             //int count = 0;
@@ -2397,19 +2602,15 @@ namespace CAOGAttendeeManager
                 dataGrid.UpdateLayout();
                 dataGrid_prospect.UpdateLayout();
 
-                // get checked attendees
-                List<AttendanceTableRow> Checklist = getListOfCheckedAttendees();
+            
 
 
+            
+                  
 
-
-                if (m_lstActivitiesCount != m_newlstActivitiesCount)
-                {
-                    Save_ChurchActivities_To_XMLFile();
-
-                }
+            
 #if (init_db)
-                if (m_dbContext.ChangeTracker.HasChanges() || Checklist.Count != 0)
+                if (m_dbContext.ChangeTracker.HasChanges() || m_ActivityTreeChanged)
                 {
 
 
@@ -2510,12 +2711,14 @@ namespace CAOGAttendeeManager
         private void SaveActiveList()
         {
 
+            Save_ChurchActivities_To_XMLFile();
             // save contents to database
             m_dbContext.SaveChanges();
+            m_ActivityTreeChanged = false;
 
         }
 
-        private void btnGenerateFollowUps_Click(object sender, RoutedEventArgs e)
+        private void btnGenerateFollowUps_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
             MessageBoxResult result = MessageBox.Show("Are you sure you want to generate follow-Ups now?", "Generate Follow-Up", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -2545,7 +2748,7 @@ namespace CAOGAttendeeManager
 
 
 
-        private void chkActivityFilter_Checked(object sender, RoutedEventArgs e)
+        private void chkActivityFilter_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
             m_isActivityFilterChecked = true;
             // trvActivities.IsEnabled = true; FIX ME
@@ -2553,357 +2756,7 @@ namespace CAOGAttendeeManager
 
         }
 
-        private void chkActivityFilter_Unchecked(object sender, RoutedEventArgs e)
-        {
-            m_isActivityFilterChecked = false;
 
-
-            Cursor = Cursors.Wait;
-
-            ClearTreeView();
-
-
-
-            // FIX ME trvActivities.IsEnabled = false;
-
-            Cursor = Cursors.Arrow;
-        }
-
-
-        private void btnCopy_Click(object sender, RoutedEventArgs e)
-        {
-            //var selectedcells = dataGrid.SelectedCells;
-
-
-            //DataGridRowClipboardEventArgs dataRowcellContent = new DataGridRowClipboardEventArgs(dataGrid, 2, 5, true);
-
-            //CopyDataGridtoClipboard(dataGrid, dataRowcellContent);
-
-            //DataGridCellClipboardEventArgs cells_to_copy = new DataGridCellClipboardEventArgs(dataGrid, dataGrid.CurrentColumn, dataGrid.CurrentItem);
-
-            //DataGridClipboardCellContent cellContent = new DataGridClipboardCellContent(dataGrid.CurrentItem, dataGrid.CurrentColumn, dataGrid.CurrentItem.ToString());
-
-            // dataRowcellContent.ClipboardRowContent.Add(cellContent);
-
-            //if (e.ClipboardRowContent.Count > 3)
-            //{
-            //    e.ClipboardRowContent.RemoveAt(4);
-            //}
-            // DataGridCellClipboardEventArgs clip = new DataGridCellClipboardEventArgs()
-            // CopyDataGridtoClipboard(dataGrid, );
-        }
-
-        private void ActivityTreeView_Checkbox_Checked(object sender, RoutedEventArgs e)
-        {
-
-
-            m_isActivityChecked = true;
-            var checkbox = sender as CheckBox;
-            m_ActivityName = checkbox.Content.ToString();
-
-
-
-            //if (m_AttendanceView && m_IsActivePanelView)
-            //{
-            Do_treeview_ActiveView();
-            //}
-            //else if (m_IsActivityPanelView && m_AttendanceView)
-            //{
-            //    Do_treeview_ActivityView();
-            //}
-
-
-
-
-        }
-
-        private void Do_treeview_ActivityView()
-        {
-
-            //m_child_taskId = 0;
-            //m_parent_taskId = 0;
-
-
-            //foreach (ActivityGroup activity_group in m_lstActivities)
-            //{
-            //    foreach (ActivityTask task in activity_group.lstActivityTasks)
-            //    {
-
-
-
-
-            //        if (task.lstsubTasks.Count != 0) // task has children
-            //        {
-
-            //            foreach (ActivityTask subtask in task.lstsubTasks)
-            //            {
-
-
-            //                // if user selected child node
-            //                if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected)
-            //                {
-            //                    m_activitychecked_count++;
-
-            //                    ActivityPair selectedActivity = new ActivityPair
-            //                    {
-            //                        ActivityGroup = activity_group.ActivityName,
-            //                        AttendeeId = m_default_row_selected.AttendeeId,
-            //                        ParentTaskName = task.TaskName,
-            //                        ChildTaskName = subtask.TaskName,
-
-            //                    };
-
-            //                    m_child_taskId = subtask.ActivityId;
-            //                    m_parent_taskId = task.ActivityId;
-
-            //                    m_currentSelected_ActivityPair = selectedActivity;
-
-
-
-            //                    if (m_activitychecked_count == 1)
-            //                    {
-            //                        m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
-            //                    }
-
-            //                    txtblkTaskDescription.Text = subtask.Description;
-            //                    task.IsSelected = true; //check parent
-
-            //                    break;
-            //                }
-
-
-
-
-            //            }
-            //        }
-            //        else if (task.lstsubTasks.Count == 0) // task has no children
-            //        {
-
-
-            //            if ((m_ActivityName == task.TaskName) && task.IsSelected)
-            //            {
-            //                m_activitychecked_count++;
-            //                ActivityPair selectedActivity = new ActivityPair
-            //                {
-            //                    ActivityGroup = activity_group.ActivityName,
-            //                    AttendeeId = m_default_row_selected.AttendeeId,
-            //                    ParentTaskName = task.TaskName,
-            //                    ChildTaskName = "",
-
-            //                };
-
-            //                m_parent_taskId = task.ActivityId;
-
-            //                m_currentSelected_ActivityPair = selectedActivity;
-
-
-            //                if (m_activitychecked_count == 1)
-            //                {
-            //                    m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
-
-            //                }
-
-            //                txtblkTaskDescription.Text = task.Description;
-            //                break;
-            //            }
-
-
-
-            //        }
-            //        else { }
-
-
-            //    }
-            //}
-
-
-            //m_activitychecked_count = 1;
-            //ClearTreeViewCheckboxes_except_clickedOne(m_child_taskId,m_parent_taskId);
-            //m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
-
-
-        }
-        private void ClearTreeViewCheckboxes_except_clickedOne(int childtaskId, int parenttaskId)
-        {
-            // if task ids are different
-            // loop through all the tasks and deselect any task that is not the current one selected
-
-            if (m_previousSelected_ActivityPair != m_currentSelected_ActivityPair)
-            {
-
-                foreach (ActivityTask task in m_lstActivityTasks)
-                {
-
-                    if ((task.ActivityId == parenttaskId) || (task.ActivityId == childtaskId))
-                    {
-                        //do nothing
-                    }
-                    else
-                    {
-                        task.IsSelected = false;
-                    }
-
-
-
-
-
-
-
-                }
-
-
-            }
-
-
-            //m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
-            //     m_activitychecked_count = 1;
-
-
-
-        }
-        private void Do_treeview_ActiveView()
-        {
-
-            //m_child_taskId = 0;
-            //m_parent_taskId = 0;
-
-
-            //    foreach (ActivityGroup activity_group in m_lstActivities)
-            //    {
-
-
-
-            //    foreach (ActivityTask task in activity_group.lstActivityTasks)
-            //    {
-
-
-            //        if (task.lstsubTasks.Count != 0) // task has children
-            //        {
-
-
-
-            //            foreach (ActivityTask subtask in task.lstsubTasks)
-            //                {
-
-
-            //                    // if user selected child node
-            //                    if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected)
-            //                    {
-            //                        m_activitychecked_count++;
-
-            //                        ActivityPair selectedActivity = new ActivityPair
-            //                        {
-            //                            ActivityGroup = activity_group.ActivityName,
-            //                            AttendeeId = 0,
-            //                            ParentTaskName = task.TaskName,
-            //                            ChildTaskName = subtask.TaskName,
-
-
-            //                        };
-
-            //                        m_child_taskId = subtask.ActivityId;
-            //                        m_parent_taskId = task.ActivityId;
-
-            //                        m_currentSelected_ActivityPair = selectedActivity;
-            //                        m_currentSelect_ActivityTask = subtask;
-
-
-            //                        if (m_activitychecked_count == 1)
-            //                        {
-            //                            m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
-            //                        }
-
-            //                        txtblkTaskDescription.Text = subtask.Description;
-            //                        task.IsSelected = true; //check parent
-
-            //                        break;
-            //                    }
-            //                    else if  ((m_ActivityName == task.TaskName) && task.IsSelected) // user selected a task with subtasks underneath it
-            //                    {
-
-            //                        if (m_currentSelected_ActivityPair != null)
-            //                             return; //prevent routine from executing twice
-
-            //                        m_activitychecked_count++;
-            //                        ActivityPair selectedActivity = new ActivityPair
-            //                        {
-            //                            ActivityGroup = activity_group.ActivityName,
-            //                            AttendeeId = 0,
-            //                            ParentTaskName = task.TaskName,
-            //                            ChildTaskName = "",
-
-
-            //                        };
-            //                        m_parent_taskId = task.ActivityId;
-
-            //                        m_currentSelected_ActivityPair = selectedActivity;
-            //                        m_currentSelect_ActivityTask = task;
-
-            //                        if (m_activitychecked_count == 1)
-            //                        {
-            //                            m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
-
-            //                        }
-
-            //                        txtblkTaskDescription.Text = task.Description;
-            //                        break;
-
-
-            //                }
-
-
-
-            //                }
-            //            }
-            //            else if (task.lstsubTasks.Count == 0) // task has no children
-            //            {
-
-
-            //                if ((m_ActivityName == task.TaskName) && task.IsSelected)
-            //                {
-            //                    m_activitychecked_count++;
-            //                    ActivityPair selectedActivity = new ActivityPair
-            //                    {
-            //                        ActivityGroup = activity_group.ActivityName,
-            //                        AttendeeId = 0,
-            //                        ParentTaskName = task.TaskName,
-            //                        ChildTaskName = "",
-
-
-            //                    };
-            //                    m_parent_taskId = task.ActivityId;
-
-            //                    m_currentSelected_ActivityPair = selectedActivity;
-            //                    m_currentSelect_ActivityTask = task;
-
-            //                if (m_activitychecked_count == 1)
-            //                    {
-            //                        m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
-
-            //                    }
-
-            //                    txtblkTaskDescription.Text = task.Description;
-            //                    break;
-            //                }
-
-
-
-            //            }
-            //            else { }
-
-
-            //        }
-            //    }
-
-
-            //    m_activitychecked_count = 1;
-            //    ClearTreeViewCheckboxes_except_clickedOne(m_child_taskId, m_parent_taskId);
-            //    m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
-
-
-
-
-        }
         private void Copy_ContentsOfDefaultTable()
         {
             if (m_lstdefaultTableRowsCopy.Any())
@@ -2944,8 +2797,8 @@ namespace CAOGAttendeeManager
 
             bool ChurchDate = m_dateIsValid && m_DateSelected != null;
             bool Status = (m_isFollowupChecked || m_isAttendedChecked || m_isRespondedChecked);
-            bool Activity = m_isActivityFilterChecked && m_isActivityChecked && m_currentSelected_ActivityPair != null;
-            bool ActivityDate = m_isActivityfilterByDateChecked && m_ActivityDateSelected != null;
+            bool Activity = m_isActivityChecked && m_currentSelected_ActivityPair != null;
+            bool ActivityDate = m_ActivityDateSelected != null;
 
 
 
@@ -2953,8 +2806,6 @@ namespace CAOGAttendeeManager
             if (!ChurchDate && !Status && !Activity && !ActivityDate)
             {
                 Display_DefaultTable_in_Grid();
-                m_isQueryTableShown = false;
-
                 btnDelete.IsEnabled = true;
                 btnGenerateFollowUps.IsEnabled = true;
 
@@ -2993,7 +2844,7 @@ namespace CAOGAttendeeManager
                 {
 
 
-                    if (m_lstdefaultTableRowsCopy[i].AttendanceList.Count > 0 && m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
+                    if (m_lstdefaultTableRowsCopy[i].AttendanceList.Any()  && m_lstdefaultTableRowsCopy[i].ActivityList.Any() )
                     {
                         IEnumerable<Attendance_Info> query_status;
                         IEnumerable<ActivityPair> query_activity;
@@ -3039,7 +2890,7 @@ namespace CAOGAttendeeManager
             //Date , church status, activity
             else if (ChurchDate && Status && Activity)
             {
-                string strChurchDate = m_DateSelected.ToString("MM-dd-yyyy");
+                string strChurchDate = m_DateSelected?.ToString("MM-dd-yyyy");
 
                 strChurchStatus += (m_isFollowupChecked) ? "Follow-Up" : "";
                 strChurchStatus += (m_isAttendedChecked) ? "Attended" : "";
@@ -3060,7 +2911,7 @@ namespace CAOGAttendeeManager
                 for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
-                    if (m_lstdefaultTableRowsCopy[i].AttendanceList.Count > 0 && m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
+                    if (m_lstdefaultTableRowsCopy[i].AttendanceList.Any()  && m_lstdefaultTableRowsCopy[i].ActivityList.Any() )
                     {
                         IQueryable<Attendance_Info> query_dateandstatus;
                         IQueryable<ActivityPair> query_activity;
@@ -3090,7 +2941,7 @@ namespace CAOGAttendeeManager
             }
             else if (ChurchDate && Activity) //ChurchDate and Activity
             {
-                string strChurchDate = m_DateSelected.ToString("MM-dd-yyyy");
+                string strChurchDate = m_DateSelected?.ToString("MM-dd-yyyy");
                 string strActivity = m_currentSelected_ActivityPair.ToString();
 
                 string ActivityGroup = m_currentSelected_ActivityPair.ActivityGroup;
@@ -3100,7 +2951,7 @@ namespace CAOGAttendeeManager
                 for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
-                    if (m_lstdefaultTableRowsCopy[i].AttendanceList.Count > 0 && m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
+                    if (m_lstdefaultTableRowsCopy[i].AttendanceList.Any()  && m_lstdefaultTableRowsCopy[i].ActivityList.Any() )
                     {
                         var query_dateandstatus = m_lstdefaultTableRowsCopy[i].AttendanceList.AsQueryable().Where("DateString == @0", strChurchDate);
                         var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityGroup == @0 and ParentTaskName == @1 and ChildTaskName == @2", ActivityGroup, ActivityParentName, ActivityChildName);
@@ -3134,7 +2985,7 @@ namespace CAOGAttendeeManager
                 for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
-                    if (m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
+                    if (m_lstdefaultTableRowsCopy[i].ActivityList.Any() )
                     {
 
                         var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("DateString == @0 and ActivityGroup == @1 and ParentTaskName == @2 and ChildTaskName == @3", strActivityDate, ActivityGroup, ActivityParentName, ActivityChildName);
@@ -3174,7 +3025,7 @@ namespace CAOGAttendeeManager
                 for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
 
-                    if (m_lstdefaultTableRowsCopy[i].AttendanceList.Count > 0 && m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
+                    if (m_lstdefaultTableRowsCopy[i].AttendanceList.Any()  && m_lstdefaultTableRowsCopy[i].ActivityList.Any() )
                     {
                         IQueryable<Attendance_Info> query_dateandstatus;
                         IQueryable<ActivityPair> query_activity;
@@ -3222,7 +3073,7 @@ namespace CAOGAttendeeManager
                 {
 
 
-                    if (m_lstdefaultTableRowsCopy[i].AttendanceList.Count > 0 && m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
+                    if (m_lstdefaultTableRowsCopy[i].AttendanceList.Any()  && m_lstdefaultTableRowsCopy[i].ActivityList.Any() )
                     {
                         IQueryable<Attendance_Info> query_status;
                         IQueryable<ActivityPair> query_activity;
@@ -3256,7 +3107,7 @@ namespace CAOGAttendeeManager
 
 
 
-                string strChurchDate = m_DateSelected.ToString("MM-dd-yyyy");
+                string strChurchDate = m_DateSelected?.ToString("MM-dd-yyyy");
 
 
                 strChurchStatus += (m_isFollowupChecked) ? "Follow-Up" : "";
@@ -3360,7 +3211,7 @@ namespace CAOGAttendeeManager
             }
             else if (ChurchDate) //DATE
             {
-                string strChurchDate = m_DateSelected.ToString("MM-dd-yyyy");
+                string strChurchDate = m_DateSelected?.ToString("MM-dd-yyyy");
 
                 for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
                 {
@@ -3391,12 +3242,12 @@ namespace CAOGAttendeeManager
                 {
 
 
-                    if (m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
+                    if (m_lstdefaultTableRowsCopy[i].ActivityList.Any() )
                     {
 
                         var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("DateString == @0", strActivityDate);
 
-                        if (query_activity.Count() != 0)
+                        if (query_activity.Any() )
                         {
 
                             m_lstdefaultTableRowsCopy[i].Activity_Last_Attended = strActivityDate;
@@ -3418,26 +3269,26 @@ namespace CAOGAttendeeManager
 
 
 
-                //for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
-                //{
+                for (int i = 0; i <= m_lstdefaultTableRowsCopy.Count - 1; i++)
+                {
 
-                //    if (m_lstdefaultTableRowsCopy[i].ActivityList.Count > 0)
-                //    {
+                    if (m_lstdefaultTableRowsCopy[i].ActivityList.Any() )
+                    {
 
-                //        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityGroup == @0 and ParentTaskName == @1 and ChildTaskName == @2", ActivityGroup, ActivityParentName, ActivityChildName);
+                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityGroup == @0 and ParentTaskName == @1 and ChildTaskName == @2", ActivityGroup, ActivityParentName, ActivityChildName);
 
-                //        if (query_activity.Count() != 0 )
-                //        {
+                        if (query_activity.Any() )
+                        {
 
 
-                //            m_lstdefaultTableRowsCopy[i].Activity = strActivity;
+                            m_lstdefaultTableRowsCopy[i].Activity = strActivity;
 
-                //            m_lstQueryTableRows.Add(m_lstdefaultTableRowsCopy[i]);
+                            m_lstQueryTableRows.Add(m_lstdefaultTableRowsCopy[i]);
 
-                //        }
-                //    }
+                        }
+                    }
 
-                //}
+                }
             }
 
 
@@ -3487,39 +3338,28 @@ namespace CAOGAttendeeManager
 
 
         }
-        private void ActivityTreeView_Checkbox_UnChecked(object sender, RoutedEventArgs e)
-        {
-            Cursor = Cursors.Wait;
-
-            m_isActivityChecked = false;
-            if (m_currentSelected_ActivityPair != null)
-            {
-                ClearTreeView();
-                m_currentSelected_ActivityPair = null;
-
-            }
-
-            Cursor = Cursors.Arrow;
-
-        }
-
+    
 
         private void GridsTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
             Cursor = Cursors.Wait;
 
-            if (dataGrid_prospect.Columns.Count > 1)
+
+            if (dataGrid_prospect.Columns.Any() )
             {
                 dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
                 dataGrid_prospect.UpdateLayout();
+
             }
 
-            // commit datagrid edits and return DataContext to show all records
-            if (dataGrid.Columns.Count > 1)
+           // commit datagrid edits and return DataContext to show all records
+            if (dataGrid.Columns.Any() )
             {
                 dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
                 dataGrid.UpdateLayout();
+              
+
             }
 
 
@@ -3532,40 +3372,42 @@ namespace CAOGAttendeeManager
 
                     m_alistView = false;
                     m_AttendanceView = true;
-                    m_activityView = false;
+                    
 
-                    //delete last row if no new attendee firstname or lastname entered
-#if (init_db)
-                    if (m_lstattendanceTableRows.LastOrDefault().FirstName == "" ||
-                        m_lstattendanceTableRows.LastOrDefault().LastName == "")
+                    if (m_lstattendanceTableRows != null)
                     {
-                        m_lstattendanceTableRows.RemoveAt(m_lstattendanceTableRows.Count - 1);
+                        //delete last row if no new attendee firstname or lastname entered
+                        if (m_lstattendanceTableRows.Any() )
+                        {
+                            if (m_lstattendanceTableRows.LastOrDefault().FirstName == "" ||
+                            m_lstattendanceTableRows.LastOrDefault().LastName == "")
+                            {
+                                m_lstattendanceTableRows.RemoveAt(m_lstattendanceTableRows.Count - 1);
+                            }
+                        }
+                        
                     }
-#endif
-
-                    //SaveProspectPanelState();
 
 
 
-
-
-
-
-                    ClearTreeView();
-
-
-
+                   
 
                     btnNewRec.IsEnabled = false;
                     btnDelete.IsEnabled = true;
-                    btnImportRecords.IsEnabled = false;
 
+                    if (m_isAttendedChecked)
+                        cmbHeaderStatus.SelectedIndex = 1;
+                    else if (m_isFollowupChecked)
+                        cmbHeaderStatus.SelectedIndex = 2;
+                    else if (m_isRespondedChecked)
+                        cmbHeaderStatus.SelectedIndex = 3;
+                    else
+                        cmbHeaderStatus.SelectedIndex = 0;
 
-                    if (!m_IsActivePanelView)
-                    {
-                        // LoadActivePanelState();
-                        Show_activeview_Panel();
-                    }
+                    if (m_isQueryTableShown)
+                        Display_Query_Table();
+                    else
+                       Display_DefaultTable_in_Grid();
 
                 }
             }
@@ -3577,25 +3419,35 @@ namespace CAOGAttendeeManager
                 {
                     m_alistView = true;
                     m_AttendanceView = false;
-                    m_activityView = false;
+                    
+
+                    m_currentSelected_ActivityPair = null;
+                    m_ActivityDateSelected = null;
+                    btnPanelAddActivity.IsEnabled = false;
+                    btnImport.IsEnabled = false;
+
                     Enable_Filters();
 
+                   
+                    
 
 
-
-                    btnImportRecords.IsEnabled = true;
-                    btnImportRecords.Content = "Update Changes";
+                    //btnImportRecords.IsEnabled = true;
+                    //btnImportRecords.Content = "Update Changes";
 
                     btnNewRec.IsEnabled = true;
                     btnDelete.IsEnabled = false;
 
 
-                    if (!m_IsPanelProspectView)
-                    {
-                        Show_prospectview_Panel();
-                    }
+                    if (m_isQueryTableShown)
+                        Display_Query_Table();
+                    else
+                        Display_AttendeeListTable_in_Grid();
 
-                    Display_AttendeeListTable_in_Grid();
+
+
+
+
                 }
             }
 
@@ -3603,280 +3455,9 @@ namespace CAOGAttendeeManager
 
         }
 
-        private void LoadActivityPanelState()
-        {
 
-            btnNewRec.IsEnabled = false;
-            btnImportRecords.IsEnabled = false;
-            btnDelete.IsEnabled = false;
 
-            // chkActivityDateFilter.IsChecked = true;
-            chkActivityFilter.IsChecked = true;
-            btnPanelAddActivity.IsEnabled = true;
-            btnPanelNewActivity.IsEnabled = true;
-
-
-        }
-        private void Show_activeview_Panel()
-        {
-
-
-
-            spFilterOptions.Children.Clear();
-
-
-
-            btnAddActivity.IsEnabled = true;
-            //btnFilterOpts.IsEnabled = true;
-            if (btnAddActivity.IsChecked.GetValueOrDefault())
-            {
-                Show_Activity_Panel();
-                btnPanelNewActivity.Visibility = Visibility.Visible;
-                btnPanelAddActivity.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                gbFilterOptions.Header = "Filter Options";
-                btnPanelNewActivity.Visibility = Visibility.Hidden;
-                btnPanelAddActivity.Visibility = Visibility.Hidden;
-
-                //if (!DateStackPanel.Children.Contains(chkActivityDateFilter))
-                //{
-                //    DateStackPanel.Children.Add(chkActivityDateFilter);
-
-                //}
-
-
-
-                //if (!DateStackPanel.Children.Contains(chkChurchDateFilter))
-                //{
-
-                //    chkChurchDateFilter.Content = "Church Date";
-
-                //    DateStackPanel.Children.Insert(0, chkChurchDateFilter);
-                //}
-                //else
-                //{
-                //    chkChurchDateFilter.Content = "Church Date";
-
-                //}
-
-
-
-                // spFilterOptions.Children.Add(spActifityFilter);
-                //spFilterOptions.Children.Add(CalendarExpander);
-                //spFilterOptions.Children.Add(ChurchStatusExpander);
-                spFilterOptions.Children.Add(ActivityExpander);
-
-
-                txtblkTaskDescription.Text = "";
-
-                m_IsActivityPanelView = false;
-                m_IsActivePanelView = true;
-                m_IsPanelProspectView = false;
-
-
-                btnDelete.IsEnabled = true;
-                btnGenerateFollowUps.IsEnabled = true; ;
-
-                //  Add_Blackout_Dates(ref DateCalendar);
-            }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        }
-
-        private void Show_prospectview_Panel()
-        {
-            //    spFilterOptions.Children.Clear();
-            //    gbFilterOptions.Header = "Edit Table";
-
-            //    m_IsPanelProspectView = true;
-            //    m_IsActivityPanelView = false;
-            //    m_IsActivePanelView = false;
-
-
-            //    btnFilterOpts.IsEnabled = false;
-            //    btnAddActivity.IsEnabled = false;
-
-
-            //    if (DateStackPanel.Children.Contains(chkActivityDateFilter))
-            //        DateStackPanel.Children.Remove(chkActivityDateFilter);
-
-            //    if (!DateStackPanel.Children.Contains(chkChurchDateFilter))
-            //    {
-
-            //        chkChurchDateFilter.Content = "Church Date";
-
-            //        DateStackPanel.Children.Insert(0, chkChurchDateFilter);
-            //    }
-            //    else
-            //    {
-            //        chkChurchDateFilter.Content = "Church Date";
-
-            //    }
-
-
-            // chkChurchDateFilter.IsChecked = true;
-            // spFilterOptions.Children.Remove(spFilterOptions);
-            // spFilterOptions.Children.Add(CalendarExpander);
-
-            txtblkTaskDescription.Text = "";
-
-            btnGenerateFollowUps.IsEnabled = false;
-
-            btnDelete.IsEnabled = false;
-
-        }
-
-        private void GridsTabControl_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-
-            var tabctrl = sender as TabControl;
-
-            if (tabctrl.SelectedIndex == 1)
-            {
-                if (dataGrid_prospect.Columns.Count > 1)
-                {
-                    dataGrid_prospect.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
-
-                }
-            }
-            else if (tabctrl.SelectedIndex == 0)
-            {
-                if (dataGrid.Columns.Count > 1)
-                {
-                    dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
-
-                }
-            }
-
-
-        }
-
-        private void chkActivityDateFilter_Checked(object sender, RoutedEventArgs e)
-        {
-
-            m_isActivityfilterByDateChecked = true;
-            m_isFilterByDateChecked = false;
-
-            // chkChurchDateFilter.IsChecked = false;
-            //DateCalendar.IsEnabled = true;
-
-
-
-
-
-
-
-        }
-
-        private void chkActivityDateFilter_Unchecked(object sender, RoutedEventArgs e)
-        {
-
-            m_isActivityfilterByDateChecked = false;
-
-
-
-            if (!m_isFilterByDateChecked)
-                // DateCalendar.IsEnabled = false; FIXME
-
-                if (m_alistView)
-                    return;
-
-
-
-
-        }
-
-
-        private void ClearTreeView()
-        {
-
-
-
-
-            //m_activitychecked_count = 0;
-            ////loop through ActivityTree and update the checkboxes
-            //foreach (ActivityGroup activity_group in m_lstActivities)
-            //{
-            //    foreach (ActivityTask task in activity_group.lstActivityTasks)
-            //    {
-            //        //check the box
-            //        task.IsSelected = false;
-
-            //        if (task.lstsubTasks.Count != 0) // task has children
-            //        {
-            //            foreach (ActivityTask subtask in task.lstsubTasks)
-            //            {
-            //                subtask.IsSelected = false;
-            //            }
-
-            //        }
-
-
-
-            //    }
-            //}
-            //txtblkTaskDescription.Text = "";
-            //m_currentSelected_ActivityPair = null;
-        }
-
-
-        private void GetActivityFromTreeView(int attendeeId, ref List<ActivityPair> aList)
-        {
-            //foreach (ActivityGroup activity_group in m_lstActivities)
-            //{
-            //    foreach (ActivityTask task in activity_group.lstActivityTasks)
-            //    {
-
-
-            //        if (task.lstsubTasks.Count != 0) // task has children
-            //        {
-            //            foreach (ActivityTask subtask in task.lstsubTasks)
-            //            {
-
-
-            //                if ((m_ActivityName == subtask.TaskName) && subtask.IsSelected)
-            //                {
-
-            //                   // BuildQuery_and_UpdateGrid();
-
-            //                    txtblkTaskDescription.Text = subtask.Description;
-            //                    task.IsSelected = true; //check parent
-            //                    break;
-            //                }
-
-            //            }
-            //        }
-            //        else if ((m_ActivityName == task.TaskName) && task.IsSelected)
-            //        {
-            //            //BuildQuery_and_UpdateGrid();
-            //            txtblkTaskDescription.Text = task.Description;
-
-            //            break;
-
-            //        }
-            //    }
-            //}
-        }
-
-
-
-
-
-        private void btnDelete_Click(object sender, RoutedEventArgs e)
+        private void btnDeleteAttendanceInfo_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             Cursor = Cursors.Wait;
 
@@ -3929,13 +3510,18 @@ namespace CAOGAttendeeManager
 
             }
 
-            var latestAttRec = (from last_date in m_default_row_selected.ActivityList
+            var latestAttRec = (from last_date in m_default_row_selected.AttendanceList
+                                where last_date.Status == "Attended" || last_date.Status == "Responded"
                                 orderby last_date.Date descending
                                 select last_date).FirstOrDefault();
 
             //update default row with new latest activity
-            m_default_row_selected.Activity_Last_Attended = latestAttRec.DateString;
-            m_default_row_selected.Activity = latestAttRec.ToString();
+            if (latestAttRec != null)
+            {
+                m_default_row_selected.Activity_Last_Attended = latestAttRec.DateString;
+                m_default_row_selected.Activity = latestAttRec.ToString();
+            }
+            
 
             if (!m_default_row_selected.ActivityList.Any())
             {
@@ -3967,6 +3553,7 @@ namespace CAOGAttendeeManager
                 m_default_row_selected.AttendanceList.Remove(dr);
 
                 var latestAttRec = (from last_date in m_default_row_selected.AttendanceList
+                                    where last_date.Status == "Attended" || last_date.Status == "Responded"
                                     orderby last_date.Date descending
                                     select last_date).FirstOrDefault();
 
@@ -3992,6 +3579,13 @@ namespace CAOGAttendeeManager
 
                 m_Activity_grid.DataContext = m_default_row_selected.ActivityList.OrderByDescending(x => x.Date).ToList();
                 m_Activity_grid.Items.Refresh();
+
+                if (m_Activity_grid.Columns.Any())
+                {
+                    m_Activity_grid.Columns[0].Visibility = Visibility.Hidden; // AttendeeId
+                    m_Activity_grid.Columns[2].Width = 300; // Activity column
+
+                }
             }
 
 
@@ -4002,15 +3596,17 @@ namespace CAOGAttendeeManager
         {
             if (m_AttendeeInfo_grid != null)
             {
-                //var results = from DataRow row in m_DataSet.Tables["attendanceDT"].Rows
-                //              where (int)row["AttendeeId"] == m_
-                //              orderby row["Date"]
-                //              select row;
-
-
-
+               
                 m_AttendeeInfo_grid.DataContext = m_default_row_selected.AttendanceList.OrderByDescending(x => x.Date).ToList();
                 m_AttendeeInfo_grid.Items.Refresh();
+
+                //hide grid columns
+                if (m_AttendeeInfo_grid.Columns.Any())
+                {
+                    m_AttendeeInfo_grid.Columns[0].Visibility = Visibility.Hidden; //AttedeeId
+
+                }
+
             }
 
 
@@ -4019,7 +3615,7 @@ namespace CAOGAttendeeManager
         }
 
 
-        private void btnExpandHistory_Click(object sender, RoutedEventArgs e)
+        private void btnExpandHistory_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
 
@@ -4079,278 +3675,119 @@ namespace CAOGAttendeeManager
             Display_AttendanceList_in_Grid();
 
             btnDelete.IsEnabled = false;
-            //hide grid columns
-            if (m_AttendeeInfo_grid.Columns.Count > 0)
-            {
-                m_AttendeeInfo_grid.Columns[0].Visibility = Visibility.Hidden; //AttedeeId
-
-            }
-            if (m_Activity_grid.Columns.Count > 0)
-            {
-                m_Activity_grid.Columns[0].Visibility = Visibility.Hidden; // AttendeeId
-                m_Activity_grid.Columns[2].Width = 300; // Activity column
-
-            }
+          
 
 
             Cursor = Cursors.Arrow;
         }
 
-        private void dataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
-        {
-            var datagrid = sender as DataGrid;
-
-            m_default_row_selected = (DefaultTableRow)dataGrid.SelectedItem;
-
-            m_attendance_row_selected = m_lstattendanceTableRows.SingleOrDefault(rec => rec.AttendeeId == m_default_row_selected.AttendeeId);
-
-            if (m_attendance_row_selected != null)
-            {
-
-                var queryAttRec = m_dbContext.Attendees.Local.SingleOrDefault(attrec => attrec.AttendeeId == m_default_row_selected.AttendeeId);
-
-                if (queryAttRec != null)
-                {
-                    var text = e.EditingElement as TextBox;
-
-                    if (e.Column.Header != null)
-                    {
-
-
-                        if (e.Column.Header.ToString() == "First Name")
-                        {
-                            if (queryAttRec != null)
-                            {
-                                queryAttRec.FirstName = text.Text;
-
-                            }
-
-                            m_default_row_selected.FirstName = text.Text;
-                          
-
-                            m_attendance_row_selected.FirstName = text.Text;
-                          
-
-                        }
-                        else if (e.Column.Header.ToString() == "Last Name")
-                        {
-                            if (queryAttRec != null)
-                            {
-                                queryAttRec.LastName = text.Text;
-                            }
-
-                            m_default_row_selected.LastName = text.Text;
-                          
-
-                            m_attendance_row_selected.LastName = text.Text;
-                          
-
-                        }
-                    }
-                }
-
-
-            }
-
-        }
+   
 
 
         private void dataGrid_prospect_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
-            var selectedItems = sender as DataGrid;
+            var dg = sender as DataGrid;
 
-            if (selectedItems.SelectedItem != null)
+            if (dg.SelectedItems != null)
             {
-                m_attendance_row_selected = (AttendanceTableRow)selectedItems.SelectedItem;
+
+                m_MultiAttendanceRow_Selected = dg.SelectedItems;
 
             }
+            
         }
 
-        private void btnAddActivity_Click(object sender, RoutedEventArgs e)
-        {
+      
 
-            SetTimer();
-
-
-
-
-
-
-
-            if (!m_IsActivityPanelView && !m_isQueryTableShown)
-            {
-                // SaveActivePanelState();
-                LoadActivityPanelState();
-                Show_Activity_Panel();
-
-
-            }
-            else if (m_IsActivityPanelView)
-            {
-                //do nothing
-            }
-            else
-            {
-                MessageBox.Show("Activities can only be added when no database queries are being displayed.\n\nPlease deselect all filter checkboxes and query the database again.", "Cannot add activity", MessageBoxButton.OK, MessageBoxImage.Stop);
-            }
-
-
-
-        }
-        private void Show_Activity_Panel()
-        {
-
-            Enable_Filters();
-
-            spFilterOptions.Children.Clear();
-
-            gbFilterOptions.Header = "Activity";
-
-            btnPanelNewActivity.Visibility = Visibility.Visible;
-            btnPanelAddActivity.Visibility = Visibility.Visible;
-
-
-            //if (DateStackPanel.Children.Contains(chkChurchDateFilter))
-            //        DateStackPanel.Children.Remove(chkChurchDateFilter);
-
-
-
-            //    if (!DateStackPanel.Children.Contains(chkActivityDateFilter))
-            //        DateStackPanel.Children.Add(chkActivityDateFilter);
-
-
-
-
-
-
-            btnPanelAddActivity.IsEnabled = false;
-
-            //chkActivityDateFilter.IsChecked = true;
-            //chkChurchDateFilter.IsChecked = false;
-
-
-            //spFilterOptions.Children.Add(CalendarExpander);
-            spFilterOptions.Children.Add(ActivityExpander);
-            chkActivityFilter.IsChecked = true;
-
-            txtblkTaskDescription.Text = "";
-
-            m_IsActivePanelView = false;
-            m_IsActivityPanelView = true;
-            m_IsPanelProspectView = false;
-
-
-            btnDelete.IsEnabled = false;
-            btnGenerateFollowUps.IsEnabled = false;
-
-            //  DateCalendar.BlackoutDates.Clear();FIXME
-
-        }
-
-
-        private void btnPanelAddActivity_Click(object sender, RoutedEventArgs e)
+        private void btnPanelAddActivity_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             Cursor = Cursors.Wait;
 
-            m_currentSelected_ActivityPair.Date = m_ActivityDateSelected;
-
-            if (m_currentSelected_ActivityPair.AttendeeId == 0)
+           
+            if (m_currentSelected_ActivityPair != null)
             {
-                m_currentSelected_ActivityPair.AttendeeId = m_default_row_selected.AttendeeId;
-            }
-            //if activity already exist in dbContext
-            var queryifActivityExistList = m_default_row_selected.ActivityList.SingleOrDefault(rec => rec.ToString() == m_currentSelected_ActivityPair.ToString() && rec.Date == m_currentSelected_ActivityPair.Date);
-
-            if (queryifActivityExistList == null)
-            {
-
-
-                m_dbContext.Activities.Add(m_currentSelected_ActivityPair);
-
-
-                //Add this to work a round an issue that will not sync the ActivityList when an entry is added to the m_dbContext.ActivityList   
-                var ActivityExistInList = m_default_row_selected.ActivityList.SingleOrDefault(rec => rec.ToString() == m_currentSelected_ActivityPair.ToString() && rec.Date == m_currentSelected_ActivityPair.Date);
-                if (ActivityExistInList == null)
+                foreach (AttendanceTableRow dr in m_MultiAttendanceRow_Selected)
                 {
-                    m_default_row_selected.ActivityList.Add(m_currentSelected_ActivityPair);
+
+                    ActivityPair new_ap = new ActivityPair();
+
+                    new_ap.Date = m_ActivityDateSelected;
+                    new_ap.AttendeeId = dr.AttendeeId;
+                    new_ap.ActivityGroup = m_currentSelected_ActivityPair.ActivityGroup;
+                    new_ap.ParentTaskName = m_currentSelected_ActivityPair.ParentTaskName;
+                    new_ap.ChildTaskName = m_currentSelected_ActivityPair.ChildTaskName;
+
+
+                    // Find defaultrow that correspond to the attendance row attendeeID
+                    m_default_row_selected = m_lstdefaultTableRows.SingleOrDefault(x => x.AttendeeId == dr.AttendeeId);
+
+                    //if activity do not already exist in dbContext then add to attendee's activitylist
+                    var queryifActivityExistList = m_default_row_selected.ActivityList.SingleOrDefault(rec => rec.ToString() == m_currentSelected_ActivityPair.ToString() && rec.Date == m_currentSelected_ActivityPair.Date);
+                    if (queryifActivityExistList == null)
+                    {
+
+                        m_dbContext.Activities.Add(new_ap);
+                        if (!m_default_row_selected.ActivityList.Contains(new_ap) ) // if new activity is not added then add it to the activity list
+                             m_default_row_selected.ActivityList.Add(new_ap);
+                        
+
+
+                        var lastActivity = (from rec in m_default_row_selected.ActivityList
+                                            orderby rec.Date descending
+                                            select rec).ToList().FirstOrDefault();
+
+                        if (lastActivity != null)
+                        {
+                            m_default_row_selected.Activity = lastActivity.ToString();
+                            m_default_row_selected.Activity_Last_Attended = lastActivity.DateString;
+                        }
+                        else
+                        {
+                            m_default_row_selected.Activity = new_ap.ToString();
+                            m_default_row_selected.Activity_Last_Attended = new_ap.DateString;
+                        }
+
+                    }
+                    else
+                    {
+                        MessageBox.Show("Activity already exist for this attendee, please choose another activity or date.", "Duplicate activity", MessageBoxButton.OK, MessageBoxImage.Error);
+                        Cursor = Cursors.Arrow;
+                        return;
+                    }
+
                 }
 
-                var lastActivity = (from rec in m_default_row_selected.ActivityList
-                                    where rec.AttendeeId == m_currentSelected_ActivityPair.AttendeeId
-                                    orderby rec.Date descending
-                                    select rec).ToList().FirstOrDefault();
-                if (lastActivity != null)
-                {
-                    m_default_row_selected.Activity = lastActivity.ToString();
-                    m_default_row_selected.Activity_Last_Attended = lastActivity.DateString;
-                }
 
-
-
-
-                ClearTreeView();
-
+                m_ctbActivityProspect.UncheckAll();
+                dpHeaderActivityPr.Text = "";
                 btnPanelAddActivity.IsEnabled = false;
                 m_currentSelected_ActivityPair = null;
-                m_activitychecked_count = 0;
+                m_ActivityDateSelectedPr = null;
 
-                Display_ActivityList_in_Grid();
+                MessageBox.Show("Activity successfully added to selected attendee(s) profile", "Activity Added", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
+                
             }
-            else
-            {
-                MessageBox.Show("Activity already exist for this attendee, please choose another activity or date.", "Duplicate activity", MessageBoxButton.OK, MessageBoxImage.Error);
-                Cursor = Cursors.Arrow;
-                return;
-            }
-
-
-
-
-
-
 
             Cursor = Cursors.Arrow;
         }
 
-        private void cmbAttendanceInfo_LayoutUpdated(object sender, EventArgs e)
+        private void cmbAttendanceInfo_LayoutUpdated(object sender, System.EventArgs e)
         {
 
         }
 
-        private void dataGrid_prospect_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+
+
+        private void MenuItem_AddNewActivity_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            // dataGrid_prospect.Items.Refresh();
-        }
-
-
-        private void MenuItem_AddNewActivity_Click(object sender, RoutedEventArgs e)
-        {
-            int WindowMode = 1;
-
-
-
-            if (m_currentSelected_ActivityPair != null)
-            {
-                WndAddGroup AddgroupWin = new WndAddGroup(ref m_lstActivityHeaders, WindowMode, m_currentSelected_ActivityPair);
-                AddgroupWin.ShowDialog();
-                m_newlstActivitiesCount += AddgroupWin.GetActivitiesCount;
-                // FIX ME trvActivities.Items.Refresh();
-            }
-            else
-            {
-                MessageBox.Show("Must select an activity first. Select an activity checking by left click on the activity.");
-            }
-
-
-
-
+          
 
 
 
         }
 
-        private void MenuItem_DeleteActivity_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_DeleteActivity_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             //Cursor = Cursors.Wait;
             //FIX ME
@@ -4426,7 +3863,7 @@ namespace CAOGAttendeeManager
 
 
 
-        private void MenuItem_DeleteActivityGroup_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_DeleteActivityGroup_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             //Cursor = Cursors.Wait;
 
@@ -4454,34 +3891,34 @@ namespace CAOGAttendeeManager
 
         }
 
-        private void MenuItem_AddNewHeader_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_AddNewHeader_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            int WindowMode = 2;
+        //    int WindowMode = 2;
 
 
 
 
-            WndAddGroup groupWin = new WndAddGroup(ref m_lstActivityHeaders, WindowMode, m_currentSelected_ActivityPair = null);
-            groupWin.ShowDialog();
-            m_newlstActivitiesCount = m_newlstActivitiesCount + groupWin.GetActivitiesCount;
+        //    WndAddGroup groupWin = new WndAddGroup(ref m_lstActivityHeaders, WindowMode, m_currentSelected_ActivityPair = null);
+        //    groupWin.ShowDialog();
+        //    m_newlstActivitiesCount = m_newlstActivitiesCount + groupWin.GetActivitiesCount;
 
             // FIX ME trvActivities.Items.Refresh();
 
         }
-        private void MenuItem_DeleteHeader_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_DeleteHeader_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
         }
-        private void MenuItem_AddNewGroup_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_AddNewGroup_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             int WindowMode = 0;
 
 
 
 
-            WndAddGroup groupWin = new WndAddGroup(ref m_lstActivityHeaders, WindowMode, m_currentSelected_ActivityPair);
-            groupWin.ShowDialog();
-            m_newlstActivitiesCount = m_newlstActivitiesCount + groupWin.GetActivitiesCount;
+            //WndAddGroup groupWin = new WndAddGroup(ref m_lstActivityHeaders, WindowMode, m_currentSelected_ActivityPair);
+            //groupWin.ShowDialog();
+            //m_newlstActivitiesCount = m_newlstActivitiesCount + groupWin.GetActivitiesCount;
 
             // FIX ME trvActivities.Items.Refresh();
 
@@ -4491,65 +3928,29 @@ namespace CAOGAttendeeManager
 
         }
 
-        private void TrvActivities_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void BtnPanelNewActivity_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            int index = 0;
-            var tree = sender as TreeView;
 
-
-            if (e.NewValue.GetType().Name == "ActivityGroup")
-            {
-                ActivityGroup activity_group = (ActivityGroup)e.NewValue;
+            int WindowMode = 1;
 
 
 
+                WndAddGroup AddgroupWin = new WndAddGroup(m_lstActivityHeaders);
+                AddgroupWin.ShowDialog();
+                var new_tree = AddgroupWin.getTree;
+                m_ActivityTreeChanged = AddgroupWin.getTreeChanged;
 
-
-
-                ActivityPair selectedActivity = new ActivityPair
+                if (new_tree != null) // tree has changed
                 {
-                    ActivityGroup = activity_group.ActivityName,
-                    AttendeeId = 0,
-                    ParentTaskName = "",
-                    ChildTaskName = "",
-
-
-                };
-
-                m_child_taskId = 0;
-                m_parent_taskId = 0;
-                m_currentSelected_ActivityPair = selectedActivity;
-                m_currentSelect_ActivityTask = null;
-
-
-                if (m_activitychecked_count == 1)
-                {
-                    m_previousSelected_ActivityPair = m_currentSelected_ActivityPair;
-                }
-
-                txtblkTaskDescription.Text = "";
+                    LoadNewComboTree(new_tree); //Load the combo tree boxes with the new tree
+                    Convert_and_SaveNewTreeToActivityHeardersTree(new_tree); //convert and save the new tree to the format m_lstActivityHeaders
+                    
             }
-            else if (e.NewValue.GetType().Name == "ActivityHeader")
-            {
-
-            }
-
-
-
+           
 
         }
 
-        private void BtnPanelNewActivity_Click(object sender, RoutedEventArgs e)
-        {
-
-
-            MenuItem_AddNewActivity_Click(null, null);
-
-
-
-        }
-
-        private void BtnExecQuery_Click(object sender, RoutedEventArgs e)
+        private void BtnExecQuery_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             Cursor = Cursors.Wait;
             BuildQuery_and_UpdateGrid();
@@ -4559,57 +3960,8 @@ namespace CAOGAttendeeManager
 
 
 
-        private void DataGrid_prospect_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
-        {
-            // FIX ME
-            //var datagrid = sender as DataGrid;
 
-            //m_attendance_row_selected = (AttendanceTableRow)dataGrid_prospect.SelectedItem;
-
-            //m_default_row_selected = m_lstdefaultTableRows.SingleOrDefault(rec => rec.AttendeeId == m_attendance_row_selected.AttendeeId);
-
-            //if (m_default_row_selected != null)
-            //{
-            //    var queryAttRec = m_dbContext.Attendees.Local.SingleOrDefault(attrec => attrec.AttendeeId == m_default_row_selected.AttendeeId);
-
-            //    var text = e.EditingElement as TextBox;
-
-            //    if (e.Column.Header != null)
-            //    {
-            //        if (e.Column.Header.ToString() == "First Name")
-            //        {
-            //            if (queryAttRec != null)
-            //            {
-            //                queryAttRec.FirstName = text.Text;
-
-            //            }
-
-            //            m_default_row_selected.FirstName = text.Text;
-            //            m_default_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_default_row_selected.LastName.ToUpper();
-
-            //            m_attendance_row_selected.FirstName = text.Text;
-            //            m_attendance_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_attendance_row_selected.LastName.ToUpper();
-
-            //        }
-            //        else if (e.Column.Header.ToString() == "Last Name")
-            //        {
-            //            if (queryAttRec != null)
-            //            {
-            //                queryAttRec.LastName = text.Text;
-            //            }
-
-            //            m_default_row_selected.LastName = text.Text;
-            //            m_default_row_selected.FirstLastName = m_default_row_selected.FirstName.ToUpper() + " " + text.Text.ToUpper();
-
-            //            m_attendance_row_selected.LastName = text.Text;
-            //            m_attendance_row_selected.FirstLastName = text.Text.ToUpper() + " " + m_attendance_row_selected.LastName.ToUpper();
-
-            //        }
-            //    }
-            //}
-        }
-
-        private void BtnAddColumn_Click(object sender, RoutedEventArgs e)
+        private void BtnAddColumn_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             AddColumn AddColumnWindow = new AddColumn();
 
@@ -4617,7 +3969,7 @@ namespace CAOGAttendeeManager
 
         }
 
-        private void BtnClearQuery_Click(object sender, RoutedEventArgs e)
+        private void BtnClearQuery_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             Display_DefaultTable_in_Grid();
             m_isQueryTableShown = false;
@@ -4670,12 +4022,12 @@ namespace CAOGAttendeeManager
 
         }
 
-        private void MenuItem_AddNewColumn_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_AddNewColumn_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
         }
 
-        private void MenuItem_DeleteColumn_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_DeleteColumn_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
         }
@@ -4743,7 +4095,7 @@ namespace CAOGAttendeeManager
 
             if (DateTime.TryParse(e.Text, out newDate))
             {
-                if (dpChurchLastAttended.BlackoutDates.Contains(newDate))
+                if (dp.BlackoutDates.Contains(newDate))
                 {
                     MessageBox.Show("The date you entered is not valid.");
                 }
@@ -4761,16 +4113,22 @@ namespace CAOGAttendeeManager
             if (calender.SelectedDate != null)
             {
                 DateTime date = calender.SelectedDate.Value;
+                
 
-                int ret_error = check_date_bounds();
+                int ret_error = check_date_bounds(date);
 
                 if (ret_error == 1)
+                {
+                    dpChurchLastAttended.Text = "";
                     return;
+                }
+                    
 
                 if (date.DayOfWeek == DayOfWeek.Sunday)
                 {
 
                     m_dateIsValid = true;
+                    m_DateSelected = date;
                     m_isFilterByDateChecked = true;
                     BuildQuery_and_UpdateGrid();
 
@@ -4970,7 +4328,7 @@ namespace CAOGAttendeeManager
 
 
         }
-        private void AddColumns_Click(object sender, RoutedEventArgs e)
+        private void AddColumns_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
             AddColumns();
@@ -5022,36 +4380,53 @@ namespace CAOGAttendeeManager
         {
             var dp = sender as DatePicker;
 
-            if (e.Key == Key.Back)
-            {
-
-                if (dp.Text == "")
-                {
-                    m_dateIsValid = false;
-                    BuildQuery_and_UpdateGrid();
-                }
-
-            }
-            else if (e.Key == Key.Escape)
+            if (e.Key == Key.Escape)
             {
                 if (dp.Text != "")
                 {
                     dp.Text = "";
                     m_dateIsValid = false;
+                    m_DateSelected = null;
                     BuildQuery_and_UpdateGrid();
                 }
 
             }
         }
 
-        private void BtnAddActivity_Click_1(object sender, RoutedEventArgs e)
-        {
-
-        }
 
         private void dpHeaderActivityLastAttended_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
+            var calender = sender as DatePicker;
+            if (calender.SelectedDate != null)
+            {
+                DateTime date = calender.SelectedDate.Value;
 
+                int ret_error = check_date_bounds(date);
+
+                if (ret_error == 1)
+                {
+                    dpHeaderActivityLastAttended.Text = "";
+                    return;
+
+                }
+                    
+
+                if (date.DayOfWeek == DayOfWeek.Sunday)
+                {
+
+                   
+                    m_ActivityDateSelected = date;
+                    BuildQuery_and_UpdateGrid();
+
+
+
+                }
+                else
+                {
+                    m_dateIsValid = false;
+
+                }
+            }
         }
 
         private void TxtHeaderLastNamePr_KeyUp(object sender, KeyEventArgs e)
@@ -5084,13 +4459,13 @@ namespace CAOGAttendeeManager
             if (txtHeaderLastNamePr.Text != "")
             {
 
-                dpChurchLastAttendedPr.IsEnabled = false; ;
-                dataGrid_prospect.IsReadOnly = false;
+                Disable_Filters();
+                
 
                 var filterQueryTable = m_lstattendanceTableRows.Where(row => row.LastName.ToUpper().Contains(text)).ToList();
                 dataGrid_prospect.DataContext = filterQueryTable;
                 dataGrid_prospect.Items.Refresh();
-                lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
+                lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
 
 
 
@@ -5098,7 +4473,7 @@ namespace CAOGAttendeeManager
             else // txt = ""
             {
 
-                dpChurchLastAttendedPr.IsEnabled = true;
+                Enable_Filters();
               
                 Display_AttendeeListTable_in_Grid();
 
@@ -5138,20 +4513,20 @@ namespace CAOGAttendeeManager
             if (txtHeaderFirstNamePr.Text != "")
             {
 
-                dpChurchLastAttendedPr.IsEnabled = false;
-                dataGrid_prospect.IsReadOnly = false;
+                Disable_Filters();
+                
 
                 var filterQueryTable = m_lstattendanceTableRows.Where(row => row.FirstName.ToUpper().Contains(text)).ToList();
                 dataGrid_prospect.DataContext = filterQueryTable;
                 dataGrid_prospect.Items.Refresh();
-                lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
+                lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
                   
 
             }
             else if (txtHeaderFirstNamePr.Text == "") // txt = ""
             {
 
-                dpChurchLastAttendedPr.IsEnabled = true;
+                Enable_Filters();
 
                 Display_AttendeeListTable_in_Grid();
               
@@ -5175,13 +4550,17 @@ namespace CAOGAttendeeManager
 
                 m_alistDateSelected = datec;
 
-                int ret_error = check_date_bounds();
+                int ret_error = check_date_bounds(datec);
 
                 if (ret_error == 1)
+                {
+                    dpChurchLastAttendedPr.Text = "";
                     return;
+                }
+                    
 
 
-                string date = m_alistDateSelected.ToString("MM-dd-yyyy");
+                string date = m_alistDateSelected?.ToString("MM-dd-yyyy");
 
                 if (datec.DayOfWeek == DayOfWeek.Sunday)
                 {
@@ -5204,8 +4583,81 @@ namespace CAOGAttendeeManager
 
         }
 
+        private void DpHeaderActivityLastAttended_KeyUp(object sender, KeyEventArgs e)
+        {
+            var dp = sender as DatePicker;
 
+            if (e.Key == Key.Escape)
+            {
+                if (dp.Text != "")
+                {
+                    dp.Text = "";
+                    m_dateIsValid = false;
+                    m_ActivityDateSelected = null;
+                    BuildQuery_and_UpdateGrid();
+                }
+
+            }
+        }
+
+
+        private void DpHeaderActivityPr_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var calender = sender as DatePicker;
+            if (calender.SelectedDate != null)
+            {
+                DateTime date = calender.SelectedDate.Value;
+
+                int ret_error = check_date_bounds(date);
+
+                if (ret_error == 1)
+                {
+                    dpHeaderActivityPr.Text = "";
+                    return;
+
+                }
+
+
+                if (date.DayOfWeek == DayOfWeek.Sunday)
+                {
+
+                    m_dateIsValid = true;
+                    m_ActivityDateSelectedPr = date;
+
+
+
+                }
+                else
+                {
+                    m_dateIsValid = false;
+
+                }
+            }
+        }
+
+        private void colActivityHeaderGrid_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                m_isActivityChecked = false;
+                m_ctbActivity.UncheckAll();
+                BuildQuery_and_UpdateGrid();
+            }
+        }
+
+
+        //private void DataGrid_prospect_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        //{
+        //    m_attendance_row_selected.PropertyChanged += AttendanceTabledr_PropertyChanged;
+        //}
+
+        //private void dataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        //{
+        //    m_default_row_selected.PropertyChanged += DefaultTabledr_PropertyChanged;
+
+        //}
     }
+
 }
 
 

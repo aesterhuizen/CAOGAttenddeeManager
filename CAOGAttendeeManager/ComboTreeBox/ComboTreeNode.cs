@@ -17,6 +17,7 @@ public class ComboTreeNode : IComparable<ComboTreeNode>, ICloneable {
 	private string _name;
     private ComboTreeNodeCollection _nodes;
 	private string _text;
+	private string _description;
 	private FontStyle _fontStyle;
 	private int _imageIndex;
 	private string _imageKey;
@@ -51,6 +52,17 @@ public class ComboTreeNode : IComparable<ComboTreeNode>, ICloneable {
 		get { return _parent; }
 		internal set { _parent = value; }
 	}
+
+	/// <summary>
+	/// Gets or sets the text displayed on the node.
+	/// </summary>
+	[DefaultValue("ComboTreeNode"), Description("The string MetaData of the node."), Category("Appearance")]
+	public string Description
+	{
+		get { return _description; }
+		set { _description = value; }
+	}
+
 	/// <summary>
 	/// Gets or sets the text displayed on the node.
 	/// </summary>
@@ -211,7 +223,7 @@ public class ComboTreeNode : IComparable<ComboTreeNode>, ICloneable {
 	/// </summary>
 	public ComboTreeNode() {
 		_nodes = new ComboTreeNodeCollection(this);
-		_name = _text = String.Empty;
+		_description = _name = _text = String.Empty;
 		_fontStyle = FontStyle.Regular;
 		_foreColor = Color.Empty;
 		_expandedImageIndex = _imageIndex = -1;
@@ -302,7 +314,7 @@ public class ComboTreeNode : IComparable<ComboTreeNode>, ICloneable {
 	/// Raises the <see cref="CheckStateChanged"/> event.
 	/// </summary>
 	protected virtual void OnCheckStateChanged() {
-		if (CheckStateChanged != null) CheckStateChanged(this, EventArgs.Empty);
+		if (CheckStateChanged != null) CheckStateChanged(this, System.EventArgs.Empty);
 	}
 
 	/// <summary>
@@ -384,7 +396,7 @@ public class ComboTreeNode : IComparable<ComboTreeNode>, ICloneable {
 /// Arguments for the <see cref="ComboTreeBox.AfterCheck"/> event.
 /// </summary>
 [Serializable]
-public class ComboTreeNodeEventArgs : EventArgs {
+public class EventArgs : System.EventArgs {
 
 	/// <summary>
 	/// Gets the affected node.
@@ -395,10 +407,10 @@ public class ComboTreeNodeEventArgs : EventArgs {
 	}
 
 	/// <summary>
-	/// Initialises a new instance of the <see cref="ComboTreeNodeEventArgs"/> class using the specified node.
+	/// Initialises a new instance of the <see cref="EventArgs"/> class using the specified node.
 	/// </summary>
 	/// <param name="node"></param>
-	public ComboTreeNodeEventArgs(ComboTreeNode node) {
+	public EventArgs(ComboTreeNode node) {
 		Node = node;
 	}
 }
@@ -407,7 +419,7 @@ public class ComboTreeNodeEventArgs : EventArgs {
 /// Arguments for the <see cref="ComboTreeDropDown.DrawNode"/> event.
 /// </summary>
 [Serializable]
-public class ComboTreeNodePaintEventArgs : EventArgs {
+public class ComboTreeNodePaintEventArgs : System.EventArgs {
 
 	/// <summary>
 	/// Gets the <see cref="Graphics"/> surface on which the content is drawn.

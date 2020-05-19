@@ -479,7 +479,7 @@ public class ComboTreeDropDown : ToolStripDropDown {
 	/// Updates the font on the items when the drop-down's font changes.
 	/// </summary>
 	/// <param name="e"></param>
-    protected override void OnFontChanged(EventArgs e) {
+    protected override void OnFontChanged(System.EventArgs e) {
         base.OnFontChanged(e);
 		_itemHeight = Math.Max(MIN_ITEM_HEIGHT, Font.Height);
     }
@@ -533,7 +533,7 @@ public class ComboTreeDropDown : ToolStripDropDown {
 	public bool ProcessKey(Keys keyCode, Keys modifiers) {
 		if ((keyCode == Keys.Enter) || (modifiers.HasFlag(Keys.Alt) && (keyCode == Keys.Up))) {
 			if (_visibleItems.Count > 0) {
-				_sourceControl.OnNodeClick(new ComboTreeNodeEventArgs(_visibleItems[_highlightedItemIndex].Node));
+				_sourceControl.OnNodeClick(new EventArgs(_visibleItems[_highlightedItemIndex].Node));
 
 				if (_visibleItems[_highlightedItemIndex].Node.Selectable) {
 					_sourceControl.SelectedNode = _visibleItems[_highlightedItemIndex].Node;
@@ -790,7 +790,7 @@ public class ComboTreeDropDown : ToolStripDropDown {
 						if (!info.CheckRectangle.Contains(e.Location)) Close();
 					}
 					else if (!_sourceControl.IsDisposed) {
-						_sourceControl.OnNodeClick(new ComboTreeNodeEventArgs(info.Node));
+						_sourceControl.OnNodeClick(new EventArgs(info.Node));
 
 						if (info.Node.Selectable) {
 							_sourceControl.SelectedNode = info.Node;
@@ -808,7 +808,7 @@ public class ComboTreeDropDown : ToolStripDropDown {
 	/// returning to the control.
 	/// </summary>
 	/// <param name="e"></param>
-	protected override void OnMouseEnter(EventArgs e) {
+	protected override void OnMouseEnter(System.EventArgs e) {
 		base.OnMouseEnter(e);
 		if ((MouseButtons & MouseButtons.Left) != MouseButtons.Left) _scrollDragging = false;
 	}
@@ -818,7 +818,7 @@ public class ComboTreeDropDown : ToolStripDropDown {
 	/// the control.
 	/// </summary>
 	/// <param name="e"></param>
-	protected override void OnMouseLeave(EventArgs e) {
+	protected override void OnMouseLeave(System.EventArgs e) {
 		base.OnMouseLeave(e);
 		if ((MouseButtons & MouseButtons.Left) != MouseButtons.Left) _scrollDragging = false;
 
@@ -1179,13 +1179,13 @@ public class ComboTreeDropDown : ToolStripDropDown {
 		base.Dispose(disposing);
 	}
 
-	void toolTipTimer_Tick(object sender, EventArgs e) {
+	void toolTipTimer_Tick(object sender, System.EventArgs e) {
 		string text = _visibleItems[_highlightedItemIndex].Node.ToolTip;
 		if (!String.IsNullOrEmpty(text)) _toolTip.Show(text, this, PointToClient(Cursor.Position));
 		_toolTipTimer.Stop();
 	}
 
-	void scrollRepeater_Tick(object sender, EventArgs e) {
+	void scrollRepeater_Tick(object sender, System.EventArgs e) {
 		// reduce the interval and simulate another click
 		_scrollRepeater.Interval = 50;
 		Point local = PointToClient(Cursor.Position);

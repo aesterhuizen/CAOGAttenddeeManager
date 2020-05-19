@@ -37,7 +37,7 @@
 
     <DockPanel Margin="0,-2,0,2">
 
-        <Ribbon DockPanel.Dock="Top" Title="Attendee Manager" SelectionChanged="Ribbon_SelectionChanged">
+        <Ribbon DockPanel.Dock="Top" Title="Attendee Manager">
             <Ribbon.ApplicationMenu>
                 <RibbonApplicationMenu Label="File" SmallImageSource="Resources\FileCabinet.ico">
                     <RibbonApplicationMenuItem Header="About" Click="RibbonApplicationMenuItem_Click_About"/>
@@ -46,7 +46,7 @@
                 </RibbonApplicationMenu>
             </Ribbon.ApplicationMenu>
             <!-- Tab ############################################################################################ -->
-            <RibbonTab Name="tabHome" Header="Home" >
+            <RibbonTab Name="tabHome" Header="Home" Height="90">
                 <RibbonGroup Header="Database" >
 
                     <RibbonButton Name="btnSave"
@@ -74,7 +74,7 @@
 
                 </RibbonGroup>
 
-                <RibbonGroup Header="Table Operations" Margin="0,1" Width="241">
+                <RibbonGroup Header="Table Operations" Width="190" Height="90">
 
 
 
@@ -82,7 +82,7 @@
                                   Label="Generate Follow-Up..."
                                   LargeImageSource="Resources\Generate-followup.ico"
                                   Click="btnGenerateFollowUps_Click" 
-                                  ToolTip="Generate a follow-up record for each attendee that missed 3 Sunday services in a row." />
+                                  ToolTip="Prompt the user to generate a follow-up record for each attendee that missed 3 Sunday services in a row." />
 
                     <RibbonButton x:Name="btnNewRec" 
                                   Label="New Record" 
@@ -90,25 +90,25 @@
                                   Click="btnNewRec_Click" 
                                   ToolTip="Add a new Attendee record to the attendee prospect checklist."/>
 
-                    <RibbonButton x:Name="btnImportRecords" 
-                                  Label="Update Changes" 
-                                  LargeImageSource="Resources\Add.ico"
-                                  Click="ImportRows_Click" 
-                                  ToolTip="Update changes made in Prospect List or Activity &amp; Info tabs to the Active table that will be saved to the database when the user click on the Save button."/>
+
 
 
                     <RibbonButton Name="btnDelete" 
                                   Label="Delete Records..."
                                   LargeImageSource="Resources\Delete.ico"
                                   Click="DeleteRecord" 
-                                  ToolTip="Delete Record from Active Attendance table. Attendee will not be removed from the database until you click on the Save button" Height="65" Margin="0,0,-21,0"/>
+                                  ToolTip="Delete Record from Active Attendance table. Attendee will not be removed from the database until you click on the Save button" Height="65" Margin="0,0,-21,0">
+
+
+                    </RibbonButton>
+
 
 
 
                 </RibbonGroup>
 
 
-                <RibbonGroup Header="Attendance Metrics" Width="200" Name="rbnAttendanceMetrics">
+                <RibbonGroup Header="Attendance Metrics" Width="190" Name="rbnAttendanceMetrics">
 
 
 
@@ -147,132 +147,13 @@
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250" MinWidth="200"/>
-                <ColumnDefinition Width="3"/>
-                <ColumnDefinition/>
+                <ColumnDefinition Width="1501"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0">
-                <StackPanel Name="spActifityFilter" Orientation="Horizontal">
-
-                    <ToggleButton Name="btnAddActivity"
-                        Content="Add Activity"
-                        Click="btnAddActivity_Click"
-                        ToolTip="Open activity panel to add an activity to the selected attendee's activity list"/>
-
-                    <!--<Button Margin="37,0,0,0" Name="btnClearQuery" Click="BtnClearQuery_Click" Content="Clear Query"/>-->
-                </StackPanel>
-                <GroupBox Name="gbFilterOptions">
-
-                    <StackPanel Name="spFilterOptions" MinWidth="200">
 
 
-
-                        <Expander Name="ActivityExpander" IsExpanded="True" Height="300">
-                            <Expander.Header>
-                                <StackPanel Name="spActivityExpanderHeader" Orientation="Horizontal" >
-                                    <CheckBox Margin="5,0,0,0" Content="Activity"  Name="chkActivityFilter" Checked="chkActivityFilter_Checked" Unchecked="chkActivityFilter_Unchecked" RenderTransformOrigin="0.797,-0.5"/>
-                                    <Button Name="btnPanelNewActivity" BorderThickness="1" Click="BtnPanelNewActivity_Click"
-                                            Content="New Activity"
-                                            ToolTip="Add a new activity to the activities list"
-                                            Margin="10,0,0,0"/>
-
-
-
-                                    <Button Margin="1,0,0,0" Name="btnPanelAddActivity" BorderThickness="1" Click="btnPanelAddActivity_Click"
-                                            Content="Add"
-                                            Width="66"
-                                            ToolTip="Add activity to selected attendee's activity list"/>
-
-
-                                </StackPanel>
-                            </Expander.Header>
-
-                            <TreeView Name="trvActivities" SelectedItemChanged="TrvActivities_SelectedItemChanged" >
-                                <TreeView.ContextMenu>
-                                    <ContextMenu>
-                                        <MenuItem Header="Add New Activity Group ..." Click="MenuItem_AddNewHeader_Click"/>
-
-                                    </ContextMenu>
-                                </TreeView.ContextMenu>
-                                <TreeView.ItemContainerStyle>
-                                    <Style TargetType="{x:Type TreeViewItem}">
-                                        <Setter Property="IsExpanded" Value="True"/>
-                                    </Style>
-                                </TreeView.ItemContainerStyle>
-
-                                <TreeView.Resources>
-                                    <Style TargetType="{x:Type ScrollViewer}">
-                                        <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
-                                    </Style>
-
-                                    <HierarchicalDataTemplate DataType="{x:Type local:ActivityHeader}" ItemsSource="{Binding Groups}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" >
-                                                <TextBlock.ContextMenu>
-                                                    <ContextMenu>
-                                                        <MenuItem Header="Add new group" Click="MenuItem_AddNewGroup_Click"/>
-                                                        <Separator/>
-                                                        <MenuItem Header="Delete group" Click="MenuItem_DeleteActivityGroup_Click"/>
-                                                    </ContextMenu>
-                                                </TextBlock.ContextMenu>
-                                            </TextBlock>
-
-                                        </StackPanel>
-                                    </HierarchicalDataTemplate>
-
-                                    <HierarchicalDataTemplate DataType="{x:Type local:ActivityGroup }" ItemsSource="{Binding lstActivityTasks}">
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                            <CheckBox  Name="chkActivity" Content="{Binding ActivityName}" Margin="5,0,0,0" Checked="ActivityTreeView_Checkbox_Checked"
-                                                       Unchecked="ActivityTreeView_Checkbox_UnChecked"
-                                                      IsChecked="{Binding IsSelected}" >
-                                                <CheckBox.ContextMenu>
-                                                    <ContextMenu>
-                                                        <MenuItem Header="Add new activity ..." Click="MenuItem_AddNewActivity_Click"/>
-                                                        <MenuItem Header="Create new column from select activity" Click="MenuItem_AddNewColumn_Click"/>
-                                                        <Separator/>
-                                                        <MenuItem Header="Delete activity" Click="MenuItem_DeleteActivity_Click"/>
-                                                        <MenuItem Header="Delete column" Click="MenuItem_DeleteColumn_Click"/>
-                                                    </ContextMenu>
-                                                </CheckBox.ContextMenu>
-                                            </CheckBox>
-                                        </StackPanel>
-                                    </HierarchicalDataTemplate>
-
-                                    <HierarchicalDataTemplate DataType="{x:Type local:ActivityTask}" ItemsSource="{Binding lstsubTasks}">
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                            <CheckBox  Name="chkActivity" Content="{Binding TaskName}" Margin="5,0,0,0" Checked="ActivityTreeView_Checkbox_Checked"
-                                                       Unchecked="ActivityTreeView_Checkbox_UnChecked"
-                                                      IsChecked="{Binding IsSelected}" >
-                                                <CheckBox.ContextMenu>
-                                                    <ContextMenu>
-                                                        <MenuItem Header="Add new activity ..." Click="MenuItem_AddNewActivity_Click"/>
-                                                        <MenuItem Header="Create new column from select activity" Click="MenuItem_AddNewColumn_Click"/>
-                                                        <Separator/>
-                                                        <MenuItem Header="Delete activity" Click="MenuItem_DeleteActivity_Click"/>
-                                                        <MenuItem Header="Delete column" Click="MenuItem_DeleteColumn_Click"/>
-                                                    </ContextMenu>
-                                                </CheckBox.ContextMenu>
-                                            </CheckBox>
-                                        </StackPanel>
-                                    </HierarchicalDataTemplate>
-                                </TreeView.Resources>
-                            </TreeView>
-
-
-
-                        </Expander>
-
-
-                    </StackPanel>
-                </GroupBox>
-                <TextBlock Name="txtblkTaskDescription" TextWrapping="Wrap"/>
-
-            </StackPanel>
-
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Left" Background="#007acc"/>
             <!-- Tab control ############################################################################################################################################## -->
-            <TabControl Name="GridsTabControl" SelectionChanged="GridsTabControl_SelectionChanged" MouseUp="GridsTabControl_MouseUp" Grid.Column="2">
+            <TabControl Name="GridsTabControl" SelectionChanged="GridsTabControl_SelectionChanged"  >
                 <!-- Active Tab################################################################################################################################################ -->
                 <TabItem Header="Active" Name="ActiveTab">
                     <Grid>
@@ -286,22 +167,10 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
 
-                        <!--<Style TargetType="DataGridColumnHeader">
-                                    <EventSetter Event="Click" Handler="columnHeaderClick"/>
-                                </Style>-->
-                        <!--<Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="76*"/>
-                            <ColumnDefinition Width="0*"/>
-                            <ColumnDefinition Width="15*"/>
-                            <ColumnDefinition Width="17*"/>
-                            <ColumnDefinition Width="921*"/>
-                        </Grid.ColumnDefinitions>-->
-
-
                         <DataGrid x:Name="dataGrid"
                                 LoadingRowDetails="dataGrid_LoadingRowDetails"
                                 RowDetailsVisibilityMode="Collapsed"
-                                CellEditEnding="dataGrid_CellEditEnding"
+                            
                                 AutoGenerateColumns="False"
                                 CanUserAddRows="False" 
                                 CanUserDeleteRows="False"
@@ -312,16 +181,15 @@
                                 SelectedCellsChanged="dataGrid_SelectedCellsChanged"
                                 ColumnWidth="120"
                                 CanUserResizeRows="False" 
-                                ItemsSource="{Binding}" Margin="0,4,0,-4" 
-                                ColumnHeaderHeight="60">
+                                ItemsSource="{Binding}" 
+                                ColumnHeaderHeight="60"
+                                GridLinesVisibility="Horizontal"
+                                HorizontalGridLinesBrush="LightGray"
+                                RowHeight="25" FontSize="13"  
+                                >
 
 
                             <DataGrid.Columns>
-
-
-
-
-                                <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
                                 <DataGridTemplateColumn Width="8" >
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -367,8 +235,17 @@
                                                      TextChanged="txtSearch_TextChanged_LName" FontSize="12" 
                                                         HorizontalAlignment="Left" 
                                                     VerticalAlignment="Center" 
-                                                     Width="100" Height="22"/>
+                                                     Width="100" Height="22">
 
+                                                <TextBox.ToolTip>
+                                                    <TextBlock>
+                                                    Search lastname
+                                                   <LineBreak/>
+                                                    Press ESC to exit search mode.
+                                                    </TextBlock>
+                                                </TextBox.ToolTip>
+
+                                            </TextBox>
 
                                         </Grid>
                                     </DataGridTextColumn.Header>
@@ -398,8 +275,17 @@
                                                      TextChanged="txtSearch_TextChanged_FName" FontSize="12" 
                                                      HorizontalAlignment="Left" 
                                                     VerticalAlignment="Center" 
-                                                     Width="100" Height="22"/>
+                                                     Width="100" Height="22">
+                                                
+                                                <TextBox.ToolTip>
+                                                    <TextBlock>
+                                                    Search firstname
+                                                   <LineBreak/>
+                                                    Press ESC to exit search mode.
+                                                    </TextBlock>
+                                                </TextBox.ToolTip>
 
+                                            </TextBox>
 
                                         </Grid>
 
@@ -424,12 +310,22 @@
                                                     SelectedDateChanged="dpChurchLastAttended_SelectedDateChanged"
                                                     IsEnabled="True"
                                                     DateValidationError="Dp_DateValidation" 
+                                                    
                                                     PreviewKeyUp="dpChurchLastAttended_PreviewKeyUp"
                                                     FontSize="11"
                                                     SelectedDateFormat="Short" 
                                                     DisplayDateEnd="2030-01-01" 
-                                                    DisplayDateStart="2000-01-01"/>
+                                                    DisplayDateStart="2000-01-01">
 
+                                                <DatePicker.ToolTip>
+                                                    <TextBlock>
+                                                    Search church last attended
+                                                   <LineBreak/>
+                                                    Press ESC to exit search mode.
+                                                    </TextBlock>
+                                                </DatePicker.ToolTip>
+
+                                            </DatePicker>
                                         </Grid>
 
                                     </DataGridTextColumn.Header>
@@ -464,6 +360,14 @@
                                                 <ComboBoxItem>Attended</ComboBoxItem>
                                                 <ComboBoxItem>Follow-Up</ComboBoxItem>
                                                 <ComboBoxItem>Responded</ComboBoxItem>
+
+                                                <ComboBox.ToolTip>
+                                                    <TextBlock>
+                                                    Search church status
+                                                   <LineBreak/>
+                                                    Press ESC to exit search mode.
+                                                    </TextBlock>
+                                                </ComboBox.ToolTip>
                                             </ComboBox>
 
                                         </Grid>
@@ -482,7 +386,7 @@
                                         </Style>
                                     </DataGridTextColumn.HeaderStyle>
                                     <DataGridTextColumn.Header>
-                                        <Grid Name="colActivityHeaderGrid">
+                                        <Grid Name="colActivityHeaderGrid" ToolTip="Search activity" KeyUp="colActivityHeaderGrid_KeyUp">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
@@ -491,8 +395,9 @@
                                                 <RowDefinition Height="25"/>
                                             </Grid.RowDefinitions>
 
-                                            <Label Margin="-5,0,0,0" Grid.Row="0" Content="Activity" Height="23.5" FontSize="11"/>
-                                            <StackPanel Name="spActivityHeader" Grid.Row="1" Height="22">
+                                            <Label Margin="-5,0,0,0" Grid.Row="0" Content="Activity" Height="23.5" FontSize="11" />
+                                            <StackPanel Name="spActivityHeader" Grid.Row="1" Height="22"
+                                                        >
 
                                             </StackPanel>
 
@@ -518,13 +423,25 @@
                                             </Grid.RowDefinitions>
 
                                             <Label Margin="-5,0,0,0" Grid.Row="0" Content="Activity last attended" Height="23" FontSize="12"/>
-                                            <DatePicker Grid.Column="0" Grid.Row="1" Height="22" Width="130" Name="dpHeaderActivityLastAttended"
-                                                        Text="Activity Date" 
-                                                        ToolTip="Search activity date"
+                                            <DatePicker Margin="0,1,0,2"
+                                                        Grid.Column="0" Grid.Row="1" Height="22" Width="130" 
+                                                        Name="dpHeaderActivityLastAttended"
+                                                        PreviewKeyUp="DpHeaderActivityLastAttended_KeyUp"
                                                         SelectedDateChanged="dpHeaderActivityLastAttended_SelectedDateChanged"
-                                                    FontSize="11"
-                                                    SelectedDateFormat="Short" DisplayDateEnd="2030-01-01" DisplayDateStart="2000-01-01" HorizontalAlignment="Left" Margin="0,1,0,2"/>
-
+                                                        DateValidationError="Dp_DateValidation"
+                                                        FontSize="11"
+                                                        SelectedDateFormat="Short" 
+                                                        DisplayDateEnd="2030-01-01" 
+                                                        DisplayDateStart="2000-01-01" 
+                                                        HorizontalAlignment="Left">
+                                                <DatePicker.ToolTip>
+                                                    <TextBlock>
+                                                        Search activity date
+                                                   <LineBreak/>
+                                                    Press ESC to exit search mode.
+                                                    </TextBlock>
+                                                </DatePicker.ToolTip>
+                                            </DatePicker>
 
                                         </Grid>
 
@@ -549,8 +466,8 @@
                                             </Button>-->
 
                                             <Button Name="btnDelete"
-                                                        Click="btnDelete_Click"
-                                                        ToolTip="Delete Attendee Record from selected table...">
+                                                        Click="btnDeleteAttendanceInfo_Click"
+                                                        ToolTip="Delete multiple selected attendee records from the table below.">
                                                 <Image Height="20" Source="Resources\Delete.ico"/>
                                             </Button>
 
@@ -563,7 +480,10 @@
                                                         AutoGenerateColumns="False"
                                                         SelectionMode="Extended"
                                                         CanUserDeleteRows="False"
-                                                        IsReadOnly="True">
+                                                        IsReadOnly="True"
+                                                        GridLinesVisibility="Horizontal"
+                                                        HorizontalGridLinesBrush="LightGray"
+                                                        RowHeight="25" FontSize="13" >
 
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
@@ -580,7 +500,10 @@
                                                         AutoGenerateColumns="False"
                                                         SelectionMode="Extended"
                                                         CanUserDeleteRows="False"
-                                                        IsReadOnly="True">
+                                                        IsReadOnly="True"
+                                                        GridLinesVisibility="Horizontal"
+                                                        HorizontalGridLinesBrush="LightGray"
+                                                        RowHeight="45" FontSize="13" >
 
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
@@ -626,21 +549,25 @@
 
 
 
-                        <DataGrid Name="dataGrid_prospect"
-                                  DataContextChanged="dataGrid_prospect_DataContextChanged"
-                                  SelectedCellsChanged="dataGrid_prospect_SelectedCellsChanged"
-                                  CanUserSortColumns="False"
-                                  CanUserAddRows="False"
-                                  AutoGenerateColumns="False"
-                                  CanUserDeleteRows="False"
-                                   ItemsSource="{Binding IsAsync=True}" 
-                                  CanUserReorderColumns="False"
-                                  ClipboardCopyMode="IncludeHeader"
-                                  ColumnWidth="120" 
-                                  CanUserResizeRows="False">
+                        <DataGrid x:Name="dataGrid_prospect"
+                                SelectedCellsChanged="dataGrid_prospect_SelectedCellsChanged"
+                               
+                                AutoGenerateColumns="False"
+                                CanUserAddRows="False" 
+                                CanUserDeleteRows="False"
+                                CanUserReorderColumns="False"
+                                CanUserSortColumns="True"
+                                CanUserResizeColumns="True"
+                                ColumnWidth="120"
+                                CanUserResizeRows="False" 
+                                ItemsSource="{Binding}" 
+                                ColumnHeaderHeight="60"
+                                GridLinesVisibility="Horizontal"
+                                HorizontalGridLinesBrush="LightGray"
+                                RowHeight="25" FontSize="13"  >
 
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}" />
+
                                 <DataGridTextColumn Binding="{Binding LastName}">
                                     <DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="{x:Type DataGridColumnHeader}">
@@ -665,7 +592,8 @@
                                                      TextChanged="TxtHeaderLastNamePr_TextChanged" FontSize="12" 
                                                         HorizontalAlignment="Left" 
                                                     VerticalAlignment="Center" 
-                                                     Width="100" Height="22"/>
+                                                     Width="100" Height="22"
+                                                     ToolTip="Search lastname"/>
 
 
                                         </Grid>
@@ -695,7 +623,8 @@
                                                      TextChanged="TxtHeaderFirstNamePr_TextChanged"  FontSize="12" 
                                                      HorizontalAlignment="Left" 
                                                     VerticalAlignment="Center" 
-                                                     Width="100" Height="22"/>
+                                                     Width="100" Height="22"
+                                                     ToolTip="Search firstname"/>
 
 
                                         </Grid>
@@ -723,16 +652,90 @@
                                                     FontSize="11"
                                                     SelectedDateFormat="Short" 
                                                     DisplayDateEnd="2030-01-01" 
-                                                    DisplayDateStart="2000-01-01"/>
+                                                    DisplayDateStart="2000-01-01"
+                                                    ToolTip="Search church last attended"/>
 
                                         </Grid>
 
                                     </DataGridTextColumn.Header>
                                 </DataGridTextColumn>
-                                                    
-                                <DataGridTextColumn Header="Attended" Binding="{Binding Attended}" />
-                           
 
+                                <DataGridTextColumn Binding="{Binding Attended}" Width="70">
+                                    <DataGridTextColumn.Header>
+                                        <Grid ToolTipService.ShowDuration="60000" 
+                                              ToolTip="Add church last attened date to all attendee's profile marked with a '1' in this column.">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="25"/>
+                                                <RowDefinition Height="25"/>
+                                            </Grid.RowDefinitions>
+
+                                            <Label Grid.Row="0" Content="Attended" Height="23" FontSize="12"/>
+                                            <Button Grid.Row="1" Name="btnImport" BorderThickness="1" Click="ImportRows_Click"
+                                            Content="Add"
+                                            Width="60"
+                                            Height="20"
+                                            HorizontalAlignment="Left"/>
+
+                                        </Grid>
+                                    </DataGridTextColumn.Header>
+                                </DataGridTextColumn>
+
+
+
+                                <DataGridTextColumn x:Name="ActivityPr" Width="260" Binding="{Binding Activity}">
+                                    <DataGridTextColumn.HeaderStyle>
+                                        <Style TargetType="{x:Type DataGridColumnHeader}">
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        </Style>
+                                    </DataGridTextColumn.HeaderStyle>
+                                    <DataGridTextColumn.Header>
+                                        <Grid Name="colActivityHeaderGridPr" ToolTipService.ShowDuration="60000"  
+                                              ToolTip="Add activity and activity attended date to all selected attenees's profile.">
+
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="25"/>
+                                                <RowDefinition Height="25"/>
+                                            </Grid.RowDefinitions>
+
+                                            <Label Grid.Row="0" Grid.Column="0" Content="Activity" Height="23.5" FontSize="11"/>
+                                            <DatePicker Grid.Row="0" Grid.Column="0"
+                                                        Height="22" Width="130" 
+                                                        Name="dpHeaderActivityPr"
+                                                        SelectedDateChanged="DpHeaderActivityPr_SelectedDateChanged"
+                                                        DateValidationError="Dp_DateValidation"
+                                                        FontSize="11"
+                                                        SelectedDateFormat="Short" 
+                                                        DisplayDateEnd="2030-01-01" 
+                                                        DisplayDateStart="2000-01-01" 
+                                                        HorizontalAlignment="Right" />
+                                            <StackPanel Name="spActivityHeaderPr" Grid.Row="1" Height="22" />
+                                            <Button Grid.Row="0" Grid.Column="1" 
+                                                Margin="10,0,0,0" 
+                                                Name="btnPanelAddActivity" BorderThickness="1" Click="btnPanelAddActivity_Click"
+                                                Content="Add"
+                                                Width="60"
+                                                Height="20"
+                                                HorizontalAlignment="Left"
+                                                ToolTip="Add Activity to selected attendee(s) profile"/>
+                                            <Button Grid.Row="1"  Grid.Column="1" Name="btnPanelNewActivity" BorderThickness="1" Click="BtnPanelNewActivity_Click"
+                                                    Margin="10,0,0,0"
+                                                    Content="New"
+                                                    ToolTip="Add/Remove new activity to the dropdown list"
+                                                    Width="60"
+                                                    Height="20"
+                                                    HorizontalAlignment="Left"/>
+
+                                        </Grid>
+                                    </DataGridTextColumn.Header>
+                                </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>

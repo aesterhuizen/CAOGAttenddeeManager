@@ -229,21 +229,21 @@ namespace BufferedPainting {
             }
         }
 
-        void Control_HandleCreated(object sender, EventArgs e) {
+        void Control_HandleCreated(object sender, System.EventArgs e) {
             if (BufferedPaintSupported) {
                 Interop.BufferedPaintInit();
                 _animationsNeedCleanup = true;
             }
         }
 
-        void Control_Disposed(object sender, EventArgs e) {
+        void Control_Disposed(object sender, System.EventArgs e) {
             if (_animationsNeedCleanup) {
                 Interop.BufferedPaintUnInit();
                 _animationsNeedCleanup = false;
             }
         }
 
-        void Control_Resize(object sender, EventArgs e) {
+        void Control_Resize(object sender, System.EventArgs e) {
             // resizing stops all playing animations
             if (_animationsNeedCleanup && Control.IsHandleCreated) Interop.BufferedPaintStopAllAnimations(Control.Handle);
 
@@ -478,7 +478,7 @@ namespace BufferedPainting {
     /// EventArgs class for the BufferedPainter.PaintVisualState event.
     /// </summary>
     /// <typeparam name="TState">Any type representing the visual state of the control.</typeparam>
-    public class BufferedPaintEventArgs<TState> : EventArgs {
+    public class BufferedPaintEventArgs<TState> : System.EventArgs {
 
         /// <summary>
         /// Gets the visual state to paint.

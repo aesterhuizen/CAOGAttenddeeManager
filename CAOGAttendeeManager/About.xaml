@@ -9,10 +9,12 @@
         WindowStyle="ToolWindow"
         ResizeMode="NoResize">
     <Grid>
-        <StackPanel Orientation="Vertical" Margin="0,50,0,0">
-            <Label Content="Attendee Manager v 3.1.16" HorizontalAlignment="Center" />
+        <StackPanel Orientation="Vertical" Margin="0,0,0,50">
+            <Label Content="Attendee Manager" HorizontalAlignment="Left" Margin="92,16,0,0" VerticalAlignment="Top" Height="29" Width="109"/>
+            <Label x:Name="lblVersionStr" HorizontalAlignment="Center" />
             <Label Content="by Anton Esterhuizen" HorizontalAlignment="Center" Margin="78,0" Width="138"/>
-            
-       </StackPanel>
+
+        </StackPanel>
+
     </Grid>
 </Window>

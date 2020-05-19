@@ -97,7 +97,7 @@ public abstract class DropDownControlBase : Control {
 			if (_style != value) {
 				_style = value;
 				Invalidate();
-				OnDropDownStyleChanged(EventArgs.Empty);
+                OnDropDownStyleChanged(System.EventArgs.Empty);
 			}
 		}
 	}
@@ -231,7 +231,7 @@ public abstract class DropDownControlBase : Control {
 	/// Raised the DropDownButtonClick event.
 	/// </summary>
 	/// <param name="e"></param>
-	protected virtual void OnDropDownButtonClick(EventArgs e) {
+	protected virtual void OnDropDownButtonClick(System.EventArgs e) {
 		if (DropDownButtonClick != null) DropDownButtonClick(this, e);
 	}
 
@@ -239,7 +239,7 @@ public abstract class DropDownControlBase : Control {
 	/// Raises the DropDown event.
 	/// </summary>
 	/// <param name="e"></param>
-	protected virtual void OnDropDown(EventArgs e) {
+	protected virtual void OnDropDown(System.EventArgs e) {
 		if (DropDown != null) DropDown(this, e);
 	}
 
@@ -247,7 +247,7 @@ public abstract class DropDownControlBase : Control {
 	/// Raises the DropDownClosed event.
 	/// </summary>
 	/// <param name="e"></param>
-	protected virtual void OnDropDownClosed(EventArgs e) {
+	protected virtual void OnDropDownClosed(System.EventArgs e) {
 		if (DropDownClosed != null) DropDownClosed(this, e);
 	}
 
@@ -255,7 +255,7 @@ public abstract class DropDownControlBase : Control {
 	/// Raises the <see cref="StyleChanged"/> event.
 	/// </summary>
 	/// <param name="e"></param>
-	protected virtual void OnDropDownStyleChanged(EventArgs e) {
+	protected virtual void OnDropDownStyleChanged(System.EventArgs e) {
 		if (DropDownStyleChanged != null) DropDownStyleChanged(this, e);
 	}
 
@@ -263,7 +263,7 @@ public abstract class DropDownControlBase : Control {
 	/// Recalculates the fixed height of the control when the font changes.
 	/// </summary>
 	/// <param name="e"></param>
-	protected override void OnFontChanged(EventArgs e) {
+	protected override void OnFontChanged(System.EventArgs e) {
 		base.OnFontChanged(e);
 		SetHeight();
 	}
@@ -272,7 +272,7 @@ public abstract class DropDownControlBase : Control {
 	/// Repaints the focus rectangle when focus changes.
 	/// </summary>
 	/// <param name="e"></param>
-	protected override void OnGotFocus(EventArgs e) {
+	protected override void OnGotFocus(System.EventArgs e) {
 		base.OnGotFocus(e);
 		if (ShowFocusCues) Invalidate();
 	}
@@ -281,7 +281,7 @@ public abstract class DropDownControlBase : Control {
 	/// Repaints the focus rectangle when focus changes.
 	/// </summary>
 	/// <param name="e"></param>
-	protected override void OnLostFocus(EventArgs e) {
+	protected override void OnLostFocus(System.EventArgs e) {
 		base.OnLostFocus(e);
 		if (ShowFocusCues) Invalidate();
 	}
@@ -308,7 +308,7 @@ public abstract class DropDownControlBase : Control {
 	/// Repaints the control when the mouse enters its bounds.
 	/// </summary>
 	/// <param name="e"></param>
-	protected override void OnMouseEnter(EventArgs e) {
+	protected override void OnMouseEnter(System.EventArgs e) {
 		base.OnMouseEnter(e);
 		_bufferedPainter.State = GetComboBoxState();
 		UpdateCursor();
@@ -318,7 +318,7 @@ public abstract class DropDownControlBase : Control {
 	/// Repaints the control when the mouse leaves its bounds.
 	/// </summary>
 	/// <param name="e"></param>
-	protected override void OnMouseLeave(EventArgs e) {
+	protected override void OnMouseLeave(System.EventArgs e) {
 		base.OnMouseLeave(e);
 		_bufferedPainter.State = GetComboBoxState();
 		UpdateCursor();
@@ -384,7 +384,7 @@ public abstract class DropDownControlBase : Control {
 	/// Recalculates the bounds for the dropdown button when the control's size changes.
 	/// </summary>
 	/// <param name="e"></param>
-	protected override void OnSizeChanged(EventArgs e) {
+	protected override void OnSizeChanged(System.EventArgs e) {
 		base.OnSizeChanged(e);
 		_dropDownButtonBounds = new Rectangle(ClientSize.Width - DROPDOWNBUTTON_WIDTH, 0, DROPDOWNBUTTON_WIDTH, ClientSize.Height);
 	}
@@ -393,7 +393,7 @@ public abstract class DropDownControlBase : Control {
 	/// Repaints the control when the control is enabled/disabled.
 	/// </summary>
 	/// <param name="e"></param>
-	protected override void OnEnabledChanged(EventArgs e) {
+	protected override void OnEnabledChanged(System.EventArgs e) {
 		base.OnEnabledChanged(e);
 		_bufferedPainter.State = GetComboBoxState();
 	}

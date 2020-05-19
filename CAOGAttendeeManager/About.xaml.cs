@@ -19,9 +19,10 @@ namespace CAOGAttendeeManager
     /// </summary>
     public partial class AboutWindow : Window
     {
-        public AboutWindow()
+        public AboutWindow(string versionString)
         {
             InitializeComponent();
+            lblVersionStr.Content = versionString;
         }
     }
 }

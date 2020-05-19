@@ -403,18 +403,19 @@ public class  ComboTreeBox : DropDownControlBase {
 	/// Fired when the value of a node's <see cref="ComboTreeNode.CheckState"/> property changes.
 	/// </summary>
 	[Description("Occurs when a node checkbox is checked.")]
-	public event EventHandler<ComboTreeNodeEventArgs> AfterCheck;
+	public event EventHandler<EventArgs> AfterCheck;
 
 	/// <summary>
 	/// Fired when a node is clicked, regardless of whether it can be selected.
 	/// </summary>
 	[Description("Occurs when a node is clicked, regardless of whether it can be selected.")]
-	public event EventHandler<ComboTreeNodeEventArgs> NodeClick;
+	public event EventHandler<EventArgs> NodeClick;
 
-	/// <summary>
-	/// Initalises a new instance of ComboTreeBox.
-	/// </summary>
-	public ComboTreeBox() {
+   
+    /// <summary>
+    /// Initalises a new instance of ComboTreeBox.
+    /// </summary>
+    public ComboTreeBox() {
 		// default property values
 		_nullValue = String.Empty;
 		_pathSeparator = DEFAULT_PATH_SEPARATOR;
@@ -656,7 +657,7 @@ public class  ComboTreeBox : DropDownControlBase {
 	/// Raises the <see cref="NodeClick"/> event.
 	/// </summary>
 	/// <param name="e"></param>
-	protected internal virtual void OnNodeClick(ComboTreeNodeEventArgs e) {
+	protected internal virtual void OnNodeClick(EventArgs e) {
 		if (NodeClick != null) NodeClick(this, e);
 	}
 
@@ -664,7 +665,7 @@ public class  ComboTreeBox : DropDownControlBase {
 	/// Updates the dropdown's font when the control's font changes.
 	/// </summary>
 	/// <param name="e"></param>
-	protected override void OnFontChanged(EventArgs e) {
+	protected override void OnFontChanged(System.EventArgs e) {
         base.OnFontChanged(e);
         _dropDown.Font = Font;
     }
@@ -676,7 +677,8 @@ public class  ComboTreeBox : DropDownControlBase {
 	protected override void OnKeyDown(KeyEventArgs e) {
 		e.Handled = e.SuppressKeyPress = true;
 
-		if (e.Alt && (e.KeyCode == Keys.Down)) {
+      
+        if (e.Alt && (e.KeyCode == Keys.Down)) {
 			DroppedDown = true;
 		}
 		else if ((e.KeyCode == Keys.Up) || (e.KeyCode == Keys.Left)) {
@@ -698,7 +700,7 @@ public class  ComboTreeBox : DropDownControlBase {
 	/// Closes the dropdown portion of the control when it loses focus.
 	/// </summary>
 	/// <param name="e"></param>
-	protected override void OnLostFocus(EventArgs e) {
+	protected override void OnLostFocus(System.EventArgs e) {
         base.OnLostFocus(e);
         if (!_dropDown.Focused) _dropDown.Close();
     }
@@ -788,7 +790,7 @@ public class  ComboTreeBox : DropDownControlBase {
 	/// Raises the <see cref="SelectedNodeChanged"/> event.
     /// </summary>
     /// <param name="e"></param>
-    protected virtual void OnSelectedNodeChanged(EventArgs e) {
+    protected virtual void OnSelectedNodeChanged(System.EventArgs e) {
         if (SelectedNodeChanged != null) SelectedNodeChanged(this, e);
     }
 
@@ -796,7 +798,7 @@ public class  ComboTreeBox : DropDownControlBase {
 	/// Raises the <see cref="AfterCheck"/> event.
 	/// </summary>
 	/// <param name="e"></param>
-	protected internal virtual void OnAfterCheck(ComboTreeNodeEventArgs e) {
+	protected internal virtual void OnAfterCheck(EventArgs e) {
 		if (AfterCheck != null) AfterCheck(this, e);
 	}
 
@@ -839,7 +841,7 @@ public class  ComboTreeBox : DropDownControlBase {
 		if ((_selectedNode != node) && !_showCheckBoxes && ((node == null) || node.Selectable)) {
 			_selectedNode = node;
 			Invalidate();
-			OnSelectedNodeChanged(EventArgs.Empty);
+            OnSelectedNodeChanged(System.EventArgs.Empty);
 		}
 	}
 
@@ -894,11 +896,11 @@ public class  ComboTreeBox : DropDownControlBase {
 	}
 
 	void dropDown_Closed(object sender, ToolStripDropDownClosedEventArgs e) {
-		OnDropDownClosed(EventArgs.Empty);
+		base.OnDropDownClosed(System.EventArgs.Empty);
 	}
 
-	void dropDown_Opened(object sender, EventArgs e) {
-		OnDropDown(EventArgs.Empty);
+	void dropDown_Opened(object sender, System.EventArgs e) {
+		base.OnDropDown(System.EventArgs.Empty);
 	}
 
 	void nodes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
@@ -911,7 +913,7 @@ public class  ComboTreeBox : DropDownControlBase {
 		}
 	}
 
-	void nodes_AfterCheck(object sender, ComboTreeNodeEventArgs e) {
+	void nodes_AfterCheck(object sender, EventArgs e) {
 		if (_cascadeCheckState) {
 			_recurseDepth++;
 
@@ -937,4 +939,5 @@ public class  ComboTreeBox : DropDownControlBase {
 			_dropDown.UpdateVisibleItems();
 		}
 	}
+
 }
