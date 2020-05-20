@@ -41,7 +41,7 @@ namespace CAOGAttendeeManager
             InitActivityTreeView();
             
 
-            m_version_string = "v3.1.19";
+            m_version_string = "v3.1.20";
 
 
 
@@ -417,21 +417,21 @@ namespace CAOGAttendeeManager
 
 
 
-            XElement DefaultTableColumnElement = new XElement("DefaultTableColumns");
+          //  XElement DefaultTableColumnElement = new XElement("DefaultTableColumns");
 
 
 
             //Save default table columns
-            for (int i = 0; i <= m_aryColumnHeaders.Length - 1; i++)
-            {
+            //for (int i = 0; i <= m_aryColumnHeaders.Length - 1; i++)
+            //{
 
-                XElement TableColumn = new XElement("TableColumn", new XAttribute("Header", m_aryColumnHeaders[i]));
+            //    XElement TableColumn = new XElement("TableColumn", new XAttribute("Header", m_aryColumnHeaders[i]));
 
-                if (m_aryColumnHeaders[i] == "0") { break; }
+            //    if (m_aryColumnHeaders[i] == "0") { break; }
 
-                DefaultTableColumnElement.Add(TableColumn);
-            }
-            lstdocNodes.Add(DefaultTableColumnElement);
+            //    DefaultTableColumnElement.Add(TableColumn);
+            //}
+            //lstdocNodes.Add(DefaultTableColumnElement);
             foreach (ActivityHeader ahead in m_lstActivityHeaders)
             {
                 XElement ActivityHeaderElement = new XElement("ActivityHeader", new XAttribute("Name", ahead.Name));
@@ -542,10 +542,10 @@ namespace CAOGAttendeeManager
 
 
             // zero out the header array
-            for (int i = 0; i <= m_aryColumnHeaders.Length - 1; i++)
-            {
-                m_aryColumnHeaders[i] = "0";
-            }
+            //for (int i = 0; i <= m_aryColumnHeaders.Length - 1; i++)
+            //{
+            //    m_aryColumnHeaders[i] = "0";
+            //}
 
             XmlReaderSettings reader_settings = new XmlReaderSettings
             {
@@ -561,22 +561,22 @@ namespace CAOGAttendeeManager
 
                     using (XmlReader xreader = XmlReader.Create("ChurchActivities.xml", reader_settings))
                     {
-                        xreader.ReadStartElement("XmlDocument");
+                       xreader.ReadStartElement("XmlDocument");
 
-                        XElement XMLtag = (XElement)XNode.ReadFrom(xreader);
-                        int i = 0;
+                      //  XElement XMLtag = (XElement)XNode.ReadFrom(xreader);
+                        //int i = 0;
 
-                        if (XMLtag.Name == "DefaultTableColumns")
-                        {
-                            foreach (XElement TablecolElement in XMLtag.Elements())
-                            {
-                                string value = "";
-                                value = (string)TablecolElement.Attribute("Header");
+                        //if (XMLtag.Name == "DefaultTableColumns")
+                        //{
+                        //    foreach (XElement TablecolElement in XMLtag.Elements())
+                        //    {
+                        //        string value = "";
+                        //        value = (string)TablecolElement.Attribute("Header");
 
-                                m_aryColumnHeaders[i] = value.ToLower();
-                                i++;
-                            }
-                        }
+                        //        m_aryColumnHeaders[i] = value.ToLower();
+                        //        i++;
+                        //    }
+                        //}
 
 
                         while (xreader.Name == "ActivityHeader")
@@ -642,9 +642,9 @@ namespace CAOGAttendeeManager
                                 m_lstActivityHeaders.Add(aheader);
                             } // end Activityheader
 
-
+                            xreader.ReadEndElement();
                         } // end while
-                        xreader.ReadEndElement();
+                      
                     }
                     
                     LoadNewComboTree(m_lstActivityHeaders);
@@ -1017,7 +1017,7 @@ namespace CAOGAttendeeManager
                         DefaultTableRow DefaultTabledr = new DefaultTableRow
                         {
                             AttendanceList = AttendeeRec.AttendanceList,
-                            Columns = m_aryColumnHeaders
+                            //Columns = m_aryColumnHeaders
 
                         };
 
@@ -1092,7 +1092,7 @@ namespace CAOGAttendeeManager
                             DefaultTableRow DefaultTabledr = new DefaultTableRow
                             {
                                 AttendanceList = AttendeeRec.AttendanceList,
-                                Columns = m_aryColumnHeaders
+                                //Columns = m_aryColumnHeaders
 
                             };
 
@@ -1470,7 +1470,7 @@ namespace CAOGAttendeeManager
             }
 
             //if there is no attendees checked then make sure all attendees in the dbcontext is not checked (ie checked = false)
-            if (Checklist.Count == 0)
+            if (Checklist.Any() )
             {
                 foreach (Attendee at in m_dbContext.Attendees)
                 {
@@ -1483,7 +1483,7 @@ namespace CAOGAttendeeManager
 
             // save change to db
             SaveActiveList();
-
+            m_ActivityTreeChanged = false;
             Cursor = Cursors.Arrow;
 
         }
@@ -2372,7 +2372,7 @@ namespace CAOGAttendeeManager
 
                     }
 
-                    
+                    m_currentSelected_ActivityPair.ChildTaskName = "";
                     m_currentSelected_ActivityPair.ParentTaskName = firstNode.Text;
                     m_currentSelected_ActivityPair.ActivityGroup = firstNode.Parent.Text;
                 }
@@ -2714,7 +2714,7 @@ namespace CAOGAttendeeManager
             Save_ChurchActivities_To_XMLFile();
             // save contents to database
             m_dbContext.SaveChanges();
-            m_ActivityTreeChanged = false;
+         
 
         }
 
@@ -3891,61 +3891,26 @@ namespace CAOGAttendeeManager
 
         }
 
-        private void MenuItem_AddNewHeader_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-        //    int WindowMode = 2;
-
-
-
-
-        //    WndAddGroup groupWin = new WndAddGroup(ref m_lstActivityHeaders, WindowMode, m_currentSelected_ActivityPair = null);
-        //    groupWin.ShowDialog();
-        //    m_newlstActivitiesCount = m_newlstActivitiesCount + groupWin.GetActivitiesCount;
-
-            // FIX ME trvActivities.Items.Refresh();
-
-        }
-        private void MenuItem_DeleteHeader_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-
-        }
-        private void MenuItem_AddNewGroup_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            int WindowMode = 0;
-
-
-
-
-            //WndAddGroup groupWin = new WndAddGroup(ref m_lstActivityHeaders, WindowMode, m_currentSelected_ActivityPair);
-            //groupWin.ShowDialog();
-            //m_newlstActivitiesCount = m_newlstActivitiesCount + groupWin.GetActivitiesCount;
-
-            // FIX ME trvActivities.Items.Refresh();
-
-
-
-
-
-        }
 
         private void BtnPanelNewActivity_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
-            int WindowMode = 1;
+          
 
 
 
                 WndAddGroup AddgroupWin = new WndAddGroup(m_lstActivityHeaders);
                 AddgroupWin.ShowDialog();
-                var new_tree = AddgroupWin.getTree;
+               
                 m_ActivityTreeChanged = AddgroupWin.getTreeChanged;
 
-                if (new_tree != null) // tree has changed
+                if (m_ActivityTreeChanged) // tree has changed
                 {
+                    var new_tree = AddgroupWin.getTree;
                     LoadNewComboTree(new_tree); //Load the combo tree boxes with the new tree
                     Convert_and_SaveNewTreeToActivityHeardersTree(new_tree); //convert and save the new tree to the format m_lstActivityHeaders
                     
-            }
+                }
            
 
         }

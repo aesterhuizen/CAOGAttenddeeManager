@@ -436,96 +436,96 @@ namespace CAOGAttendeeManager
     {
 
 
-        public Dictionary<string, object> DynamicProperties { get; set; }
+        //public Dictionary<string, object> DynamicProperties { get; set; }
 
       
-        public void MakeDynamicProperties()
-        {
+        //public void MakeDynamicProperties()
+        //{
 
-            //Add User added columns as dictionary keys 
-            for (int i = 0; i <= Columns.Length - 1; i++)
-            {
+        //    //Add User added columns as dictionary keys 
+        //    for (int i = 0; i <= Columns.Length - 1; i++)
+        //    {
 
-                if (Columns[i] == "0") { break; }
+        //        if (Columns[i] == "0") { break; }
 
-                string key = Columns[i].ToLower();
+        //        string key = Columns[i].ToLower();
                 
-                DynamicProperties.Add(key, "");
+        //        DynamicProperties.Add(key, "");
 
-            }
+        //    }
 
-            //DynamicProperties["AttendeeId".ToLower()] = AttendeeId;
-            //DynamicProperties["FirstName".ToLower()] = FirstName;
-            //DynamicProperties["LastName".ToLower()] = LastName;
-            //DynamicProperties["Activity".ToLower()] = Activity;
-            //DynamicProperties["ChurchStatus".ToLower()] = ChurchStatus;
+        //    //DynamicProperties["AttendeeId".ToLower()] = AttendeeId;
+        //    //DynamicProperties["FirstName".ToLower()] = FirstName;
+        //    //DynamicProperties["LastName".ToLower()] = LastName;
+        //    //DynamicProperties["Activity".ToLower()] = Activity;
+        //    //DynamicProperties["ChurchStatus".ToLower()] = ChurchStatus;
 
 
-            //Add values to keys according to the class fields
+        //    //Add values to keys according to the class fields
 
-            if (m_functionSteps != "")
-            {
+        //    if (m_functionSteps != "")
+        //    {
 
                 
 
-                //find key in dictionary and add the corresponding value from the function steps string to it
-                string[] arycolumn_value = m_functionSteps.Split(',');
-                foreach (string column_value in arycolumn_value)
-                {
-                    string[] strcolumn_value = column_value.Split('|');
+        //        //find key in dictionary and add the corresponding value from the function steps string to it
+        //        string[] arycolumn_value = m_functionSteps.Split(',');
+        //        foreach (string column_value in arycolumn_value)
+        //        {
+        //            string[] strcolumn_value = column_value.Split('|');
 
-                    string key = strcolumn_value[0].ToLower();
-                    string value = strcolumn_value[1].ToLower();
+        //            string key = strcolumn_value[0].ToLower();
+        //            string value = strcolumn_value[1].ToLower();
 
                    
-                    DynamicProperties[key] = value;
-                }
+        //            DynamicProperties[key] = value;
+        //        }
 
 
-            }
-            else
-            {
-                //Add User added columns as dictionary keys 
-                for (int i = 0; i <= m_aryfunction_steps.Length - 1; i++)
-                {
+        //    }
+        //    else
+        //    {
+        //        //Add User added columns as dictionary keys 
+        //        for (int i = 0; i <= m_aryfunction_steps.Length - 1; i++)
+        //        {
 
-                    if (m_AllTableColumns_Array[i] == "0") { break; }
+        //            if (m_AllTableColumns_Array[i] == "0") { break; }
 
-                    string key = m_AllTableColumns_Array[i].ToLower();
+        //            string key = m_AllTableColumns_Array[i].ToLower();
 
-                    DynamicProperties.Add(key, "");
+        //            DynamicProperties.Add(key, "");
 
-                }
+        //        }
 
               
-            }
+        //    }
 
             
-        }
+        //}
 
 
-        //Array holding the column header of the datagrid
-        string[] m_AllTableColumns_Array = new string[50];
+        ////Array holding the column header of the datagrid
+        //string[] m_AllTableColumns_Array = new string[50];
 
-        public string[] Columns
-        {
-            get
-            {
-                return m_AllTableColumns_Array;
-            }
-            set
-            {
-                if (m_AllTableColumns_Array != value)
-                {
-                    for (int i =0; i<= m_AllTableColumns_Array.Length-1;i++)
-                    {
-                        m_AllTableColumns_Array[i] = value[i];
-                    }
+        //public string[] Columns
+        //{
+        //    get
+        //    {
+        //        return m_AllTableColumns_Array;
+        //    }
+        //    set
+        //    {
+        //        if (m_AllTableColumns_Array != value)
+        //        {
+        //            for (int i =0; i<= m_AllTableColumns_Array.Length-1;i++)
+        //            {
+        //                m_AllTableColumns_Array[i] = value[i];
+        //            }
                     
-                }
+        //        }
                     
-            }
-        }
+        //    }
+        //}
 
 
         public DefaultTableRow()
@@ -538,7 +538,7 @@ namespace CAOGAttendeeManager
             Church_Last_Attended = "";
             Activity_Last_Attended = "";
             ChurchStatus = "";
-            DynamicProperties = new Dictionary<string, object>() { };
+           // DynamicProperties = new Dictionary<string, object>() { };
 
             AttendanceList = new ObservableCollection<Attendance_Info>() { };
             ActivityList = new ObservableCollection<ActivityPair>() { };

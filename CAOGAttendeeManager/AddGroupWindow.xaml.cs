@@ -99,7 +99,7 @@ namespace CAOGAttendeeManager
       
         private void BtnApply_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-     
+            
             Close();
             
         }
@@ -110,6 +110,7 @@ namespace CAOGAttendeeManager
 
         private void BtnCancel_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            m_tree_changed = false;
             Close();
         }
 
@@ -194,14 +195,31 @@ namespace CAOGAttendeeManager
 
             if (selected_node != null)
             {
-                TreeNode Parent = (TreeNode)selected_node.Parent;
-                int idx = Parent.Items.IndexOf(selected_node);
+                if (selected_node.Parent.GetType() == typeof(System.Windows.Controls.TreeView) ) // is a toplevel node
+                {
+                    int idx = trvActivities.Items.IndexOf(selected_node);
 
-                trvActivities.BeginInit();
-                Parent.Items.RemoveAt(idx);
-                trvActivities.EndInit();
-                m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
-                m_tree_changed = true;
+                    trvActivities.BeginInit();
+                    trvActivities.Items.RemoveAt(idx);
+                    trvActivities.EndInit();
+                    m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+                    m_tree_changed = true;
+                }
+                else if (selected_node.Parent.GetType() == typeof(CAOGAttendeeManager.TreeNode) )
+                {
+                    TreeNode Parent = (TreeNode)selected_node.Parent;
+                    int idx = Parent.Items.IndexOf(selected_node);
+
+                    trvActivities.BeginInit();
+                    Parent.Items.RemoveAt(idx);
+                    trvActivities.EndInit();
+                    m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+                    m_tree_changed = true;
+                }
+                
+
+                
+                
             }
 
 
