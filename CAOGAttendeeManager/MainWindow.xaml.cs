@@ -41,7 +41,7 @@ namespace CAOGAttendeeManager
             InitActivityTreeView();
             
 
-            m_version_string = "v3.1.20";
+            m_version_string = "v3.1.21";
 
 
 
@@ -278,7 +278,7 @@ namespace CAOGAttendeeManager
 
             Dispatcher.Invoke(() =>
            {
-               if (m_currentSelected_ActivityPair != null && m_ActivityDateSelected != null && m_MultiAttendanceRow_Selected != null)
+               if (m_currentSelected_ActivityPair != null && m_ActivityDateSelectedPr != null && m_MultiAttendanceRow_Selected != null)
                {
 
                    btnPanelAddActivity.IsEnabled = true;
@@ -3711,7 +3711,7 @@ namespace CAOGAttendeeManager
 
                     ActivityPair new_ap = new ActivityPair();
 
-                    new_ap.Date = m_ActivityDateSelected;
+                    new_ap.Date = m_ActivityDateSelectedPr;
                     new_ap.AttendeeId = dr.AttendeeId;
                     new_ap.ActivityGroup = m_currentSelected_ActivityPair.ActivityGroup;
                     new_ap.ParentTaskName = m_currentSelected_ActivityPair.ParentTaskName;
