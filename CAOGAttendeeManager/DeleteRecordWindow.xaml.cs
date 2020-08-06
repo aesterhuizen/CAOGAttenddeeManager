@@ -1,16 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 
 namespace CAOGAttendeeManager
@@ -20,6 +12,20 @@ namespace CAOGAttendeeManager
     /// </summary>
     public partial class DeleteRecordWindow : Window
     {
+        bool m_delete_click = false;
+        public bool getDeleteRecs
+        {
+            get
+            {
+                return m_delete_click;
+            }
+            set
+            {
+                if (m_delete_click != value)
+                    m_delete_click = true;
+            }
+
+        }
         private DateTime? _dateToDelete = null;
         public DateTime? getDateToDelete
         {
@@ -56,6 +62,7 @@ namespace CAOGAttendeeManager
        
         private void BtnDeleteSelectedRecords_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            m_delete_click = true;
             Close();
         }
 
@@ -63,6 +70,9 @@ namespace CAOGAttendeeManager
 
         private void BtnDeleteDateRecords_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+
+            m_delete_click = true;
+            
             Close();
 
             
@@ -165,8 +175,25 @@ namespace CAOGAttendeeManager
         {
             Add_Blackout_Dates(ref dpChurchDate);
 
+            m_delete_click = false;
             btnDeleteDateRecords.IsEnabled = false;
             
+        }
+
+        private void Window_Closed(object sender, System.EventArgs e)
+        {
+            if (m_delete_click == true)
+            {
+                // do nothing
+            }
+            else
+                m_delete_click = false;
+        }
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            m_delete_click = false;
+            Close();
         }
     }
 

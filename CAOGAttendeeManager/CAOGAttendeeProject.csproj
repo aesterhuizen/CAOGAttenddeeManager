@@ -20,7 +20,7 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -30,10 +30,10 @@
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\v3.1.21\</OutputPath>
+    <OutputPath>bin\Release\v3.1.23\</OutputPath>
     <DefineConstants>TRACE;init_db</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -41,12 +41,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;init_db</DefineConstants>
     <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -71,6 +72,9 @@
     </Reference>
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEntityFrameworkProvider, Version=6.0.0.0, Culture=neutral, PublicKeyToken=756cf6beb8fe7b41, processorArchitecture=MSIL">
+      <HintPath>..\packages\JetEntityFrameworkProvider.6.2.0-rc1\lib\JetEntityFrameworkProvider.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.1.1.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
@@ -189,21 +193,12 @@
     <Compile Include="AddColumn.xaml.cs">
       <DependentUpon>AddColumn.xaml</DependentUpon>
     </Compile>
-    <Compile Include="BufferedPaint\BufferedPainter.cs" />
-    <Compile Include="BufferedPaint\Interop.cs" />
     <Compile Include="ChartWindow.xaml.cs">
       <DependentUpon>ChartWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ComboTreeBox\ComboTreeBox.cs" />
-    <Compile Include="ComboTreeBox\ComboTreeDropDown.cs" />
-    <Compile Include="ComboTreeBox\ComboTreeNode.cs" />
-    <Compile Include="ComboTreeBox\ComboTreeNodeCollection.cs" />
     <Compile Include="DeleteRecordWindow.xaml.cs">
       <DependentUpon>DeleteRecordWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DropDownControlBase\DropDownControlBase.cs" />
-    <Compile Include="DropdownSearchbox\DropDownSearchBox.cs" />
-    <Compile Include="DropdownSearchbox\TextServices.cs" />
     <Compile Include="DynamicLinqLibrary\DynamicLibrary.cs" />
     <Compile Include="ModelDb.cs" />
     <Compile Include="AddGroupWindow.xaml.cs">

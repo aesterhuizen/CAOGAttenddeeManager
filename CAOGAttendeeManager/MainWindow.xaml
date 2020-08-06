@@ -170,14 +170,12 @@
                         <DataGrid x:Name="dataGrid"
                                 LoadingRowDetails="dataGrid_LoadingRowDetails"
                                 RowDetailsVisibilityMode="Collapsed"
-                            
                                 AutoGenerateColumns="False"
                                 CanUserAddRows="False" 
                                 CanUserDeleteRows="False"
                                 CanUserReorderColumns="False"
                                 CanUserSortColumns="True"
                                 CanUserResizeColumns="True"
-                                ClipboardCopyMode="IncludeHeader"
                                 SelectedCellsChanged="dataGrid_SelectedCellsChanged"
                                 ColumnWidth="120"
                                 CanUserResizeRows="False" 
@@ -551,7 +549,6 @@
 
                         <DataGrid x:Name="dataGrid_prospect"
                                 SelectedCellsChanged="dataGrid_prospect_SelectedCellsChanged"
-                               
                                 AutoGenerateColumns="False"
                                 CanUserAddRows="False" 
                                 CanUserDeleteRows="False"

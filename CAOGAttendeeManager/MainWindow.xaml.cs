@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using DropDownControls;
 using System.Timers;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,25 +8,20 @@ using System.Xml.Linq;
 using System.Xml;
 using System.Text;
 using System.Windows;
-using System.Windows.Data;
 using System.Windows.Forms.Integration;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Data.Entity;
-using System.Data.OleDb;
 using System.Data;
-using System.Text.RegularExpressions;
 using System.Windows.Threading;
-using System.Collections.ObjectModel;
-
+using System.Runtime.Remoting.Contexts;
 
 namespace CAOGAttendeeManager
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-   
+
     public partial class MainWindow : Window
     {
 
@@ -41,7 +35,7 @@ namespace CAOGAttendeeManager
             InitActivityTreeView();
             
 
-            m_version_string = "v3.1.21";
+            m_version_string = "v3.1.23";
 
 
 
@@ -91,19 +85,22 @@ namespace CAOGAttendeeManager
 
 #if (init_db)
 
+                   
                     if (m_dbContext == null)
                     {
-                       
-                        m_dbContext = new ModelDb(m_constr);
-                        m_dbContext.Configuration.ProxyCreationEnabled = false;
-                        m_dbContext.Configuration.AutoDetectChangesEnabled = true;
-                        //load db context
-                        m_dbContext.Attendees.Load();
-                        m_dbContext.Attendance_Info.Load();
-                        m_dbContext.Activities.Load();
+
+                        
+                            m_dbContext = new ModelDb();
+                            m_dbContext.Configuration.ProxyCreationEnabled = false;
+                            m_dbContext.Configuration.AutoDetectChangesEnabled = true;
+
+                            //load db context
+                            m_dbContext.Attendees.Load();
+                            m_dbContext.Attendance_Info.Load();
+                            m_dbContext.Activities.Load();
+                        
+
                     }
-
-
 
 
 
@@ -511,14 +508,13 @@ namespace CAOGAttendeeManager
             // Create DOM with lst of nodes 'lstdocNodes'
             XDocument DOMdoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), doc_root);
             var executingPath = Directory.GetCurrentDirectory();
-
             try
             {
 
 
                 if (File.Exists($"{executingPath}\\ChurchActivities.xml"))
                 {
-                    FileAccess fa = new FileAccess();
+                    
                      
                     var fsXML = new FileStream($"{executingPath}\\ChurchActivities.xml", FileMode.Create, FileAccess.ReadWrite);
 
@@ -526,7 +522,7 @@ namespace CAOGAttendeeManager
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Cursor = Cursors.Arrow;
                 MessageBox.Show("No Activities file found!");
@@ -962,7 +958,7 @@ namespace CAOGAttendeeManager
             {
                 m_lstattendanceTableRows.Clear();
             }
-            string date = "Date Not Valid";
+          
           
             
 
@@ -1154,12 +1150,6 @@ namespace CAOGAttendeeManager
 
                 }
 
-
-
-
-
-
-
             }
             catch (Exception ex)
             {
@@ -1271,7 +1261,7 @@ namespace CAOGAttendeeManager
                         }
                       
                     }
-
+                    // re-register PropertyChanged property to class
                     m_attendance_row_selected.PropertyChanged += AttendanceTabledr_PropertyChanged;
                 }
 
@@ -1609,7 +1599,7 @@ namespace CAOGAttendeeManager
             var default_row_selected = selectedRows.Cast<DefaultTableRow>();
             int idx = 0;
 
-            if (date_to_be_deleted != null)
+            if (date_to_be_deleted != null && delrec_win.getDeleteRecs == true)
             {
                 //find all date records with the 'date_to_be_deleted' date in all attendee's attendance_info history
 
@@ -1654,16 +1644,24 @@ namespace CAOGAttendeeManager
                         
                     }
                    
-                }
+                } //end for loop
                 // remove all attendance_info records from the datastructure
-                m_dbContext.Attendance_Info.RemoveRange(lstDeleteRecs);
-                MessageBox.Show("Records successfully deleted!", "Records deleted...", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (lstDeleteRecs.Any() )
+                {
+                    m_dbContext.Attendance_Info.RemoveRange(lstDeleteRecs);
+                    MessageBox.Show("Records successfully deleted!", "Records deleted...", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("No records found!, No records were deleted", "No records deleted...", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
 
             }
             else
             {
 
-               if (selectedRows.Count != 0 )
+               if (selectedRows.Count != 0 && delrec_win.getDeleteRecs == true)
                 {
                     DeleteRecordInDefaultTable(selectedRows);
                     DeleteRecordInAttendeeListTable(selectedRows);
@@ -1728,7 +1726,7 @@ namespace CAOGAttendeeManager
             DateTime curdate = DateTime.Now;
             DateTime datelimit;
             List<DateTime> lstsundays = new List<DateTime>();
-            int i = 0;
+           
             if (curdate.DayOfWeek != DayOfWeek.Sunday)
             {
 
@@ -1812,12 +1810,11 @@ namespace CAOGAttendeeManager
 
             string date = m_alistDateSelected?.ToString("MM-dd-yyyy");
 
-            string firstname = "";
-            string lastname = "";
+          
             //DateTime? date_t;
             int dupID = 1;
             // add all attendee status and date to database
-            bool isListDirty = false;
+          
 
             List<Attendee> attendeeList = new List<Attendee>() { };
             List<Attendance_Info> attendanceList = new List<Attendance_Info>() { };
@@ -2770,7 +2767,7 @@ namespace CAOGAttendeeManager
                 rowCopy.FirstName = row.FirstName;
                 rowCopy.AttendeeId = row.AttendeeId;
                 rowCopy.FirstName = row.FirstName;
-                rowCopy.LastName = row.LastName;
+                rowCopy.LastName = row.  LastName;
                 rowCopy.Activity = row.Activity;
                 rowCopy.Church_Last_Attended = row.Church_Last_Attended;
                 rowCopy.Activity_Last_Attended = row.Activity_Last_Attended; ;
@@ -2786,7 +2783,7 @@ namespace CAOGAttendeeManager
         private void BuildQuery_and_UpdateGrid()
         {
 
-            IQueryable<DefaultTableRow> querylinq = null;
+          
 
 
 
@@ -4192,7 +4189,7 @@ namespace CAOGAttendeeManager
         private void AddColumns()
         {
 
-            int x = 0;
+            
 
 
 

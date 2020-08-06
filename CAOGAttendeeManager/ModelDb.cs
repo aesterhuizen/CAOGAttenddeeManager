@@ -1,21 +1,13 @@
 namespace CAOGAttendeeManager
 {
     using System;
-    using System.Dynamic;
-    using System.IO;
-    using System.Windows;
-    using System.Data;
     using System.ComponentModel;
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Linq;
-    using System.Collections;
-    using System.Collections.Specialized;
     using System.Data.Entity;
 
     // [DbConfigurationType(typeof(MyDbConfiguration))]
 
-
+    
     public class ModelDb : DbContext
     {
         // Your context has been configured to use a 'ModelDb' connection string from your application's 
@@ -30,7 +22,10 @@ namespace CAOGAttendeeManager
         //    optionsBuilder.UseSqlServer(
         //        @"Server=(Server=tcp:caogserver.database.windows.net,1433;Initial Catalog=CAOGdb_2018_09_14_Prod;Persist Security Info=False;User ID=sqladmin;Password=RFtgYH56&*;MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30");
         //}
-
+        public ModelDb() : base("AccessConnection")
+        {
+             
+        }
         public ModelDb(string constr) : base(constr)
         {
 
@@ -38,7 +33,7 @@ namespace CAOGAttendeeManager
         // Add a DbSet for each entity type that you want to include in your model. For more information 
         // on configuring and using a Code First model, see http://go.microsoft.com/fwlink/?LinkId=390109.
 
-        // public virtual DbSet<MyEntity> MyEntities { get; set; }
+        
         public virtual DbSet<Attendee> Attendees { get; set; }
         public virtual DbSet<Attendance_Info> Attendance_Info { get; set; }
         public virtual DbSet<ActivityPair> Activities { get; set; }
