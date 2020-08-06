@@ -35,7 +35,7 @@ namespace CAOGAttendeeManager
             InitActivityTreeView();
             
 
-            m_version_string = "v3.1.23";
+            m_version_string = "v3.1.24";
 
 
 
@@ -63,24 +63,11 @@ namespace CAOGAttendeeManager
             {
 
 
-                if (File.Exists($"{executingPath}\\credentials.txt"))
-                {
-
-                    var fs = new FileStream($"{executingPath}\\credentials.txt", FileMode.Open, FileAccess.Read);
-                    using (var sr = new StreamReader(fs, Encoding.ASCII))
-                    {
-                        string line;
-                        while ((line = sr.ReadLine()) != null)
-                        {
-                            m_constr = line;
-                        }
-
-                    }
 
 #if (DEBUG)
-                    this.Title = $"Attendee Manager " + m_version_string + "(Debug) - " + m_constr;
+                this.Title = $"Attendee Manager " + m_version_string + "(Debug) - ";
 #else
-            this.Title = "Attendee Manager " + m_version_string;
+                    this.Title = "Attendee Manager " + m_version_string;
 #endif
 
 #if (init_db)
@@ -116,20 +103,6 @@ namespace CAOGAttendeeManager
 
                     // display the attendee records in the table
                    Display_DefaultTable_in_Grid();
-
-
-                }
-                else
-                {
-
-                    MessageBox.Show("Cannot connect to database, credential file does not exist!", "File does not exist.", MessageBoxButton.OK, MessageBoxImage.Error);
-                    m_NoCredFile = true;
-                    this.Close();
-                }
-
-
-
-
 
             }
             catch (Exception ex)
@@ -215,7 +188,7 @@ namespace CAOGAttendeeManager
 
         private string m_version_string = "";
 
-        private bool m_NoCredFile = false;
+      
         private int m_activitychecked_count = 0;
 
         //filter state
@@ -247,8 +220,7 @@ namespace CAOGAttendeeManager
 
         private bool m_loaded = false;
 
-        private string m_constr = "";
-
+      
 
         private int m_NewAttendeeId = 0;
 
@@ -2586,14 +2558,7 @@ namespace CAOGAttendeeManager
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            //  bool isAttendedStatusChecked = false;
-
-            if (m_NoCredFile)
-            {
-                e.Cancel = false;
-            }
-            else
-            {
+          
                 dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
                 dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
                 dataGrid.UpdateLayout();
@@ -2652,12 +2617,6 @@ namespace CAOGAttendeeManager
 
                 }
 #endif
-
-            }
-
-
-
-
 
         }
         private void ShowFiltered_Or_DefaultTable()
