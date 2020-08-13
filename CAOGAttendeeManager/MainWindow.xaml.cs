@@ -108,7 +108,7 @@ namespace CAOGAttendeeManager
             catch (Exception ex)
             {
 
-                MessageBox.Show($"Exception occurred when performing database initialization { ex}!\n");
+                MessageBox.Show($"Exception occurred when performing database initialization { ex}!\n","Database Error", MessageBoxButton.OK, MessageBoxImage.Error );
             }
 
 

@@ -15,4 +15,7 @@
     <FallbackCulture>en-US</FallbackCulture>
     <VerifyUploadedFiles>false</VerifyUploadedFiles>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <StartProgram>C:\Users\aesterh\Documents\Visual Studio 2015\Projects\CAOGAttendeeManager\CAOGAttendeeManager\bin\Debug\CAOGAttendeeManager.exe</StartProgram>
+  </PropertyGroup>
 </Project>
