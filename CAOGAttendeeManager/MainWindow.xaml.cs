@@ -35,7 +35,7 @@ namespace CAOGAttendeeManager
             InitActivityTreeView();
             
 
-            m_version_string = "v3.1.24";
+            m_version_string = "v3.1.25";
 
 
 

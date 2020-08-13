@@ -50,7 +50,7 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
+    <OutputPath>bin\x86\Release\v3.1.25\</OutputPath>
     <DefineConstants>TRACE;init_db</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
