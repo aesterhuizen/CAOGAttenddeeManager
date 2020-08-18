@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,7 +16,7 @@ namespace CAOGAttendeeManager
         {
             get
             {
-                if (m_tree_changed)
+                if (GetTreeChanged)
                     return m_ActivitiesTreeView;
                 else
                     return null;
@@ -23,10 +24,7 @@ namespace CAOGAttendeeManager
 
         }
 
-        public bool getTreeChanged => m_tree_changed;
-
-
-        private bool m_tree_changed = false;
+        public bool GetTreeChanged { get; private set; } = false;
 
         private IEnumerable<TreeNode> m_ActivitiesTreeView = null;
 
@@ -102,7 +100,7 @@ namespace CAOGAttendeeManager
 
         private void BtnCancel_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            m_tree_changed = false;
+            GetTreeChanged = false;
             Close();
         }
 
@@ -119,7 +117,7 @@ namespace CAOGAttendeeManager
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            int idx = 0;
+           
             Cursor = Cursors.Wait;
 
            
@@ -136,7 +134,7 @@ namespace CAOGAttendeeManager
                     trvActivities.BeginInit();
                     selected_node.Items.Add(new_item);
                     trvActivities.EndInit();
-                    m_tree_changed = true;
+                    GetTreeChanged = true;
 
                     m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
                     txtActivityName.Text = "";
@@ -150,7 +148,7 @@ namespace CAOGAttendeeManager
             }
             
           
-            if (m_tree_changed)
+            if (GetTreeChanged)
                 btnApply.IsEnabled = true;
             else
                 btnApply.IsEnabled = false;
@@ -184,7 +182,7 @@ namespace CAOGAttendeeManager
         private void btnDelete_Click(object sender, RoutedEventArgs e)
         {
             TreeNode selected_node = (TreeNode)trvActivities.SelectedItem;
-
+            
             if (selected_node != null)
             {
                 if (selected_node.Parent.GetType() == typeof(System.Windows.Controls.TreeView) ) // is a toplevel node
@@ -195,7 +193,7 @@ namespace CAOGAttendeeManager
                     trvActivities.Items.RemoveAt(idx);
                     trvActivities.EndInit();
                     m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
-                    m_tree_changed = true;
+                    GetTreeChanged = true;
                 }
                 else if (selected_node.Parent.GetType() == typeof(CAOGAttendeeManager.TreeNode) )
                 {
@@ -206,16 +204,19 @@ namespace CAOGAttendeeManager
                     Parent.Items.RemoveAt(idx);
                     trvActivities.EndInit();
                     m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
-                    m_tree_changed = true;
+                    GetTreeChanged = true;
                 }
-                
 
-                
-                
+                if (GetTreeChanged)
+                    btnApply.IsEnabled = true;
+                else
+                    btnApply.IsEnabled = false;
+
+
             }
 
 
-            if (m_tree_changed)
+            if (GetTreeChanged)
                 btnApply.IsEnabled = true;
             else
                 btnApply.IsEnabled = false;
@@ -230,7 +231,8 @@ namespace CAOGAttendeeManager
 
             if (selitem != null )
             {
-                txtTaskDescription.Text = selitem.Description;
+                txtActivityDescription.Text = selitem.Description;
+                txtActivityName.Text = (string)selitem.Header;
                 btnDelete.IsEnabled = true;
               
             }
@@ -249,15 +251,120 @@ namespace CAOGAttendeeManager
 
                 };
                 trvActivities.Items.Add(new_item);
-                m_tree_changed = true;
+                GetTreeChanged = true;
 
                 m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
                 txtActivityName.Text = "";
                 txtActivityDescription.Text = "";
-        
+
+            if (GetTreeChanged)
+                btnApply.IsEnabled = true;
+            else
+                btnApply.IsEnabled = false;
         }
 
-      
+        private void btnEdit_Click(object sender, RoutedEventArgs e)
+        {
+            TreeNode node = (TreeNode)trvActivities.SelectedItem;
+
+            node.Header = txtActivityName.Text;
+            node.Description = txtActivityDescription.Text;
+        }
+
+        private void ActivitymnuAdd_Click(object sender, RoutedEventArgs e)
+        {
+
+            Cursor = Cursors.Wait;
+
+
+            TreeNode selected_node = (TreeNode)trvActivities.SelectedItem;
+
+
+
+            if (selected_node != null)
+            {
+
+                if (!selected_node.Items.Contains(selected_node))
+                {
+                    TreeNode new_item = new TreeNode { Header = txtActivityName.Text, Description = txtActivityDescription.Text };
+                    trvActivities.BeginInit();
+                    selected_node.Items.Add(new_item);
+                    trvActivities.EndInit();
+                    GetTreeChanged = true;
+
+                    m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+                    txtActivityName.Text = "";
+                    txtActivityDescription.Text = "";
+                }
+
+            }
+            else
+            {
+                MessageBox.Show("Item already exist.", "Item already exist", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+
+
+            if (GetTreeChanged)
+                btnApply.IsEnabled = true;
+            else
+                btnApply.IsEnabled = false;
+
+            Cursor = Cursors.Arrow;
+
+        }
+
+        private void ActivitymnuEdit_Click(object sender, RoutedEventArgs e)
+        {
+            TreeNode node = (TreeNode)trvActivities.SelectedItem;
+
+            node.Header = txtActivityName.Text;
+            node.Description = txtActivityDescription.Text;
+
+        }
+
+        private void ActivitymnuDelete_Click(object sender, RoutedEventArgs e)
+        {
+            TreeNode selected_node = (TreeNode)trvActivities.SelectedItem;
+
+            if (selected_node != null)
+            {
+                if (selected_node.Parent.GetType() == typeof(System.Windows.Controls.TreeView)) // is a toplevel node
+                {
+                    int idx = trvActivities.Items.IndexOf(selected_node);
+
+                    trvActivities.BeginInit();
+                    trvActivities.Items.RemoveAt(idx);
+                    trvActivities.EndInit();
+                    m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+                    GetTreeChanged = true;
+                }
+                else if (selected_node.Parent.GetType() == typeof(CAOGAttendeeManager.TreeNode))
+                {
+                    TreeNode Parent = (TreeNode)selected_node.Parent;
+                    int idx = Parent.Items.IndexOf(selected_node);
+
+                    trvActivities.BeginInit();
+                    Parent.Items.RemoveAt(idx);
+                    trvActivities.EndInit();
+                    m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+                    GetTreeChanged = true;
+                }
+
+                if (GetTreeChanged)
+                    btnApply.IsEnabled = true;
+                else
+                    btnApply.IsEnabled = false;
+
+
+            }
+
+
+            if (GetTreeChanged)
+                btnApply.IsEnabled = true;
+            else
+                btnApply.IsEnabled = false;
+
+        }
     }
 
     public class TreeNode : TreeViewItem

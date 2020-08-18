@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CAOGAttendeeManager"
         mc:Ignorable="d"
-        Title="Delete Records..." Height="367.808" Width="425.271"
+        Title="Delete Records..." Height="380.808" Width="424.271"
         WindowStyle="ToolWindow"
         ResizeMode="NoResize"
         Loaded="Window_Loaded"
@@ -62,13 +62,13 @@
                                 VerticalAlignment="Top" 
                                 Width="128"/>
                     </Grid>
-                    
+
                 </StackPanel>
             </GroupBox>
             <StackPanel>
                 <Button Name ="btnCancel" Content="Cancel" Click="btnCancel_Click" HorizontalAlignment="Right" Width="70" Margin="0,5,33,0"/>
             </StackPanel>
-           
+
         </StackPanel>
     </Grid>
 </Window>

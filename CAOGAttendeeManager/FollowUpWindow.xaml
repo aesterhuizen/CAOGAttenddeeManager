@@ -1,0 +1,38 @@
+﻿<Window x:Class="CAOGAttendeeManager.FollowUpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CAOGAttendeeManager"
+        mc:Ignorable="d"
+        Title="FollowUpWindow" 
+        Loaded="Window_Loaded"
+        
+        WindowStyle="ToolWindow"
+        ResizeMode="NoResize" Height="223" Width="410">
+
+    <Grid Margin="0,0,-6,-5"  >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="119"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="219*"/>
+            <ColumnDefinition Width="188*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock HorizontalAlignment="Left" Margin="20,35,0,0" TextWrapping="Wrap" 
+               Text="Enter number of weeks an attendee could miss before a follow-up entry gets generated:" 
+               VerticalAlignment="Top" Width="201" Height="48"/>
+        <TextBox Name="txtFollowUpWeeks" HorizontalAlignment="Left" Height="23" Margin="20,88,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Width="164" Height="40" VerticalAlignment="Bottom">
+            <Button x:Name="btnApply" Content="OK" HorizontalAlignment="Left" TabIndex="2" Width="73" Click="BtnApply_Click"
+                ToolTip="Apply changes from the activity list to the activity dropdown list" Height="25" VerticalAlignment="Top"/>
+            <Button Margin="10,0,0,0" x:Name="btnCancel" Content="Cancel" TabIndex="3" VerticalAlignment="Top" Width="75" Click="BtnCancel_Click" Height="25"/>
+
+        </StackPanel>
+
+
+    </Grid>
+
+</Window>

@@ -5,9 +5,9 @@
         xmlns:swf="clr-namespace:DropDownControls;assembly=DropDownControls"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CAOGAttendeeManager"
-    
+        Icon="Resources\splashscreenProg.ico"
         mc:Ignorable="d"
-        Title="CAOG Attendee Manager" Height="900" Width="1513"
+        Title="Attendee Manager" Height="913" Width="1513"
         Loaded="Window_Loaded"
         Closing="Window_Closing">
     <Window.Resources>
@@ -37,7 +37,7 @@
 
     <DockPanel Margin="0,-2,0,2">
 
-        <Ribbon DockPanel.Dock="Top" Title="Attendee Manager">
+        <Ribbon DockPanel.Dock="Top">
             <Ribbon.ApplicationMenu>
                 <RibbonApplicationMenu Label="File" SmallImageSource="Resources\FileCabinet.ico">
                     <RibbonApplicationMenuItem Header="About" Click="RibbonApplicationMenuItem_Click_About"/>
@@ -74,15 +74,18 @@
 
                 </RibbonGroup>
 
-                <RibbonGroup Header="Table Operations" Width="190" Height="90">
-
+                <RibbonGroup Header="Table Operations" Width="250" Height="90">
 
 
                     <RibbonButton Name="btnGenerateFollowUps"
                                   Label="Generate Follow-Up..."
                                   LargeImageSource="Resources\Generate-followup.ico"
                                   Click="btnGenerateFollowUps_Click" 
-                                  ToolTip="Prompt the user to generate a follow-up record for each attendee that missed 3 Sunday services in a row." />
+                                  ToolTip="Prompt the user to generate a follow-up record for each attendee that missed 3 Sunday services in a row.">
+                       
+
+                    </RibbonButton>
+                  
 
                     <RibbonButton x:Name="btnNewRec" 
                                   Label="New Record" 
@@ -102,6 +105,14 @@
 
                     </RibbonButton>
 
+                    <RibbonButton Name="btnAddColumn" 
+                                  Label="Add Column"
+                                  LargeImageSource="Resources\Table-add.ico"
+                                  Click="BtnAddColumn_Click" 
+                                  ToolTip="Add a new column to the database" Height="65" Margin="26,0,-26,0">
+
+
+                    </RibbonButton>
 
 
 
@@ -155,7 +166,7 @@
             <!-- Tab control ############################################################################################################################################## -->
             <TabControl Name="GridsTabControl" SelectionChanged="GridsTabControl_SelectionChanged"  >
                 <!-- Active Tab################################################################################################################################################ -->
-                <TabItem Header="Active" Name="ActiveTab">
+                <TabItem Header="Overview" Name="ActiveTab">
                     <Grid>
                         <Grid.Resources>
                             <Style TargetType="{x:Type ScrollViewer}">
@@ -183,7 +194,7 @@
                                 ColumnHeaderHeight="60"
                                 GridLinesVisibility="Horizontal"
                                 HorizontalGridLinesBrush="LightGray"
-                                RowHeight="25" FontSize="13"  
+                                RowHeight="25" FontSize="13" Margin="0,0,0,5"  
                                 >
 
 
@@ -533,7 +544,7 @@
                     </Grid>
                 </TabItem>
                 <!-- Prospect Tab ####################################################################################################################################################-->
-                <TabItem Header="Prospect List" Name="ProspectListTab">
+                <TabItem Header="Edit Attendee Info" Name="ProspectListTab">
                     <Grid>
                         <Grid.Resources>
                             <Style TargetType="{x:Type ScrollViewer}">

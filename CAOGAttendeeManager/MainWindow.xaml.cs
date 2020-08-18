@@ -31,11 +31,16 @@ namespace CAOGAttendeeManager
 
             InitializeComponent();
 
+          
+
+            //Dictionary<string, object> values = ((object)v).GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(v));
+
+
 
             InitActivityTreeView();
             
 
-            m_version_string = "v3.1.25";
+            m_version_string = "v3.1.26";
 
 
 
@@ -152,7 +157,7 @@ namespace CAOGAttendeeManager
         private List<DefaultTableRow> m_lstQueryTableRows = new List<DefaultTableRow>() { };
 
         //List that is a Copy of the default list for table building purposes
-        List<DefaultTableRow> m_lstdefaultTableRowsCopy = new List<DefaultTableRow>() { };
+        private List<DefaultTableRow> m_lstdefaultTableRowsCopy = new List<DefaultTableRow>() { };
 
         //List of default Table rows
         private List<DefaultTableRow> m_lstdefaultTableRows = new List<DefaultTableRow>() { };
@@ -187,8 +192,9 @@ namespace CAOGAttendeeManager
         private Timer aTimer = null;
 
         private string m_version_string = "";
+        private string _followUpWeeks = "4";
 
-      
+
         private int m_activitychecked_count = 0;
 
         //filter state
@@ -386,7 +392,7 @@ namespace CAOGAttendeeManager
 
 
 
-          //  XElement DefaultTableColumnElement = new XElement("DefaultTableColumns");
+            //  XElement DefaultTableColumnElement = new XElement("DefaultTableColumns");
 
 
 
@@ -401,6 +407,11 @@ namespace CAOGAttendeeManager
             //    DefaultTableColumnElement.Add(TableColumn);
             //}
             //lstdocNodes.Add(DefaultTableColumnElement);
+            XElement ProgramSettingsElement = new XElement("ProgramSettings");
+            XElement FollowUpElement = new XElement("FollowUpWeeks", new XAttribute("Weeks", _followUpWeeks) );
+            ProgramSettingsElement.Add(FollowUpElement);
+
+            lstdocNodes.Add(ProgramSettingsElement);
             foreach (ActivityHeader ahead in m_lstActivityHeaders)
             {
                 XElement ActivityHeaderElement = new XElement("ActivityHeader", new XAttribute("Name", ahead.Name));
@@ -531,9 +542,21 @@ namespace CAOGAttendeeManager
                     {
                        xreader.ReadStartElement("XmlDocument");
 
-                      //  XElement XMLtag = (XElement)XNode.ReadFrom(xreader);
+                        XElement XMLtag = (XElement)XNode.ReadFrom(xreader);
                         //int i = 0;
 
+                        if (XMLtag.Name == "ProgramSettings")
+                        {
+                            foreach ( XElement settingsElement in XMLtag.Elements())
+                            {
+                                if (settingsElement.Name == "FollowUpWeeks")
+                                {
+                                    
+                                    string followupnumber = settingsElement.FirstAttribute.Value;
+                                    _followUpWeeks = followupnumber;
+                                }
+                            }
+                        }
                         //if (XMLtag.Name == "DefaultTableColumns")
                         //{
                         //    foreach (XElement TablecolElement in XMLtag.Elements())
@@ -623,13 +646,13 @@ namespace CAOGAttendeeManager
                 else // activities file does not exist
                 {
                     Cursor = Cursors.Arrow;
-                    MessageBox.Show("No Activities file found! 'ChurchActivities.xml'");
+                    MessageBox.Show("No Activities file found or file is in the wrong format! 'ChurchActivities.xml'");
                 }
 
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                MessageBox.Show(ex.ToString(),"XML read error",MessageBoxButton.OK, MessageBoxImage.Error);
 
             }
 
@@ -759,9 +782,10 @@ namespace CAOGAttendeeManager
                 }
             }
         }
-        private bool GenerateDBFollowUps()
+        private bool GenerateDBFollowUps(string followUpWeeks)
         {
-           
+            int intFollowUpDays = int.Parse(followUpWeeks) * 7;
+            
             // Generate Follow-Ups for each Attendee that missed 28 days of church
 
             //Solution
@@ -779,6 +803,7 @@ namespace CAOGAttendeeManager
             List<Attendance_Info> lstAttendanceInfo = new List<Attendance_Info>() { };
 
             DateTime? greatest_date = null;
+
 
             ////get latest and greatest date 
             for (int i = 0; i < m_lstdefaultTableRows.Count; i++)
@@ -800,16 +825,11 @@ namespace CAOGAttendeeManager
 
                     }
                 }
-                
+
 
 
 
             }
-
-
-
-
-
             //get latest attended date per attendee
             for (int i = 0; i <= m_lstdefaultTableRows.Count - 1; i++)
             {
@@ -817,17 +837,17 @@ namespace CAOGAttendeeManager
                 //get last church date attended per attendee history
                 var lstDateRec = (from rec in m_lstdefaultTableRows[i].AttendanceList
                                   where rec.Status == "Attended" || rec.Status == "Responded"
-                                  orderby rec
-                                  select rec).ToList().LastOrDefault();
+                                  orderby rec descending
+                                  select rec).ToList().FirstOrDefault();
 
-
+              
                 if (lstDateRec != null)
                 {
                     timespanSinceDate = greatest_date - lstDateRec?.Date;
 
 
-
-                    if (timespanSinceDate?.Days < 21)
+                
+                    if (timespanSinceDate?.Days < intFollowUpDays) // 4 weeks not present
                     {
                         
                         //// do nothing
@@ -839,7 +859,7 @@ namespace CAOGAttendeeManager
                     else
                     {
 
-
+                      
                         var HasAlreadyFollowUpDate = m_lstdefaultTableRows[i].AttendanceList.SingleOrDefault(rec => rec.Status == "Follow-Up" && rec.Date == greatest_date);
 
 
@@ -2677,28 +2697,35 @@ namespace CAOGAttendeeManager
         private void btnGenerateFollowUps_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
-            MessageBoxResult result = MessageBox.Show("Are you sure you want to generate follow-Ups now?", "Generate Follow-Up", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.Yes)
+            FollowUpWindow fw = new FollowUpWindow(_followUpWeeks);
+
+            fw.ShowDialog();
+
+            if (int.Parse(fw.GetFollowUpWeeks) != 0)
             {
-                Cursor = Cursors.Wait;
+                _followUpWeeks = fw.GetFollowUpWeeks;
 
-                bool generate_one = GenerateDBFollowUps();
+                MessageBoxResult result = MessageBox.Show($"Are you sure you want to generate follow-Ups for every {_followUpWeeks } weeks now?", "Generate Follow-Up", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    Cursor = Cursors.Wait;
 
-                Cursor = Cursors.Arrow;
-                if (generate_one)
-                {
-                    MessageBox.Show("Successfully generated follow-ups!");
-                }
-                else
-                {
-                    MessageBox.Show("No follow-ups to generate, no follow-ups generated.", "Generate follow-ups", MessageBoxButton.OK, MessageBoxImage.Information);
+                    bool generate_one = GenerateDBFollowUps(_followUpWeeks);
+
+                    Cursor = Cursors.Arrow;
+                    if (generate_one)
+                    {
+                        MessageBox.Show("Successfully generated follow-ups!");
+                    }
+                    else
+                    {
+                        MessageBox.Show("No follow-ups to generate, no follow-ups generated.", "Generate follow-ups", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    }
 
                 }
 
             }
-
-
-
         }
 
 
@@ -3858,7 +3885,7 @@ namespace CAOGAttendeeManager
                 WndAddGroup AddgroupWin = new WndAddGroup(m_lstActivityHeaders);
                 AddgroupWin.ShowDialog();
                
-                m_ActivityTreeChanged = AddgroupWin.getTreeChanged;
+                m_ActivityTreeChanged = AddgroupWin.GetTreeChanged;
 
                 if (m_ActivityTreeChanged) // tree has changed
                 {
@@ -3884,9 +3911,15 @@ namespace CAOGAttendeeManager
 
         private void BtnAddColumn_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            AddColumn AddColumnWindow = new AddColumn();
+            AddColumnWindow AddColumnWindow = new AddColumnWindow();
 
-            AddColumnWindow.Show();
+            AddColumnWindow.ShowDialog();
+
+            if (AddColumnWindow.GetColumnNames.Count > 0)
+            {
+                List<string> lst = AddColumnWindow.GetColumnNames;
+            }
+                
 
         }
 
@@ -4565,6 +4598,12 @@ namespace CAOGAttendeeManager
                 BuildQuery_and_UpdateGrid();
             }
         }
+
+        private void RibbonMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
 
 
         //private void DataGrid_prospect_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)

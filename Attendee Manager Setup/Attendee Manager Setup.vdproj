@@ -2168,7 +2168,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Attendee Manager Setup"
         "ProductCode" = "8:{53B4A4AB-1D49-4E4D-A4E5-671157A12FFD}"
-        "PackageCode" = "8:{21FD9D51-F08E-4F7D-B747-EBCF21D19A00}"
+        "PackageCode" = "8:{86A14D2C-3558-4E47-97E4-1D234C874E81}"
         "UpgradeCode" = "8:{2D2E5D07-306C-4510-ABC8-3AFBFE03C038}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
