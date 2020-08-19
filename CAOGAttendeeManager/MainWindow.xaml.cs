@@ -33,7 +33,7 @@ namespace CAOGAttendeeManager
 
           
 
-            //Dictionary<string, object> values = ((object)v).GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(v));
+            
 
 
 
@@ -293,37 +293,7 @@ namespace CAOGAttendeeManager
 
            });
 
-            //Dispatcher.Invoke(() =>
-            //{
-            //    foreach (AttendanceTableRow dr in m_lstattendanceTableRows)
-            //    {
-            //        if (dr.Attended == "1" && m_alistdateIsValid)
-            //        {
-            //            btnImport.IsEnabled = true;
-            //            break;
-            //        }
-            //        else
-            //        {
-            //            btnImport.IsEnabled = false;
-            //        }
-            //    }
-            //});
-
-            //Dispatcher.Invoke(() =>
-            //{
-
-
-            //    if (m_dbContext.ChangeTracker.HasChanges())
-            //    {
-            //        btnSave.IsEnabled = true;
-
-            //    }
-            //    else
-            //    {
-            //        btnSave.IsEnabled = false;
-            //    }
-
-            //});
+        
         }
 
         private void correctDBerrors()

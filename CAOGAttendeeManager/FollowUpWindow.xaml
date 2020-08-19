@@ -5,13 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CAOGAttendeeManager"
         mc:Ignorable="d"
-        Title="FollowUpWindow" 
+        Title="Generae FollowUp" 
         Loaded="Window_Loaded"
-        
         WindowStyle="ToolWindow"
-        ResizeMode="NoResize" Height="223" Width="410">
+        ResizeMode="NoResize" Height="219" Width="388">
 
-    <Grid Margin="0,0,-6,-5"  >
+    <Grid  >
         <Grid.RowDefinitions>
             <RowDefinition Height="119"/>
             <RowDefinition />
@@ -22,12 +21,12 @@
         </Grid.ColumnDefinitions>
         <TextBlock HorizontalAlignment="Left" Margin="20,35,0,0" TextWrapping="Wrap" 
                Text="Enter number of weeks an attendee could miss before a follow-up entry gets generated:" 
-               VerticalAlignment="Top" Width="201" Height="48"/>
+               VerticalAlignment="Top" Width="183" Height="48"/>
         <TextBox Name="txtFollowUpWeeks" HorizontalAlignment="Left" Height="23" Margin="20,88,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Width="164" Height="40" VerticalAlignment="Bottom">
-            <Button x:Name="btnApply" Content="OK" HorizontalAlignment="Left" TabIndex="2" Width="73" Click="BtnApply_Click"
-                ToolTip="Apply changes from the activity list to the activity dropdown list" Height="25" VerticalAlignment="Top"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10">
+            <Button x:Name="btnApply" Content="Generate" HorizontalAlignment="Left" TabIndex="2" Width="73" Click="BtnApply_Click"
+                ToolTip="Generate follow up records" Height="25" VerticalAlignment="Top"/>
             <Button Margin="10,0,0,0" x:Name="btnCancel" Content="Cancel" TabIndex="3" VerticalAlignment="Top" Width="75" Click="BtnCancel_Click" Height="25"/>
 
         </StackPanel>
