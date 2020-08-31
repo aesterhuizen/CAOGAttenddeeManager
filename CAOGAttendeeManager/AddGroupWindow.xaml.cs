@@ -266,9 +266,24 @@ namespace CAOGAttendeeManager
         private void btnEdit_Click(object sender, RoutedEventArgs e)
         {
             TreeNode node = (TreeNode)trvActivities.SelectedItem;
+            trvActivities.BeginInit();
 
             node.Header = txtActivityName.Text;
             node.Description = txtActivityDescription.Text;
+
+
+            GetTreeChanged = true;
+
+            m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+           
+
+            trvActivities.EndInit();
+
+            if (GetTreeChanged)
+                btnApply.IsEnabled = true;
+            else
+                btnApply.IsEnabled = false;
+
         }
 
         private void ActivitymnuAdd_Click(object sender, RoutedEventArgs e)
