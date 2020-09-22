@@ -5,7 +5,7 @@
         xmlns:swf="clr-namespace:DropDownControls;assembly=DropDownControls"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CAOGAttendeeManager"
-        Icon="Resources\splashscreenProg.ico"
+        Icon="Resources\checklist.png"
         mc:Ignorable="d"
         Title="Attendee Manager" Height="913" Width="1513"
         Loaded="Window_Loaded"
@@ -544,7 +544,7 @@
                     </Grid>
                 </TabItem>
                 <!-- Prospect Tab ####################################################################################################################################################-->
-                <TabItem Header="Edit Attendee Info" Name="ProspectListTab">
+                <TabItem Header="Prospect List" Name="ProspectListTab">
                     <Grid>
                         <Grid.Resources>
                             <Style TargetType="{x:Type ScrollViewer}">
@@ -572,7 +572,7 @@
                                 ColumnHeaderHeight="60"
                                 GridLinesVisibility="Horizontal"
                                 HorizontalGridLinesBrush="LightGray"
-                                RowHeight="25" FontSize="13"  >
+                                RowHeight="25" FontSize="13" SelectionChanged="dataGrid_prospect_SelectionChanged" Margin="0,1,0,-1"  >
 
                             <DataGrid.Columns>
 

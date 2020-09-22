@@ -40,7 +40,7 @@ namespace CAOGAttendeeManager
             InitActivityTreeView();
             
 
-            m_version_string = "v3.1.26";
+            m_version_string = "v3.1.27";
 
 
 
@@ -195,12 +195,12 @@ namespace CAOGAttendeeManager
         private string _followUpWeeks = "4";
 
 
-        private int m_activitychecked_count = 0;
+       //private int m_activitychecked_count = 0;
 
         //filter state
         private bool m_isActivityfilterByDateChecked = false;
         private bool m_isFilterByDateChecked = false;
-        private bool m_isChurchStatusFilterChecked = false;
+        //private bool m_isChurchStatusFilterChecked = false;
         private bool m_isAttendedChecked = false;
         private bool m_isFollowupChecked = false;
         private bool m_isRespondedChecked = false;
@@ -213,14 +213,14 @@ namespace CAOGAttendeeManager
         // view state
         private bool m_alistView = false;
         private bool m_AttendanceView = false;
-        private bool m_activityView = false;
-        //panel state
-        private bool m_IsActivePanelView = false;
-        private bool m_IsPanelProspectView = false;
-        private bool m_IsActivityPanelView = false;
-        private bool m_LoadFromActiveState = false;
-        private string[] m_ary_ActivityStatus = new string[10];
-        private string m_old_attendeeId = "";
+        //private bool m_activityView = false;
+        //private bool m_IsActivePanelView = false;
+        //private bool m_IsPanelProspectView = false;
+        //private bool m_IsActivityPanelView = false;
+       // private bool m_LoadFromActiveState = false;anel state
+      
+       // private string[] m_ary_ActivityStatus = new string[10];
+       // private string m_old_attendeeId = "";
         private bool m_dateIsValid = false;
         private bool m_alistdateIsValid = false;
 
@@ -3859,7 +3859,7 @@ namespace CAOGAttendeeManager
 
                 if (m_ActivityTreeChanged) // tree has changed
                 {
-                    var new_tree = AddgroupWin.getTree;
+                    var new_tree = AddgroupWin.GetTree;
                     LoadNewComboTree(new_tree); //Load the combo tree boxes with the new tree
                     Convert_and_SaveNewTreeToActivityHeardersTree(new_tree); //convert and save the new tree to the format m_lstActivityHeaders
                     
@@ -4569,23 +4569,15 @@ namespace CAOGAttendeeManager
             }
         }
 
-        private void RibbonMenuItem_Click(object sender, RoutedEventArgs e)
+
+        private void dataGrid_prospect_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
         }
 
 
 
-        //private void DataGrid_prospect_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
-        //{
-        //    m_attendance_row_selected.PropertyChanged += AttendanceTabledr_PropertyChanged;
-        //}
-
-        //private void dataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
-        //{
-        //    m_default_row_selected.PropertyChanged += DefaultTabledr_PropertyChanged;
-
-        //}
+      
     }
 
 }

@@ -38,25 +38,7 @@ namespace CAOGAttendeeManager
         public virtual DbSet<Attendance_Info> Attendance_Info { get; set; }
         public virtual DbSet<ActivityPair> Activities { get; set; }
     }
-    //    
-    //}
-
-    //public class MyDbConfiguration : DbConfiguration
-
-    //{
-
-    //    public MyDbConfiguration() : base()
-
-    //    {
-
-    //        var path = Path.GetDirectoryName(this.GetType().Assembly.Location);
-
-    //        SetModelStore(new DefaultDbModelStore(path));
-
-
-    //    }
-
-    //}
+   
     public class Attendee : INotifyPropertyChanged
     {
 
@@ -788,7 +770,7 @@ namespace CAOGAttendeeManager
             }
         }
 
-        private string _activity = "";
+        //private string _activity = "";
 
         
     

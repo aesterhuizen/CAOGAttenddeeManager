@@ -65,7 +65,7 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\v3.1.26\</OutputPath>
+    <OutputPath>bin\x86\Release\UpdatedVersion\</OutputPath>
     <DefineConstants>TRACE;init_db</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -238,6 +238,11 @@
     <Compile Include="AddColumn.xaml.cs">
       <DependentUpon>AddColumn.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AttendeeMgrDBDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AttendeeMgrDBDataSet.xsd</DependentUpon>
+    </Compile>
     <Compile Include="ChartWindow.xaml.cs">
       <DependentUpon>ChartWindow.xaml</DependentUpon>
     </Compile>
@@ -293,6 +298,11 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
@@ -300,7 +310,19 @@
     </Compile>
     <Resource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </Resource>
+    <None Include="AttendeeMgrDBDataSet.xsc">
+      <DependentUpon>AttendeeMgrDBDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="AttendeeMgrDBDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>AttendeeMgrDBDataSet.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="AttendeeMgrDBDataSet.xss">
+      <DependentUpon>AttendeeMgrDBDataSet.xsd</DependentUpon>
+    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -319,9 +341,6 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\ApplyChanges.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
     <Resource Include="Resources\Chart2.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
@@ -332,9 +351,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\Print.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\Search.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
@@ -349,9 +365,6 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Add.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\FileCabinet.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -359,21 +372,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Delete.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\DropdownArrow2.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\NewActivity.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\ActivityPanel.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\ApplyQuery.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\splashscreenProg.ico" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
@@ -389,6 +387,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Table-add.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\checklist.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\checklist.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Data.SqlClient.SNI.1.0.19235.1\build\net46\Microsoft.Data.SqlClient.SNI.targets" Condition="Exists('..\packages\Microsoft.Data.SqlClient.SNI.1.0.19235.1\build\net46\Microsoft.Data.SqlClient.SNI.targets')" />

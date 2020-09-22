@@ -12,7 +12,7 @@ namespace CAOGAttendeeManager
     /// </summary>
     public partial class WndAddGroup : Window
     {
-        public IEnumerable<TreeNode> getTree
+        public IEnumerable<TreeNode> GetTree
         {
             get
             {
@@ -28,12 +28,9 @@ namespace CAOGAttendeeManager
 
         private IEnumerable<TreeNode> m_ActivitiesTreeView = null;
 
-        private int m_header_idx = 0; //index of header
-        private int m_group_idx = 0; //index of group
-        private int m_task_idx = 0; //index of task
-        private int m_subtask_idx = -1; //index of subtask
        
-        private void InitTree(List<ActivityHeader> tree)
+       
+        void InitTree(List<ActivityHeader> tree)
         {
             trvActivities.BeginInit();
             //Add ComboTreeNodes to ComboTreeBox Treeview
