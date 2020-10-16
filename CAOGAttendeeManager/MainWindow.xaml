@@ -172,6 +172,7 @@
                             <Style TargetType="{x:Type ScrollViewer}">
                                 <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
                             </Style>
+                          
 
                         </Grid.Resources>
                         <Grid.ColumnDefinitions>
@@ -196,6 +197,21 @@
                                 HorizontalGridLinesBrush="LightGray"
                                 RowHeight="25" FontSize="13" Margin="0,0,0,5"  
                                 >
+                            <DataGrid.RowStyle >
+                                <Style TargetType="DataGridRow">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="DarkGray"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="DarkGray"/>
+                                        </Trigger>
+                                       
+                                    </Style.Triggers>
+                                </Style>
+                               
+                            </DataGrid.RowStyle>
+                            
 
 
                             <DataGrid.Columns>
