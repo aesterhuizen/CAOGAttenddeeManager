@@ -32,15 +32,10 @@ namespace CAOGAttendeeManager
             InitializeComponent();
 
           
-
-            
-
-
-
             InitActivityTreeView();
             
 
-            m_version_string = "v3.1.27";
+            m_version_string = "v3.1.27b";
 
 
 
@@ -70,7 +65,7 @@ namespace CAOGAttendeeManager
 
 
 #if (DEBUG)
-                this.Title = $"Attendee Manager " + m_version_string + "(Debug) - ";
+                this.Title = $"Attendee Manager " + m_version_string + "(Debug)";
 #else
                     this.Title = "Attendee Manager " + m_version_string;
 #endif
@@ -85,6 +80,7 @@ namespace CAOGAttendeeManager
                             m_dbContext = new ModelDb();
                             m_dbContext.Configuration.ProxyCreationEnabled = false;
                             m_dbContext.Configuration.AutoDetectChangesEnabled = true;
+                            m_dbContext.Configuration.LazyLoadingEnabled = false;
 
                             //load db context
                             m_dbContext.Attendees.Load();
@@ -2188,7 +2184,7 @@ namespace CAOGAttendeeManager
         private void Window_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
             dpChurchLastAttended.DisplayDate = DateTime.Today;
-            
+            btnAddColumn.IsEnabled = false;
             Add_Blackout_Dates(ref dpChurchLastAttended);
             Add_Blackout_Dates(ref dpChurchLastAttendedPr);
             Add_Blackout_Dates(ref dpHeaderActivityLastAttended);
