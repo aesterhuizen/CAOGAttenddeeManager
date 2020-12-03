@@ -685,7 +685,5 @@ ASALocalRun/
 healthchecksdb
 WpfExperiments/
 /WPF_4-5_Unl_code
-/CAOGAttendeeManager/AttendeeMgrDBDataSet.Designer.cs
-/CAOGAttendeeManager/AttendeeMgrDBDataSet.xsc
-/CAOGAttendeeManager/AttendeeMgrDBDataSet.xsd
-/CAOGAttendeeManager/AttendeeMgrDBDataSet.xss
+/ChurchActivities_saved.xml
+/CAOGAttendeeManager/Properties/Licenses.licx

@@ -12,7 +12,7 @@
         Closing="Window_Closing">
     <Window.Resources>
 
-        <DataTemplate x:Key="ActivityPairItemsTemplate">
+        <!--<DataTemplate x:Key="ActivityPairItemsTemplate">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{Binding ActivityGroup}" FontSize="10" FontWeight="Bold"/>
                 <Label Content="->" FontSize="10"/>
@@ -20,7 +20,7 @@
                 <Label Content="->" FontSize="10"/>
                 <TextBlock Text="{Binding ChildTaskName}" Margin="10,0,0,0" FontSize="10"/>
             </StackPanel>
-        </DataTemplate>
+        </DataTemplate>-->
 
         <DataTemplate x:Key="chkAttendanceItemsTemplate">
             <CheckBox Name="chkAttendedStatus" IsChecked="{Binding Attended}" />
@@ -50,6 +50,8 @@
                 <RibbonGroup Header="Database" >
 
                     <RibbonButton Name="btnSave"
+                                  Margin="1,1,1,1"
+                                  BorderBrush="LightBlue"
                                   Label="Save"
                                   LargeImageSource="Resources\save.ico"
                                   Click="Save_Changes">
@@ -74,20 +76,24 @@
 
                 </RibbonGroup>
 
-                <RibbonGroup Header="Table Operations" Width="250" Height="90">
+                <RibbonGroup Header="Table Operations" Width="280" Height="90">
 
 
                     <RibbonButton Name="btnGenerateFollowUps"
+                                  Margin="1,1,1,1"
+                                  BorderBrush="LightBlue"
                                   Label="Generate Follow-Up..."
                                   LargeImageSource="Resources\Generate-followup.ico"
                                   Click="btnGenerateFollowUps_Click" 
                                   ToolTip="Prompt the user to generate a follow-up record for each attendee that missed 3 Sunday services in a row.">
-                       
+
 
                     </RibbonButton>
-                  
 
-                    <RibbonButton x:Name="btnNewRec" 
+
+                    <RibbonButton x:Name="btnNewRec"
+                                  Margin="1,1,1,1"
+                                  BorderBrush="LightBlue"
                                   Label="New Record" 
                                   LargeImageSource="Resources\NewRec.ico"
                                   Click="btnNewRec_Click" 
@@ -96,20 +102,24 @@
 
 
 
-                    <RibbonButton Name="btnDelete" 
+                    <RibbonButton Name="btnDelete"
+                                  Margin="1,1,1,1"
+                                  BorderBrush="LightBlue"
                                   Label="Delete Records..."
                                   LargeImageSource="Resources\Delete.ico"
                                   Click="DeleteRecord" 
-                                  ToolTip="Delete Record from Active Attendance table. Attendee will not be removed from the database until you click on the Save button" Height="65" Margin="0,0,-21,0">
+                                  ToolTip="Delete Record from Active Attendance table. Attendee will not be removed from the database until you click on the Save button" Height="65" >
 
 
                     </RibbonButton>
 
-                    <RibbonButton Name="btnAddColumn" 
+                    <RibbonButton Name="btnAddColumn"
+                                  Margin="11,1,1,1"
+                                  BorderBrush="LightBlue"
                                   Label="Add Column"
                                   LargeImageSource="Resources\Table-add.ico"
                                   Click="BtnAddColumn_Click" 
-                                  ToolTip="Add a new column to the database" Height="65" Margin="26,0,-26,0">
+                                  ToolTip="Add a new column to the database" Height="65">
 
 
                     </RibbonButton>
@@ -119,23 +129,32 @@
                 </RibbonGroup>
 
 
-                <RibbonGroup Header="Attendance Metrics" Width="190" Name="rbnAttendanceMetrics">
+                <RibbonGroup Header="Attendance Metrics" Width="350" Name="rbnAttendanceMetrics" Margin="0,1">
 
 
 
-                    <RibbonButton x:Name="btnChart" Label="Charts"  
+                    <RibbonButton x:Name="btnChart" Label="Charts"
+                                  Margin="1,1,1,1"
+                                  BorderBrush="LightBlue"
                                       LargeImageSource="Resources\Chart2.ico" 
                                       Click="btnChart_Click" 
                                       ToolTip="View attendee metrics in charts" HorizontalAlignment="Left" VerticalAlignment="Top" />
 
 
-                    <StackPanel Orientation="Vertical" Margin="10,0,0,0" Width="110" Height="50">
+                    <StackPanel Orientation="Vertical" Margin="10,0,0,0" Width="200" Height="50">
                         <StackPanel Orientation="Horizontal">
-                            <Label HorizontalAlignment="Left" Width="60">Active:</Label>
-                            <TextBlock Margin="9,0,0,0" Name="lblAttendenceMetrics" 
-                                   Width="40" 
-                                   TextAlignment="Right" VerticalAlignment="Center"/>
+                            <Label HorizontalAlignment="Left" Width="69" Content="Active:"/>
+                            <TextBlock Margin ="20,0,0,0" x:Name="lblAttendenceMetrics" 
+                                   TextAlignment="Left" VerticalAlignment="Center"/>
+
                         </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label x:Name="lblActivityListName" Content="Activity list:" HorizontalAlignment="Left" Width="69"/>
+                            <TextBlock Margin="20,0,0,0" x:Name="txtbActivityListName" 
+                                   TextAlignment="Left" VerticalAlignment="Center"/>
+                                
+                        </StackPanel>
+
 
 
 
@@ -172,7 +191,7 @@
                             <Style TargetType="{x:Type ScrollViewer}">
                                 <Setter Property="Template" Value="{DynamicResource AppleStyleScrollBarStyle}"/>
                             </Style>
-                          
+
 
                         </Grid.Resources>
                         <Grid.ColumnDefinitions>
@@ -206,12 +225,12 @@
                                         <Trigger Property="IsSelected" Value="True">
                                             <Setter Property="Background" Value="DarkGray"/>
                                         </Trigger>
-                                       
+
                                     </Style.Triggers>
                                 </Style>
-                               
+
                             </DataGrid.RowStyle>
-                            
+
 
 
                             <DataGrid.Columns>
@@ -301,7 +320,7 @@
                                                      HorizontalAlignment="Left" 
                                                     VerticalAlignment="Center" 
                                                      Width="100" Height="22">
-                                                
+
                                                 <TextBox.ToolTip>
                                                     <TextBlock>
                                                     Search firstname
@@ -588,7 +607,7 @@
                                 ColumnHeaderHeight="60"
                                 GridLinesVisibility="Horizontal"
                                 HorizontalGridLinesBrush="LightGray"
-                                RowHeight="25" FontSize="13" SelectionChanged="dataGrid_prospect_SelectionChanged" Margin="0,1,0,-1"  >
+                                RowHeight="25" FontSize="13" SelectionChanged="dataGrid_prospect_SelectionChanged" Margin="1,1,-1,-1"  >
 
                             <DataGrid.Columns>
 
@@ -751,8 +770,8 @@
                                                 ToolTip="Add Activity to selected attendee(s) profile"/>
                                             <Button Grid.Row="1"  Grid.Column="1" Name="btnPanelNewActivity" BorderThickness="1" Click="BtnPanelNewActivity_Click"
                                                     Margin="10,0,0,0"
-                                                    Content="New/Remove"
-                                                    ToolTip="Add/Remove new activity to the dropdown list"
+                                                    Content="New"
+                                                    ToolTip="Add/Remove activities from the activity list"
                                                     Width="80"
                                                     Height="20"
                                                     HorizontalAlignment="Left"/>

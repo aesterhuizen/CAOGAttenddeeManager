@@ -189,12 +189,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_1B342E2416864CB2A86B2156E898B7D3"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_1D125685B49BEEEDDB71489795CAC320"
         "OwnerKey" = "8:_B411F98FB8AF4A45BA4AD6B74589324A"
         "MsmSig" = "8:_UNDEFINED"
@@ -375,6 +369,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_6A3FE61058C0426F8B5902B78E3D354E"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_6A579D2DAE80BD064EEB55481EACAA3B"
         "OwnerKey" = "8:_B411F98FB8AF4A45BA4AD6B74589324A"
         "MsmSig" = "8:_UNDEFINED"
@@ -537,12 +537,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_ED08ACF469AE468DB775999EF17F5FFC"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_EF1018379C92183A18C4435E0D6997A3"
         "OwnerKey" = "8:_B411F98FB8AF4A45BA4AD6B74589324A"
         "MsmSig" = "8:_UNDEFINED"
@@ -569,12 +563,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_B411F98FB8AF4A45BA4AD6B74589324A"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_1B342E2416864CB2A86B2156E898B7D3"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -746,6 +734,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
         "Release"
@@ -1054,37 +1050,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_1B342E2416864CB2A86B2156E898B7D3"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:System.Windows.Controls.DataVisualization.Toolkit, Version=3.5.40128.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL"
-                "ScatterAssemblies"
-                {
-                    "_1B342E2416864CB2A86B2156E898B7D3"
-                    {
-                    "Name" = "8:system.windows.controls.datavisualization.toolkit.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:..\\CAOGAttendeeManager\\bin\\x86\\Release\\system.windows.controls.datavisualization.toolkit.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_51D97D98C04C4BB8BBA484F3DDC37DB9"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_1D125685B49BEEEDDB71489795CAC320"
@@ -1581,6 +1546,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6A3FE61058C0426F8B5902B78E3D354E"
+            {
+            "SourcePath" = "8:..\\CAOGAttendeeManager\\bin\\x86\\Debug\\settings.xml"
+            "TargetName" = "8:settings.xml"
+            "Tag" = "8:"
+            "Folder" = "8:_51D97D98C04C4BB8BBA484F3DDC37DB9"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_6A579D2DAE80BD064EEB55481EACAA3B"
             {
             "AssemblyRegister" = "3:1"
@@ -1982,26 +1967,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_ED08ACF469AE468DB775999EF17F5FFC"
-            {
-            "SourcePath" = "8:..\\CAOGAttendeeManager\\bin\\x86\\Release\\v3.1.26\\ChurchActivities.xml"
-            "TargetName" = "8:ChurchActivities.xml"
-            "Tag" = "8:"
-            "Folder" = "8:_51D97D98C04C4BB8BBA484F3DDC37DB9"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_EF1018379C92183A18C4435E0D6997A3"
@@ -2689,7 +2654,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B411F98FB8AF4A45BA4AD6B74589324A"
             {
-            "SourcePath" = "8:..\\CAOGAttendeeManager\\obj\\x86\\Release\\CAOGAttendeeManager.exe"
+            "SourcePath" = "8:..\\CAOGAttendeeManager\\obj\\x86\\Debug\\CAOGAttendeeManager.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_51D97D98C04C4BB8BBA484F3DDC37DB9"

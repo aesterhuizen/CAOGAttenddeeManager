@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<XmlDocument>
+  <ProgramSettings>
+    <FollowUpWeeks Weeks="2" />
+	<ActivityList FilePath="G:\\dev\\Git\\AttendeeManager\\CAOGAttendeeManager\\bin\\x86\\Debug\\ChurchActivities.xml"/>
+  </ProgramSettings>
+</XmlDocument>

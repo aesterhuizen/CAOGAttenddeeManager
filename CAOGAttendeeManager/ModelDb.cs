@@ -4,10 +4,34 @@ namespace CAOGAttendeeManager
     using System.ComponentModel;
     using System.Collections.ObjectModel;
     using System.Data.Entity;
+    using System.Collections.Generic;
+    using System.Windows.Controls;
+    using System.IO;
 
     // [DbConfigurationType(typeof(MyDbConfiguration))]
 
-    
+
+    public enum ArrayFormat
+    {
+        STX = 0x02,
+        ETX = 0x03
+    }
+
+
+    public class TreeNode : TreeViewItem
+    {
+        public MemoryStream rtbDescriptionMStream { get; set; }
+
+        public int Level { get; set; }
+
+        public TreeNode()
+        {
+            rtbDescriptionMStream = new MemoryStream();
+            Level = 0;
+        }
+
+    }
+
     public class ModelDb : DbContext
     {
         // Your context has been configured to use a 'ModelDb' connection string from your application's 

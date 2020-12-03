@@ -14,7 +14,7 @@ using System.Windows.Input;
 using System.Data.Entity;
 using System.Data;
 using System.Windows.Threading;
-using System.Runtime.Remoting.Contexts;
+
 
 namespace CAOGAttendeeManager
 {
@@ -31,11 +31,11 @@ namespace CAOGAttendeeManager
 
             InitializeComponent();
 
-          
-            InitActivityTreeView();
-            
 
-            m_version_string = "v3.1.27b";
+           
+
+
+            m_version_string = "v3.1.28";
 
 
 
@@ -104,6 +104,12 @@ namespace CAOGAttendeeManager
 
                     // display the attendee records in the table
                    Display_DefaultTable_in_Grid();
+                //Loaded the program settings
+                LoadSettings();
+                m_lstTreeNodes = Load_ChurchActivities_From_File(m_ActivityListPath);
+               
+                txtbActivityListName.Text = GetListName();
+                LoadNewComboTree(m_lstTreeNodes);
 
             }
             catch (Exception ex)
@@ -173,8 +179,9 @@ namespace CAOGAttendeeManager
         private ComboTreeBox m_ctbActivityProspect = new ComboTreeBox();
 
         //list of Activity headers
-        private List<ActivityHeader> m_lstActivityHeaders = new List<ActivityHeader> { };
-        private List<ActivityTask> m_lstActivityTasks = new List<ActivityTask> { };
+        private List<TreeNode> m_lstTreeNodes = new List<TreeNode> { };
+      
+
 
 
      
@@ -188,23 +195,24 @@ namespace CAOGAttendeeManager
         private Timer aTimer = null;
 
         private string m_version_string = "";
-        private string _followUpWeeks = "4";
-
+        private string m_followUpWeeks ="" ;
+        //Store the list name that is in use
+        private string m_ActivityListPath = "";
 
        //private int m_activitychecked_count = 0;
 
         //filter state
-        private bool m_isActivityfilterByDateChecked = false;
-        private bool m_isFilterByDateChecked = false;
+       // private bool m_isActivityfilterByDateChecked = false;
+      //  private bool m_isFilterByDateChecked = false;
         //private bool m_isChurchStatusFilterChecked = false;
         private bool m_isAttendedChecked = false;
         private bool m_isFollowupChecked = false;
         private bool m_isRespondedChecked = false;
-        private bool m_isActivityFilterChecked = false;
+       // private bool m_isActivityFilterChecked = false;
         private bool m_isActivityChecked = false;
         private bool m_isQueryTableShown = false;
-        private bool m_isFirstNamefiltered = false;
-        private bool m_isLastNamefiltered = false;
+       // private bool m_isFirstNamefiltered = false;
+      // private bool m_isLastNamefiltered = false;
 
         // view state
         private bool m_alistView = false;
@@ -338,296 +346,107 @@ namespace CAOGAttendeeManager
 
             //Console.WriteLine("DB changes successfully saved");
         }
-
-        private void InitActivityTreeView()
-        {
-
-            Load_ChurchActivities_From_XMLFile();
-
-
-        }
-
-        private void Save_ChurchActivities_To_XMLFile()
+        private void SaveSettings()
         {
 
             List<XNode> lstdocNodes = new List<XNode>() { };
             var doc_root = new XElement("XmlDocument");
+            XDocument DOMdoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), doc_root);
 
-            int intId = 0;
             Cursor = Cursors.Wait;
 
 
-
-            //  XElement DefaultTableColumnElement = new XElement("DefaultTableColumns");
-
-
-
-            //Save default table columns
-            //for (int i = 0; i <= m_aryColumnHeaders.Length - 1; i++)
-            //{
-
-            //    XElement TableColumn = new XElement("TableColumn", new XAttribute("Header", m_aryColumnHeaders[i]));
-
-            //    if (m_aryColumnHeaders[i] == "0") { break; }
-
-            //    DefaultTableColumnElement.Add(TableColumn);
-            //}
-            //lstdocNodes.Add(DefaultTableColumnElement);
             XElement ProgramSettingsElement = new XElement("ProgramSettings");
-            XElement FollowUpElement = new XElement("FollowUpWeeks", new XAttribute("Weeks", _followUpWeeks) );
+            XElement FollowUpElement = new XElement("FollowUpWeeks", new XAttribute("Weeks", m_followUpWeeks));
+            XElement ListActivityPath = new XElement("ActivityList", new XAttribute("Path",m_ActivityListPath));
+
             ProgramSettingsElement.Add(FollowUpElement);
+            ProgramSettingsElement.Add(ListActivityPath);
 
             lstdocNodes.Add(ProgramSettingsElement);
-            foreach (ActivityHeader ahead in m_lstActivityHeaders)
-            {
-                XElement ActivityHeaderElement = new XElement("ActivityHeader", new XAttribute("Name", ahead.Name));
 
-                //ActivityGroups in Activity headers
-                foreach (ActivityGroup agroup in ahead.Groups)
-                {
-                    //make group element
-                    XElement ActivityGroupElement = new XElement("ActivityGroup", new XAttribute("ActivityName", agroup.ActivityName));
-
-                    //ActivityTask Element
-                    foreach (ActivityTask task in agroup.lstActivityTasks)
-                    {
-                        List<XAttribute> lstAttributes = new List<XAttribute>();
-
-                        XAttribute attId = new XAttribute("Id", intId++);
-                        lstAttributes.Add(attId);
-                        XAttribute attTaskName = new XAttribute("TaskName", task.TaskName);
-                        lstAttributes.Add(attTaskName);
-
-                        if (task.Description != null)
-                        {
-                            XAttribute attDescription = new XAttribute("Description", task.Description);
-                            lstAttributes.Add(attDescription);
-
-                        }
-                        // make Activity Task Element
-                        XElement ActivityTaskElement = new XElement("ActivityTask", lstAttributes);
-
-
-                        //task has subtasks
-                        if (task.lstsubTasks.Count != 0)
-                        {
-
-                            // ActivitySubTask Element
-                            foreach (ActivityTask subTask in task.lstsubTasks)
-                            {
-                                List<XAttribute> lstsubAttributes = new List<XAttribute>();
-
-                                XAttribute subattId = new XAttribute("Id", intId++);
-                                lstsubAttributes.Add(subattId);
-                                XAttribute subattTaskName = new XAttribute("TaskName", subTask.TaskName);
-                                lstsubAttributes.Add(subattTaskName);
-                                if (subTask.Description != null)
-                                {
-                                    XAttribute subattDescription = new XAttribute("Description", subTask.Description);
-                                    lstsubAttributes.Add(subattDescription);
-                                }
-                                XElement ActivitySubTaskElement = new XElement("ActivitySubTask", lstsubAttributes);
-                                //add sub element to the ActivityTask elelemnt
-                                ActivityTaskElement.Add(ActivitySubTaskElement);
-                            }
-                            // add activityTask element to ActivityGroup element
-                            ActivityGroupElement.Add(ActivityTaskElement);
-                        }
-                        else
-                        {
-                            //ActivityTask has no subtasks so add ActivityTask to ActivityGroup
-                            ActivityGroupElement.Add(ActivityTaskElement);
-                        }
-
-                    } // end foreach activity task
-
-                    ActivityHeaderElement.Add(ActivityGroupElement); // Add Groups to the Header tag
-                } // end foreach activity group
-
-
-                // add ActivityHeader elements to doc_root Element of the DOM document
-              
-                lstdocNodes.Add(ActivityHeaderElement);
-
-            } // end activity header tag
-
-
-            //add root node list of element nodes
             doc_root.Add(lstdocNodes);
-            // Create DOM with lst of nodes 'lstdocNodes'
-            XDocument DOMdoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), doc_root);
-            var executingPath = Directory.GetCurrentDirectory();
+
+            string settingPath = Directory.GetCurrentDirectory();
+            settingPath += "\\settings.xml";
+
             try
             {
 
 
-                if (File.Exists($"{executingPath}\\ChurchActivities.xml"))
-                {
-                    
-                     
-                    var fsXML = new FileStream($"{executingPath}\\ChurchActivities.xml", FileMode.Create, FileAccess.ReadWrite);
+                var fsXML = new FileStream(settingPath, FileMode.Create, FileAccess.ReadWrite);
+                // save document
+                DOMdoc.Save(fsXML);
+                fsXML.Close();
 
-                    DOMdoc.Save(fsXML);
-                }
+
+
+
 
             }
             catch (Exception)
             {
                 Cursor = Cursors.Arrow;
-                MessageBox.Show("No Activities file found!");
+                MessageBox.Show("Something went wrong with the save of the settings file!");
             }
 
             Cursor = Cursors.Arrow;
-
         }
-
-        private void Load_ChurchActivities_From_XMLFile()
+        private void LoadSettings()
         {
+            //Open new file that contains all the descriptions
+            string descriptions_pathname = Directory.GetCurrentDirectory() + "\\settings.xml";
 
-
-
-            // zero out the header array
-            //for (int i = 0; i <= m_aryColumnHeaders.Length - 1; i++)
-            //{
-            //    m_aryColumnHeaders[i] = "0";
-            //}
+            // Open or create new file that wil hold the node's descriptions            
+            //FileStream fsDescriptions = new FileStream(descriptions_pathname, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
             XmlReaderSettings reader_settings = new XmlReaderSettings
             {
                 IgnoreWhitespace = true
             };
 
-            try
+
+
+
+
+
+            using (XmlReader xreader = XmlReader.Create(descriptions_pathname, reader_settings))
             {
+                xreader.ReadStartElement("XmlDocument");
 
-                var executingPath = Directory.GetCurrentDirectory();
-                if (File.Exists($"{executingPath}\\ChurchActivities.xml"))
+                XElement XMLtag = (XElement)XNode.ReadFrom(xreader);
+                //int i = 0;
+
+                if (XMLtag.Name == "ProgramSettings")
                 {
-
-                    using (XmlReader xreader = XmlReader.Create("ChurchActivities.xml", reader_settings))
+                    foreach (XElement settingsElement in XMLtag.Elements())
                     {
-                       xreader.ReadStartElement("XmlDocument");
-
-                        XElement XMLtag = (XElement)XNode.ReadFrom(xreader);
-                        //int i = 0;
-
-                        if (XMLtag.Name == "ProgramSettings")
+                        if (settingsElement.Name == "FollowUpWeeks")
                         {
-                            foreach ( XElement settingsElement in XMLtag.Elements())
-                            {
-                                if (settingsElement.Name == "FollowUpWeeks")
-                                {
-                                    
-                                    string followupnumber = settingsElement.FirstAttribute.Value;
-                                    _followUpWeeks = followupnumber;
-                                }
-                            }
+
+                            string followupnumber = settingsElement.FirstAttribute.Value;
+                            m_followUpWeeks = followupnumber;
                         }
-                        //if (XMLtag.Name == "DefaultTableColumns")
-                        //{
-                        //    foreach (XElement TablecolElement in XMLtag.Elements())
-                        //    {
-                        //        string value = "";
-                        //        value = (string)TablecolElement.Attribute("Header");
-
-                        //        m_aryColumnHeaders[i] = value.ToLower();
-                        //        i++;
-                        //    }
-                        //}
-
-
-                        while (xreader.Name == "ActivityHeader")
+                        if (settingsElement.Name == "ActivityList")
                         {
+                            m_ActivityListPath = settingsElement.FirstAttribute.Value;
 
-                            XElement tag = (XElement)XNode.ReadFrom(xreader);
 
-                            if (tag.Name == "ActivityHeader")
-                            {
-                                //ActivityHeader
-                                string ActivityHeaderName = (string)tag.Attribute("Name");
-                                ActivityHeader aheader = new ActivityHeader();
-                                aheader.Name = ActivityHeaderName;
-
-                                //ActivityGroups   
-                                foreach (XElement ActivityGroups in tag.Elements())
-                                {
-                                    string xmlAttName = (string)ActivityGroups.Attribute("ActivityName");
-                                    ActivityGroup trv_activityGroup = new ActivityGroup { Parent = ActivityHeaderName, ActivityName = xmlAttName };
-                                  
-
-                                    //ActivityTasks
-                                    foreach (XElement ActivityTaskElement in ActivityGroups.Elements())
-                                    {
-                                        int id = (int)ActivityTaskElement.Attribute("Id");
-                                        string name = (string)ActivityTaskElement.Attribute("TaskName");
-                                        string description = (string)ActivityTaskElement.Attribute("Description");
-
-                                        ActivityTask trv_activityTask = new ActivityTask { Parent = trv_activityGroup.ActivityName, ActivityId = id, TaskName = name, Description = description };
-                                    
-
-                                        //if Activity Subtasks
-                                        if (ActivityTaskElement.HasElements)
-                                        {
-                                            //Subtasks
-                                            foreach (XElement ActivitySubTask in ActivityTaskElement.Elements())
-                                            {
-                                                int subtaskId = (int)ActivitySubTask.Attribute("Id");
-                                                string subtaskName = (string)ActivitySubTask.Attribute("TaskName");
-                                                string subtaskdescription = (string)ActivitySubTask.Attribute("Description");
-
-                                                ActivityTask trv_activitysubTask = new ActivityTask { Parent = trv_activityTask.TaskName, ActivityId = subtaskId, TaskName = subtaskName, Description = subtaskdescription };
-                                                //add subtask to lstActivityTask
-                                                trv_activityTask.lstsubTasks.Add(trv_activitysubTask);
-                                             
-                                             
-
-                                            }
-
-                                        }
-
-                                        //add activity tasks to activity group
-                                        trv_activityGroup.lstActivityTasks.Add(trv_activityTask);
-                                   
-
-                                    }
-
-                                    aheader.Groups.Add(trv_activityGroup);
-
-                                }
-
-                                //add groups to lstActivityHeaders list
-                                m_lstActivityHeaders.Add(aheader);
-                            } // end Activityheader
-
-                            xreader.ReadEndElement();
-                        } // end while
-                      
+                        }
                     }
-                    
-                    LoadNewComboTree(m_lstActivityHeaders);
-                   
-
-
                 }
-                else // activities file does not exist
-                {
-                    Cursor = Cursors.Arrow;
-                    MessageBox.Show("No Activities file found or file is in the wrong format! 'ChurchActivities.xml'");
-                }
-
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(),"XML read error",MessageBoxButton.OK, MessageBoxImage.Error);
-
-            }
-
-
-
-
-
-
         }
+      
+        private string GetListName()
+        {
+            string[] splitstring = m_ActivityListPath.Split('\\');
+            string strlast = splitstring.Last();
+           string listname = strlast.Substring(0, strlast.Length - 4);
+            return listname;
+        }
+     
+
 
         private void Convert_and_SaveNewTreeToActivityHeardersTree(IEnumerable<TreeNode> tree)
         {
@@ -648,13 +467,13 @@ namespace CAOGAttendeeManager
                     //ActivityTask
                     foreach (TreeNode task in group.Items)
                     {
-                        ActivityTask aTask = new ActivityTask { TaskName = (string)task.Header, Description = (string)task.Description };
+                        ActivityTask aTask = new ActivityTask { TaskName = (string)task.Header,  };
 
                         aGroup.lstActivityTasks.Add(aTask);
                         //subTask
                         foreach (TreeNode subtask in task.Items)
                         {
-                            ActivityTask subTask = new ActivityTask { TaskName = (string)subtask.Header, Description = (string)subtask.Description };
+                            ActivityTask subTask = new ActivityTask { TaskName = (string)subtask.Header,  };
 
                             aTask.lstsubTasks.Add(subTask);
                         }
@@ -664,7 +483,7 @@ namespace CAOGAttendeeManager
             }
             
             // save tree to private class variable
-            m_lstActivityHeaders = ActivityTree;
+           // m_lstActivityHeaders = ActivityTree;
 
 
             
@@ -2154,32 +1973,6 @@ namespace CAOGAttendeeManager
         }
 
 
-
-        private void chkChurchDateFiler_Checked(object sender, System.Windows.RoutedEventArgs e)
-        {
-
-
-            m_isFilterByDateChecked = true;
-
-
-            m_isActivityfilterByDateChecked = false;
-            //chkActivityDateFilter.IsChecked = false;
-            // DateCalendar.IsEnabled = true;
-
-
-
-
-        }
-
-
-        public void e_SelectedNodeChanged(object sender, EventArgs e)
-        {
-          
-
-          
-                
-        }
-
       
         private void Window_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
@@ -2239,7 +2032,7 @@ namespace CAOGAttendeeManager
 
             ///////////////////////////////////////////////////////////////////////////////////////////////
             m_alistView = false;
-            m_isActivityfilterByDateChecked = false;
+           // m_isActivityfilterByDateChecked = false;
             m_AttendanceView = true;
             btnSave.IsEnabled = false;
         
@@ -2270,6 +2063,184 @@ namespace CAOGAttendeeManager
         
             lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
             m_loaded = true;
+
+            
+            
+           
+        }
+        private List<TreeNode> Load_ChurchActivities_From_File(string listPath)
+        {
+
+
+
+            List<TreeNode> tree_array = new List<TreeNode>() { };
+
+
+            try
+            {
+
+
+                if (File.Exists($"{listPath}"))
+                {
+                    FileStream fs = new FileStream(listPath, FileMode.Open, FileAccess.Read);
+                    // STX = byte 0x02
+                    // ETX = byte 0x03
+                    //message = [STX(1byte) + header_byte_array (n bytes) + escape_seq (2 bytes)+payload + ETX(1byte)]
+
+
+
+                    byte[] read_buffer = new byte[1024];
+                    byte[] tmp_buf = new byte[1024];
+
+
+                    byte[] ETX_seq = new byte[2] { 0x03, 0x30 };
+                    byte[] STX_seq = new byte[2] { 0x02, 0x20 };
+
+                    byte[] escape_seq = new byte[2] { 0x0A, 0xA0 };
+
+                    int node_level_length = 1;
+
+                    //byte[] tmp_array = new byte[STX_seq.Length + node_level_length + header_byte_array.Length + escape_seq.Length + payload.Length + ETX_seq.Length];
+
+                    int STXidx = 0;
+                    int ETXidx = 0;
+
+                    int offset_size = 0;
+                    int idx = 0;
+                    int bytes_read = 0;
+                    string node_header;
+                    int node_level = 0;
+                    int payload_length = 0;
+
+
+                    TreeNode node;
+                    MemoryStream payload_data;
+
+                    while ((bytes_read = fs.Read(read_buffer, offset_size, read_buffer.Length - offset_size)) > 0)
+                    {
+
+                        //loop over read buffer
+                        for (idx = 0; idx <= read_buffer.Length - 1; idx++)
+                        {
+                            // read untill get a STX
+                            if (read_buffer[idx] == 0x02 && read_buffer[idx + 1] == 0x20)
+                                STXidx = idx; //STXidx is the beginning of the STX sequence index in the read buffer array
+
+                            // read until you get an ETX symbol
+                            if (read_buffer[idx] == 0x03 && read_buffer[idx + 1] == 0x30)
+                                ETXidx = idx + 1; //ETXidx is the end of the ETX sequence index in the read buffer array and at the end of 1 message
+
+                            // if an STX and ETX is found decode the the data and find the next message (STX ETX)
+                            if (read_buffer[STXidx] == (byte)ArrayFormat.STX && read_buffer[ETXidx] == 0x30)
+                            {
+
+
+                                //we found the beginning of the payload
+                                for (int i = STXidx; i <= ETXidx - 2; i++)
+                                {
+                                    if (read_buffer[i] == 0x0A && read_buffer[i + 1] == 0xA0)
+                                    {
+
+                                        int header_size = (i - 1) - (STXidx + 1 + node_level_length);
+
+                                        node_level = Convert.ToInt16(read_buffer[STXidx + 2]);
+
+                                        node_header = Encoding.UTF8.GetString(read_buffer, STXidx + 3 /*beggining offset of node header*/, header_size);
+
+                                        node = new TreeNode { Header = node_header, Level = node_level };
+
+                                        if (read_buffer[i + 2] == (byte)ArrayFormat.ETX)
+                                        {
+                                            payload_length = 0;
+                                        }
+                                        else
+
+                                        {
+                                            payload_data = new MemoryStream();
+
+                                            payload_length = (ETXidx - 2) - (i + 2);
+
+                                            payload_data.Write(read_buffer, i + 2, payload_length);
+
+
+                                            node.rtbDescriptionMStream = payload_data;
+                                            string data = Encoding.UTF8.GetString(payload_data.GetBuffer(), 0, payload_length);
+                                        }
+
+                                        tree_array.Add(node);
+
+                                        break;
+                                    }
+                                }
+
+
+
+                                STXidx = ETXidx + 1;
+                                ETXidx = 0;
+
+                            }
+                            else if (idx == read_buffer.Length - 1 && ETXidx == 0)   //we read until the end of the buffer but cannot find an end of message sequence ETX
+                            {
+                                // if this is the last byte in the buffer and we have not found an ETX symbol
+
+                                //cal new size of offset into read_buffer where the new data will go
+                                offset_size = (read_buffer.Length - 1) - STXidx;
+
+
+                                Buffer.BlockCopy(read_buffer, STXidx, tmp_buf, 0, offset_size);
+
+                                //clear the read_buffer
+                                for (int i = 0; i <= read_buffer.Length - 1; i++)
+                                {
+                                    read_buffer[i] = 0;
+                                }
+
+                                //copy the bytes from tmp_buffer back to the read_buffer at the 0 index in read buffer
+                                Buffer.BlockCopy(tmp_buf, 0, read_buffer, 0, offset_size);
+                                //clear the tmp_buffer
+                                for (int i = 0; i <= read_buffer.Length - 1; i++)
+                                {
+                                    tmp_buf[i] = 0;
+                                }
+
+                            }
+
+
+
+
+                        }
+
+
+
+
+
+                    } // while readbytes
+
+
+
+                }
+                else
+                {
+
+                }
+
+                //else // activities file does not exist
+                //{
+                //    Cursor = Cursors.Arrow;
+                //    MessageBox.Show("No Activities file found or file is in the wrong format! '*.xml'");
+                //}
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "XML read error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            }
+
+
+
+            return tree_array;
+
 
         }
 
@@ -2568,6 +2539,7 @@ namespace CAOGAttendeeManager
                     {
                         Cursor = Cursors.Wait;
                         SaveActiveList();
+                        SaveSettings();
                         StopTimer();
                         Cursor = Cursors.Arrow;
                         e.Cancel = false;
@@ -2579,6 +2551,7 @@ namespace CAOGAttendeeManager
                     {
                         e.Cancel = false;
                         StopTimer();
+                        SaveSettings();
                         // close all active threads
                         Environment.Exit(0);
 
@@ -2596,7 +2569,7 @@ namespace CAOGAttendeeManager
                 else
                 {
                     Cursor = Cursors.Wait;
-
+                    SaveSettings();
                     Environment.Exit(0);
 
                     Cursor = Cursors.Arrow;
@@ -2653,7 +2626,7 @@ namespace CAOGAttendeeManager
         private void SaveActiveList()
         {
 
-            Save_ChurchActivities_To_XMLFile();
+           
             // save contents to database
             m_dbContext.SaveChanges();
          
@@ -2663,20 +2636,20 @@ namespace CAOGAttendeeManager
         private void btnGenerateFollowUps_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
-            FollowUpWindow fw = new FollowUpWindow(_followUpWeeks);
+            FollowUpWindow fw = new FollowUpWindow(m_followUpWeeks);
 
             fw.ShowDialog();
 
             if (int.Parse(fw.GetFollowUpWeeks) != 0)
             {
-                _followUpWeeks = fw.GetFollowUpWeeks;
+                m_followUpWeeks = fw.GetFollowUpWeeks;
 
-                MessageBoxResult result = MessageBox.Show($"Are you sure you want to generate follow-Ups for every {_followUpWeeks } weeks now?", "Generate Follow-Up", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                MessageBoxResult result = MessageBox.Show($"Are you sure you want to generate follow-Ups for every {m_followUpWeeks } weeks now?", "Generate Follow-Up", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
                     Cursor = Cursors.Wait;
 
-                    bool generate_one = GenerateDBFollowUps(_followUpWeeks);
+                    bool generate_one = GenerateDBFollowUps(m_followUpWeeks);
 
                     Cursor = Cursors.Arrow;
                     if (generate_one)
@@ -2695,15 +2668,6 @@ namespace CAOGAttendeeManager
         }
 
 
-
-
-        private void chkActivityFilter_Checked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            m_isActivityFilterChecked = true;
-            // trvActivities.IsEnabled = true; FIX ME
-
-
-        }
 
 
         private void Copy_ContentsOfDefaultTable()
@@ -3843,37 +3807,31 @@ namespace CAOGAttendeeManager
 
         private void BtnPanelNewActivity_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            
 
-          
-
-
-
-                WndAddGroup AddgroupWin = new WndAddGroup(m_lstActivityHeaders);
+                WndAddGroup AddgroupWin = new WndAddGroup(m_lstTreeNodes,m_ActivityListPath, m_followUpWeeks);
                 AddgroupWin.ShowDialog();
-               
-                m_ActivityTreeChanged = AddgroupWin.GetTreeChanged;
 
-                if (m_ActivityTreeChanged) // tree has changed
-                {
-                    var new_tree = AddgroupWin.GetTree;
-                    LoadNewComboTree(new_tree); //Load the combo tree boxes with the new tree
-                    Convert_and_SaveNewTreeToActivityHeardersTree(new_tree); //convert and save the new tree to the format m_lstActivityHeaders
-                    
-                }
+            //m_ActivityTreeChanged = AddgroupWin.GetTreeChanged;
+
+
+           
+                
+
+            if (AddgroupWin.GetTreeChanged)
+            {
+                if (AddgroupWin.GetTree != null)
+                    m_lstTreeNodes = new List<TreeNode>(AddgroupWin.GetTree);
+                //save full path for next time the user load the program
+                m_ActivityListPath = AddgroupWin.GetFilePath;
+                     txtbActivityListName.Text = GetListName();
+                     LoadNewComboTree(m_lstTreeNodes); //Load the combo tree boxes with the new tree
+                    Convert_and_SaveNewTreeToActivityHeardersTree(m_lstTreeNodes); //convert and save the new tree to the format m_lstActivityHeaders
+                   
+            }
            
 
         }
-
-        private void BtnExecQuery_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            Cursor = Cursors.Wait;
-            BuildQuery_and_UpdateGrid();
-            Cursor = Cursors.Arrow;
-
-        }
-
-
-
 
         private void BtnAddColumn_Click(object sender, System.Windows.RoutedEventArgs e)
         {
@@ -3888,21 +3846,6 @@ namespace CAOGAttendeeManager
                 
 
         }
-
-        private void BtnClearQuery_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            Display_DefaultTable_in_Grid();
-            m_isQueryTableShown = false;
-
-            btnDelete.IsEnabled = true;
-            btnGenerateFollowUps.IsEnabled = true;
-
-        }
-
-
-
-
-
 
         private void DataGridCell_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -3961,7 +3904,7 @@ namespace CAOGAttendeeManager
                 {
                     if (m_isQueryTableShown)
                     {
-                        m_isFirstNamefiltered = false;
+                       // m_isFirstNamefiltered = false;
                         Display_Query_Table(m_lstQueryTableRows.AsQueryable());
                     }
                     else
@@ -3975,7 +3918,7 @@ namespace CAOGAttendeeManager
             else if (e.Key == Key.Escape)
             {
                 txtHeaderFirstName.Text = "";
-                m_isFirstNamefiltered = false;
+              //  m_isFirstNamefiltered = false;
                 if (m_isQueryTableShown)
                 {
                     Display_Query_Table();
@@ -3994,7 +3937,7 @@ namespace CAOGAttendeeManager
             if (e.Key == Key.Escape)
             {
                 txtHeaderLastName.Text = "";
-                m_isLastNamefiltered = false;
+               //m_isLastNamefiltered = false;
                 if (m_isQueryTableShown)
                 {
                     Display_Query_Table();
@@ -4049,7 +3992,7 @@ namespace CAOGAttendeeManager
 
                     m_dateIsValid = true;
                     m_DateSelected = date;
-                    m_isFilterByDateChecked = true;
+                   // m_isFilterByDateChecked = true;
                     BuildQuery_and_UpdateGrid();
 
 

@@ -112,7 +112,7 @@ namespace CAOGAttendeeManager
             DateTime curdate = DateTime.Now;
             DateTime datelimit;
             List<DateTime> lstsundays = new List<DateTime>();
-            int i = 0;
+           // int i = 0;
             if (curdate.DayOfWeek != DayOfWeek.Sunday)
             {
 
