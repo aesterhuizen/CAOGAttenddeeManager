@@ -14,7 +14,7 @@ namespace CAOGAttendeeManager
     /// </summary>
     public partial class ChartWindow : Window
     {
-        public ChartWindow(ref ModelDb db)
+        public ChartWindow(ref AttendeeManagerDBModel db)
         {
             InitializeComponent();
 
@@ -23,7 +23,7 @@ namespace CAOGAttendeeManager
         }
 
 
-        private ModelDb m_db;
+        private readonly AttendeeManagerDBModel m_db;
         private DateTime m_StartDateSelected;
         private DateTime m_EndDateSelected;
         private List<DateTime> m_lstValidSundays = new List<DateTime> { };

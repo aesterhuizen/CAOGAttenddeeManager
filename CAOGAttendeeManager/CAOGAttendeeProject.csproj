@@ -115,7 +115,7 @@
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
-    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+    <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="JetEntityFrameworkProvider, Version=6.0.0.0, Culture=neutral, PublicKeyToken=756cf6beb8fe7b41, processorArchitecture=MSIL">
@@ -244,11 +244,7 @@
     <Compile Include="AddColumn.xaml.cs">
       <DependentUpon>AddColumn.xaml</DependentUpon>
     </Compile>
-    <Compile Include="AttendeeMgrDBDataSet.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>AttendeeMgrDBDataSet.xsd</DependentUpon>
-    </Compile>
+    <Compile Include="AttendeeManagerDBModel.cs" />
     <Compile Include="ChartWindow.xaml.cs">
       <DependentUpon>ChartWindow.xaml</DependentUpon>
     </Compile>
@@ -259,7 +255,6 @@
     <Compile Include="FollowUpWindow.xaml.cs">
       <DependentUpon>FollowUpWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ModelDb.cs" />
     <Compile Include="AddGroupWindow.xaml.cs">
       <DependentUpon>AddGroupWindow.xaml</DependentUpon>
     </Compile>
@@ -318,17 +313,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </Resource>
-    <None Include="AttendeeMgrDBDataSet.xsc">
-      <DependentUpon>AttendeeMgrDBDataSet.xsd</DependentUpon>
-    </None>
-    <None Include="AttendeeMgrDBDataSet.xsd">
-      <Generator>MSDataSetGenerator</Generator>
-      <LastGenOutput>AttendeeMgrDBDataSet.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="AttendeeMgrDBDataSet.xss">
-      <DependentUpon>AttendeeMgrDBDataSet.xsd</DependentUpon>
-    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -401,9 +385,6 @@
     <Resource Include="Resources\checklist.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AttendeeMgrDB.accdb">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Resource Include="Resources\new-list.png" />
     <Resource Include="Resources\edit-icon.png" />
     <Resource Include="Resources\open-file-icon.png" />

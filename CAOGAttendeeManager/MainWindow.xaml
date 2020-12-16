@@ -12,16 +12,7 @@
         Closing="Window_Closing">
     <Window.Resources>
 
-        <!--<DataTemplate x:Key="ActivityPairItemsTemplate">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{Binding ActivityGroup}" FontSize="10" FontWeight="Bold"/>
-                <Label Content="->" FontSize="10"/>
-                <TextBlock Text="{Binding ParentTaskName}" Margin="5,0,0,0" FontSize="10"/>
-                <Label Content="->" FontSize="10"/>
-                <TextBlock Text="{Binding ChildTaskName}" Margin="10,0,0,0" FontSize="10"/>
-            </StackPanel>
-        </DataTemplate>-->
-
+     
         <DataTemplate x:Key="chkAttendanceItemsTemplate">
             <CheckBox Name="chkAttendedStatus" IsChecked="{Binding Attended}" />
         </DataTemplate>
@@ -185,7 +176,7 @@
             <!-- Tab control ############################################################################################################################################## -->
             <TabControl Name="GridsTabControl" SelectionChanged="GridsTabControl_SelectionChanged"  >
                 <!-- Active Tab################################################################################################################################################ -->
-                <TabItem Header="Overview" Name="ActiveTab">
+                <TabItem Header="Overview" Name="Overview">
                     <Grid>
                         <Grid.Resources>
                             <Style TargetType="{x:Type ScrollViewer}">
@@ -423,7 +414,7 @@
 
 
 
-                                <DataGridTextColumn x:Name="ActivityCol" Width="250" Binding="{Binding Activity}">
+                                <DataGridTextColumn x:Name="ActivityCol" Width="250" Binding="{Binding ActivityText}">
                                     <DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="{x:Type DataGridColumnHeader}">
                                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -552,17 +543,9 @@
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
                                                 <DataGridTextColumn Header="Date" Binding="{Binding DateString}"/>
-                                                <DataGridTemplateColumn Header="Activity">
-                                                    <DataGridTemplateColumn.CellTemplate>
-                                                        <DataTemplate>
-                                                            <StackPanel>
-                                                                <TextBlock Text="{Binding ActivityGroup}" FontSize="10" FontWeight="Bold"/>
-                                                                <TextBlock Text="{Binding ParentTaskName}" Margin="5,0,0,0" FontSize="10"/>
-                                                                <TextBlock Text="{Binding ChildTaskName}" Margin="10,0,0,0" FontSize="10"/>
-                                                            </StackPanel>
-                                                        </DataTemplate>
-                                                    </DataGridTemplateColumn.CellTemplate>
-                                                </DataGridTemplateColumn>
+                                                <DataGridTextColumn Header="Activity" Binding="{Binding ActivityText}">
+                                                   
+                                                </DataGridTextColumn>
 
 
                                             </DataGrid.Columns>

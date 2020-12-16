@@ -1,37 +1,22 @@
+
+using System;
+using System.ComponentModel;
+using System.Collections.ObjectModel;
+using System.Data.Entity;
+using System.Windows.Controls;
+using System.IO;
+
+public enum ArrayFormat
+{
+    STX = 0x02,
+    ETX = 0x03
+}
+
+
+
+// [DbConfigurationType(typeof(MyDbConfiguration))]
 namespace CAOGAttendeeManager
 {
-    using System;
-    using System.ComponentModel;
-    using System.Collections.ObjectModel;
-    using System.Data.Entity;
-    using System.Collections.Generic;
-    using System.Windows.Controls;
-    using System.IO;
-
-    // [DbConfigurationType(typeof(MyDbConfiguration))]
-
-
-    public enum ArrayFormat
-    {
-        STX = 0x02,
-        ETX = 0x03
-    }
-
-
-    public class TreeNode : TreeViewItem
-    {
-        public MemoryStream rtbDescriptionMStream { get; set; }
-
-        public int Level { get; set; }
-
-        public TreeNode()
-        {
-            rtbDescriptionMStream = new MemoryStream();
-            Level = 0;
-        }
-
-    }
-
     public class ModelDb : DbContext
     {
         // Your context has been configured to use a 'ModelDb' connection string from your application's 
@@ -46,9 +31,9 @@ namespace CAOGAttendeeManager
         //    optionsBuilder.UseSqlServer(
         //        @"Server=(Server=tcp:caogserver.database.windows.net,1433;Initial Catalog=CAOGdb_2018_09_14_Prod;Persist Security Info=False;User ID=sqladmin;Password=RFtgYH56&*;MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30");
         //}
-        public ModelDb() : base("AccessConnection")
+        public ModelDb() : base("AccessConnection2")
         {
-             
+
         }
         public ModelDb(string constr) : base(constr)
         {
@@ -57,86 +42,90 @@ namespace CAOGAttendeeManager
         // Add a DbSet for each entity type that you want to include in your model. For more information 
         // on configuring and using a Code First model, see http://go.microsoft.com/fwlink/?LinkId=390109.
 
-        
+
         public virtual DbSet<Attendee> Attendees { get; set; }
         public virtual DbSet<Attendance_Info> Attendance_Info { get; set; }
         public virtual DbSet<ActivityPair> Activities { get; set; }
     }
-   
-    public class Attendee : INotifyPropertyChanged
+
+
+
+public class Attendee : INotifyPropertyChanged
+{
+
+    public Attendee()
     {
+        AttendanceList = new ObservableCollection<Attendance_Info>() { };
+        ActivityList = new ObservableCollection<ActivityPair>() { };
 
-        public Attendee()
-        {
-            AttendanceList = new ObservableCollection<Attendance_Info>() { };
-            ActivityList = new ObservableCollection<ActivityPair>() { };
-
-        }
-
-        public bool Checked { get; set; }
-
-        public int AttendeeId { get; set; }
-        private string _lastname = "";
-        public string LastName
-        {
-            get
-            {
-                return _lastname;
-            }
-            set
-            {
-                if (_lastname != value)
-                {
-                    _lastname = value;
-                }
-                NotifyPropertyChanged("LastName");
-            }
-        }
-        private string _firstname = "";
-        public string FirstName
-        {
-            get
-            {
-                return _firstname;
-            }
-            set
-            {
-
-                if (_firstname != value)
-                {
-                    _firstname = value;
-                }
-                NotifyPropertyChanged("FirstName");
-
-            }
-
-        }
-
-        private string m_strFunctionSteps = "";
-        //public string FunctionSteps
-        //{
-        //    get
-        //    {
-        //        return m_strFunctionSteps;
-        //    }
-        //    set
-        //    {
-        //        m_strFunctionSteps = value;
-        //    }
-        //}
-
-
-        public virtual ObservableCollection<Attendance_Info> AttendanceList { get; private set; }
-        public virtual ObservableCollection<ActivityPair> ActivityList { get; private set; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void NotifyPropertyChanged(string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 
-  
+    public bool Checked { get; set; }
+
+    public int AttendeeId { get; set; }
+    private string _lastname = "";
+    public string LastName
+    {
+        get
+        {
+            return _lastname;
+        }
+        set
+        {
+            if (_lastname != value)
+            {
+                _lastname = value;
+            }
+            NotifyPropertyChanged("LastName");
+        }
+    }
+    private string _firstname = "";
+    public string FirstName
+    {
+        get
+        {
+            return _firstname;
+        }
+        set
+        {
+
+            if (_firstname != value)
+            {
+                _firstname = value;
+            }
+            NotifyPropertyChanged("FirstName");
+
+        }
+
+    }
+
+    private string m_strFunctionSteps = "";
+    //public string FunctionSteps
+    //{
+    //    get
+    //    {
+    //        return m_strFunctionSteps;
+    //    }
+    //    set
+    //    {
+    //        m_strFunctionSteps = value;
+    //    }
+    //}
+
+
+    public virtual ObservableCollection<Attendance_Info> AttendanceList { get; private set; }
+
+
+    public virtual ObservableCollection<ActivityPair> ActivityList { get; private set; }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+    private void NotifyPropertyChanged(string propertyName = "")
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+
+}
     public class Attendance_Info : IComparable, INotifyPropertyChanged
     {
 
@@ -204,7 +193,7 @@ namespace CAOGAttendeeManager
 
     public class ActivityPair : INotifyPropertyChanged
     {
-                    
+
         public ActivityPair()
         {
             ActivityGroup = "";
@@ -378,537 +367,551 @@ namespace CAOGAttendeeManager
 
     }
 
+   
 
-    //public class DefaultTableRowWrapper : DefaultTableRow
+
+    public class DefaultTableRowWrapper : DefaultTableRow
+{
+
+    //public Dictionary<string, object> DynamicProperties { get; set; }
+
+    //public DefaultTableRowWrapper() : base()
     //{
-        
-    //    public Dictionary<string, object> DynamicProperties { get; set; }
+    //    DynamicProperties = new Dictionary<string, object>();
+    //}
+    //public IEnumerable<string> GetDynamicMemberNames()
+    //{
+    //    return DynamicProperties.Keys;
 
-    //    public DefaultTableRowWrapper() : base ()
+    //}
+
+
+    //public int Count
+    //{
+    //    get { return DynamicProperties.Count; }
+    //}
+
+    //public IDictionary<string, object> MakeDynamicProperties(string function_steps)
+    //{
+    //    string concat_string = "";
+    //    if (function_steps != "")
     //    {
-    //        DynamicProperties = new Dictionary<string, object>();
-    //    }
-    //    public IEnumerable<string> GetDynamicMemberNames()
-    //    {
-    //        return DynamicProperties.Keys;
-
-    //    }
-
-
-    //    public int Count
-    //    {
-    //        get { return DynamicProperties.Count; }
-    //    }
-
-    //    public IDictionary<string, object> MakeDynamicProperties(string function_steps)
-    //    {
-    //        string concat_string = "";
-    //        if (function_steps != "")
+    //        string[] arycolumn_value = base.FunctionSteps.Split(',');
+    //        foreach (string column_value in arycolumn_value)
     //        {
-    //            string[] arycolumn_value = base.FunctionSteps.Split(',');
-    //            foreach (string column_value in arycolumn_value)
-    //            {
-    //                string[] strcolumn_value = column_value.Split('|');
-    //                DynamicProperties.Add(strcolumn_value[0].ToLower(), strcolumn_value[1].ToLower());
+    //            string[] strcolumn_value = column_value.Split('|');
+    //            DynamicProperties.Add(strcolumn_value[0].ToLower(), strcolumn_value[1].ToLower());
 
 
 
 
-    //            }
     //        }
-    //        else
+    //    }
+    //    else
+    //    {
+    //        for (int i = 0; i <= base.Columns.Length - 1; i++)
     //        {
-    //            for (int i = 0; i <= base.Columns.Length - 1; i++)
-    //            {
-    //                if (base.Columns[i] != "0")
-    //                    DynamicProperties.Add(base.Columns[i].ToLower(), "");
-    //                else
-    //                    break;
-    //            }
+    //            if (base.Columns[i] != "0")
+    //                DynamicProperties.Add(base.Columns[i].ToLower(), "");
+    //            else
+    //                break;
+    //        }
+    //    }
+
+    //    return DynamicProperties;
+    //}
+}
+
+
+
+public class DefaultTableRow : INotifyPropertyChanged
+{
+
+
+   // public Dictionary<string, object> DynamicProperties { get; set; }
+
+
+    //public void MakeDynamicProperties()
+    //{
+
+    //    //Add User added columns as dictionary keys 
+    //    for (int i = 0; i <= Columns.Length - 1; i++)
+    //    {
+
+    //        if (Columns[i] == "0") { break; }
+
+    //        string key = Columns[i].ToLower();
+
+    //        DynamicProperties.Add(key, "");
+
+    //    }
+
+    //    //DynamicProperties["AttendeeId".ToLower()] = AttendeeId;
+    //    //DynamicProperties["FirstName".ToLower()] = FirstName;
+    //    //DynamicProperties["LastName".ToLower()] = LastName;
+    //    //DynamicProperties["Activity".ToLower()] = Activity;
+    //    //DynamicProperties["ChurchStatus".ToLower()] = ChurchStatus;
+
+
+    //    //Add values to keys according to the class fields
+
+    //    if (m_functionSteps != "")
+    //    {
+
+
+
+    //        //find key in dictionary and add the corresponding value from the function steps string to it
+    //        string[] arycolumn_value = m_functionSteps.Split(',');
+    //        foreach (string column_value in arycolumn_value)
+    //        {
+    //            string[] strcolumn_value = column_value.Split('|');
+
+    //            string key = strcolumn_value[0].ToLower();
+    //            string value = strcolumn_value[1].ToLower();
+
+
+    //            DynamicProperties[key] = value;
     //        }
 
-    //        return DynamicProperties;
+
+    //    }
+    //    else
+    //    {
+    //        //Add User added columns as dictionary keys 
+    //        for (int i = 0; i <= m_aryfunction_steps.Length - 1; i++)
+    //        {
+
+    //            if (m_AllTableColumns_Array[i] == "0") { break; }
+
+    //            string key = m_AllTableColumns_Array[i].ToLower();
+
+    //            DynamicProperties.Add(key, "");
+
+    //        }
+
+
+    //    }
+
+
+    //}
+
+
+    //Array holding the column header of the datagrid
+    //string[] m_AllTableColumns_Array = new string[50];
+
+    //public string[] Columns
+    //{
+    //    get
+    //    {
+    //        return m_AllTableColumns_Array;
+    //    }
+    //    set
+    //    {
+    //        if (m_AllTableColumns_Array != value)
+    //        {
+    //            for (int i = 0; i <= m_AllTableColumns_Array.Length - 1; i++)
+    //            {
+    //                m_AllTableColumns_Array[i] = value[i];
+    //            }
+
+    //        }
+
     //    }
     //}
 
 
-
-    public class DefaultTableRow : INotifyPropertyChanged
+    public DefaultTableRow()
     {
+        AttendeeId = 0;
+        FirstName = "";
+        LastName = "";
+        Activity = "";
+        Date = null;
+        Church_Last_Attended = "";
+        Activity_Last_Attended = "";
+        ChurchStatus = "";
+        // DynamicProperties = new Dictionary<string, object>() { };
+
+        AttendanceList = new ObservableCollection<Attendance_Info>() { };
+        ActivityList = new ObservableCollection<ActivityPair>() { };
 
 
-        //public Dictionary<string, object> DynamicProperties { get; set; }
+    }
 
-      
-        //public void MakeDynamicProperties()
-        //{
-
-        //    //Add User added columns as dictionary keys 
-        //    for (int i = 0; i <= Columns.Length - 1; i++)
-        //    {
-
-        //        if (Columns[i] == "0") { break; }
-
-        //        string key = Columns[i].ToLower();
-                
-        //        DynamicProperties.Add(key, "");
-
-        //    }
-
-        //    //DynamicProperties["AttendeeId".ToLower()] = AttendeeId;
-        //    //DynamicProperties["FirstName".ToLower()] = FirstName;
-        //    //DynamicProperties["LastName".ToLower()] = LastName;
-        //    //DynamicProperties["Activity".ToLower()] = Activity;
-        //    //DynamicProperties["ChurchStatus".ToLower()] = ChurchStatus;
+    public int AttendeeId { get; set; }
 
 
-        //    //Add values to keys according to the class fields
 
-        //    if (m_functionSteps != "")
-        //    {
-
-                
-
-        //        //find key in dictionary and add the corresponding value from the function steps string to it
-        //        string[] arycolumn_value = m_functionSteps.Split(',');
-        //        foreach (string column_value in arycolumn_value)
-        //        {
-        //            string[] strcolumn_value = column_value.Split('|');
-
-        //            string key = strcolumn_value[0].ToLower();
-        //            string value = strcolumn_value[1].ToLower();
-
-                   
-        //            DynamicProperties[key] = value;
-        //        }
-
-
-        //    }
-        //    else
-        //    {
-        //        //Add User added columns as dictionary keys 
-        //        for (int i = 0; i <= m_aryfunction_steps.Length - 1; i++)
-        //        {
-
-        //            if (m_AllTableColumns_Array[i] == "0") { break; }
-
-        //            string key = m_AllTableColumns_Array[i].ToLower();
-
-        //            DynamicProperties.Add(key, "");
-
-        //        }
-
-              
-        //    }
-
-            
-        //}
-
-
-        ////Array holding the column header of the datagrid
-        //string[] m_AllTableColumns_Array = new string[50];
-
-        //public string[] Columns
-        //{
-        //    get
-        //    {
-        //        return m_AllTableColumns_Array;
-        //    }
-        //    set
-        //    {
-        //        if (m_AllTableColumns_Array != value)
-        //        {
-        //            for (int i =0; i<= m_AllTableColumns_Array.Length-1;i++)
-        //            {
-        //                m_AllTableColumns_Array[i] = value[i];
-        //            }
-                    
-        //        }
-                    
-        //    }
-        //}
-
-
-        public DefaultTableRow()
+    private string _lastname = "";
+    public string LastName
+    {
+        get
         {
-            AttendeeId = 0;
-            FirstName = "";
-            LastName = "";
-            Activity = "";
-            Date = null;
-            Church_Last_Attended = "";
-            Activity_Last_Attended = "";
-            ChurchStatus = "";
-           // DynamicProperties = new Dictionary<string, object>() { };
+            return _lastname;
+        }
+        set
+        {
+            if (_lastname != value)
+            {
+                _lastname = value;
+            }
+            NotifyPropertyChanged("LastName");
+        }
+    }
+    private string _firstname = "";
+    public string FirstName
+    {
+        get
+        {
+            return _firstname;
+        }
+        set
+        {
 
-            AttendanceList = new ObservableCollection<Attendance_Info>() { };
-            ActivityList = new ObservableCollection<ActivityPair>() { };
-
+            if (_firstname != value)
+            {
+                _firstname = value;
+            }
+            NotifyPropertyChanged("FirstName");
 
         }
 
-        public int AttendeeId { get; set; }
+    }
+    private string _activity = "";
 
-   
-
-        private string _lastname = "";
-        public string LastName
+    public string Activity
+    {
+        get
         {
-            get
-            {
-                return _lastname;
-            }
-            set
-            {
-                if (_lastname != value)
-                {
-                    _lastname = value;
-                }
-                NotifyPropertyChanged("LastName");
-            }
-        }
-        private string _firstname = "";
-        public string FirstName
-        {
-            get
-            {
-                return _firstname;
-            }
-            set
-            {
-
-                if (_firstname != value)
-                {
-                    _firstname = value;
-                }
-                NotifyPropertyChanged("FirstName");
-
-            }
-
-        }
-        private string _activity = "";
-
-        public string Activity
-        {
-            get
-            {
-                return _activity;
-            }
-
-            set
-            {
-                _activity = value;
-                NotifyPropertyChanged("Activity");
-            }
-
+            return _activity;
         }
 
-        public virtual ObservableCollection<ActivityPair> ActivityList { get; set; }
-
-        public virtual ObservableCollection<Attendance_Info> AttendanceList { get; set; }
-
-
-        private DateTime? _date = null;
-        public DateTime? Date
+        set
         {
-            get
-            {
-                return _date;
-            }
-
-            set
-            {
-                if (_date != value)
-                {
-                    _date = value;
-                    Church_Last_Attended = _date?.ToString("MM-dd-yyyy");
-
-                    NotifyPropertyChanged("DateString");
-                }
-            }
-        }
-
-
-        private string _church_last_attended = "";
-        public string Church_Last_Attended
-        {
-            get
-            {
-                return _church_last_attended;
-            }
-            set
-            {
-                _church_last_attended = value;
-                NotifyPropertyChanged("Church_Last_Attended");
-            }
-        }
-        private string _activity_last_attended = "";
-        public string Activity_Last_Attended
-        {
-            get
-            {
-                return _activity_last_attended;
-            }
-
-            set
-            {
-
-
-                _activity_last_attended = value;
-                NotifyPropertyChanged("Activity_Last_Attended");
-
-            }
-        }
-        private string _church_status = "";
-        public string ChurchStatus
-        {
-            get
-            {
-                return _church_status;
-            }
-            set
-            {
-                _church_status = value;
-                NotifyPropertyChanged("ChurchStatus");
-            }
-        }
-
-        string[] m_aryfunction_steps = { };
-
-        string m_functionSteps = "";
-        public string FunctionSteps
-        {
-            get
-            {
-                return m_functionSteps;
-            }
-            set
-            {
-                m_functionSteps = value;
-            }
-        }
-
-     
-
-
-
-
-
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-
-
-        private void NotifyPropertyChanged(string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            _activity = value;
+            NotifyPropertyChanged("Activity");
         }
 
     }
 
-    public class AttendanceTableRow : INotifyPropertyChanged
+    public virtual ObservableCollection<ActivityPair> ActivityList { get; set; }
+
+    public virtual ObservableCollection<Attendance_Info> AttendanceList { get; set; }
+
+
+    private DateTime? _date = null;
+    public DateTime? Date
     {
-        public AttendanceTableRow()
+        get
         {
-            Attended = "";
-            IsNewrow = false;
-            IsModifiedrow = false;
-            
-        }
-      
-        private bool _isModified = false;
-
-        public bool IsNewrow { get; set; }
-        public bool IsModifiedrow
-        {
-            get
-            {
-                return _isModified;
-            }
-            set
-            {
-                if (_isModified != value)
-                {
-                    _isModified = value;
-                 
-                }
-                
-            }
-
+            return _date;
         }
 
-        public int AttendeeId { get; set; }
-        
-        private string _lastname = "";
-        public string LastName
+        set
         {
-            get
+            if (_date != value)
             {
-                return _lastname;
-            }
-            set
-            {
-                if (_lastname != value)
-                {
-                    _lastname = value;
-                }
-                NotifyPropertyChanged("LastName");
+                _date = value;
+                Church_Last_Attended = _date?.ToString("MM-dd-yyyy");
+
+                NotifyPropertyChanged("DateString");
             }
         }
-        private string _firstname = "";
-        public string FirstName
-        {
-            get
-            {
-                return _firstname;
-            }
-            set
-            {
-
-                if (_firstname != value)
-                {
-                    _firstname = value;
-                }
-                NotifyPropertyChanged("FirstName");
-
-            }
-
-        }
-        public string DateString { get; set; }
-
-        private string _attended = "";
-        public string Attended
-        {
-            get
-            {
-                return _attended;
-            }
-            set
-            {
-                if (_attended != value)
-                {
-                    _attended = value;
-                    NotifyPropertyChanged("Attended");
-                }
-            }
-        }
-
-        //private string _activity = "";
-
-        
-    
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void NotifyPropertyChanged(string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-       
-    }
-  
-
-    public class ActivityHeader
-    {
-        public ActivityHeader()
-        {
-            Name = "";
-            Groups = new ObservableCollection<ActivityGroup>();
-        }
-        public string Name { get; set; }
-        public ObservableCollection<ActivityGroup> Groups { get; set; } 
-    }
-    public class ActivityGroup : INotifyPropertyChanged
-    {
-        public ActivityGroup()
-        {
-            lstActivityTasks = new ObservableCollection<ActivityTask>();
-            Parent = "";
-            ActivityName = "";
-        }
-
-        public string Parent {get; set;}
-        public string ActivityName { get; set; }
-        private bool _IsSelected = false;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        #region INotifyPropertyChanged Members
-
-
-        private void OnChanged(string prop)
-        {
-           
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
-        }
-
-        #endregion
-
-        public bool IsSelected
-        {
-            get { return _IsSelected; }
-            set { _IsSelected = value; OnChanged("IsSelected"); }
-        }
-
-        public ObservableCollection<ActivityTask> lstActivityTasks { get; set; }
     }
 
 
-    public class ActivityTask : INotifyPropertyChanged
+    private string _church_last_attended = "";
+    public string Church_Last_Attended
     {
-
-        public ActivityTask()
+        get
         {
-            this.lstsubTasks = new ObservableCollection<ActivityTask>() { };
-            ActivityId = 0;
-            Parent = "";
-            TaskName = "";
-            Description = "";
-
+            return _church_last_attended;
+        }
+        set
+        {
+            _church_last_attended = value;
+            NotifyPropertyChanged("Church_Last_Attended");
+        }
+    }
+    private string _activity_last_attended = "";
+    public string Activity_Last_Attended
+    {
+        get
+        {
+            return _activity_last_attended;
         }
 
-       
-        public int ActivityId {get;set; }
-        public string Parent { get; set; }
-      
-        public string TaskName { get; set; }
-        public string Description { get; set; }
-        private bool _IsSelected = false;
-
-       
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        #region INotifyPropertyChanged Members
-
-       
-
-        private void OnChanged(string prop)
+        set
         {
-         
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
-           
+
+
+            _activity_last_attended = value;
+            NotifyPropertyChanged("Activity_Last_Attended");
+
         }
-
-        #endregion
-
-        public bool IsSelected
+    }
+    private string _church_status = "";
+    public string ChurchStatus
+    {
+        get
         {
-            get { return _IsSelected; }
-
-            set
-            {
-                _IsSelected = value;
-                OnChanged("IsSelected");
-            }
+            return _church_status;
         }
-
-      
-
-        public ObservableCollection<ActivityTask> lstsubTasks { get; set; }
+        set
+        {
+            _church_status = value;
+            NotifyPropertyChanged("ChurchStatus");
+        }
     }
 
-  
+    string[] m_aryfunction_steps = { };
+
+    string m_functionSteps = "";
+    public string FunctionSteps
+    {
+        get
+        {
+            return m_functionSteps;
+        }
+        set
+        {
+            m_functionSteps = value;
+        }
+    }
+
+
+
+
+
+
+
+
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+
+
+    private void NotifyPropertyChanged(string propertyName = "")
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+}
+
+public class AttendanceTableRow : INotifyPropertyChanged
+{
+    public AttendanceTableRow()
+    {
+        Attended = "";
+        IsNewrow = false;
+        IsModifiedrow = false;
+
+    }
+
+    private bool _isModified = false;
+
+    public bool IsNewrow { get; set; }
+    public bool IsModifiedrow
+    {
+        get
+        {
+            return _isModified;
+        }
+        set
+        {
+            if (_isModified != value)
+            {
+                _isModified = value;
+
+            }
+
+        }
+
+    }
+
+    public int AttendeeId { get; set; }
+
+    private string _lastname = "";
+    public string LastName
+    {
+        get
+        {
+            return _lastname;
+        }
+        set
+        {
+            if (_lastname != value)
+            {
+                _lastname = value;
+            }
+            NotifyPropertyChanged("LastName");
+        }
+    }
+    private string _firstname = "";
+    public string FirstName
+    {
+        get
+        {
+            return _firstname;
+        }
+        set
+        {
+
+            if (_firstname != value)
+            {
+                _firstname = value;
+            }
+            NotifyPropertyChanged("FirstName");
+
+        }
+
+    }
+    public string DateString { get; set; }
+
+    private string _attended = "";
+    public string Attended
+    {
+        get
+        {
+            return _attended;
+        }
+        set
+        {
+            if (_attended != value)
+            {
+                _attended = value;
+                NotifyPropertyChanged("Attended");
+            }
+        }
+    }
+
+    //private string _activity = "";
+
+
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    private void NotifyPropertyChanged(string propertyName = "")
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 
 
 }
+
+
+public class ActivityHeader
+{
+    public ActivityHeader()
+    {
+        Name = "";
+        Groups = new ObservableCollection<ActivityGroup>();
+    }
+    public string Name { get; set; }
+    public ObservableCollection<ActivityGroup> Groups { get; set; }
+}
+public class ActivityGroup : INotifyPropertyChanged
+{
+    public ActivityGroup()
+    {
+        lstActivityTasks = new ObservableCollection<ActivityTask>();
+        Parent = "";
+        ActivityName = "";
+    }
+
+    public string Parent { get; set; }
+    public string ActivityName { get; set; }
+    private bool _IsSelected = false;
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    #region INotifyPropertyChanged Members
+
+
+    private void OnChanged(string prop)
+    {
+
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+    }
+
+    #endregion
+
+    public bool IsSelected
+    {
+        get { return _IsSelected; }
+        set { _IsSelected = value; OnChanged("IsSelected"); }
+    }
+
+    public ObservableCollection<ActivityTask> lstActivityTasks { get; set; }
+}
+
+
+public class ActivityTask : INotifyPropertyChanged
+{
+
+    public ActivityTask()
+    {
+        this.lstsubTasks = new ObservableCollection<ActivityTask>() { };
+        ActivityId = 0;
+        Parent = "";
+        TaskName = "";
+        Description = "";
+
+    }
+
+
+    public int ActivityId { get; set; }
+    public string Parent { get; set; }
+
+    public string TaskName { get; set; }
+    public string Description { get; set; }
+    private bool _IsSelected = false;
+
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    #region INotifyPropertyChanged Members
+
+
+
+    private void OnChanged(string prop)
+    {
+
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+
+    }
+
+    #endregion
+
+    public bool IsSelected
+    {
+        get { return _IsSelected; }
+
+        set
+        {
+            _IsSelected = value;
+            OnChanged("IsSelected");
+        }
+    }
+
+
+
+    public ObservableCollection<ActivityTask> lstsubTasks { get; set; }
+}
+
+    public class TreeNode : TreeViewItem
+    {
+        public MemoryStream rtbDescriptionMStream { get; set; }
+
+        public int Level { get; set; }
+
+        public TreeNode()
+        {
+            rtbDescriptionMStream = new MemoryStream();
+            Level = 0;
+        }
+
+    }
+}
+
+

@@ -26,6 +26,7 @@ namespace CAOGAttendeeManager
 
         public string GetFollowUpWeeks { get; set; } = "";
 
+      
         public bool isListSaved { get; private set; } = false;
         public IEnumerable<TreeNode> GetTree
         {
@@ -50,12 +51,12 @@ namespace CAOGAttendeeManager
         private IEnumerable<TreeNode> m_ActivitiesTreeView = null;
 
         // variable that hold tree of headers read from XML file
-        private List<ActivityHeader> m_lstHeadersFromXML = new List<ActivityHeader>() { };
+      // private List<ActivityHeader> m_lstHeadersFromXML = new List<ActivityHeader>() { };
 
 
      
             
-        void InitTree(List<TreeNode> tree)
+        public void InitTree(List<TreeNode> tree)
         {
             TreeNode parent_ptr = null;
             TreeNode root_ptr = null;
@@ -135,53 +136,53 @@ namespace CAOGAttendeeManager
             
 
         }
-void InitTree(List<ActivityHeader> tree)
-        {
-            trvActivities.BeginInit();
+//void InitTree(List<ActivityHeader> tree)
+//        {
+//            trvActivities.BeginInit();
 
-            if (trvActivities.Items.Count != 0)
-            {
-                // clear the list before initializing it
-                trvActivities.Items.Clear();
+//            if (trvActivities.Items.Count != 0)
+//            {
+//                // clear the list before initializing it
+//                trvActivities.Items.Clear();
 
-            }
-            //Add ComboTreeNodes to ComboTreeBox Treeview
-            foreach (var header in tree)
-            {
-                //ActivityHeader
+//            }
+//            //Add ComboTreeNodes to ComboTreeBox Treeview
+//            foreach (var header in tree)
+//            {
+//                //ActivityHeader
 
-                TreeNode parent = new TreeNode() { Header = header.Name };
+//                TreeNode parent = new TreeNode() { Header = header.Name };
 
 
-                //ActivityGroups
-                foreach (var group in header.Groups)
-                {
-                    TreeNode group_node = new TreeNode() { Header = group.ActivityName };
+//                //ActivityGroups
+//                foreach (var group in header.Groups)
+//                {
+//                    TreeNode group_node = new TreeNode() { Header = group.ActivityName };
 
-                    parent.Items.Add(group_node);
+//                    parent.Items.Add(group_node);
 
-                    //ActivityTask
-                    foreach (var task in group.lstActivityTasks)
-                    {
-                        TreeNode taskNode = new TreeNode() { Header = task.TaskName, /*Description = task.Description*/ };
-                        group_node.Items.Add(taskNode);
+//                    //ActivityTask
+//                    foreach (var task in group.lstActivityTasks)
+//                    {
+//                        TreeNode taskNode = new TreeNode() { Header = task.TaskName, /*Description = task.Description*/ };
+//                        group_node.Items.Add(taskNode);
 
-                        //subTask
-                        foreach (var subtask in task.lstsubTasks)
-                        {
-                            TreeNode subTaskNode = new TreeNode() { Header = subtask.TaskName, /*Description = subtask.Description*/ };
-                            taskNode.Items.Add(subTaskNode);
+//                        //subTask
+//                        foreach (var subtask in task.lstsubTasks)
+//                        {
+//                            TreeNode subTaskNode = new TreeNode() { Header = subtask.TaskName, /*Description = subtask.Description*/ };
+//                            taskNode.Items.Add(subTaskNode);
 
-                        }
-                    }
+//                        }
+//                    }
 
-                }
-                trvActivities.Items.Add(parent);
-            }
+//                }
+//                trvActivities.Items.Add(parent);
+//            }
 
-            trvActivities.EndInit();
+//            trvActivities.EndInit();
            
-        }
+//        }
 
         private Timer aTimer = null;
 
@@ -383,6 +384,12 @@ void InitTree(List<ActivityHeader> tree)
                 foreach (TreeNode n in new_tree)
                 {
                     if (itemfound) break;
+                    if (n == selected_node)
+                    {
+                        n.Items.Add(new_item);
+                        itemfound = true;
+                        break;
+                    }
 
                     foreach (TreeNode i in n.Items)
                     {
@@ -566,7 +573,7 @@ void InitTree(List<ActivityHeader> tree)
             trvActivities.Items.Refresh();
             txtActivityName.Text = "";
            
-
+           
           
         }
 
@@ -1125,7 +1132,8 @@ void InitTree(List<ActivityHeader> tree)
             txtActivityName.Text = "";
             rtbDescription.Document.Blocks.Clear();
 
-
+            m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+            
         }
 
         private void SaveSettings()
