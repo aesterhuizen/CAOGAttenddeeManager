@@ -35,7 +35,7 @@ namespace CAOGAttendeeManager
            
 
 
-            m_version_string = "v3.1.29";
+            m_version_string = "v3.1.29a";
 
 
 
@@ -181,7 +181,7 @@ namespace CAOGAttendeeManager
         private System.Collections.IList m_MultiAttendanceRow_Selected;
 
         //ComboTreeBox
-        private ComboTreeBox m_ctbActivity = new ComboTreeBox();
+        private DropDownSearchBox m_ctbActivity = new DropDownSearchBox();
         private ComboTreeBox m_ctbActivityProspect = new ComboTreeBox();
 
         //list of Activity headers

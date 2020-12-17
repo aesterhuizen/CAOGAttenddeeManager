@@ -231,8 +231,8 @@
                                             <Button Width="14" 
                                                     RenderOptions.BitmapScalingMode="NearestNeighbor" 
                                                     Name="btnExpandHistory"
-                                                    Content="\/"
-                                                    Margin="0,0,0,0"
+                                                    Content="+"
+                                                    Margin="1,1,1,1"
                                                     Click="btnExpandHistory_Click"
                                                     BorderThickness="0" 
                                                     Background="White"
@@ -491,7 +491,7 @@
                             <DataGrid.RowDetailsTemplate>
                                 <DataTemplate>
 
-                                    <StackPanel Name="spAttendeeProfile">
+                                    <StackPanel Margin="10,5,10,5" Name="spAttendeeProfile">
                                         <ToolBar Name="tbarProfileAttendanceList" MinHeight="33">
                                             <!--<Button Name="btnAddColumn" 
                                                     Click="BtnAddColumn_Click"
