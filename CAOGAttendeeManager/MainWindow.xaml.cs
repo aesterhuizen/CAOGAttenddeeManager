@@ -339,7 +339,7 @@ namespace CAOGAttendeeManager
             
 }
         private int m_NewAttendeeId = 0;
-
+        
 
         private void StopTimer()
         {
@@ -2366,17 +2366,6 @@ namespace CAOGAttendeeManager
 
         }
 
-        private void M_ctbActivity_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
-        {
-            //if (e.KeyCode == System.Windows.Forms.Keys.Escape)
-            //{
-            //    m_isActivityChecked = false;
-            //    m_ctbActivity.UncheckAll();
-            //    BuildQuery_and_UpdateGrid();
-            //}
-
-        }
-
         private void M_ctbActivityProspect_DropDownClosed(object sender, System.EventArgs e)
         {
             ComboTreeBox ctb = sender as ComboTreeBox;
@@ -2411,10 +2400,27 @@ namespace CAOGAttendeeManager
                 ComboTreeNode firstNode = chkNodes.First();
                 if (firstNode != null)
                 {
+                    string path = firstNode.GetFullPath("->", false);
 
                     m_isActivityChecked = true;
-                    if (m_currentSelected_Activity == null)
-                        m_currentSelected_Activity = new Activity {ActivityText = firstNode.GetFullPath("->", false) };
+                  if (m_currentSelected_Activity == null) //create an activity with activity text if non exist
+                  {
+
+                        m_currentSelected_Activity = new Activity { ActivityText = firstNode.GetFullPath("->", false) };
+
+                        
+                  }
+                  else
+                  {
+                        // if this is a different activity than previous selected change the ActivityText of the activity
+                        if (m_currentSelected_Activity.ActivityText != path)
+                        {
+                            m_currentSelected_Activity.ActivityText = path;
+                        }
+                        else
+                            return;
+                  }
+                   
                    
                    
                     
@@ -2656,51 +2662,7 @@ namespace CAOGAttendeeManager
 #endif
 
         }
-        private void ShowFiltered_Or_DefaultTable()
-        {
-            //if (m_isFilterByDateChecked || m_isActivityfilterByDateChecked || m_isActivityFilterChecked ||
-            //    m_isAttendedChecked || m_isFollowupChecked || m_isRespondedChecked)
-
-            //{
-            //    if (txtSearch.Text != "")
-            //    {
-            //        m_DataSet.Tables["QueryTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
-            //        dataGrid.DataContext = m_DataSet.Tables["QueryTable"];
-            //        dataGrid.IsReadOnly = true;
-            //    }
-            //    else
-            //    {
-            //        dataGrid.DataContext = m_DataSet.Tables["QueryTable"];
-            //        dataGrid.IsReadOnly = true;
-            //    }
-
-            //}
-            //else
-            //{
-
-            //    if (txtSearch.Text != "")
-            //    {
-            //        m_DataSet.Tables["DefaultTable"].DefaultView.RowFilter = "FirstLastName LIKE '%" + txtSearch.Text + "%'";
-            //        dataGrid.DataContext = m_DataSet.Tables["DefaultTable"];
-            //        dataGrid.CanUserDeleteRows = false;
-            //        dataGrid.CanUserAddRows = false;
-            //        dataGrid.IsReadOnly = false;
-
-            //    }
-            //    else
-            //    {
-            //        // (dataGrid.DataContext as DataTable).DefaultView.Sort = "[Last Name] ASC";
-            //        Display_DefaultTable_in_Grid();
-            //    }
-
-            //}
-
-            //if (dataGrid.Columns.Count > 1)
-            //{
-            //   // dataGrid.Columns[0].Visibility = Visibility.Hidden; //AttendeeId
-            //   // dataGrid.Columns[1].Visibility = Visibility.Hidden; // FirstNameLastName
-            //}
-        }
+     
         private void SaveActiveList()
         {
 
@@ -4568,6 +4530,7 @@ namespace CAOGAttendeeManager
             if (e.Key == Key.Escape)
             {
                 m_isActivityChecked = false;
+                m_currentSelected_Activity = null;
                 m_ctbActivity.UncheckAll();
                 BuildQuery_and_UpdateGrid();
             }

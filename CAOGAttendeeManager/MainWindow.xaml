@@ -421,7 +421,14 @@
                                         </Style>
                                     </DataGridTextColumn.HeaderStyle>
                                     <DataGridTextColumn.Header>
-                                        <Grid Name="colActivityHeaderGrid" ToolTip="Search activity" KeyUp="colActivityHeaderGrid_KeyUp">
+                                        <Grid Name="colActivityHeaderGrid" KeyUp="colActivityHeaderGrid_KeyUp">
+                                            <Grid.ToolTip>
+                                                <TextBlock>
+                                                        Search activity
+                                                   <LineBreak/>
+                                                    Press ESC to exit search mode.
+                                                </TextBlock>
+                                            </Grid.ToolTip>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
