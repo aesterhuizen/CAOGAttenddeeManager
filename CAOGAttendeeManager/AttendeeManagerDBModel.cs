@@ -195,6 +195,7 @@ namespace CAOGAttendeeManager
 
         public virtual Attendee Attendee { get; set; }
 
+
         private string _activityText = "";
         public string ActivityText 
         {
@@ -256,18 +257,19 @@ namespace CAOGAttendeeManager
     }
 
 
-    public class TreeNode : TreeViewItem
+    public class ComboTreeNode : TreeViewItem
     {
         public MemoryStream rtbDescriptionMStream { get; set; }
 
         public int Level { get; set; }
 
-        public TreeNode()
+        public ComboTreeNode()
         {
             rtbDescriptionMStream = new MemoryStream();
             Level = 0;
         }
 
+       
     }
 
 

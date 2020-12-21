@@ -687,3 +687,7 @@ WpfExperiments/
 /WPF_4-5_Unl_code
 /ChurchActivities_saved.xml
 /CAOGAttendeeManager/Properties/Licenses.licx
+/CAOGAttendeeManager/ComboTreeNodeCollection.cs
+/CAOGAttendeeManager/ComboTreeNode.cs
+/CAOGAttendeeManager/ComboTreeDropDown.cs
+/CAOGAttendeeManager/ComboTreeBox.cs

@@ -35,7 +35,7 @@ namespace CAOGAttendeeManager
            
 
 
-            m_version_string = "v3.1.29a";
+            m_version_string = "v3.1.29c";
 
 
 
@@ -111,12 +111,19 @@ namespace CAOGAttendeeManager
                    Display_DefaultTable_in_Grid();
                 //Loaded the program settings
                 LoadSettings();
-                m_lstTreeNodes = Load_ChurchActivities_From_File(m_ActivityListPath);
-               
-                txtbActivityListName.Text = GetListName();
+                List<ComboTreeNode> tmp_list = Load_ChurchActivities_From_File(m_ActivityListPath) ; // load tree as a list of nodes from the file
+
+
                 
-                m_lstTreeNodes = InitTree(m_lstTreeNodes);
-                LoadNewComboTree(m_lstTreeNodes);
+
+                txtbActivityListName.Text = GetListName();
+                m_lstCurrActivityListNodes = InitTree(tmp_list); // arrange array of nodes in a parent/child relationships
+                LoadActivityProspectComboTreeList(m_lstCurrActivityListNodes); // load tree into prospect tab's dropdown
+               
+
+                m_lstContextActivities = AddALLUnchangedActivitiesFromContextToActivityTree(); 
+              
+
             }
             catch (Exception ex)
             {
@@ -181,21 +188,26 @@ namespace CAOGAttendeeManager
         private System.Collections.IList m_MultiAttendanceRow_Selected;
 
         //ComboTreeBox
-        private DropDownSearchBox m_ctbActivity = new DropDownSearchBox();
+        private ComboTreeBox m_ctbActivity = new ComboTreeBox();
         private ComboTreeBox m_ctbActivityProspect = new ComboTreeBox();
 
-        //list of Activity headers
-        private List<TreeNode> m_lstTreeNodes = new List<TreeNode> { };
-      
+        //list of TreeNodes in the currently loaded list
+        private List<ComboTreeNode> m_lstCurrActivityListNodes = new List<ComboTreeNode> { };
+
+        //list of TreeNodes in the activity context table
+        private List<ComboTreeNode> m_lstContextActivities = new List<ComboTreeNode> { };
+
 
 
 
      
 
 
-        // the current selected activity Pair
+        // the current activity to be added 
+        private Activity m_currentAdded_Activity = null;
+
+        // the current activity selected for filtering
         private Activity m_currentSelected_Activity = null;
-       
 
        
         private Timer aTimer = null;
@@ -205,66 +217,177 @@ namespace CAOGAttendeeManager
         //Store the list name that is in use
         private string m_ActivityListPath = "";
 
-       //private int m_activitychecked_count = 0;
-
-        //filter state
-       // private bool m_isActivityfilterByDateChecked = false;
-      //  private bool m_isFilterByDateChecked = false;
-        //private bool m_isChurchStatusFilterChecked = false;
+     
         private bool m_isAttendedChecked = false;
         private bool m_isFollowupChecked = false;
         private bool m_isRespondedChecked = false;
-       // private bool m_isActivityFilterChecked = false;
+    
         private bool m_isActivityChecked = false;
         private bool m_isQueryTableShown = false;
-       // private bool m_isFirstNamefiltered = false;
-      // private bool m_isLastNamefiltered = false;
-
+      
         // view state
         private bool m_alistView = false;
         private bool m_AttendanceView = false;
-        //private bool m_activityView = false;
-        //private bool m_IsActivePanelView = false;
-        //private bool m_IsPanelProspectView = false;
-        //private bool m_IsActivityPanelView = false;
-       // private bool m_LoadFromActiveState = false;anel state
+       
       
-       // private string[] m_ary_ActivityStatus = new string[10];
-       // private string m_old_attendeeId = "";
+     
         private bool m_dateIsValid = false;
         private bool m_alistdateIsValid = false;
 
         private bool m_loaded = false;
 
-        private List<TreeNode> InitTree(List<TreeNode> tree)
+
+        private List<ComboTreeNode> AddALLUnchangedActivitiesFromContextToActivityTree()
+        {
+            List<ComboTreeNode> tmp = GetListOfTreeNodesFromActivityContext(); // Load all the Activities in the activity context Table into a list of nodes
+            List<ComboTreeNode> fmt_lstNodes = InitTree(tmp);
+            LoadActivityComboTree(fmt_lstNodes);
+
+            return fmt_lstNodes;;
+        }
+
+        private void LoadActivityComboTree(List<ComboTreeNode> list)
+        {
+            if (m_ctbActivity.Nodes.Any())
+            {
+
+                m_ctbActivity.Nodes.Clear();
+            }
+
+
+            //Add ComboTreeNodes to ComboTreeBox Treeview
+            foreach (ComboTreeNode header in list)
+            {
+                global::ComboTreeNode node = new global::ComboTreeNode();
+                node.Text = (string)header.Header;
+
+
+                global::ComboTreeNode parent2 = m_ctbActivity.Nodes.Add(node.Text);
+                //ActivityGroups
+                foreach (ComboTreeNode group in header.Items)
+                {
+                    global::ComboTreeNode node2 = new global::ComboTreeNode();
+                    node2.Text = (string)group.Header;
+
+
+                    global::ComboTreeNode child2 = parent2.Nodes.Add(node2.Text);
+                    //ActivityTask
+                    foreach (ComboTreeNode task in group.Items)
+                    {
+                        global::ComboTreeNode node3 = new global::ComboTreeNode();
+                        node3.Text = (string)task.Header;
+
+
+                        global::ComboTreeNode taskNode2 = child2.Nodes.Add(node3.Text);
+                        //subTask
+                        foreach (ComboTreeNode subtask in task.Items)
+                        {
+                            global::ComboTreeNode node4 = new global::ComboTreeNode();
+                            node4.Text = (string)subtask.Header;
+
+
+                            global::ComboTreeNode subTaskNode2 = taskNode2.Nodes.Add(node4.Text);
+                        }
+                    }
+
+                }
+            }
+
+
+
+
+        }
+        private List<ComboTreeNode> GetListOfTreeNodesFromActivityContext ()
+        {
+
+            List<ComboTreeNode> tmp_listNodes = new List<ComboTreeNode>();
+          
+            // see if any activity entries changed, only itterate through the activities that has state = "unchanged"
+            var activity_entry_changed = m_dbContext.ChangeTracker.Entries<Activity>();
+
+            foreach (var a in activity_entry_changed)
+            {
+                if (a.State == EntityState.Unchanged)
+                {
+
+                    if (a.Entity.ActivityText != "")
+                    {
+
+
+
+
+                        var activity = new string(
+
+                                       (from c in a.Entity.ActivityText
+                                        where char.IsWhiteSpace(c) || char.IsLetterOrDigit(c) || !char.IsSymbol(c)
+                                        select c).ToArray());
+                        string[] split_str = activity.Split('-');
+
+                        for (int i = 0; i <= split_str.Length - 1; i++)
+                        {
+                            ComboTreeNode new_node = new ComboTreeNode
+                            {
+                                Header = split_str[i],
+                                Level = i,
+
+                            };
+                            tmp_listNodes.Add(new_node);
+                        }
+
+                    }
+                   
+                }
+            }
+
+          
+            return tmp_listNodes;
+        }
+
+        private List<ComboTreeNode> InitTree(List<ComboTreeNode> tree)
         {
 
 
-            TreeNode parent_ptr = null;
-            TreeNode root_ptr = null;
-            TreeNode child_ptr = null;
+            ComboTreeNode parent_ptr = null;
+            ComboTreeNode root_ptr = null;
+            ComboTreeNode child_ptr = null;
 
-            List<TreeNode> tmp_tree = new List<TreeNode>() { };
-
-         
+            List<ComboTreeNode> tmp_tree = new List<ComboTreeNode>() { };
 
 
+
+            bool NodeExist = false;
 
 
             for (int i = 0; i <= tree.Count - 1; i++)
             {
 
-
+                
 
                 if (tree[i].Level == 0)
                 {
                     if (root_ptr != null)
                     {
-                        tmp_tree.Add(root_ptr);
+                       
+                                               
+                        
+                        if ((string)tree[i].Header == (string)root_ptr.Header)
+                        {
+                            // the new node has the same name as the root_ptr so root_ptr stay where it is 
+
+                        }
+                        else
+                        {
+                            tmp_tree.Add(root_ptr);
+                            root_ptr = tree[i];
+                            NodeExist = false;
+                        }
+                            
 
 
                     }
-                    root_ptr = tree[i];
+                    else
+                        root_ptr = tree[i];
+
 
                 }
 
@@ -273,30 +396,116 @@ namespace CAOGAttendeeManager
                 {
 
                     if (tree[i].Parent == null)
-                        root_ptr.Items.Add(tree[i]);
+                    {
+
+                        foreach (ComboTreeNode node in root_ptr.Items)
+                        {
+                            // there is already a node with the same name as tree[i] node so dont add the node
+                            if ((string)node.Header == (string)tree[i].Header)
+                            {
+                                NodeExist = true;
+                                parent_ptr = node;
+                                
+                                break;
 
 
-                    parent_ptr = tree[i];
+                            }
+                        }
+                            // Item exits, do nothing, otherwise add node to root_ptr 
+                            if (NodeExist)
+                            {
+                            // do nothing keep pointer where it is
+                                  NodeExist = false;
+                             }
+                              else
+                            {
 
+                                root_ptr.Items.Add(tree[i]);
+                                parent_ptr = tree[i];
+                                NodeExist = false;
+                            }
+                        
+
+                    }
+                        
                 }
                 /* This node is a child of a parent node pointed to by parent_ptr */
                 else if (tree[i].Level == parent_ptr.Level + 1)
                 {
                     if (tree[i].Parent == null)
-                        parent_ptr.Items.Add(tree[i]);
+                    {
 
-                    child_ptr = tree[i];
+                        foreach (ComboTreeNode node in parent_ptr.Items)
+                        {
+                            // there is already a node attached with the same name as tree[i] node so dont add the node
+                         
+                            if ((string)node.Header == (string)tree[i].Header)
+                            {
+                                NodeExist = true;
+                                parent_ptr = node;
+                                break;
+
+                            }
+
+                        }
+                            // Item exist, do nothing, otherwise, add node to parent
+                            if (NodeExist)
+                            {
+                            // Set NodeExist to false;
+                                NodeExist = false;
+                                
+                            }
+                            else
+                            {
+                                parent_ptr.Items.Add(tree[i]);
+                                child_ptr = tree[i];
+                                NodeExist = false;
+                            }
+                        
+
+
+                      
+                      
+                    }
+
+                 
                 }
                 /* This node is a child of a child node pointed to by child_ptr
                  * parent_ptr becomes the node
                  */
                 else if (tree[i].Level == child_ptr.Level + 1)
                 {
-
                     if (tree[i].Parent == null)
-                        child_ptr.Items.Add(tree[i]);
+                    {
+                        foreach (ComboTreeNode node in child_ptr.Items)
+                        {
+                            // there is already a node with the same name as tree[i] node so dont add the node
+                       
 
-                    parent_ptr = tree[i];
+                            if ((string)node.Header == (string)tree[i].Header)
+                            {
+                                NodeExist = true;
+                                break;
+                            }
+                        }
+
+
+                        // Item exist, do nothing, otherwise, add node to parent
+                        if (NodeExist)
+                        {
+                            // do nothing keep pointer where it is
+                            NodeExist = false;
+                        }
+                        else
+                        {
+                            child_ptr.Items.Add(tree[i]);
+                            parent_ptr = tree[i];
+
+                        }
+                        
+                        
+                    }
+                  
                 }
 
 
@@ -363,7 +572,7 @@ namespace CAOGAttendeeManager
 
             Dispatcher.Invoke(() =>
            {
-               if (m_currentSelected_Activity != null && m_ActivityDateSelectedPr != null && m_MultiAttendanceRow_Selected != null)
+               if (m_currentAdded_Activity != null && m_ActivityDateSelectedPr != null && m_MultiAttendanceRow_Selected != null)
                {
 
                    btnPanelAddActivity.IsEnabled = true;
@@ -628,45 +837,45 @@ namespace CAOGAttendeeManager
         //        }
         //    }
         //}
-        private void LoadNewComboTree(IEnumerable<TreeNode> tree)
+        private void LoadActivityProspectComboTreeList(IEnumerable<ComboTreeNode> tree)
         {
-            if (m_ctbActivity.Nodes.Any() && m_ctbActivityProspect.Nodes.Any())
+            if (m_ctbActivityProspect.Nodes.Any())
             {
-                m_ctbActivity.Nodes.Clear();
+             
                 m_ctbActivityProspect.Nodes.Clear();
             }
             //Add ComboTreeNodes to ComboTreeBox Treeview
-            foreach (TreeNode header in tree)
+            foreach (ComboTreeNode header in tree)
             {
-                ComboTreeNode node = new ComboTreeNode();
+                global::ComboTreeNode node = new global::ComboTreeNode();
                 node.Text = (string)header.Header;
 
-                ComboTreeNode parent = m_ctbActivity.Nodes.Add(node.Text);
-                ComboTreeNode parent2 = m_ctbActivityProspect.Nodes.Add(node.Text);
+               
+                global::ComboTreeNode parent2 = m_ctbActivityProspect.Nodes.Add(node.Text);
                 //ActivityGroups
-                foreach (TreeNode group in header.Items)
+                foreach (ComboTreeNode group in header.Items)
                 {
-                    ComboTreeNode node2 = new ComboTreeNode();
+                    global::ComboTreeNode node2 = new global::ComboTreeNode();
                     node2.Text = (string)group.Header;
 
-                    ComboTreeNode child = parent.Nodes.Add(node2.Text);
-                    ComboTreeNode child2 = parent2.Nodes.Add(node2.Text);
+                   
+                    global::ComboTreeNode child2 = parent2.Nodes.Add(node2.Text);
                     //ActivityTask
-                    foreach (TreeNode task in group.Items)
+                    foreach (ComboTreeNode task in group.Items)
                     {
-                        ComboTreeNode node3 = new ComboTreeNode();
+                        global::ComboTreeNode node3 = new global::ComboTreeNode();
                         node3.Text = (string)task.Header;
 
-                        ComboTreeNode taskNode = child.Nodes.Add(node3.Text);
-                        ComboTreeNode taskNode2 = child2.Nodes.Add(node3.Text);
+                       
+                        global::ComboTreeNode taskNode2 = child2.Nodes.Add(node3.Text);
                         //subTask
-                        foreach (TreeNode subtask in task.Items)
+                        foreach (ComboTreeNode subtask in task.Items)
                         {
-                            ComboTreeNode node4= new ComboTreeNode();
+                            global::ComboTreeNode node4= new global::ComboTreeNode();
                             node4.Text = (string)subtask.Header;
 
-                            ComboTreeNode subTaskNode = taskNode.Nodes.Add(node4.Text);
-                            ComboTreeNode subTaskNode2 = taskNode2.Nodes.Add(node4.Text);
+                          
+                            global::ComboTreeNode subTaskNode2 = taskNode2.Nodes.Add(node4.Text);
                         }
                     }
 
@@ -2178,12 +2387,12 @@ namespace CAOGAttendeeManager
             
            
         }
-        private List<TreeNode> Load_ChurchActivities_From_File(string listPath)
+        private List<ComboTreeNode> Load_ChurchActivities_From_File(string listPath)
         {
 
 
 
-            List<TreeNode> tree_array = new List<TreeNode>() { };
+            List<ComboTreeNode> tree_array = new List<ComboTreeNode>() { };
 
 
             try
@@ -2223,7 +2432,7 @@ namespace CAOGAttendeeManager
                     int payload_length = 0;
 
 
-                    TreeNode node;
+                    ComboTreeNode node;
                     MemoryStream payload_data;
 
                     while ((bytes_read = fs.Read(read_buffer, offset_size, read_buffer.Length - offset_size)) > 0)
@@ -2257,7 +2466,7 @@ namespace CAOGAttendeeManager
 
                                         node_header = Encoding.UTF8.GetString(read_buffer, STXidx + 3 /*beggining offset of node header*/, header_size);
 
-                                        node = new TreeNode { Header = node_header, Level = node_level };
+                                        node = new ComboTreeNode { Header = node_header, Level = node_level };
 
                                         if (read_buffer[i + 2] == (byte)ArrayFormat.ETX)
                                         {
@@ -2369,14 +2578,13 @@ namespace CAOGAttendeeManager
         private void M_ctbActivityProspect_DropDownClosed(object sender, System.EventArgs e)
         {
             ComboTreeBox ctb = sender as ComboTreeBox;
-            IEnumerable<ComboTreeNode> chkNodes = ctb.CheckedNodes;
+            IEnumerable<global::ComboTreeNode> chkNodes = ctb.CheckedNodes;
 
             if (chkNodes.Any())
             {
-                ComboTreeNode firstNode = chkNodes.First();
-                m_currentSelected_Activity = new Activity
+                global::ComboTreeNode firstNode = chkNodes.First();
+                m_currentAdded_Activity = new Activity
                 {
-                    Date = dpHeaderActivityPr.SelectedDate,
                     ActivityText = firstNode.GetFullPath("->", false)
                 };
 
@@ -2394,10 +2602,10 @@ namespace CAOGAttendeeManager
         {
             
             ComboTreeBox ctb = sender as ComboTreeBox;
-            IEnumerable<ComboTreeNode> chkNodes = ctb.CheckedNodes;
+            IEnumerable<global::ComboTreeNode> chkNodes = ctb.CheckedNodes;
             if (chkNodes.Any() )
             {
-                ComboTreeNode firstNode = chkNodes.First();
+                global::ComboTreeNode firstNode = chkNodes.First();
                 if (firstNode != null)
                 {
                     string path = firstNode.GetFullPath("->", false);
@@ -2406,7 +2614,7 @@ namespace CAOGAttendeeManager
                   if (m_currentSelected_Activity == null) //create an activity with activity text if non exist
                   {
 
-                        m_currentSelected_Activity = new Activity { ActivityText = firstNode.GetFullPath("->", false) };
+                        m_currentSelected_Activity = new Activity { ActivityText = path };
 
                         
                   }
@@ -3394,7 +3602,7 @@ namespace CAOGAttendeeManager
 
 
 
-        private void btnDeleteAttendanceInfo_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void BtnDeleteInfo_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             Cursor = Cursors.Wait;
 
@@ -3429,6 +3637,11 @@ namespace CAOGAttendeeManager
             }
             Cursor = Cursors.Arrow;
         }
+
+        private void Find_and_Delete_Node_from_ActivityDropdown(Activity activity_name)
+        {
+
+        }
         private void DeleteRecordFromActivitiesTable(IEnumerable<Activity> row_select)
         {
             List<Activity> rowsToBeDeleted = new List<Activity>(row_select);
@@ -3444,8 +3657,15 @@ namespace CAOGAttendeeManager
 
                 m_default_row_selected.ActivityList.Remove(dr);
 
+                // find the activity state as deleted and get the ActivityText from it.
+               
 
+                
+            
             }
+
+
+            AddALLUnchangedActivitiesFromContextToActivityTree();
 
             var lastActivity = (from rec in m_default_row_selected.ActivityList
                                 orderby rec.Date descending
@@ -3472,6 +3692,7 @@ namespace CAOGAttendeeManager
           
 
         }
+
         private void DeleteRecordFromAttendanceInfoTable(IEnumerable<Attendance_Info> row_select)
         {
 
@@ -3644,7 +3865,7 @@ namespace CAOGAttendeeManager
             Cursor = Cursors.Wait;
 
            
-            if (m_currentSelected_Activity != null)
+            if (m_currentAdded_Activity != null)
             {
                 foreach (AttendanceTableRow dr in m_MultiAttendanceRow_Selected)
                 {
@@ -3653,24 +3874,32 @@ namespace CAOGAttendeeManager
 
                     new_ap.Date = m_ActivityDateSelectedPr;
                     new_ap.AttendeeId = dr.AttendeeId;
-                    new_ap.ActivityText = m_currentSelected_Activity.ActivityText;
-                  
+                    new_ap.ActivityText = m_currentAdded_Activity.ActivityText;
 
+                   
 
                     // Find defaultrow that correspond to the attendance row attendeeID
                     m_default_row_selected = m_lstdefaultTableRows.SingleOrDefault(x => x.AttendeeId == dr.AttendeeId);
 
-                    //if activity do not already exist in dbContext then add to attendee's activitylist
-                    var queryifActivityExistList = m_default_row_selected.ActivityList.SingleOrDefault(rec => rec.ToString() == m_currentSelected_Activity.ActivityText && rec.Date == m_currentSelected_Activity.Date);
+                    //if activity and date do not already exist in dbContext then add to attendee's activitylist
+                    var queryifActivityExistList = m_default_row_selected.ActivityList.SingleOrDefault(rec => rec.ActivityText == new_ap.ActivityText && rec.Date == new_ap.Date);
                     if (queryifActivityExistList == null)
                     {
+                        //modify activity text before written to database context
+                        string tmp_text = FormatActivityText(new_ap.ActivityText);
+                        new_ap.ActivityText = tmp_text;
+                        m_dbContext.Activities.Add(new_ap); // add activity to database context
 
-                        m_dbContext.Activities.Add(new_ap);
-                        if (!m_default_row_selected.ActivityList.Contains(new_ap) ) // if new activity is not added then add it to the activity list
-                             m_default_row_selected.ActivityList.Add(new_ap);
+                        // change activity string back to original string
+                        new_ap.ActivityText = m_currentAdded_Activity.ActivityText;
+                        m_default_row_selected.ActivityList.Add(new_ap); //add activtiy to attendee Activity list
+
+                        //Make the activity searchable in the activity dropdown
+                        AddAttendeeActivityToActivityTree();
+                       
                         
 
-   var lastActivity = (from rec in m_default_row_selected.ActivityList
+                                var lastActivity = (from rec in m_default_row_selected.ActivityList
                                             orderby rec.Date descending
                                             select rec).ToList().FirstOrDefault();
                      
@@ -3702,7 +3931,7 @@ namespace CAOGAttendeeManager
                 m_ctbActivityProspect.UncheckAll();
                 dpHeaderActivityPr.Text = "";
                 btnPanelAddActivity.IsEnabled = false;
-                m_currentSelected_Activity = null;
+                m_currentAdded_Activity = null;
                 m_ActivityDateSelectedPr = null;
 
                 MessageBox.Show("Activity successfully added to selected attendee(s) profile", "Activity Added", MessageBoxButton.OK, MessageBoxImage.Exclamation);
@@ -3710,15 +3939,141 @@ namespace CAOGAttendeeManager
                 
             }
 
+            
+
             Cursor = Cursors.Arrow;
         }
 
-        private void cmbAttendanceInfo_LayoutUpdated(object sender, System.EventArgs e)
+        private List<ComboTreeNode> GetListOfTreeNodesFromAttendeeActivityList(DefaultTableRow attendee)
+        {
+            List<ComboTreeNode> tmp_listNodes = new List<ComboTreeNode>();
+
+            foreach (Activity dc_activity in attendee.ActivityList)
+            {
+                if (dc_activity.ActivityText != "")
+                {
+
+
+                    string tmp_text = FormatActivityText(dc_activity.ActivityText);
+
+                    string new_str = tmp_text.Split('-').LastOrDefault();
+
+                    ComboTreeNode new_node = new ComboTreeNode
+                        {
+                            Header = new_str,
+                            
+                        };
+
+                        tmp_listNodes.Add(new_node);
+
+                   
+
+                }
+            }
+
+
+            return tmp_listNodes;
+        }
+        private void FindandAddRecursively(ComboTreeNode node, IEnumerable<global::ComboTreeNode> node_to_find)
+        {
+            var lst = new List<global::ComboTreeNode>(node_to_find);
+
+            if ((string)node.Header == lst.FirstOrDefault().Parent.Text) // Parent found in tree
+            {
+                ComboTreeNode ctn = new ComboTreeNode { Header = node_to_find.FirstOrDefault().Text };
+
+                node.Items.Add(ctn); // add to parent as child item
+
+            }
+
+            foreach (ComboTreeNode subitem in node.Items)
+            {
+                FindandAddRecursively(subitem, node_to_find);
+            }
+        }
+        private void Find_and_addNode(ref List<ComboTreeNode> tree,IEnumerable<global::ComboTreeNode> selected_node)
+        {
+            //1. find selected_node's parent in tree
+            //2. add selected node to index as child
+
+            //1.
+            string selected_node_Text = "";
+            List<ComboTreeNode> lstNodes = new List<ComboTreeNode>();
+
+            int i = 0;
+
+            if (tree[0] == null)
+            {
+                var ptrNode = new global::ComboTreeNode();
+                //1.  tree is empty, add selected node and its relationships
+                //2. find top level parent of selected node
+
+                
+                for ( ptrNode = selected_node.FirstOrDefault(); ptrNode !=null; ptrNode = ptrNode.Parent)
+                {
+                    if (ptrNode == null) break;// found parent
+
+                    selected_node_Text = ptrNode.Text;
+                    ComboTreeNode newnode = new ComboTreeNode { Header = selected_node_Text };
+
+                   lstNodes.Add(newnode);
+
+                    
+                    
+                }
+                lstNodes.Reverse();
+                // swap arry around so that levels are Parent->child
+                for (int j = 0; j <= lstNodes.Count() - 1;j++)
+                {
+
+                    lstNodes[j].Level = j;
+                }
+
+                m_lstContextActivities = InitTree(lstNodes); // put list in correct relationship
+                return;
+            }
+
+
+            foreach (ComboTreeNode node in tree)
+            {
+                FindandAddRecursively(node, selected_node);
+            }
+
+             
+        
+        }
+        private void AddAttendeeActivityToActivityTree()
         {
 
+            // 1. Get Added activity nodes and the relationships between them.
+            // 2. Itterate through the filter activity tree and add the (Added activity) to the list with relationships
+
+            IEnumerable<global::ComboTreeNode> chkNodes = m_ctbActivityProspect.CheckedNodes;
+
+            List<ComboTreeNode> tmp_tree = new List<ComboTreeNode>();
+
+            Find_and_addNode(ref m_lstContextActivities, chkNodes);
+
+            // load the tree structure into the dropdown
+            LoadActivityComboTree(m_lstContextActivities);
+
+         
+
         }
+        private string FormatActivityText(string activityText)
+        {
+             string new_str = "";
+          
 
+            new_str = new string((from c in activityText
+                              where char.IsWhiteSpace(c) || char.IsLetterOrDigit(c) || !char.IsSymbol(c)
+                              select c
+                             ).ToArray());
+          
 
+            return new_str;
+        }
+            
 
         private void MenuItem_AddNewActivity_Click(object sender, System.Windows.RoutedEventArgs e)
         {
@@ -3837,7 +4192,7 @@ namespace CAOGAttendeeManager
         {
             
 
-                WndAddGroup AddgroupWin = new WndAddGroup(m_lstTreeNodes,m_ActivityListPath, m_followUpWeeks);
+                WndAddGroup AddgroupWin = new WndAddGroup(m_lstCurrActivityListNodes,m_ActivityListPath, m_followUpWeeks);
                 AddgroupWin.ShowDialog();
 
             //m_ActivityTreeChanged = AddgroupWin.GetTreeChanged;
@@ -3848,11 +4203,11 @@ namespace CAOGAttendeeManager
             if (AddgroupWin.GetTreeChanged)
             {
                 if (AddgroupWin.GetTree != null)
-                    m_lstTreeNodes = new List<TreeNode>(AddgroupWin.GetTree);
+                    m_lstCurrActivityListNodes = new List<ComboTreeNode>(AddgroupWin.GetTree);
                 //save full path for next time the user load the program
                 m_ActivityListPath = AddgroupWin.GetFilePath;
                      txtbActivityListName.Text = GetListName();
-                     LoadNewComboTree(m_lstTreeNodes); //Load the combo tree boxes with the new tree
+                     LoadActivityProspectComboTreeList(m_lstCurrActivityListNodes); //Load the combo tree boxes with the new tree
                     //Convert_and_SaveNewTreeToActivityHeardersTree(m_lstTreeNodes); //convert and save the new tree to the format m_lstActivityHeaders
                    
             }

@@ -508,7 +508,7 @@
                                             </Button>-->
 
                                             <Button Name="btnDelete"
-                                                        Click="btnDeleteAttendanceInfo_Click"
+                                                        Click="BtnDeleteInfo_Click"
                                                         ToolTip="Delete multiple selected attendee records from the table below.">
                                                 <Image Height="20" Source="Resources\Delete.ico"/>
                                             </Button>

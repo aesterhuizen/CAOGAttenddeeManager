@@ -28,7 +28,7 @@ namespace CAOGAttendeeManager
 
       
         public bool isListSaved { get; private set; } = false;
-        public IEnumerable<TreeNode> GetTree
+        public IEnumerable<ComboTreeNode> GetTree
         {
             get
             {
@@ -48,7 +48,7 @@ namespace CAOGAttendeeManager
        //public string GetOldPath { get; private set; } = "";
         public WndAddGroup() { }
 
-        private IEnumerable<TreeNode> m_ActivitiesTreeView = null;
+        private IEnumerable<ComboTreeNode> m_ActivitiesTreeView = null;
 
         // variable that hold tree of headers read from XML file
       // private List<ActivityHeader> m_lstHeadersFromXML = new List<ActivityHeader>() { };
@@ -56,13 +56,13 @@ namespace CAOGAttendeeManager
 
      
             
-        public void InitTree(List<TreeNode> tree)
+        public void InitTree(List<ComboTreeNode> tree)
         {
-            TreeNode parent_ptr = null;
-            TreeNode root_ptr = null;
-            TreeNode child_ptr = null;
+            ComboTreeNode parent_ptr = null;
+            ComboTreeNode root_ptr = null;
+            ComboTreeNode child_ptr = null;
 
-            List<TreeNode> tmp_tree = new List<TreeNode>() { };
+            List<ComboTreeNode> tmp_tree = new List<ComboTreeNode>() { };
 
             // tree is already initialized
             //if (trvActivities.DataContext == null)
@@ -131,7 +131,7 @@ namespace CAOGAttendeeManager
 
             trvActivities.ItemsSource = tmp_tree;
 
-            m_ActivitiesTreeView = trvActivities.ItemsSource.Cast<TreeNode>();
+            m_ActivitiesTreeView = trvActivities.ItemsSource.Cast<ComboTreeNode>();
             
             
 
@@ -225,7 +225,7 @@ namespace CAOGAttendeeManager
 
 
         }
-        public WndAddGroup(List<TreeNode> aryTree,string ListPath,string fweeks)
+        public WndAddGroup(List<ComboTreeNode> aryTree,string ListPath,string fweeks)
         {
             InitializeComponent();
 
@@ -356,23 +356,23 @@ namespace CAOGAttendeeManager
 
         }
 
-        private List<TreeNode> Find_and_addNode(IEnumerable<TreeNode> iNode, TreeNode selected_node)
+        private List<ComboTreeNode> Find_and_addNode(IEnumerable<ComboTreeNode> iNode, ComboTreeNode selected_node)
         {
 
             bool itemfound = false;
             bool addToplevelItem = false;
 
-            List<TreeNode> new_tree = new List<TreeNode>(iNode);
-            TreeNode new_item;
+            List<ComboTreeNode> new_tree = new List<ComboTreeNode>(iNode);
+            ComboTreeNode new_item;
 
             if (selected_node == null) // user want to create a new toplevel item
             {
-                new_item = new TreeNode { Header = "<new item>", Level = 0 };
+                new_item = new ComboTreeNode { Header = "<new item>", Level = 0 };
                 addToplevelItem = true;
             }
             else
             {
-                new_item = new TreeNode { Header = "<new item>", Level = selected_node.Level + 1 };
+                new_item = new ComboTreeNode { Header = "<new item>", Level = selected_node.Level + 1 };
             }
 
             if (addToplevelItem)
@@ -381,7 +381,7 @@ namespace CAOGAttendeeManager
             }
             else
             {
-                foreach (TreeNode n in new_tree)
+                foreach (ComboTreeNode n in new_tree)
                 {
                     if (itemfound) break;
                     if (n == selected_node)
@@ -391,7 +391,7 @@ namespace CAOGAttendeeManager
                         break;
                     }
 
-                    foreach (TreeNode i in n.Items)
+                    foreach (ComboTreeNode i in n.Items)
                     {
 
                         if (i == selected_node)
@@ -415,9 +415,9 @@ namespace CAOGAttendeeManager
             Cursor = Cursors.Wait;
 
            
-            TreeNode selected_node = (TreeNode)trvActivities.SelectedItem;
+            ComboTreeNode selected_node = (ComboTreeNode)trvActivities.SelectedItem;
 
-            List<TreeNode> new_tree = Find_and_addNode(m_ActivitiesTreeView, selected_node);
+            List<ComboTreeNode> new_tree = Find_and_addNode(m_ActivitiesTreeView, selected_node);
 
             if (selected_node != null)
             {
@@ -461,7 +461,7 @@ namespace CAOGAttendeeManager
 
         private void btnDelete_Click(object sender, RoutedEventArgs e)
         {
-            TreeNode selected_node = (TreeNode)trvActivities.SelectedItem;
+            ComboTreeNode selected_node = (ComboTreeNode)trvActivities.SelectedItem;
 
             if (selected_node != null)
             {
@@ -472,19 +472,19 @@ namespace CAOGAttendeeManager
                     trvActivities.BeginInit();
                     trvActivities.Items.RemoveAt(idx);
                     trvActivities.EndInit();
-                    m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+                    m_ActivitiesTreeView = trvActivities.Items.Cast<ComboTreeNode>();
                     GetTreeChanged = true;
                     isListSaved = false;
                 }
-                else if (selected_node.Parent.GetType() == typeof(TreeNode))
+                else if (selected_node.Parent.GetType() == typeof(ComboTreeNode))
                 {
-                    TreeNode Parent = (TreeNode)selected_node.Parent;
+                    ComboTreeNode Parent = (ComboTreeNode)selected_node.Parent;
                     int idx = Parent.Items.IndexOf(selected_node);
 
                     trvActivities.BeginInit();
                     Parent.Items.RemoveAt(idx);
                     trvActivities.EndInit();
-                    m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+                    m_ActivitiesTreeView = trvActivities.Items.Cast<ComboTreeNode>();
                     GetTreeChanged = true;
                     isListSaved = false;
                 }
@@ -503,7 +503,7 @@ namespace CAOGAttendeeManager
         {
             var item = sender as TreeView;
 
-            TreeNode selitem = (TreeNode)item.SelectedItem;
+            ComboTreeNode selitem = (ComboTreeNode)item.SelectedItem;
 
           
             if (selitem != null)
@@ -565,7 +565,7 @@ namespace CAOGAttendeeManager
 
            
             //pass a null in the last argument of the function Find_and_addNode will add a toplevel item to the tree
-            List<TreeNode> new_tree = Find_and_addNode(m_ActivitiesTreeView, null);
+            List<ComboTreeNode> new_tree = Find_and_addNode(m_ActivitiesTreeView, null);
             
             GetTreeChanged = true;
 
@@ -581,7 +581,7 @@ namespace CAOGAttendeeManager
         {
             
             
-            TreeNode node = (TreeNode)trvActivities.SelectedItem;
+            ComboTreeNode node = (ComboTreeNode)trvActivities.SelectedItem;
             trvActivities.BeginInit();
 
            
@@ -606,7 +606,7 @@ namespace CAOGAttendeeManager
             GetTreeChanged = true;
             isListSaved = false;
 
-            m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+            m_ActivitiesTreeView = trvActivities.Items.Cast<ComboTreeNode>();
 
 
          
@@ -687,7 +687,7 @@ namespace CAOGAttendeeManager
             // Print each node recursively.  
             ItemCollection items = treeView.Items;
            
-            foreach (TreeNode n in items)
+            foreach (ComboTreeNode n in items)
             {
                
                 PrintRecursive(n, ref fsDescriptions);
@@ -698,7 +698,7 @@ namespace CAOGAttendeeManager
         }
       
 
-        private void PrintRecursive(TreeNode node, ref FileStream fs)
+        private void PrintRecursive(ComboTreeNode node, ref FileStream fs)
         {
 
             //Print goodies
@@ -718,26 +718,26 @@ namespace CAOGAttendeeManager
             }
            
             //loop through the tree of activities
-            foreach (TreeNode tn in node.Items)
+            foreach (ComboTreeNode tn in node.Items)
             {
 
                 PrintRecursive(tn, ref fs);
                 
             }
         }
-        public void Save_ChurchActivities_To_datFile(IEnumerable<TreeNode> activityList, string filename)
+        public void Save_ChurchActivities_To_datFile(IEnumerable<ComboTreeNode> activityList, string filename)
         {
 
             CallRecursive(trvActivities, filename);
 
            
         }
-        private List<TreeNode> Load_ChurchActivities_From_File(string listPath)
+        private List<ComboTreeNode> Load_ChurchActivities_From_File(string listPath)
         {
 
 
 
-            List<TreeNode> tree_array = new List<TreeNode>() { };
+            List<ComboTreeNode> tree_array = new List<ComboTreeNode>() { };
 
 
             try
@@ -777,7 +777,7 @@ namespace CAOGAttendeeManager
                     int payload_length = 0;
 
 
-                    TreeNode node;
+                    ComboTreeNode node;
                     MemoryStream payload_data;
 
                     while ((bytes_read = fs.Read(read_buffer, offset_size, read_buffer.Length - offset_size)) > 0)
@@ -811,7 +811,7 @@ namespace CAOGAttendeeManager
 
                                         node_header = Encoding.UTF8.GetString(read_buffer, STXidx + 3 /*beggining offset of node header*/, header_size);
 
-                                        node = new TreeNode { Header = node_header, Level = node_level };
+                                        node = new ComboTreeNode { Header = node_header, Level = node_level };
 
                                         if (read_buffer[i + 2] == (byte)ArrayFormat.ETX)
                                         {
@@ -907,10 +907,10 @@ namespace CAOGAttendeeManager
 
 
         }
-        private List<TreeNode> Load_ChurchActivities_From_File(string filePath, Stream fstream)
+        private List<ComboTreeNode> Load_ChurchActivities_From_File(string filePath, Stream fstream)
         {
 
-            List<TreeNode> tree_array = new List<TreeNode>() { };
+            List<ComboTreeNode> tree_array = new List<ComboTreeNode>() { };
 
 
             try
@@ -950,7 +950,7 @@ namespace CAOGAttendeeManager
                     int payload_length = 0;
 
 
-                    TreeNode node;
+                    ComboTreeNode node;
                     MemoryStream payload_data;
 
                     while ( (bytes_read = fstream.Read(read_buffer,offset_size,read_buffer.Length-offset_size)) > 0 )
@@ -984,7 +984,7 @@ namespace CAOGAttendeeManager
 
                                         node_header = Encoding.UTF8.GetString(read_buffer, STXidx+3 /*beggining offset of node header*/, header_size);
 
-                                        node = new TreeNode { Header = node_header, Level = node_level };
+                                        node = new ComboTreeNode { Header = node_header, Level = node_level };
 
                                         if (read_buffer[i + 2] == (byte)ArrayFormat.ETX)
                                         {
@@ -1105,7 +1105,7 @@ namespace CAOGAttendeeManager
                 Stream fileStream = openFileDialog.OpenFile();
                // m_old_filepath = GetFilePath;
 
-                List<TreeNode> tree = Load_ChurchActivities_From_File(filePath, fileStream);
+                List<ComboTreeNode> tree = Load_ChurchActivities_From_File(filePath, fileStream);
                 
                 GetFilePath = filePath;
                 InitTree(tree);
@@ -1113,7 +1113,7 @@ namespace CAOGAttendeeManager
                 GetTreeChanged = true;
                 isListSaved = true;
                 //set the GetTree property to the current tree
-                m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+                m_ActivitiesTreeView = trvActivities.Items.Cast<ComboTreeNode>();
                
 
             }
@@ -1132,7 +1132,7 @@ namespace CAOGAttendeeManager
             txtActivityName.Text = "";
             rtbDescription.Document.Blocks.Clear();
 
-            m_ActivitiesTreeView = trvActivities.Items.Cast<TreeNode>();
+            m_ActivitiesTreeView = trvActivities.Items.Cast<ComboTreeNode>();
             
         }
 
@@ -1238,7 +1238,7 @@ namespace CAOGAttendeeManager
 
         }
 
-        void LoadRTBContent(ref TreeNode selected_node)
+        void LoadRTBContent(ref ComboTreeNode selected_node)
         {
             TextRange range;
 
