@@ -35,7 +35,7 @@ namespace CAOGAttendeeManager
            
 
 
-            m_version_string = "v3.1.29c";
+            m_version_string = "v3.1.30";
 
 
 
@@ -121,7 +121,7 @@ namespace CAOGAttendeeManager
                 LoadActivityProspectComboTreeList(m_lstCurrActivityListNodes); // load tree into prospect tab's dropdown
                
 
-                m_lstContextActivities = AddALLUnchangedActivitiesFromContextToActivityTree(); 
+                m_lstContextActivities = AddALLActivitiesFromContextToActivityTree(); 
               
 
             }
@@ -237,7 +237,7 @@ namespace CAOGAttendeeManager
         private bool m_loaded = false;
 
 
-        private List<ComboTreeNode> AddALLUnchangedActivitiesFromContextToActivityTree()
+        private List<ComboTreeNode> AddALLActivitiesFromContextToActivityTree()
         {
             List<ComboTreeNode> tmp = GetListOfTreeNodesFromActivityContext(); // Load all the Activities in the activity context Table into a list of nodes
             List<ComboTreeNode> fmt_lstNodes = InitTree(tmp);
@@ -307,7 +307,7 @@ namespace CAOGAttendeeManager
 
             foreach (var a in activity_entry_changed)
             {
-                if (a.State == EntityState.Unchanged)
+                if (a.State == EntityState.Unchanged || a.State == EntityState.Added)
                 {
 
                     if (a.Entity.ActivityText != "")
@@ -685,11 +685,12 @@ namespace CAOGAttendeeManager
             string settingPath = Directory.GetCurrentDirectory();
             settingPath += "\\settings.xml";
 
+            
             try
             {
 
 
-                var fsXML = new FileStream(settingPath, FileMode.Create, FileAccess.ReadWrite);
+                var fsXML = new FileStream(settingPath, FileMode.Create, FileAccess.Write);
                 // save document
                 DOMdoc.Save(fsXML);
                 fsXML.Close();
@@ -1760,6 +1761,9 @@ namespace CAOGAttendeeManager
                if (selectedRows.Count != 0 && delrec_win.getDeleteRecs == true)
                 {
                     DeleteRecordInDefaultTable(selectedRows);
+
+                    m_lstContextActivities = AddALLActivitiesFromContextToActivityTree(); // rebuild activity dropdown
+
                     DeleteRecordInAttendeeListTable(selectedRows);
                     Display_DefaultTable_in_Grid();
                     MessageBox.Show("Records successfully deleted!", "Records deleted...", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -3427,7 +3431,7 @@ namespace CAOGAttendeeManager
 
 
                             m_lstdefaultTableRowsCopy[i].ActivityText = strActivity;
-
+                           
                             m_lstQueryTableRows.Add(m_lstdefaultTableRowsCopy[i]);
 
                         }
@@ -3665,7 +3669,7 @@ namespace CAOGAttendeeManager
             }
 
 
-            AddALLUnchangedActivitiesFromContextToActivityTree();
+            m_lstContextActivities = AddALLActivitiesFromContextToActivityTree();
 
             var lastActivity = (from rec in m_default_row_selected.ActivityList
                                 orderby rec.Date descending
@@ -3888,14 +3892,16 @@ namespace CAOGAttendeeManager
                         //modify activity text before written to database context
                         string tmp_text = FormatActivityText(new_ap.ActivityText);
                         new_ap.ActivityText = tmp_text;
+                       
                         m_dbContext.Activities.Add(new_ap); // add activity to database context
 
                         // change activity string back to original string
                         new_ap.ActivityText = m_currentAdded_Activity.ActivityText;
-                        m_default_row_selected.ActivityList.Add(new_ap); //add activtiy to attendee Activity list
+                        if (!m_default_row_selected.ActivityList.Contains(new_ap) )
+                            m_default_row_selected.ActivityList.Add(new_ap); //add activtiy to attendee Activity list
 
                         //Make the activity searchable in the activity dropdown
-                        AddAttendeeActivityToActivityTree();
+                        m_lstContextActivities = AddALLActivitiesFromContextToActivityTree();
                        
                         
 
@@ -4184,34 +4190,6 @@ namespace CAOGAttendeeManager
 
             }
 
-
-        }
-
-
-        private void BtnPanelNewActivity_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            
-
-                WndAddGroup AddgroupWin = new WndAddGroup(m_lstCurrActivityListNodes,m_ActivityListPath, m_followUpWeeks);
-                AddgroupWin.ShowDialog();
-
-            //m_ActivityTreeChanged = AddgroupWin.GetTreeChanged;
-
-
-
-           
-            if (AddgroupWin.GetTreeChanged)
-            {
-                if (AddgroupWin.GetTree != null)
-                    m_lstCurrActivityListNodes = new List<ComboTreeNode>(AddgroupWin.GetTree);
-                //save full path for next time the user load the program
-                m_ActivityListPath = AddgroupWin.GetFilePath;
-                     txtbActivityListName.Text = GetListName();
-                     LoadActivityProspectComboTreeList(m_lstCurrActivityListNodes); //Load the combo tree boxes with the new tree
-                    //Convert_and_SaveNewTreeToActivityHeardersTree(m_lstTreeNodes); //convert and save the new tree to the format m_lstActivityHeaders
-                   
-            }
-           
 
         }
 
@@ -4897,9 +4875,29 @@ namespace CAOGAttendeeManager
 
         }
 
+        private void BtnPanelActivityList_Click(object sender, RoutedEventArgs e)
+        {
+            WndAddGroup AddgroupWin = new WndAddGroup(m_lstCurrActivityListNodes, m_ActivityListPath, m_followUpWeeks);
+            AddgroupWin.ShowDialog();
+
+            //m_ActivityTreeChanged = AddgroupWin.GetTreeChanged;
 
 
-      
+
+
+            if (AddgroupWin.GetTreeChanged)
+            {
+                if (AddgroupWin.GetTree != null)
+                    m_lstCurrActivityListNodes = new List<ComboTreeNode>(AddgroupWin.GetTree);
+                //save full path for next time the user load the program
+                m_ActivityListPath = AddgroupWin.GetFilePath;
+                txtbActivityListName.Text = GetListName();
+                LoadActivityProspectComboTreeList(m_lstCurrActivityListNodes); //Load the combo tree boxes with the new tree
+                                                                               //Convert_and_SaveNewTreeToActivityHeardersTree(m_lstTreeNodes); //convert and save the new tree to the format m_lstActivityHeaders
+
+            }
+
+        }
     }
 
 }

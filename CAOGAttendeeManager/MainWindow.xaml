@@ -132,7 +132,7 @@
                                       ToolTip="View attendee metrics in charts" HorizontalAlignment="Left" VerticalAlignment="Top" />
 
 
-                    <StackPanel Orientation="Vertical" Margin="10,0,0,0" Width="200" Height="50">
+                    <StackPanel Orientation="Vertical" Margin="10,0,0,0" Width="280" Height="68">
                         <StackPanel Orientation="Horizontal">
                             <Label HorizontalAlignment="Left" Width="69" Content="Active:"/>
                             <TextBlock Margin ="20,0,0,0" x:Name="lblAttendenceMetrics" 
@@ -142,7 +142,7 @@
                         <StackPanel Orientation="Horizontal">
                             <Label x:Name="lblActivityListName" Content="Activity list:" HorizontalAlignment="Left" Width="69"/>
                             <TextBlock Margin="20,0,0,0" x:Name="txtbActivityListName" 
-                                   TextAlignment="Left" VerticalAlignment="Center"/>
+                                   TextAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" Height="40"/>
                                 
                         </StackPanel>
 
@@ -758,9 +758,9 @@
                                                 Height="20"
                                                 HorizontalAlignment="Left"
                                                 ToolTip="Add Activity to selected attendee(s) profile"/>
-                                            <Button Grid.Row="1"  Grid.Column="1" Name="btnPanelNewActivity" BorderThickness="1" Click="BtnPanelNewActivity_Click"
+                                            <Button Grid.Row="1"  Grid.Column="1" Name="btnPanelNewActivity" BorderThickness="1" Click="BtnPanelActivityList_Click"
                                                     Margin="10,0,0,0"
-                                                    Content="New"
+                                                    Content="Activity list"
                                                     ToolTip="Add/Remove activities from the activity list"
                                                     Width="80"
                                                     Height="20"

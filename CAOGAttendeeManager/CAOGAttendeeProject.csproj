@@ -63,9 +63,10 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\v3.1.27b\</OutputPath>
+    <OutputPath>bin\x86\Release\v3.1.30\</OutputPath>
     <DefineConstants>TRACE;init_db</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
