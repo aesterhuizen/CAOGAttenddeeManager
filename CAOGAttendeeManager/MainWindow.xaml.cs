@@ -111,14 +111,24 @@ namespace CAOGAttendeeManager
                    Display_DefaultTable_in_Grid();
                 //Loaded the program settings
                 LoadSettings();
-                List<ComboTreeNode> tmp_list = Load_ChurchActivities_From_File(m_ActivityListPath) ; // load tree as a list of nodes from the file
+                List<ComboTreeNode> tmp_list;
+
+                if (m_ActivityListPath != "")
+                {
+                    tmp_list = Load_ChurchActivities_From_File(m_ActivityListPath); // load tree as a list of nodes from the file
+                    txtbActivityListName.Text = GetListName();
+                    if (txtbActivityListName.Text == "")
+                        txtbActivityListName.Text = "n/a";
+
+                    m_lstCurrActivityListNodes = InitTree(tmp_list); // arrange array of nodes in a parent/child relationships
+                    LoadActivityProspectComboTreeList(m_lstCurrActivityListNodes); // load tree into prospect tab's dropdown
+                }
+                    
 
 
                 
 
-                txtbActivityListName.Text = GetListName();
-                m_lstCurrActivityListNodes = InitTree(tmp_list); // arrange array of nodes in a parent/child relationships
-                LoadActivityProspectComboTreeList(m_lstCurrActivityListNodes); // load tree into prospect tab's dropdown
+                
                
 
                 m_lstContextActivities = AddALLActivitiesFromContextToActivityTree(); 
