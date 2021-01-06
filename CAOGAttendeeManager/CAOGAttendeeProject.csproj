@@ -55,7 +55,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>C:\Program Files %28x86%29\Ansoft\</OutputPath>
+    <OutputPath>bin\x86\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG;init_db</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -66,7 +66,7 @@
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\v3.1.30\</OutputPath>
+    <OutputPath>bin\x86\Release\v3.1.30a\</OutputPath>
     <DefineConstants>TRACE;init_db</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>

@@ -335,18 +335,18 @@ namespace CAOGAttendeeManager
         {
             isListSaved = true;
            
-            btnAddItem.IsEnabled = false;
-            btnDeleteItem.IsEnabled = false;
-            btnEditItem.IsEnabled = false;
+            //btnAddItem.IsEnabled = false;
+            //btnDeleteItem.IsEnabled = false;
+            //btnEditItem.IsEnabled = false;
            
-            rtbDescription.IsEnabled = false;
-            txtActivityName.IsEnabled = false;
+            //rtbDescription.IsEnabled = false;
+            //txtActivityName.IsEnabled = false;
 
-            mnuAddItem.IsEnabled = false;
-            mnuEditItem.IsEnabled = false;
+            //mnuAddItem.IsEnabled = false;
+            //mnuEditItem.IsEnabled = false;
            
-            mnuSaveList.IsEnabled = false;
-            mnuDeleteItem.IsEnabled = false;
+            //mnuSaveList.IsEnabled = false;
+            //mnuDeleteItem.IsEnabled = false;
 
             SetTimer();
 
@@ -516,9 +516,9 @@ namespace CAOGAttendeeManager
                 btnEditItem.IsEnabled = true;
                 btnDeleteItem.IsEnabled = true;
 
-                mnuAddItem.IsEnabled = true;
-                mnuEditItem.IsEnabled = true;
-                mnuDeleteItem.IsEnabled = true;
+                //mnuAddItem.IsEnabled = true;
+                //mnuEditItem.IsEnabled = true;
+                //mnuDeleteItem.IsEnabled = true;
 
 
                 if ((string)selitem.Header == "<new item>")
@@ -550,9 +550,9 @@ namespace CAOGAttendeeManager
                 btnEditItem.IsEnabled = false;
                 btnDeleteItem.IsEnabled = false;
 
-                mnuAddItem.IsEnabled = false;
-                mnuEditItem.IsEnabled = false;
-                mnuDeleteItem.IsEnabled = false;
+                //mnuAddItem.IsEnabled = false;
+                //mnuEditItem.IsEnabled = false;
+                //mnuDeleteItem.IsEnabled = false;
             }
 
 
@@ -1284,15 +1284,15 @@ namespace CAOGAttendeeManager
             {
                 btnAddItem.IsEnabled = false;
                 btnEditItem.IsEnabled = false;
-                mnuEditItem.IsEnabled = false;
-                mnuAddItem.IsEnabled = false;
+                //mnuEditItem.IsEnabled = false;
+                //mnuAddItem.IsEnabled = false;
             }
             else
             {
                 btnAddItem.IsEnabled = true;
                 btnEditItem.IsEnabled = true;
-                mnuEditItem.IsEnabled = true;
-                mnuAddItem.IsEnabled = true;
+                //mnuEditItem.IsEnabled = true;
+                //mnuAddItem.IsEnabled = true;
             }
             
             
