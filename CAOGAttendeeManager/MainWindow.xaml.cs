@@ -117,19 +117,19 @@ namespace CAOGAttendeeManager
                 {
                     tmp_list = Load_ChurchActivities_From_File(m_ActivityListPath); // load tree as a list of nodes from the file
                     txtbActivityListName.Text = GetListName();
-                    if (txtbActivityListName.Text == "")
-                        txtbActivityListName.Text = "n/a";
+                    
 
                     m_lstCurrActivityListNodes = InitTree(tmp_list); // arrange array of nodes in a parent/child relationships
                     LoadActivityProspectComboTreeList(m_lstCurrActivityListNodes); // load tree into prospect tab's dropdown
                 }
-                    
+
+                if (txtbActivityListName.Text == "")
+                    txtbActivityListName.Text = "No list";
 
 
-                
 
-                
-               
+
+
 
                 m_lstContextActivities = AddALLActivitiesFromContextToActivityTree(); 
               
@@ -249,9 +249,16 @@ namespace CAOGAttendeeManager
 
         private List<ComboTreeNode> AddALLActivitiesFromContextToActivityTree()
         {
+            List<ComboTreeNode> fmt_lstNodes = new List<ComboTreeNode>(); ;
+
             List<ComboTreeNode> tmp = GetListOfTreeNodesFromActivityContext(); // Load all the Activities in the activity context Table into a list of nodes
-            List<ComboTreeNode> fmt_lstNodes = InitTree(tmp);
-            LoadActivityComboTree(fmt_lstNodes);
+
+            if (tmp.Any() )
+            {
+                fmt_lstNodes = InitTree(tmp);
+                LoadActivityComboTree(fmt_lstNodes);
+            }
+            
 
             return fmt_lstNodes;;
         }
@@ -682,6 +689,10 @@ namespace CAOGAttendeeManager
 
 
             XElement ProgramSettingsElement = new XElement("ProgramSettings");
+
+            if (m_followUpWeeks == "")
+                m_followUpWeeks = "4";
+
             XElement FollowUpElement = new XElement("FollowUpWeeks", new XAttribute("Weeks", m_followUpWeeks));
             XElement ListActivityPath = new XElement("ActivityList", new XAttribute("Path",m_ActivityListPath));
 
@@ -698,22 +709,19 @@ namespace CAOGAttendeeManager
             
             try
             {
+               
 
-
-                var fsXML = new FileStream(settingPath, FileMode.Create, FileAccess.Write);
-                // save document
-                DOMdoc.Save(fsXML);
-                fsXML.Close();
-
-
-
-
+                    var fsXML = new FileStream(settingPath, FileMode.Open, FileAccess.Write);
+                    // save document
+                    DOMdoc.Save(fsXML);
+                    fsXML.Close();
+             
 
             }
             catch (Exception)
             {
                 Cursor = Cursors.Arrow;
-                MessageBox.Show("Something went wrong with the save of the settings file!");
+                MessageBox.Show("Something went wrong accessing the 'settings.xml' file, either the file has wrong access permissions or the file is missing.", "settings.xml", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             Cursor = Cursors.Arrow;
@@ -734,33 +742,48 @@ namespace CAOGAttendeeManager
 
 
 
-
-
-            using (XmlReader xreader = XmlReader.Create(descriptions_pathname, reader_settings))
+            try
             {
-                xreader.ReadStartElement("XmlDocument");
 
-                XElement XMLtag = (XElement)XNode.ReadFrom(xreader);
-                //int i = 0;
 
-                if (XMLtag.Name == "ProgramSettings")
+                if (File.Exists(descriptions_pathname) )
                 {
-                    foreach (XElement settingsElement in XMLtag.Elements())
+                    using (XmlReader xreader = XmlReader.Create(descriptions_pathname, reader_settings))
                     {
-                        if (settingsElement.Name == "FollowUpWeeks")
+                        xreader.ReadStartElement("XmlDocument");
+
+                        XElement XMLtag = (XElement)XNode.ReadFrom(xreader);
+                        //int i = 0;
+
+                        if (XMLtag.Name == "ProgramSettings")
                         {
+                            foreach (XElement settingsElement in XMLtag.Elements())
+                            {
+                                if (settingsElement.Name == "FollowUpWeeks")
+                                {
 
-                            string followupnumber = settingsElement.FirstAttribute.Value;
-                            m_followUpWeeks = followupnumber;
-                        }
-                        if (settingsElement.Name == "ActivityList")
-                        {
-                            m_ActivityListPath = settingsElement.FirstAttribute.Value;
+                                    string followupnumber = settingsElement.FirstAttribute.Value;
+                                    m_followUpWeeks = followupnumber;
+                                }
+                                if (settingsElement.Name == "ActivityList")
+                                {
+                                    m_ActivityListPath = settingsElement.FirstAttribute.Value;
 
 
+                                }
+                            }
                         }
                     }
                 }
+                else
+                {
+                    MessageBox.Show("File does not exist 'settings.xml'.", "settings.xml", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                
+            }
+            catch
+            {
+                MessageBox.Show("Something went wrong accessing the 'settings.xml' file, either the file has wrong access permissions or the file is missing.", "settings.xml", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
       
@@ -2899,18 +2922,25 @@ namespace CAOGAttendeeManager
         {
 
             FollowUpWindow fw = new FollowUpWindow(m_followUpWeeks);
+           
 
             fw.ShowDialog();
 
-            if (int.Parse(fw.GetFollowUpWeeks) != 0)
-            {
-                m_followUpWeeks = fw.GetFollowUpWeeks;
 
+          
+
+
+          
+
+            if (fw.GetFollowUpWeeks != "0")
+            {
+
+               
                 MessageBoxResult result = MessageBox.Show($"Are you sure you want to generate follow-Ups for every {m_followUpWeeks } weeks now?", "Generate Follow-Up", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
                     Cursor = Cursors.Wait;
-
+                    m_followUpWeeks = fw.GetFollowUpWeeks;
                     bool generate_one = GenerateDBFollowUps(m_followUpWeeks);
 
                     Cursor = Cursors.Arrow;
@@ -2926,6 +2956,10 @@ namespace CAOGAttendeeManager
 
                 }
 
+            }
+            else if (fw.GetFollowUpWeeks == "0")
+            {
+                // user pressed cancel so do nothing
             }
         }
 

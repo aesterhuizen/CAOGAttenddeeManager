@@ -24,6 +24,7 @@
                VerticalAlignment="Top" Width="183" Height="48"/>
         <TextBox Name="txtFollowUpWeeks" HorizontalAlignment="Left" Height="23" Margin="20,88,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
 
+
         <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10">
             <Button x:Name="btnApply" Content="Generate" HorizontalAlignment="Left" TabIndex="2" Width="75" Click="BtnApply_Click"
                 ToolTip="Generate follow up records" Height="25" VerticalAlignment="Top"/>

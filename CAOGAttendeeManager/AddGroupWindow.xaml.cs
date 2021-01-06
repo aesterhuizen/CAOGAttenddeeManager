@@ -229,7 +229,7 @@ namespace CAOGAttendeeManager
         {
             InitializeComponent();
 
-             
+             if (aryTree.Any() )
                 InitTree(aryTree);
 
             GetFollowUpWeeks = fweeks;
@@ -242,8 +242,9 @@ namespace CAOGAttendeeManager
                 string ListName = baseName.Substring(0, baseName.Length - 4);
                 lblListFilename.Content = ListName;
             }
-            
-                
+            else
+                lblListFilename.Content = "No list";
+
             btnAddItem.IsEnabled = false;
 
 

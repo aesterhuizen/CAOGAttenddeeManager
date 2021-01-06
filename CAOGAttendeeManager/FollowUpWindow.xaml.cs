@@ -35,9 +35,21 @@ namespace CAOGAttendeeManager
 
         private void BtnApply_Click(object sender, RoutedEventArgs e)
         {
-            GetFollowUpWeeks = txtFollowUpWeeks.Text;
 
-            Close();
+
+            GetFollowUpWeeks = txtFollowUpWeeks.Text;
+            int.TryParse(GetFollowUpWeeks, out int tryres);
+            if (tryres > 0 && tryres <= 52)
+            {
+           
+                Close();
+            }
+            else
+            {
+                MessageBox.Show("Number is in the wrong format try again. Enter number between 1-52.");
+            }
+
+
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
