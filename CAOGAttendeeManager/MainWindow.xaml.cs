@@ -119,8 +119,8 @@ namespace CAOGAttendeeManager
                     txtbActivityListName.Text = GetListName();
                     
 
-                    m_lstCurrActivityListNodes = InitTree(tmp_list); // arrange array of nodes in a parent/child relationships
-                    LoadActivityProspectComboTreeList(m_lstCurrActivityListNodes); // load tree into prospect tab's dropdown
+                    m_lstCurrActivityListNodes = AddALLActivitiesFromContextToActivityTree(); // arrange array of nodes in a parent/child relationships
+                    LoadActivityProspectComboTreeList(tmp_list); // load tree into prospect tab's dropdown
                 }
 
                 if (txtbActivityListName.Text == "")
@@ -271,7 +271,7 @@ namespace CAOGAttendeeManager
                 m_ctbActivity.Nodes.Clear();
             }
 
-
+            
             //Add ComboTreeNodes to ComboTreeBox Treeview
             foreach (ComboTreeNode header in list)
             {
@@ -280,6 +280,8 @@ namespace CAOGAttendeeManager
 
 
                 global::ComboTreeNode parent2 = m_ctbActivity.Nodes.Add(node.Text);
+                parent2.Expanded = true;
+
                 //ActivityGroups
                 foreach (ComboTreeNode group in header.Items)
                 {
@@ -310,8 +312,8 @@ namespace CAOGAttendeeManager
                 }
             }
 
-
-
+            
+            
 
         }
         private List<ComboTreeNode> GetListOfTreeNodesFromActivityContext ()
@@ -319,7 +321,7 @@ namespace CAOGAttendeeManager
 
             List<ComboTreeNode> tmp_listNodes = new List<ComboTreeNode>();
           
-            // see if any activity entries changed, only itterate through the activities that has state = "unchanged"
+            // see if any activity entries changed, only itterate through the activities that has state = "unchanged" and "added"
             var activity_entry_changed = m_dbContext.ChangeTracker.Entries<Activity>();
 
             foreach (var a in activity_entry_changed)
@@ -360,10 +362,18 @@ namespace CAOGAttendeeManager
             return tmp_listNodes;
         }
 
+    
         private List<ComboTreeNode> InitTree(List<ComboTreeNode> tree)
         {
 
-
+            /*
+             * Input: tree - this is all the activities in an array form that is in the context. The idea is to put this in tree form
+             * 1. Iterate through the passed in tree
+             * 2. Build tmp_tree from passed in tree 
+             * 3. If a node already exist in the tmp_tree and the node level is '0' then add the node to the tmp_tree and set the root_ptr to tree[i]
+             * 4. If the node already exist in the tmp_tree and the level is NOT '0' then do not add the node to the tmp_tree and just set the    
+             * 5. If a node do not exist in the tmp_tree being built then ADD the node to tmp_tree being built
+             */
             ComboTreeNode parent_ptr = null;
             ComboTreeNode root_ptr = null;
             ComboTreeNode child_ptr = null;
@@ -373,36 +383,56 @@ namespace CAOGAttendeeManager
 
 
             bool NodeExist = false;
-
+            bool node_found = false;
+            ComboTreeNode ctn;
+            ComboTreeNode find_node;
 
             for (int i = 0; i <= tree.Count - 1; i++)
             {
-
-                
 
                 if (tree[i].Level == 0)
                 {
                     if (root_ptr != null)
                     {
-                       
-                                               
-                        
-                        if ((string)tree[i].Header == (string)root_ptr.Header)
+
+                        // there is already a node with the same name as tree[i] node so dont add the node
+                        if ((string)root_ptr.Header == (string)tree[i].Header)
                         {
-                            // the new node has the same name as the root_ptr so root_ptr stay where it is 
+
+                            // do nothing
 
                         }
-                        else
+                        else /* tree[i].Header is different than root_ptr.Header */
                         {
-                            tmp_tree.Add(root_ptr);
-                            root_ptr = tree[i];
-                            NodeExist = false;
-                        }
-                            
+                           
+                            ctn = tmp_tree.SingleOrDefault(f => (string)f.Header == (string)root_ptr.Header);
+                          
+                            if (ctn == null) /*node does not exist*/
+                            {
+                                tmp_tree.Add(root_ptr);
+                                node_found = false;
 
+                                /* if tree[i] has the same name as an element already in the list then the new root becomes the list item with Header=tree[i] header
+                                 * else root_ptr = tree[i]*/
+
+                                find_node = tmp_tree.SingleOrDefault(f => (string)f.Header == (string)tree[i].Header);
+                                if (find_node !=null) /*node found */
+                                {
+                                    root_ptr = find_node;
+                                }
+                                else
+                                  root_ptr = tree[i];
+                            }
+                            else 
+                            {
+                                root_ptr = ctn;
+                                NodeExist = false;
+                            }
+
+                        }
 
                     }
-                    else
+                    else /* root_ptr is null point it too the current tree node that is iterated */
                         root_ptr = tree[i];
 
 
@@ -415,13 +445,14 @@ namespace CAOGAttendeeManager
                     if (tree[i].Parent == null)
                     {
 
+                        
                         foreach (ComboTreeNode node in root_ptr.Items)
                         {
                             // there is already a node with the same name as tree[i] node so dont add the node
                             if ((string)node.Header == (string)tree[i].Header)
                             {
                                 NodeExist = true;
-                                parent_ptr = node;
+                                //parent_ptr = tree[i];
                                 
                                 break;
 
@@ -432,9 +463,9 @@ namespace CAOGAttendeeManager
                             if (NodeExist)
                             {
                             // do nothing keep pointer where it is
-                                  NodeExist = false;
-                             }
-                              else
+                                NodeExist = false; 
+                            }
+                            else
                             {
 
                                 root_ptr.Items.Add(tree[i]);
@@ -459,7 +490,7 @@ namespace CAOGAttendeeManager
                             if ((string)node.Header == (string)tree[i].Header)
                             {
                                 NodeExist = true;
-                                parent_ptr = node;
+                               // parent_ptr = tree[i];
                                 break;
 
                             }
@@ -502,6 +533,7 @@ namespace CAOGAttendeeManager
                             if ((string)node.Header == (string)tree[i].Header)
                             {
                                 NodeExist = true;
+                                //child_ptr = tree[i];
                                 break;
                             }
                         }
@@ -796,81 +828,6 @@ namespace CAOGAttendeeManager
         }
      
 
-
-        //private void Convert_and_SaveNewTreeToActivityHeardersTree(IEnumerable<TreeNode> tree)
-        //{
-        //    List<ActivityHeader> ActivityTree = new List<ActivityHeader>() { };
-
-        //    foreach (TreeNode header in tree)
-        //    {
-        //        ActivityHeader parent = new ActivityHeader { Name = (string)header.Header };
-               
-        //        //ActivityGroups
-        //        foreach (TreeNode group in header.Items)
-        //        {
-        //            ActivityGroup aGroup = new ActivityGroup { ActivityName = (string)group.Header };
-
-        //            parent.Groups.Add(aGroup);
-
-
-        //            //ActivityTask
-        //            foreach (TreeNode task in group.Items)
-        //            {
-        //                ActivityTask aTask = new ActivityTask { TaskName = (string)task.Header,  };
-
-        //                aGroup.lstActivityTasks.Add(aTask);
-        //                //subTask
-        //                foreach (TreeNode subtask in task.Items)
-        //                {
-        //                    ActivityTask subTask = new ActivityTask { TaskName = (string)subtask.Header,  };
-
-        //                    aTask.lstsubTasks.Add(subTask);
-        //                }
-        //            }
-        //        }
-        //        ActivityTree.Add(parent);
-        //    }
-            
-        //    // save tree to private class variable
-        //   // m_lstActivityHeaders = ActivityTree;
-
-
-            
-        //}
-        //private void LoadNewComboTree(List<ActivityHeader> tree)
-        //{
-        //    if (m_ctbActivity.Nodes.Any() && m_ctbActivityProspect.Nodes.Any())
-        //    {
-        //        m_ctbActivity.Nodes.Clear();
-        //        m_ctbActivityProspect.Nodes.Clear();
-        //    }
-        //    //Add ComboTreeNodes to ComboTreeBox Treeview
-        //    foreach (var header in tree)
-        //    {
-        //        //ActivityHeader
-        //        ComboTreeNode parent = m_ctbActivity.Nodes.Add(header.Name);
-        //        ComboTreeNode parent2 = m_ctbActivityProspect.Nodes.Add(header.Name);
-        //        //ActivityGroups
-        //        foreach (var group in header.Groups)
-        //        {
-        //            ComboTreeNode child = parent.Nodes.Add(group.ActivityName);
-        //            ComboTreeNode child2 = parent2.Nodes.Add(group.ActivityName);
-        //            //ActivityTask
-        //            foreach (var task in group.lstActivityTasks)
-        //            {
-        //                ComboTreeNode taskNode = child.Nodes.Add(task.TaskName);
-        //                ComboTreeNode taskNode2 = child2.Nodes.Add(task.TaskName);
-        //                //subTask
-        //                foreach (var subtask in task.lstsubTasks)
-        //                {
-        //                    ComboTreeNode subTaskNode = taskNode.Nodes.Add(subtask.TaskName);
-        //                    ComboTreeNode subTaskNode2 = taskNode2.Nodes.Add(subtask.TaskName);
-        //                }
-        //            }
-
-        //        }
-        //    }
-        //}
         private void LoadActivityProspectComboTreeList(IEnumerable<ComboTreeNode> tree)
         {
             if (m_ctbActivityProspect.Nodes.Any())
@@ -2348,15 +2305,14 @@ namespace CAOGAttendeeManager
             m_ctbActivity.Size = new System.Drawing.Size(200, 19);
             m_ctbActivity.DrawWithVisualStyles = true;
             m_ctbActivity.Visible = true;
-            m_ctbActivity.ExpandAll();
+           
             m_ctbActivity.DropDownWidth = 350;
             m_ctbActivity.DropDownHeight = 350;
             
            
 
             m_ctbActivity.DropDownClosed += M_ctbActivity_DropDownClosed;
-            //m_ctbActivity.KeyUp += M_ctbActivity_KeyUp;
-            m_ctbActivity.DropDown += M_ctbActivity_DropDown;
+       
           
            // m_ctbActivityProspect.DroppedDown = false;
             m_ctbActivityProspect.Location = new System.Drawing.Point(0, 0);
@@ -2366,14 +2322,13 @@ namespace CAOGAttendeeManager
             m_ctbActivityProspect.Size = new System.Drawing.Size(200, 19);
             m_ctbActivityProspect.DrawWithVisualStyles = true;
             m_ctbActivityProspect.Visible = true;
-            m_ctbActivityProspect.ExpandAll();
-            m_ctbActivityProspect.DropDownWidth = 350;
+                     m_ctbActivityProspect.DropDownWidth = 350;
             m_ctbActivityProspect.DropDownHeight = 350;
            
             
 
             m_ctbActivityProspect.DropDownClosed += M_ctbActivityProspect_DropDownClosed;
-            m_ctbActivityProspect.DropDown += M_ctbActivityProspect_DropDown;
+          
             
 
             WindowsFormsHost host = new WindowsFormsHost();
@@ -2597,18 +2552,6 @@ namespace CAOGAttendeeManager
 
             return tree_array;
 
-
-        }
-
-        private void M_ctbActivityProspect_DropDown(object sender, System.EventArgs e)
-        {
-            m_ctbActivityProspect.ExpandAll();
-        }
-
-        private void M_ctbActivity_DropDown(object sender, System.EventArgs e)
-        {
-            
-            m_ctbActivity.ExpandAll();
 
         }
 
@@ -3686,10 +3629,6 @@ namespace CAOGAttendeeManager
             Cursor = Cursors.Arrow;
         }
 
-        private void Find_and_Delete_Node_from_ActivityDropdown(Activity activity_name)
-        {
-
-        }
         private void DeleteRecordFromActivitiesTable(IEnumerable<Activity> row_select)
         {
             List<Activity> rowsToBeDeleted = new List<Activity>(row_select);
