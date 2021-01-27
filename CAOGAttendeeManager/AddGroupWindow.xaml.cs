@@ -254,10 +254,7 @@ namespace CAOGAttendeeManager
         private void BtnApply_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
-            //if (m_old_filepath == m_new_filepath)
-            //  GetTreeChanged = false;
-            //else
-            //    GetTreeChanged = true;
+            
 
             if (!isListSaved)
             {
@@ -277,13 +274,14 @@ namespace CAOGAttendeeManager
                 }
                 else if (res == MessageBoxResult.No)
                 {
-
+                    GetTreeChanged = false;
                     StopTimer();
                     Close();
 
                 }
                 else if (res == MessageBoxResult.Cancel)
                 {
+                    GetTreeChanged = false;
                     Close();
                 }
 
@@ -1212,17 +1210,7 @@ namespace CAOGAttendeeManager
                 string filePath = saveFileDialog.FileName;
                 string filename = saveFileDialog.SafeFileName;
 
-                while (filePath == settingPath)
-                {
-                    MessageBox.Show("This file name is reserved for program settings information, choose another file name to save the list");
-                    if (saveFileDialog.ShowDialog() == true)
-                    {
-                        filePath = saveFileDialog.FileName;
-                        filename = saveFileDialog.SafeFileName;
-                    }
-
-                }
-
+               
                 Save_ChurchActivities_To_datFile(GetTree, filePath);
               
                 lblListFilename.Content = filename.Substring(0, filename.Length - 4);
