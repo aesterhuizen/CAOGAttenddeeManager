@@ -66,7 +66,7 @@
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\v3.1.30d\</OutputPath>
+    <OutputPath>bin\x86\Release\v3.1.30e\</OutputPath>
     <DefineConstants>TRACE;init_db;Release</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
