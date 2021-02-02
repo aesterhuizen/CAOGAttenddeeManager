@@ -20,10 +20,7 @@ namespace CAOGAttendeeManager
     /// </summary>
     public partial class WndAddGroup : Window
     {
-        private string m_old_filepath = "";
-        private byte[] m_byte_array;
-
-
+       
         public string GetFollowUpWeeks { get; set; } = "";
 
       
@@ -220,6 +217,20 @@ namespace CAOGAttendeeManager
                    
                 }
 
+                if (trvActivities.SelectedItem == null)
+                {
+                    btnEditItem.IsEnabled = false;
+                    btnDeleteItem.IsEnabled = false;
+                    btnAddItem.IsEnabled = false;
+
+                }
+                else
+                {
+                    btnEditItem.IsEnabled = true;
+                    btnDeleteItem.IsEnabled = true;
+                    btnAddItem.IsEnabled = true;                
+                }
+                   
 
             });
 
@@ -333,9 +344,9 @@ namespace CAOGAttendeeManager
         {
             isListSaved = true;
            
-            //btnAddItem.IsEnabled = false;
-            //btnDeleteItem.IsEnabled = false;
-            //btnEditItem.IsEnabled = false;
+            btnAddItem.IsEnabled = false;
+            btnDeleteItem.IsEnabled = false;
+            btnEditItem.IsEnabled = false;
            
             //rtbDescription.IsEnabled = false;
             //txtActivityName.IsEnabled = false;

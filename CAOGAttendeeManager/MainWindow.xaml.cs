@@ -2318,7 +2318,7 @@ namespace CAOGAttendeeManager
             m_ctbActivity.SelectedNode = null;
             m_ctbActivity.ShowCheckBoxes = true;
             m_ctbActivity.Size = new System.Drawing.Size(200, 19);
-            m_ctbActivity.DrawWithVisualStyles = false;
+            m_ctbActivity.DrawWithVisualStyles = true;
             m_ctbActivity.Visible = true;
            
             m_ctbActivity.DropDownWidth = 350;
@@ -2335,7 +2335,7 @@ namespace CAOGAttendeeManager
             m_ctbActivityProspect.SelectedNode = null;
             m_ctbActivityProspect.ShowCheckBoxes = true;
             m_ctbActivityProspect.Size = new System.Drawing.Size(200, 19);
-            m_ctbActivityProspect.DrawWithVisualStyles = false;
+            m_ctbActivityProspect.DrawWithVisualStyles = true;
             m_ctbActivityProspect.Visible = true;
                      m_ctbActivityProspect.DropDownWidth = 350;
             m_ctbActivityProspect.DropDownHeight = 350;
@@ -2361,6 +2361,8 @@ namespace CAOGAttendeeManager
            // m_isActivityfilterByDateChecked = false;
             m_AttendanceView = true;
             btnSave.IsEnabled = false;
+            btnImport.IsEnabled = false;
+            btnPanelNewActivity.IsEnabled = false;
         
 
             SetTimer();
