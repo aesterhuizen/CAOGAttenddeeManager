@@ -48,7 +48,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\v3.1.24\</OutputPath>
+    <OutputPath>bin\Release\v3.1.30f\</OutputPath>
     <DefineConstants>TRACE;init_db</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>2</WarningLevel>
@@ -253,6 +253,13 @@
       <DependentUpon>DeleteRecordWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="DynamicLinqLibrary\DynamicLibrary.cs" />
+    <Compile Include="FilterDataGrid\DataGridColumn.cs" />
+    <Compile Include="FilterDataGrid\FilterCommon.cs" />
+    <Compile Include="FilterDataGrid\FilterDataGrid.cs" />
+    <Compile Include="FilterDataGrid\FilterHelpers.cs" />
+    <Compile Include="FilterDataGrid\FilterItem.cs" />
+    <Compile Include="FilterDataGrid\Loc.cs" />
+    <Compile Include="FilterDataGrid\StringFormatConverter.cs" />
     <Compile Include="FollowUpWindow.xaml.cs">
       <DependentUpon>FollowUpWindow.xaml</DependentUpon>
     </Compile>
@@ -280,6 +287,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="DeleteRecordWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="FilterDataGrid\FilterDataGrid.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -391,6 +402,9 @@
     <Resource Include="Resources\open-file-icon.png" />
     <Resource Include="Resources\add-icon.png" />
     <Resource Include="Resources\Group-Add.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="FilterDataGrid\Readme.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Data.SqlClient.SNI.1.0.19235.1\build\net46\Microsoft.Data.SqlClient.SNI.targets" Condition="Exists('..\packages\Microsoft.Data.SqlClient.SNI.1.0.19235.1\build\net46\Microsoft.Data.SqlClient.SNI.targets')" />

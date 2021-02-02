@@ -429,12 +429,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_A6F1E10FD8A5ACBEE4BF4B7503CA3B5E"
-        "OwnerKey" = "8:_B411F98FB8AF4A45BA4AD6B74589324A"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_B411F98FB8AF4A45BA4AD6B74589324A"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -442,6 +436,12 @@
         "Entry"
         {
         "MsmKey" = "8:_B4738577C3B65A81D8CB27D145FA0E44"
+        "OwnerKey" = "8:_B411F98FB8AF4A45BA4AD6B74589324A"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_BA889E4574474847848C315087A768D5"
         "OwnerKey" = "8:_B411F98FB8AF4A45BA4AD6B74589324A"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -580,6 +580,12 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_BA889E4574474847848C315087A768D5"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_6449DDCCF7BE60A8C0C07C8D0072E613"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -659,12 +665,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_0613267D629B11E0BF4C39FD7E8A0BA4"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_A6F1E10FD8A5ACBEE4BF4B7503CA3B5E"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1770,20 +1770,20 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_A6F1E10FD8A5ACBEE4BF4B7503CA3B5E"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_B4738577C3B65A81D8CB27D145FA0E44"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:DropDownControls, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:JetEntityFrameworkProvider, Version=6.0.0.0, Culture=neutral, PublicKeyToken=756cf6beb8fe7b41, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_A6F1E10FD8A5ACBEE4BF4B7503CA3B5E"
+                    "_B4738577C3B65A81D8CB27D145FA0E44"
                     {
-                    "Name" = "8:DropDownControls.dll"
+                    "Name" = "8:JetEntityFrameworkProvider.dll"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:DropDownControls.dll"
+            "SourcePath" = "8:JetEntityFrameworkProvider.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_51D97D98C04C4BB8BBA484F3DDC37DB9"
@@ -1801,20 +1801,20 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_B4738577C3B65A81D8CB27D145FA0E44"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_BA889E4574474847848C315087A768D5"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:JetEntityFrameworkProvider, Version=6.0.0.0, Culture=neutral, PublicKeyToken=756cf6beb8fe7b41, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:DropDownControls, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_B4738577C3B65A81D8CB27D145FA0E44"
+                    "_BA889E4574474847848C315087A768D5"
                     {
-                    "Name" = "8:JetEntityFrameworkProvider.dll"
+                    "Name" = "8:DropDownControls.dll"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:JetEntityFrameworkProvider.dll"
+            "SourcePath" = "8:DropDownControls.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_51D97D98C04C4BB8BBA484F3DDC37DB9"
@@ -2167,7 +2167,7 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Attendee Manager"
-        "ProductCode" = "8:{7B3AF75C-661E-4111-92FD-1FE40E725F02}"
+        "ProductCode" = "8:{34665424-B69B-43B3-AF9A-FBBB692A4307}"
         "PackageCode" = "8:{AB63B4E7-35B4-4568-827E-4B2E6E1F3842}"
         "UpgradeCode" = "8:{E11C2216-175D-499C-A731-65D86CB29F6F}"
         "AspNetVersion" = "8:2.0.50727.0"
@@ -2703,7 +2703,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B411F98FB8AF4A45BA4AD6B74589324A"
             {
-            "SourcePath" = "8:..\\CAOGAttendeeManager\\obj\\x86\\Debug\\CAOGAttendeeManager.exe"
+            "SourcePath" = "8:..\\CAOGAttendeeManager\\obj\\Release\\CAOGAttendeeManager.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_51D97D98C04C4BB8BBA484F3DDC37DB9"
