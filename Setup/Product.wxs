@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	
+  <Product Id="*" Name="Attendee Manager" Language="1033" Version="3.1.31" Manufacturer="Ansoft" UpgradeCode="9fd43eb0-fd2d-42cf-8d18-8ff3a58e903d">
+  <Package InstallerVersion='100' Languages='1033' Compressed='yes' InstallScope='perMachine'/>
+
+
+    
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <Media Id='1' Cabinet='AMgr.cab' EmbedCab='yes' />
+    
+    <Icon Id="icon.ico" SourceFile="$(var.CAOGAttendeeProject.ProjectDir)\Resources\checklist.ico"/>
+    <Property Id="ARPPRODUCTICON" Value="icon.ico"/>
+    <Property Id="NETFRAMEWORK472" Value="Admin"/>
+
+    <Condition Message="This application requires .NET Framework 4.7.2 Please install the .NET Framework then run this installer again.">
+      <![CDATA[Installed OR NETFRAMEWORK472]]>
+    </Condition>
+
+    
+		<Feature Id="ProductFeature" Title="Attendee Manager" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="ApplicationShortcut"/>
+      
+    </Feature>
+	</Product>
+
+  
+  
+	<Fragment>
+    <!--<util:FileSearch
+                  Id="search_Office16Dir"
+                  Variable="IsAceOLEDB"
+                  Path="[TARGETDIR]\Common Files\Microsoft Shared\OFFICE16\ACEOLEDB.DLL"
+                  Result="exists" />
+                
+    <PackageGroup Id="ACEPackage">
+      <ExePackage
+          SourceFile="$(var.CAOGAttendeeProject.TargetDir)\accessdatabaseengine.exe"
+          InstallCommand="/quiet"
+          InstallCondition="IsACEOLEDB = false" />
+     
+    </PackageGroup>-->
+
+    
+      
+      
+    
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      	<Directory Id="ProgramFilesFolder">
+			  	<Directory Id="INSTALLFOLDER" Name="Attendee Manager" />
+			  </Directory>
+
+      <Directory Id="ProgramMenuFolder">
+         <Directory Id="ApplicationProgramsFolder" Name="Attendee Manager"/>
+      </Directory>
+    </Directory>
+
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="{7187BE73-C871-4096-9DE2-5A129C2EC868}">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="Attendee Manager"
+                  Description="Attendee Manager Shortcut"
+                  Target="[#am.exe]"
+                  Icon="icon.ico"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Advertise="no"/>
+                  
+        <RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]' Name='installed' Type='integer' Value='1' KeyPath='yes' />
+      </Component>
+     </DirectoryRef>
+    
+  </Fragment>
+  
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+			<!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
+			  <Component Id='MainExecutable'  Guid='667a627c-b328-47a5-8701-105e53a63181'>
+          <File Id='am.exe' Name="$(var.CAOGAttendeeProject.TargetFileName)" DiskId='1' Source="$(var.CAOGAttendeeProject.TargetPath)" KeyPath='yes'/>
+         </Component>
+
+         <Component Id="cmp2617F2D8C9D19129861AA400E5CE8FCF"  Guid="{AD38BC6F-6F95-4664-A446-690F11B8D033}">
+           <File Id="fil99F97469BD819EE777D922020F340DEC" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\AttendeeMgrDB.accdb" />
+         </Component>
+
+        <Component Id="accessdatabaseengine_Comp" Guid="{318CBD30-568D-43F2-BF85-91774742BD24}">
+          <File Id="accessdatabaseengine.exe" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\accessdatabaseengine.exe" />
+        </Component>
+      
+         <Component Id="cmp95EE6F0C9B8CA95F6B0F07281596D697" Guid="{00C7EF04-2197-4734-A9CC-37C397B34AD1}">
+           <File Id="fil2B8D317C496A687F2B8DF945DDDB6CE0" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\CAOGAttendeeManager.exe.config" />
+         </Component>
+         <Component Id="cmp185BA18AD0EC87B1DC2F0E67451090C1"  Guid="{93021DA3-D4E5-4666-B492-ADC3AC96C84E}">
+           <File Id="fil885E54823C79A68CA527E2BFAD894523" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\CAOGAttendeeManager.pdb" />
+         </Component>
+         <Component Id="cmpA2E900FBBA9D8A99C352A62F8793AEC9"  Guid="{FB9E3897-5FA1-4A07-8ACA-4D4F46BBA4CD}">
+           <File Id="fil7A18CB13D392EAC5F9D3C8D01BAD5294" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\DropDownControls.dll" />
+         </Component>
+         <Component Id="cmp9EF076C912EBFE3CBE97BD30E2963746" Guid="{D369F644-2FE9-4EFB-9F68-A62B49192AF4}">
+           <File Id="fil7D853659986C341BF54A67B3949F1F56" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\DropDownControls.xml" />
+         </Component>
+         <Component Id="cmp0E4908A56D0E4E1144478D5E5DBCA6A4"  Guid="{7B59261B-27E9-46BC-95EA-519BE56015D5}">
+           <File Id="fil91590475A2712D93FA3634D42F95CF32" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\EntityFramework.dll" />
+         </Component>
+         <Component Id="cmpCC7B0AD5DA673E6B67142B9CEE980650"  Guid="{FB330DB0-E717-4E46-B518-3EAA5ED36C5D}">
+           <File Id="fil923C81CDD3C7AFFCEDEA4B9E5151722C" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\EntityFramework.SqlServer.dll" />
+         </Component>
+         <Component Id="cmp5FE086BE444FD89590BCE452C4E43273" Guid="{6B913F52-8C95-4CBD-8BFC-CE18ACD1E650}">
+           <File Id="fil35287EDB57A6FC6D2B93C9662BB9022E" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\EntityFramework.SqlServer.xml" />
+         </Component>
+         <Component Id="cmp507D6A4A607AF7FE694F4E425F0C5A0B" Guid="{5D8AD882-CB94-4BCB-BF3F-BD904845022D}">
+           <File Id="fil4D05BB6AC31F28FB18AD83AD5312F9C2" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\EntityFramework.xml" />
+         </Component>
+         <Component Id="cmp978AE5EEE6ED30DE2BEEA2A37EEFB5BD" Guid="{E1899874-62D2-420B-A751-17A2992279AF}">
+           <File Id="filFE9B2A58C281747A69418C673F9E195E" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\JetEntityFrameworkProvider.dll" />
+         </Component>
+         <Component Id="cmpC4F6B60CB385D020B4376AE6FE9D83EC"  Guid="{C3D9C2CC-06C3-4A25-BC33-38D1549B64E8}">
+           <File Id="fil27B41C091528BF3300CD183D2847EC43" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\settings.xml" />
+         </Component>
+         <Component Id="cmp75C60719BF32C69FBEA0B55B39121D7A"  Guid="{FFB6224E-0326-459A-9666-2B7C86FD753A}">
+           <File Id="filBE3328C6F0D3B29249C02CAF45712E16" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\system.windows.controls.datavisualization.toolkit.dll" />
+         </Component>
+         <Component Id="cmpCB8FBA64717707E4547A10A8672A4CC5"  Guid="{A757D77C-BEE8-4957-9510-F98FE2B5E45A}">
+           <File Id="fil20D155DB4103119812F1699B173F35C2" KeyPath="yes" Source="$(var.CAOGAttendeeProject.TargetDir)\WPFToolkit.dll" />
+         </Component>
+		</ComponentGroup>
+	</Fragment>
+</Wix>

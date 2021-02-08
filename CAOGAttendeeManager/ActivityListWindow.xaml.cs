@@ -18,7 +18,7 @@ namespace CAOGAttendeeManager
     /// <summary>
     /// Interaction logic for Window1.xaml
     /// </summary>
-    public partial class WndAddGroup : Window
+    public partial class WndActivityList : Window
     {
        
         public string GetFollowUpWeeks { get; set; } = "";
@@ -29,10 +29,8 @@ namespace CAOGAttendeeManager
         {
             get
             {
-                //if (GetTreeChanged || (GetOldPath != GetFilePath) )
-                    return m_ActivitiesTreeView;
-                //else
-                //    return null;
+               return m_ActivitiesTreeView;
+              
             }
 
         }
@@ -43,9 +41,9 @@ namespace CAOGAttendeeManager
         public string GetFilePath { get; private set; } = "";
 
        //public string GetOldPath { get; private set; } = "";
-        public WndAddGroup() { }
+        public WndActivityList() { }
 
-        private IEnumerable<ComboTreeNode> m_ActivitiesTreeView = null;
+        private IEnumerable<ComboTreeNode> m_ActivitiesTreeView = new List<ComboTreeNode>();
 
         // variable that hold tree of headers read from XML file
       // private List<ActivityHeader> m_lstHeadersFromXML = new List<ActivityHeader>() { };
@@ -133,53 +131,6 @@ namespace CAOGAttendeeManager
             
 
         }
-//void InitTree(List<ActivityHeader> tree)
-//        {
-//            trvActivities.BeginInit();
-
-//            if (trvActivities.Items.Count != 0)
-//            {
-//                // clear the list before initializing it
-//                trvActivities.Items.Clear();
-
-//            }
-//            //Add ComboTreeNodes to ComboTreeBox Treeview
-//            foreach (var header in tree)
-//            {
-//                //ActivityHeader
-
-//                TreeNode parent = new TreeNode() { Header = header.Name };
-
-
-//                //ActivityGroups
-//                foreach (var group in header.Groups)
-//                {
-//                    TreeNode group_node = new TreeNode() { Header = group.ActivityName };
-
-//                    parent.Items.Add(group_node);
-
-//                    //ActivityTask
-//                    foreach (var task in group.lstActivityTasks)
-//                    {
-//                        TreeNode taskNode = new TreeNode() { Header = task.TaskName, /*Description = task.Description*/ };
-//                        group_node.Items.Add(taskNode);
-
-//                        //subTask
-//                        foreach (var subtask in task.lstsubTasks)
-//                        {
-//                            TreeNode subTaskNode = new TreeNode() { Header = subtask.TaskName, /*Description = subtask.Description*/ };
-//                            taskNode.Items.Add(subTaskNode);
-
-//                        }
-//                    }
-
-//                }
-//                trvActivities.Items.Add(parent);
-//            }
-
-//            trvActivities.EndInit();
-           
-//        }
 
         private Timer aTimer = null;
 
@@ -217,26 +168,26 @@ namespace CAOGAttendeeManager
                    
                 }
 
-                if (trvActivities.SelectedItem == null)
-                {
-                    btnEditItem.IsEnabled = false;
-                    btnDeleteItem.IsEnabled = false;
-                    btnAddItem.IsEnabled = false;
+                //if (trvActivities.SelectedItem == null)
+                //{
+                //    btnEditItem.IsEnabled = false;
+                //    btnDeleteItem.IsEnabled = false;
+                //    btnAddItem.IsEnabled = false;
 
-                }
-                else
-                {
-                    btnEditItem.IsEnabled = true;
-                    btnDeleteItem.IsEnabled = true;
-                    btnAddItem.IsEnabled = true;                
-                }
+                //}
+                //else
+                //{
+                //    btnEditItem.IsEnabled = true;
+                //    btnDeleteItem.IsEnabled = true;
+                //    btnAddItem.IsEnabled = true;                
+                //}
                    
 
             });
 
 
         }
-        public WndAddGroup(List<ComboTreeNode> aryTree,string ListPath,string fweeks)
+        public WndActivityList(List<ComboTreeNode> aryTree,string ListPath,string fweeks)
         {
             InitializeComponent();
 
@@ -348,8 +299,8 @@ namespace CAOGAttendeeManager
             btnDeleteItem.IsEnabled = false;
             btnEditItem.IsEnabled = false;
            
-            //rtbDescription.IsEnabled = false;
-            //txtActivityName.IsEnabled = false;
+            rtbDescription.IsEnabled = false;
+            txtActivityName.IsEnabled = false;
 
             //mnuAddItem.IsEnabled = false;
             //mnuEditItem.IsEnabled = false;
@@ -377,7 +328,7 @@ namespace CAOGAttendeeManager
 
             if (selected_node == null) // user want to create a new toplevel item
             {
-                new_item = new ComboTreeNode { Header = "<new item>", Level = 0 };
+                new_item = new ComboTreeNode {};
                 addToplevelItem = true;
             }
             else
@@ -595,8 +546,8 @@ namespace CAOGAttendeeManager
             trvActivities.BeginInit();
 
            
-
-            node.Header = txtActivityName.Text;
+            if (node !=null)
+                node.Header = txtActivityName.Text;
 
             TextRange range;
             range = new TextRange(rtbDescription.Document.ContentStart, rtbDescription.Document.ContentEnd);
@@ -648,12 +599,12 @@ namespace CAOGAttendeeManager
         }
 
 
-        private byte[] FormatByteArray(byte[] payload, string node_header,int header_level /*string Parent*/)
+        private byte[] FormatByteArray(byte[] payload, string node_header,int header_level )
         {
 
             //int i = 0;
 
-            //read_buffer = [Preamble + escape_seq + payload + ETX)]
+            //read_buffer = [ STX_seq + node_level + header_byte_array + escape_seq + payload + ETX_seq)]
 
 
             byte[] header_byte_array = Encoding.UTF8.GetBytes(node_header);
@@ -686,12 +637,12 @@ namespace CAOGAttendeeManager
         }
 
 
-        private void CallRecursive(TreeView treeView, string filename)
+        private void CallRecursive(TreeView treeView, string filepath, string listname)
         {
             
-
+            
             // Open or create new file that wil hold the node's descriptions            
-            FileStream fsDescriptions = new FileStream(filename, FileMode.Create, FileAccess.ReadWrite);
+            FileStream fsDescriptions = new FileStream(filepath, FileMode.Create, FileAccess.ReadWrite);
             
             
             // Print each node recursively.  
@@ -700,7 +651,7 @@ namespace CAOGAttendeeManager
             foreach (ComboTreeNode n in items)
             {
                
-                PrintRecursive(n, ref fsDescriptions);
+                PrintRecursive(n, ref fsDescriptions, listname);
               
                
             }
@@ -708,13 +659,13 @@ namespace CAOGAttendeeManager
         }
       
 
-        private void PrintRecursive(ComboTreeNode node, ref FileStream fs)
+        private void PrintRecursive(ComboTreeNode node, ref FileStream fs, string listname)
         {
 
             //Print goodies
 
 
-            string node_header_string = (string)node.Header;
+            string node_header_string = (string)node.Header + "_" + listname;
             int node_level = node.Level;
 
            //node.Parent;
@@ -731,192 +682,18 @@ namespace CAOGAttendeeManager
             foreach (ComboTreeNode tn in node.Items)
             {
 
-                PrintRecursive(tn, ref fs);
+                PrintRecursive(tn, ref fs, listname);
                 
             }
         }
-        public void Save_ChurchActivities_To_datFile(IEnumerable<ComboTreeNode> activityList, string filename)
+        public void Save_ChurchActivities_To_datFile(IEnumerable<ComboTreeNode> activityList, string filepath, string listname)
         {
 
-            CallRecursive(trvActivities, filename);
+            CallRecursive(trvActivities, filepath, listname);
 
            
         }
-        private List<ComboTreeNode> Load_ChurchActivities_From_File(string listPath)
-        {
-
-
-
-            List<ComboTreeNode> tree_array = new List<ComboTreeNode>() { };
-
-
-            try
-            {
-
-
-                if (File.Exists($"{listPath}"))
-                {
-                    FileStream fs = new FileStream(listPath, FileMode.Open, FileAccess.Read);
-                    // STX = byte 0x02
-                    // ETX = byte 0x03
-                    //message = [STX(1byte) + header_byte_array (n bytes) + escape_seq (2 bytes)+payload + ETX(1byte)]
-
-
-
-                    byte[] read_buffer = new byte[1024];
-                    byte[] tmp_buf = new byte[1024];
-
-
-                    byte[] ETX_seq = new byte[2] { 0x03, 0x30 };
-                    byte[] STX_seq = new byte[2] { 0x02, 0x20 };
-
-                    byte[] escape_seq = new byte[2] { 0x0A, 0xA0 };
-
-                    int node_level_length = 1;
-
-                    //byte[] tmp_array = new byte[STX_seq.Length + node_level_length + header_byte_array.Length + escape_seq.Length + payload.Length + ETX_seq.Length];
-
-                    int STXidx = 0;
-                    int ETXidx = 0;
-
-                    int offset_size = 0;
-                    int idx = 0;
-                    int bytes_read = 0;
-                    string node_header;
-                    int node_level = 0;
-                    int payload_length = 0;
-
-
-                    ComboTreeNode node;
-                    MemoryStream payload_data;
-
-                    while ((bytes_read = fs.Read(read_buffer, offset_size, read_buffer.Length - offset_size)) > 0)
-                    {
-
-                        //loop over read buffer
-                        for (idx = 0; idx <= read_buffer.Length - 1; idx++)
-                        {
-                            // read untill get a STX
-                            if (read_buffer[idx] == 0x02 && read_buffer[idx + 1] == 0x20)
-                                STXidx = idx; //STXidx is the beginning of the STX sequence index in the read buffer array
-
-                            // read until you get an ETX symbol
-                            if (read_buffer[idx] == 0x03 && read_buffer[idx + 1] == 0x30)
-                                ETXidx = idx + 1; //ETXidx is the end of the ETX sequence index in the read buffer array and at the end of 1 message
-
-                            // if an STX and ETX is found decode the the data and find the next message (STX ETX)
-                            if (read_buffer[STXidx] == (byte)ArrayFormat.STX && read_buffer[ETXidx] == 0x30)
-                            {
-
-
-                                //we found the beginning of the payload
-                                for (int i = STXidx; i <= ETXidx - 2; i++)
-                                {
-                                    if (read_buffer[i] == 0x0A && read_buffer[i + 1] == 0xA0)
-                                    {
-
-                                        int header_size = (i - 1) - (STXidx + 1 + node_level_length);
-
-                                        node_level = Convert.ToInt16(read_buffer[STXidx + 2]);
-
-                                        node_header = Encoding.UTF8.GetString(read_buffer, STXidx + 3 /*beggining offset of node header*/, header_size);
-
-                                        node = new ComboTreeNode { Header = node_header, Level = node_level };
-
-                                        if (read_buffer[i + 2] == (byte)ArrayFormat.ETX)
-                                        {
-                                            payload_length = 0;
-                                        }
-                                        else
-
-                                        {
-                                            payload_data = new MemoryStream();
-
-                                            payload_length = (ETXidx - 2) - (i + 2);
-
-                                            payload_data.Write(read_buffer, i + 2, payload_length);
-
-
-                                            node.rtbDescriptionMStream = payload_data;
-                                            string data = Encoding.UTF8.GetString(payload_data.GetBuffer(), 0, payload_length);
-                                        }
-
-                                        tree_array.Add(node);
-
-                                        break;
-                                    }
-                                }
-
-
-
-                                STXidx = ETXidx + 1;
-                                ETXidx = 0;
-
-                            }
-                            else if (idx == read_buffer.Length - 1 && ETXidx == 0)   //we read until the end of the buffer but cannot find an end of message sequence ETX
-                            {
-                                // if this is the last byte in the buffer and we have not found an ETX symbol
-
-                                //cal new size of offset into read_buffer where the new data will go
-                                offset_size = (read_buffer.Length - 1) - STXidx;
-
-
-                                Buffer.BlockCopy(read_buffer, STXidx, tmp_buf, 0, offset_size);
-
-                                //clear the read_buffer
-                                for (int i = 0; i <= read_buffer.Length - 1; i++)
-                                {
-                                    read_buffer[i] = 0;
-                                }
-
-                                //copy the bytes from tmp_buffer back to the read_buffer at the 0 index in read buffer
-                                Buffer.BlockCopy(tmp_buf, 0, read_buffer, 0, offset_size);
-                                //clear the tmp_buffer
-                                for (int i = 0; i <= read_buffer.Length - 1; i++)
-                                {
-                                    tmp_buf[i] = 0;
-                                }
-
-                            }
-
-
-
-
-                        }
-
-
-
-
-
-                    } // while readbytes
-
-
-
-                }
-                else
-                {
-
-                }
-
-                //else // activities file does not exist
-                //{
-                //    Cursor = Cursors.Arrow;
-                //    MessageBox.Show("No Activities file found or file is in the wrong format! '*.xml'");
-                //}
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "XML read error", MessageBoxButton.OK, MessageBoxImage.Error);
-
-            }
-
-
-
-            return tree_array;
-
-
-        }
+     
         private List<ComboTreeNode> Load_ChurchActivities_From_File(string filePath, Stream fstream)
         {
 
@@ -994,7 +771,13 @@ namespace CAOGAttendeeManager
 
                                         node_header = Encoding.UTF8.GetString(read_buffer, STXidx+3 /*beggining offset of node header*/, header_size);
 
-                                        node = new ComboTreeNode { Header = node_header, Level = node_level };
+
+
+                                        string[] ary_nodeHeader = node_header.Split('_');
+                                        string activityName = ary_nodeHeader[0];
+                                        string listname = ary_nodeHeader[1];
+
+                                        node = new ComboTreeNode { Header = activityName, Level = node_level, activityList = listname };
 
                                         if (read_buffer[i + 2] == (byte)ArrayFormat.ETX)
                                         {
@@ -1111,7 +894,7 @@ namespace CAOGAttendeeManager
             {
                 //Get the path of specified file
                 filePath = openFileDialog.FileName;
-                string filename = openFileDialog.SafeFileName;
+                string filename = (openFileDialog.SafeFileName).Substring(0, openFileDialog.SafeFileName.Length - 4);
                 Stream fileStream = openFileDialog.OpenFile();
                // m_old_filepath = GetFilePath;
 
@@ -1119,7 +902,7 @@ namespace CAOGAttendeeManager
                 
                 GetFilePath = filePath;
                 InitTree(tree);
-                lblListFilename.Content = filename.Substring(0,filename.Length-4);
+                lblListFilename.Content = filename;
                 GetTreeChanged = true;
                 isListSaved = true;
                 //set the GetTree property to the current tree
@@ -1219,12 +1002,12 @@ namespace CAOGAttendeeManager
             {
                 //Get the path of specified file
                 string filePath = saveFileDialog.FileName;
-                string filename = saveFileDialog.SafeFileName;
+                string filename = (saveFileDialog.SafeFileName).Substring(0, saveFileDialog.SafeFileName.Length - 4);
 
                
-                Save_ChurchActivities_To_datFile(GetTree, filePath);
+                Save_ChurchActivities_To_datFile(GetTree, filePath, filename);
               
-                lblListFilename.Content = filename.Substring(0, filename.Length - 4);
+                lblListFilename.Content = filename;
                 GetFilePath = filePath;
 
 

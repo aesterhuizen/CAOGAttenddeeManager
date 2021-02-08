@@ -9,7 +9,7 @@
         Loaded="Window_Loaded"
         Closing="Window_Closing">
     <Window.Resources>
-        
+
 
         <DataTemplate x:Key="chkAttendanceItemsTemplate">
             <CheckBox Name="chkAttendedStatus" IsChecked="{Binding Attended}" />
@@ -25,7 +25,7 @@
 
 
     <DockPanel Margin="0,-2,0,2">
-       
+
         <Ribbon DockPanel.Dock="Top">
             <Ribbon.ApplicationMenu>
                 <RibbonApplicationMenu Label="File" SmallImageSource="Resources\FileCabinet.ico">
@@ -37,7 +37,6 @@
             <!-- Tab ############################################################################################ -->
             <RibbonTab Name="tabHome" Header="Home" Height="90">
                 <RibbonGroup Header="Database" >
-
                     <RibbonButton Name="btnSave"
                                   Margin="1,1,1,1"
                                   BorderBrush="LightBlue"
@@ -102,7 +101,7 @@
 
                     </RibbonButton>
 
-                    <RibbonButton Name="btnAddColumn"
+                    <!--<RibbonButton Name="btnAddColumn"
                                   Margin="11,1,1,1"
                                   BorderBrush="LightBlue"
                                   Label="Add Column"
@@ -111,7 +110,7 @@
                                   ToolTip="Add a new column to the database" Height="65">
 
 
-                    </RibbonButton>
+                    </RibbonButton>-->
 
 
 
@@ -141,7 +140,7 @@
                             <Label x:Name="lblActivityListName" Content="Activity list:" HorizontalAlignment="Left" Width="69"/>
                             <TextBlock Margin="20,0,0,0" x:Name="txtbActivityListName" 
                                    TextAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" Height="40"/>
-                                
+
                         </StackPanel>
 
 
@@ -200,13 +199,12 @@
                                 CanUserResizeColumns="True"
                                 SelectedCellsChanged="dataGrid_SelectedCellsChanged"
                                 ColumnWidth="120"
+                                ItemsSource="{Binding}"
                                 CanUserResizeRows="False" 
-                                ItemsSource="{Binding}" 
                                 ColumnHeaderHeight="60"
                                 GridLinesVisibility="Horizontal"
                                 HorizontalGridLinesBrush="LightGray"
-                                RowHeight="25" FontSize="13" Margin="0,0,0,5"  
-                                >
+                                RowHeight="25" FontSize="13" Margin="0,0,0,5"  >
                             <DataGrid.RowStyle >
                                 <Style TargetType="DataGridRow">
                                     <Style.Triggers>
@@ -494,7 +492,7 @@
                                 </DataGridTextColumn>
 
                             </DataGrid.Columns>
-                            Row details 
+
                             <DataGrid.RowDetailsTemplate>
                                 <DataTemplate>
 
@@ -550,9 +548,9 @@
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
                                                 <DataGridTextColumn Header="Date" Binding="{Binding DateString}"/>
-                                                <DataGridTextColumn Header="Activity" Binding="{Binding ActivityText}">
-                                                   
-                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Header="Activity" Width="200" Binding="{Binding ActivityText}"/>
+                                                <DataGridTextColumn Header="Activity List" Binding="{Binding ListName}"/>
+
 
 
                                             </DataGrid.Columns>

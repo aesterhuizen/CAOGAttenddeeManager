@@ -20,9 +20,9 @@ namespace CAOGAttendeeManager {
     [global::System.ComponentModel.DesignerCategoryAttribute("code")]
     [global::System.ComponentModel.ToolboxItem(true)]
     [global::System.Xml.Serialization.XmlSchemaProviderAttribute("GetTypedDataSetSchema")]
-    [global::System.Xml.Serialization.XmlRootAttribute("AttendeeMgrDB_CodeFistDataSet")]
+    [global::System.Xml.Serialization.XmlRootAttribute("AttendeeMgrDBDataSet")]
     [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.DataSet")]
-    public partial class AttendeeMgrDB_CodeFistDataSet : global::System.Data.DataSet {
+    public partial class AttendeeMgrDBDataSet : global::System.Data.DataSet {
         
         private @__MigrationHistoryDataTable table__MigrationHistory;
         
@@ -32,15 +32,13 @@ namespace CAOGAttendeeManager {
         
         private AttendeesDataTable tableAttendees;
         
-        private global::System.Data.DataRelation relationFK_Activities_Attendees_AttendeeId;
-        
-        private global::System.Data.DataRelation relationFK_Attendance_Info_Attendees_AttendeeId;
+        private global::System.Data.DataRelation _relation_728BFEC4_FF3D_4EFE_8F69_1B2B4C59E502_;
         
         private global::System.Data.SchemaSerializationMode _schemaSerializationMode = global::System.Data.SchemaSerializationMode.IncludeSchema;
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-        public AttendeeMgrDB_CodeFistDataSet() {
+        public AttendeeMgrDBDataSet() {
             this.BeginInit();
             this.InitClass();
             global::System.ComponentModel.CollectionChangeEventHandler schemaChangedHandler = new global::System.ComponentModel.CollectionChangeEventHandler(this.SchemaChanged);
@@ -51,7 +49,7 @@ namespace CAOGAttendeeManager {
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-        protected AttendeeMgrDB_CodeFistDataSet(global::System.Runtime.Serialization.SerializationInfo info, global::System.Runtime.Serialization.StreamingContext context) : 
+        protected AttendeeMgrDBDataSet(global::System.Runtime.Serialization.SerializationInfo info, global::System.Runtime.Serialization.StreamingContext context) : 
                 base(info, context, false) {
             if ((this.IsBinarySerialized(info, context) == true)) {
                 this.InitVars(false);
@@ -176,7 +174,7 @@ namespace CAOGAttendeeManager {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         public override global::System.Data.DataSet Clone() {
-            AttendeeMgrDB_CodeFistDataSet cln = ((AttendeeMgrDB_CodeFistDataSet)(base.Clone()));
+            AttendeeMgrDBDataSet cln = ((AttendeeMgrDBDataSet)(base.Clone()));
             cln.InitVars();
             cln.SchemaSerializationMode = this.SchemaSerializationMode;
             return cln;
@@ -270,16 +268,15 @@ namespace CAOGAttendeeManager {
                     this.tableAttendees.InitVars();
                 }
             }
-            this.relationFK_Activities_Attendees_AttendeeId = this.Relations["FK_Activities_Attendees_AttendeeId"];
-            this.relationFK_Attendance_Info_Attendees_AttendeeId = this.Relations["FK_Attendance_Info_Attendees_AttendeeId"];
+            this._relation_728BFEC4_FF3D_4EFE_8F69_1B2B4C59E502_ = this.Relations["{728BFEC4-FF3D-4EFE-8F69-1B2B4C59E502}"];
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         private void InitClass() {
-            this.DataSetName = "AttendeeMgrDB_CodeFistDataSet";
+            this.DataSetName = "AttendeeMgrDBDataSet";
             this.Prefix = "";
-            this.Namespace = "http://tempuri.org/AttendeeMgrDB_CodeFistDataSet.xsd";
+            this.Namespace = "http://tempuri.org/AttendeeMgrDBDataSet.xsd";
             this.EnforceConstraints = true;
             this.SchemaSerializationMode = global::System.Data.SchemaSerializationMode.IncludeSchema;
             this.table__MigrationHistory = new @__MigrationHistoryDataTable();
@@ -290,14 +287,10 @@ namespace CAOGAttendeeManager {
             base.Tables.Add(this.tableAttendance_Info);
             this.tableAttendees = new AttendeesDataTable();
             base.Tables.Add(this.tableAttendees);
-            this.relationFK_Activities_Attendees_AttendeeId = new global::System.Data.DataRelation("FK_Activities_Attendees_AttendeeId", new global::System.Data.DataColumn[] {
-                        this.tableAttendees.AttendeeIdColumn}, new global::System.Data.DataColumn[] {
-                        this.tableActivities.AttendeeIdColumn}, false);
-            this.Relations.Add(this.relationFK_Activities_Attendees_AttendeeId);
-            this.relationFK_Attendance_Info_Attendees_AttendeeId = new global::System.Data.DataRelation("FK_Attendance_Info_Attendees_AttendeeId", new global::System.Data.DataColumn[] {
+            this._relation_728BFEC4_FF3D_4EFE_8F69_1B2B4C59E502_ = new global::System.Data.DataRelation("{728BFEC4-FF3D-4EFE-8F69-1B2B4C59E502}", new global::System.Data.DataColumn[] {
                         this.tableAttendees.AttendeeIdColumn}, new global::System.Data.DataColumn[] {
                         this.tableAttendance_Info.AttendeeIdColumn}, false);
-            this.Relations.Add(this.relationFK_Attendance_Info_Attendees_AttendeeId);
+            this.Relations.Add(this._relation_728BFEC4_FF3D_4EFE_8F69_1B2B4C59E502_);
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -335,7 +328,7 @@ namespace CAOGAttendeeManager {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         public static global::System.Xml.Schema.XmlSchemaComplexType GetTypedDataSetSchema(global::System.Xml.Schema.XmlSchemaSet xs) {
-            AttendeeMgrDB_CodeFistDataSet ds = new AttendeeMgrDB_CodeFistDataSet();
+            AttendeeMgrDBDataSet ds = new AttendeeMgrDBDataSet();
             global::System.Xml.Schema.XmlSchemaComplexType type = new global::System.Xml.Schema.XmlSchemaComplexType();
             global::System.Xml.Schema.XmlSchemaSequence sequence = new global::System.Xml.Schema.XmlSchemaSequence();
             global::System.Xml.Schema.XmlSchemaAny any = new global::System.Xml.Schema.XmlSchemaAny();
@@ -637,7 +630,7 @@ namespace CAOGAttendeeManager {
             public static global::System.Xml.Schema.XmlSchemaComplexType GetTypedTableSchema(global::System.Xml.Schema.XmlSchemaSet xs) {
                 global::System.Xml.Schema.XmlSchemaComplexType type = new global::System.Xml.Schema.XmlSchemaComplexType();
                 global::System.Xml.Schema.XmlSchemaSequence sequence = new global::System.Xml.Schema.XmlSchemaSequence();
-                AttendeeMgrDB_CodeFistDataSet ds = new AttendeeMgrDB_CodeFistDataSet();
+                AttendeeMgrDBDataSet ds = new AttendeeMgrDBDataSet();
                 global::System.Xml.Schema.XmlSchemaAny any1 = new global::System.Xml.Schema.XmlSchemaAny();
                 any1.Namespace = "http://www.w3.org/2001/XMLSchema";
                 any1.MinOccurs = new decimal(0);
@@ -823,17 +816,14 @@ namespace CAOGAttendeeManager {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public ActivitiesRow AddActivitiesRow(AttendeesRow parentAttendeesRowByFK_Activities_Attendees_AttendeeId, string ActivityText, string DateString, System.DateTime Date) {
+            public ActivitiesRow AddActivitiesRow(int AttendeeId, string ActivityText, string DateString, System.DateTime Date) {
                 ActivitiesRow rowActivitiesRow = ((ActivitiesRow)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
                         null,
-                        null,
+                        AttendeeId,
                         ActivityText,
                         DateString,
                         Date};
-                if ((parentAttendeesRowByFK_Activities_Attendees_AttendeeId != null)) {
-                    columnValuesArray[1] = parentAttendeesRowByFK_Activities_Attendees_AttendeeId[0];
-                }
                 rowActivitiesRow.ItemArray = columnValuesArray;
                 this.Rows.Add(rowActivitiesRow);
                 return rowActivitiesRow;
@@ -959,7 +949,7 @@ namespace CAOGAttendeeManager {
             public static global::System.Xml.Schema.XmlSchemaComplexType GetTypedTableSchema(global::System.Xml.Schema.XmlSchemaSet xs) {
                 global::System.Xml.Schema.XmlSchemaComplexType type = new global::System.Xml.Schema.XmlSchemaComplexType();
                 global::System.Xml.Schema.XmlSchemaSequence sequence = new global::System.Xml.Schema.XmlSchemaSequence();
-                AttendeeMgrDB_CodeFistDataSet ds = new AttendeeMgrDB_CodeFistDataSet();
+                AttendeeMgrDBDataSet ds = new AttendeeMgrDBDataSet();
                 global::System.Xml.Schema.XmlSchemaAny any1 = new global::System.Xml.Schema.XmlSchemaAny();
                 any1.Namespace = "http://www.w3.org/2001/XMLSchema";
                 any1.MinOccurs = new decimal(0);
@@ -1145,7 +1135,7 @@ namespace CAOGAttendeeManager {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public Attendance_InfoRow AddAttendance_InfoRow(AttendeesRow parentAttendeesRowByFK_Attendance_Info_Attendees_AttendeeId, string DateString, System.DateTime Date, string Status) {
+            public Attendance_InfoRow AddAttendance_InfoRow(AttendeesRow _parentAttendeesRowBy_728BFEC4_FF3D_4EFE_8F69_1B2B4C59E502_, string DateString, System.DateTime Date, string Status) {
                 Attendance_InfoRow rowAttendance_InfoRow = ((Attendance_InfoRow)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
                         null,
@@ -1153,8 +1143,8 @@ namespace CAOGAttendeeManager {
                         DateString,
                         Date,
                         Status};
-                if ((parentAttendeesRowByFK_Attendance_Info_Attendees_AttendeeId != null)) {
-                    columnValuesArray[1] = parentAttendeesRowByFK_Attendance_Info_Attendees_AttendeeId[0];
+                if ((_parentAttendeesRowBy_728BFEC4_FF3D_4EFE_8F69_1B2B4C59E502_ != null)) {
+                    columnValuesArray[1] = _parentAttendeesRowBy_728BFEC4_FF3D_4EFE_8F69_1B2B4C59E502_[0];
                 }
                 rowAttendance_InfoRow.ItemArray = columnValuesArray;
                 this.Rows.Add(rowAttendance_InfoRow);
@@ -1281,7 +1271,7 @@ namespace CAOGAttendeeManager {
             public static global::System.Xml.Schema.XmlSchemaComplexType GetTypedTableSchema(global::System.Xml.Schema.XmlSchemaSet xs) {
                 global::System.Xml.Schema.XmlSchemaComplexType type = new global::System.Xml.Schema.XmlSchemaComplexType();
                 global::System.Xml.Schema.XmlSchemaSequence sequence = new global::System.Xml.Schema.XmlSchemaSequence();
-                AttendeeMgrDB_CodeFistDataSet ds = new AttendeeMgrDB_CodeFistDataSet();
+                AttendeeMgrDBDataSet ds = new AttendeeMgrDBDataSet();
                 global::System.Xml.Schema.XmlSchemaAny any1 = new global::System.Xml.Schema.XmlSchemaAny();
                 any1.Namespace = "http://www.w3.org/2001/XMLSchema";
                 any1.MinOccurs = new decimal(0);
@@ -1517,8 +1507,8 @@ namespace CAOGAttendeeManager {
                 this.columnAttendeeId.AutoIncrementStep = -1;
                 this.columnAttendeeId.AllowDBNull = false;
                 this.columnAttendeeId.Unique = true;
-                this.columnLastName.MaxLength = 1000;
-                this.columnFirstName.MaxLength = 1000;
+                this.columnLastName.MaxLength = 536870910;
+                this.columnFirstName.MaxLength = 536870910;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -1586,7 +1576,7 @@ namespace CAOGAttendeeManager {
             public static global::System.Xml.Schema.XmlSchemaComplexType GetTypedTableSchema(global::System.Xml.Schema.XmlSchemaSet xs) {
                 global::System.Xml.Schema.XmlSchemaComplexType type = new global::System.Xml.Schema.XmlSchemaComplexType();
                 global::System.Xml.Schema.XmlSchemaSequence sequence = new global::System.Xml.Schema.XmlSchemaSequence();
-                AttendeeMgrDB_CodeFistDataSet ds = new AttendeeMgrDB_CodeFistDataSet();
+                AttendeeMgrDBDataSet ds = new AttendeeMgrDBDataSet();
                 global::System.Xml.Schema.XmlSchemaAny any1 = new global::System.Xml.Schema.XmlSchemaAny();
                 any1.Namespace = "http://www.w3.org/2001/XMLSchema";
                 any1.MinOccurs = new decimal(0);
@@ -1829,17 +1819,6 @@ namespace CAOGAttendeeManager {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public AttendeesRow AttendeesRow {
-                get {
-                    return ((AttendeesRow)(this.GetParentRow(this.Table.ParentRelations["FK_Activities_Attendees_AttendeeId"])));
-                }
-                set {
-                    this.SetParentRow(value, this.Table.ParentRelations["FK_Activities_Attendees_AttendeeId"]);
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public bool IsAttendeeIdNull() {
                 return this.IsNull(this.tableActivities.AttendeeIdColumn);
             }
@@ -1980,10 +1959,10 @@ namespace CAOGAttendeeManager {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public AttendeesRow AttendeesRow {
                 get {
-                    return ((AttendeesRow)(this.GetParentRow(this.Table.ParentRelations["FK_Attendance_Info_Attendees_AttendeeId"])));
+                    return ((AttendeesRow)(this.GetParentRow(this.Table.ParentRelations["{728BFEC4-FF3D-4EFE-8F69-1B2B4C59E502}"])));
                 }
                 set {
-                    this.SetParentRow(value, this.Table.ParentRelations["FK_Attendance_Info_Attendees_AttendeeId"]);
+                    this.SetParentRow(value, this.Table.ParentRelations["{728BFEC4-FF3D-4EFE-8F69-1B2B4C59E502}"]);
                 }
             }
             
@@ -2147,23 +2126,12 @@ namespace CAOGAttendeeManager {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public ActivitiesRow[] GetActivitiesRows() {
-                if ((this.Table.ChildRelations["FK_Activities_Attendees_AttendeeId"] == null)) {
-                    return new ActivitiesRow[0];
-                }
-                else {
-                    return ((ActivitiesRow[])(base.GetChildRows(this.Table.ChildRelations["FK_Activities_Attendees_AttendeeId"])));
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public Attendance_InfoRow[] GetAttendance_InfoRows() {
-                if ((this.Table.ChildRelations["FK_Attendance_Info_Attendees_AttendeeId"] == null)) {
+                if ((this.Table.ChildRelations["{728BFEC4-FF3D-4EFE-8F69-1B2B4C59E502}"] == null)) {
                     return new Attendance_InfoRow[0];
                 }
                 else {
-                    return ((Attendance_InfoRow[])(base.GetChildRows(this.Table.ChildRelations["FK_Attendance_Info_Attendees_AttendeeId"])));
+                    return ((Attendance_InfoRow[])(base.GetChildRows(this.Table.ChildRelations["{728BFEC4-FF3D-4EFE-8F69-1B2B4C59E502}"])));
                 }
             }
         }
@@ -2305,7 +2273,7 @@ namespace CAOGAttendeeManager {
         }
     }
 }
-namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
+namespace CAOGAttendeeManager.AttendeeMgrDBDataSetTableAdapters {
     
     
     /// <summary>
@@ -2470,7 +2438,7 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         private void InitConnection() {
             this._connection = new global::System.Data.OleDb.OleDbConnection();
-            this._connection.ConnectionString = global::CAOGAttendeeManager.Properties.Settings.Default.AttendeeMgrDB_CodeFistConnectionString;
+            this._connection.ConnectionString = global::CAOGAttendeeManager.Properties.Settings.Default.AttendeeMgrDBConnectionString;
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -2487,7 +2455,7 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Fill, true)]
-        public virtual int Fill(AttendeeMgrDB_CodeFistDataSet.@__MigrationHistoryDataTable dataTable) {
+        public virtual int Fill(AttendeeMgrDBDataSet.@__MigrationHistoryDataTable dataTable) {
             this.Adapter.SelectCommand = this.CommandCollection[0];
             if ((this.ClearBeforeFill == true)) {
                 dataTable.Clear();
@@ -2500,9 +2468,9 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Select, true)]
-        public virtual AttendeeMgrDB_CodeFistDataSet.@__MigrationHistoryDataTable GetData() {
+        public virtual AttendeeMgrDBDataSet.@__MigrationHistoryDataTable GetData() {
             this.Adapter.SelectCommand = this.CommandCollection[0];
-            AttendeeMgrDB_CodeFistDataSet.@__MigrationHistoryDataTable dataTable = new AttendeeMgrDB_CodeFistDataSet.@__MigrationHistoryDataTable();
+            AttendeeMgrDBDataSet.@__MigrationHistoryDataTable dataTable = new AttendeeMgrDBDataSet.@__MigrationHistoryDataTable();
             this.Adapter.Fill(dataTable);
             return dataTable;
         }
@@ -2510,14 +2478,14 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
-        public virtual int Update(AttendeeMgrDB_CodeFistDataSet.@__MigrationHistoryDataTable dataTable) {
+        public virtual int Update(AttendeeMgrDBDataSet.@__MigrationHistoryDataTable dataTable) {
             return this.Adapter.Update(dataTable);
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
-        public virtual int Update(AttendeeMgrDB_CodeFistDataSet dataSet) {
+        public virtual int Update(AttendeeMgrDBDataSet dataSet) {
             return this.Adapter.Update(dataSet, "__MigrationHistory");
         }
         
@@ -2850,7 +2818,7 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         private void InitConnection() {
             this._connection = new global::System.Data.OleDb.OleDbConnection();
-            this._connection.ConnectionString = global::CAOGAttendeeManager.Properties.Settings.Default.AttendeeMgrDB_CodeFistConnectionString;
+            this._connection.ConnectionString = global::CAOGAttendeeManager.Properties.Settings.Default.AttendeeMgrDBConnectionString;
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -2867,7 +2835,7 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Fill, true)]
-        public virtual int Fill(AttendeeMgrDB_CodeFistDataSet.ActivitiesDataTable dataTable) {
+        public virtual int Fill(AttendeeMgrDBDataSet.ActivitiesDataTable dataTable) {
             this.Adapter.SelectCommand = this.CommandCollection[0];
             if ((this.ClearBeforeFill == true)) {
                 dataTable.Clear();
@@ -2880,9 +2848,9 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Select, true)]
-        public virtual AttendeeMgrDB_CodeFistDataSet.ActivitiesDataTable GetData() {
+        public virtual AttendeeMgrDBDataSet.ActivitiesDataTable GetData() {
             this.Adapter.SelectCommand = this.CommandCollection[0];
-            AttendeeMgrDB_CodeFistDataSet.ActivitiesDataTable dataTable = new AttendeeMgrDB_CodeFistDataSet.ActivitiesDataTable();
+            AttendeeMgrDBDataSet.ActivitiesDataTable dataTable = new AttendeeMgrDBDataSet.ActivitiesDataTable();
             this.Adapter.Fill(dataTable);
             return dataTable;
         }
@@ -2890,14 +2858,14 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
-        public virtual int Update(AttendeeMgrDB_CodeFistDataSet.ActivitiesDataTable dataTable) {
+        public virtual int Update(AttendeeMgrDBDataSet.ActivitiesDataTable dataTable) {
             return this.Adapter.Update(dataTable);
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
-        public virtual int Update(AttendeeMgrDB_CodeFistDataSet dataSet) {
+        public virtual int Update(AttendeeMgrDBDataSet dataSet) {
             return this.Adapter.Update(dataSet, "Activities");
         }
         
@@ -3208,7 +3176,7 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         private void InitConnection() {
             this._connection = new global::System.Data.OleDb.OleDbConnection();
-            this._connection.ConnectionString = global::CAOGAttendeeManager.Properties.Settings.Default.AttendeeMgrDB_CodeFistConnectionString;
+            this._connection.ConnectionString = global::CAOGAttendeeManager.Properties.Settings.Default.AttendeeMgrDBConnectionString;
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -3226,7 +3194,7 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Fill, true)]
-        public virtual int Fill(AttendeeMgrDB_CodeFistDataSet.Attendance_InfoDataTable dataTable) {
+        public virtual int Fill(AttendeeMgrDBDataSet.Attendance_InfoDataTable dataTable) {
             this.Adapter.SelectCommand = this.CommandCollection[0];
             if ((this.ClearBeforeFill == true)) {
                 dataTable.Clear();
@@ -3239,9 +3207,9 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Select, true)]
-        public virtual AttendeeMgrDB_CodeFistDataSet.Attendance_InfoDataTable GetData() {
+        public virtual AttendeeMgrDBDataSet.Attendance_InfoDataTable GetData() {
             this.Adapter.SelectCommand = this.CommandCollection[0];
-            AttendeeMgrDB_CodeFistDataSet.Attendance_InfoDataTable dataTable = new AttendeeMgrDB_CodeFistDataSet.Attendance_InfoDataTable();
+            AttendeeMgrDBDataSet.Attendance_InfoDataTable dataTable = new AttendeeMgrDBDataSet.Attendance_InfoDataTable();
             this.Adapter.Fill(dataTable);
             return dataTable;
         }
@@ -3249,14 +3217,14 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
-        public virtual int Update(AttendeeMgrDB_CodeFistDataSet.Attendance_InfoDataTable dataTable) {
+        public virtual int Update(AttendeeMgrDBDataSet.Attendance_InfoDataTable dataTable) {
             return this.Adapter.Update(dataTable);
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
-        public virtual int Update(AttendeeMgrDB_CodeFistDataSet dataSet) {
+        public virtual int Update(AttendeeMgrDBDataSet dataSet) {
             return this.Adapter.Update(dataSet, "Attendance_Info");
         }
         
@@ -3557,7 +3525,7 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         private void InitConnection() {
             this._connection = new global::System.Data.OleDb.OleDbConnection();
-            this._connection.ConnectionString = global::CAOGAttendeeManager.Properties.Settings.Default.AttendeeMgrDB_CodeFistConnectionString;
+            this._connection.ConnectionString = global::CAOGAttendeeManager.Properties.Settings.Default.AttendeeMgrDBConnectionString;
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -3574,7 +3542,7 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Fill, true)]
-        public virtual int Fill(AttendeeMgrDB_CodeFistDataSet.AttendeesDataTable dataTable) {
+        public virtual int Fill(AttendeeMgrDBDataSet.AttendeesDataTable dataTable) {
             this.Adapter.SelectCommand = this.CommandCollection[0];
             if ((this.ClearBeforeFill == true)) {
                 dataTable.Clear();
@@ -3587,9 +3555,9 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Select, true)]
-        public virtual AttendeeMgrDB_CodeFistDataSet.AttendeesDataTable GetData() {
+        public virtual AttendeeMgrDBDataSet.AttendeesDataTable GetData() {
             this.Adapter.SelectCommand = this.CommandCollection[0];
-            AttendeeMgrDB_CodeFistDataSet.AttendeesDataTable dataTable = new AttendeeMgrDB_CodeFistDataSet.AttendeesDataTable();
+            AttendeeMgrDBDataSet.AttendeesDataTable dataTable = new AttendeeMgrDBDataSet.AttendeesDataTable();
             this.Adapter.Fill(dataTable);
             return dataTable;
         }
@@ -3597,14 +3565,14 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
-        public virtual int Update(AttendeeMgrDB_CodeFistDataSet.AttendeesDataTable dataTable) {
+        public virtual int Update(AttendeeMgrDBDataSet.AttendeesDataTable dataTable) {
             return this.Adapter.Update(dataTable);
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
-        public virtual int Update(AttendeeMgrDB_CodeFistDataSet dataSet) {
+        public virtual int Update(AttendeeMgrDBDataSet dataSet) {
             return this.Adapter.Update(dataSet, "Attendees");
         }
         
@@ -3879,7 +3847,7 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         ///</summary>
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-        private int UpdateUpdatedRows(AttendeeMgrDB_CodeFistDataSet dataSet, global::System.Collections.Generic.List<global::System.Data.DataRow> allChangedRows, global::System.Collections.Generic.List<global::System.Data.DataRow> allAddedRows) {
+        private int UpdateUpdatedRows(AttendeeMgrDBDataSet dataSet, global::System.Collections.Generic.List<global::System.Data.DataRow> allChangedRows, global::System.Collections.Generic.List<global::System.Data.DataRow> allAddedRows) {
             int result = 0;
             if ((this._attendeesTableAdapter != null)) {
                 global::System.Data.DataRow[] updatedRows = dataSet.Attendees.Select(null, null, global::System.Data.DataViewRowState.ModifiedCurrent);
@@ -3925,7 +3893,7 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         ///</summary>
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-        private int UpdateInsertedRows(AttendeeMgrDB_CodeFistDataSet dataSet, global::System.Collections.Generic.List<global::System.Data.DataRow> allAddedRows) {
+        private int UpdateInsertedRows(AttendeeMgrDBDataSet dataSet, global::System.Collections.Generic.List<global::System.Data.DataRow> allAddedRows) {
             int result = 0;
             if ((this._attendeesTableAdapter != null)) {
                 global::System.Data.DataRow[] addedRows = dataSet.Attendees.Select(null, null, global::System.Data.DataViewRowState.Added);
@@ -3967,7 +3935,7 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         ///</summary>
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-        private int UpdateDeletedRows(AttendeeMgrDB_CodeFistDataSet dataSet, global::System.Collections.Generic.List<global::System.Data.DataRow> allChangedRows) {
+        private int UpdateDeletedRows(AttendeeMgrDBDataSet dataSet, global::System.Collections.Generic.List<global::System.Data.DataRow> allChangedRows) {
             int result = 0;
             if ((this._attendance_InfoTableAdapter != null)) {
                 global::System.Data.DataRow[] deletedRows = dataSet.Attendance_Info.Select(null, null, global::System.Data.DataViewRowState.Deleted);
@@ -4033,7 +4001,7 @@ namespace CAOGAttendeeManager.AttendeeMgrDB_CodeFistDataSetTableAdapters {
         ///</summary>
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-        public virtual int UpdateAll(AttendeeMgrDB_CodeFistDataSet dataSet) {
+        public virtual int UpdateAll(AttendeeMgrDBDataSet dataSet) {
             if ((dataSet == null)) {
                 throw new global::System.ArgumentNullException("dataSet");
             }

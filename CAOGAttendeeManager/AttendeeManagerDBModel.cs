@@ -21,12 +21,9 @@ namespace CAOGAttendeeManager
 
         public AttendeeManagerDBModel() : base("name=AccessConnection")
         {
-
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion<AttendeeManagerDBModel, CAOGAttendeeManager.Migrations.Configuration>());
         }
-        public AttendeeManagerDBModel(string ConStr) : base(ConStr)
-        {
-           
-        }
+     
 
         // Add a DbSet for each entity type that you want to include in your model. For more information 
         // on configuring and using a Code First model, see http://go.microsoft.com/fwlink/?LinkId=390109.
@@ -35,6 +32,11 @@ namespace CAOGAttendeeManager
         public virtual DbSet<Attendee> Attendees { get; set; }
         public virtual DbSet<Attendance_Info> Attendance_Info { get; set; }
         public virtual DbSet<Activity> Activities { get; set; }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
     }
 
 
@@ -195,6 +197,7 @@ namespace CAOGAttendeeManager
 
         public virtual Attendee Attendee { get; set; }
 
+        public string ListName { get; set; }
 
         private string _activityText = "";
         public string ActivityText 
@@ -262,11 +265,14 @@ namespace CAOGAttendeeManager
         public MemoryStream rtbDescriptionMStream { get; set; }
 
         public int Level { get; set; }
+        public string activityList { get; set; }
 
         public ComboTreeNode()
         {
+            Header = "<new item...>";
             rtbDescriptionMStream = new MemoryStream();
             Level = 0;
+            activityList = "";
         }
 
        

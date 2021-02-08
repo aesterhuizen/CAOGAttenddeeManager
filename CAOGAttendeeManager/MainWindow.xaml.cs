@@ -35,7 +35,7 @@ namespace CAOGAttendeeManager
            
 
 
-            m_version_string = "v3.1.30";
+            m_version_string = "v3.1.31";
 
 
 
@@ -64,7 +64,7 @@ namespace CAOGAttendeeManager
 
 
 
-#if DEBUG
+#if Debug
                 this.Title = $"Attendee Manager " + m_version_string + "(Debug)";
 #else
                     this.Title = "Attendee Manager " + m_version_string;
@@ -114,21 +114,22 @@ namespace CAOGAttendeeManager
                 LoadSettings();
               
 
-                if (m_ActivityListPath != "")
+                if (m_ActivityListPath != ""  )
                 {
-                    List<ComboTreeNode> tmp_list = Load_ChurchActivities_From_File_to_Array(m_ActivityListPath); // load tree as a list of nodes from the file                    
-                    
-                    m_lstCurrActivityListNodes = Array_to_Tree(tmp_list); //Transfor array to tree structure
-                    LoadActivityProspectComboTree(m_lstCurrActivityListNodes); // load tree into prospect tab's dropdown
+                   if (File.Exists(m_ActivityListPath))
+                    {
+                        List<ComboTreeNode> tmp_list = Load_ChurchActivities_From_File_to_Array(m_ActivityListPath); // load tree as a list of nodes from the file                    
 
-                    txtbActivityListName.Text = GetListName();
-                    
+                        m_lstCurrActivityListNodes = Array_to_Tree(tmp_list); //Transfor array to tree structure
+                        LoadActivityProspectComboTree(m_lstCurrActivityListNodes); // load tree into prospect tab's dropdown
 
+                        txtbActivityListName.Text = GetListName();
+                    }
+                        
                     
-                
                 }
 
-                //m_lstCurrActivityListNodes = AddALLActivitiesFromContextToActivityTree(); // arrange array of nodes in a parent/child relationships
+                
 
 
 
@@ -285,12 +286,12 @@ namespace CAOGAttendeeManager
             foreach (ComboTreeNode header in list)
             {
                 global::ComboTreeNode node = new global::ComboTreeNode();
-                node.Text = (string)header.Header;
+                node.Text = $"(List: {header.activityList})" + " " + (string)header.Header;
 
 
                 global::ComboTreeNode parent2 = m_ctbActivity.Nodes.Add(node.Text);
                 parent2.Expanded = true;
-
+                
                 //ActivityGroups
                 foreach (ComboTreeNode group in header.Items)
                 {
@@ -342,7 +343,7 @@ namespace CAOGAttendeeManager
                     {
 
 
-
+                        string alist = a.Entity.ListName;
 
                         var activity = new string(
 
@@ -357,7 +358,7 @@ namespace CAOGAttendeeManager
                             {
                                 Header = split_str[i],
                                 Level = i,
-
+                                activityList = alist
                             };
                             tmp_listNodes.Add(new_node);
                         }
@@ -1024,8 +1025,8 @@ namespace CAOGAttendeeManager
         private void Display_DefaultTable_in_Grid()
         {
 
-            
-            dataGrid.DataContext = m_lstdefaultTableRows.OrderBy(rec => rec.LastName).ToList();
+            if (m_lstdefaultTableRows.Any() )
+                dataGrid.DataContext = m_lstdefaultTableRows.OrderBy(rec => rec.LastName).ToList();
 
 
             dataGrid.Items.Refresh();
@@ -2305,7 +2306,7 @@ namespace CAOGAttendeeManager
         private void Window_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
             dpChurchLastAttended.DisplayDate = DateTime.Today;
-            btnAddColumn.IsEnabled = false;
+           // btnAddColumn.IsEnabled = false;
             Add_Blackout_Dates(ref dpChurchLastAttended);
             Add_Blackout_Dates(ref dpChurchLastAttendedPr);
             Add_Blackout_Dates(ref dpHeaderActivityLastAttended);
@@ -2321,7 +2322,7 @@ namespace CAOGAttendeeManager
             m_ctbActivity.DrawWithVisualStyles = true;
             m_ctbActivity.Visible = true;
            
-            m_ctbActivity.DropDownWidth = 350;
+            m_ctbActivity.DropDownWidth = 600;
             m_ctbActivity.DropDownHeight = 350;
             
            
@@ -2337,7 +2338,8 @@ namespace CAOGAttendeeManager
             m_ctbActivityProspect.Size = new System.Drawing.Size(200, 19);
             m_ctbActivityProspect.DrawWithVisualStyles = true;
             m_ctbActivityProspect.Visible = true;
-                     m_ctbActivityProspect.DropDownWidth = 350;
+            
+            m_ctbActivityProspect.DropDownWidth = 600;
             m_ctbActivityProspect.DropDownHeight = 350;
            
             
@@ -2475,7 +2477,11 @@ namespace CAOGAttendeeManager
 
                                         node_header = Encoding.UTF8.GetString(read_buffer, STXidx + 3 /*beggining offset of node header*/, header_size);
 
-                                        node = new ComboTreeNode { Header = node_header, Level = node_level };
+                                        string[] ary_nodeHeader = node_header.Split('_');
+                                        string activityName = ary_nodeHeader[0];
+                                        string listname = ary_nodeHeader[1];
+
+                                        node = new ComboTreeNode { Header = activityName, Level = node_level, activityList = listname };
 
                                         if (read_buffer[i + 2] == (byte)ArrayFormat.ETX)
                                         {
@@ -2582,7 +2588,8 @@ namespace CAOGAttendeeManager
                 global::ComboTreeNode firstNode = chkNodes.First();
                 m_currentAdded_Activity = new Activity
                 {
-                    ActivityText = firstNode.GetFullPath("->", false)
+                    ActivityText = firstNode.GetFullPath("->", false),
+                    ListName = txtbActivityListName.Text
                 };
 
                
@@ -3880,6 +3887,7 @@ namespace CAOGAttendeeManager
                     new_ap.Date = m_ActivityDateSelectedPr;
                     new_ap.AttendeeId = dr.AttendeeId;
                     new_ap.ActivityText = m_currentAdded_Activity.ActivityText;
+                    new_ap.ListName = m_currentAdded_Activity.ListName;
 
                    
 
@@ -4878,18 +4886,23 @@ namespace CAOGAttendeeManager
 
         private void BtnPanelActivityList_Click(object sender, RoutedEventArgs e)
         {
-            WndAddGroup AddgroupWin = new WndAddGroup(m_lstCurrActivityListNodes, m_ActivityListPath, m_followUpWeeks);
-            AddgroupWin.ShowDialog();
+             WndActivityList activity_win = new WndActivityList(m_lstCurrActivityListNodes, m_ActivityListPath, m_followUpWeeks);
+            activity_win.ShowDialog();
 
-            if (AddgroupWin.GetTreeChanged)
+            if (activity_win.GetTreeChanged)
             {
-                if (AddgroupWin.GetTree != null)
-                    m_lstCurrActivityListNodes = new List<ComboTreeNode>(AddgroupWin.GetTree);
-                //save full path for next time the user load the program
-                m_ActivityListPath = AddgroupWin.GetFilePath;
-                txtbActivityListName.Text = GetListName();
-                LoadActivityProspectComboTree(m_lstCurrActivityListNodes); //Load the combo tree boxes with the new tree
-                                                                               //Convert_and_SaveNewTreeToActivityHeardersTree(m_lstTreeNodes); //convert and save the new tree to the format m_lstActivityHeaders
+                if (activity_win.GetTree != null)
+                    m_lstCurrActivityListNodes = new List<ComboTreeNode>(activity_win.GetTree);
+
+                if (m_lstCurrActivityListNodes.Any() )
+                {
+                    //save full path for next time the user load the program
+                    m_ActivityListPath = activity_win.GetFilePath;
+                    txtbActivityListName.Text = GetListName();
+                    LoadActivityProspectComboTree(m_lstCurrActivityListNodes); //Load the combo tree boxes with the new tree
+                }
+                
+                    
 
             }
 

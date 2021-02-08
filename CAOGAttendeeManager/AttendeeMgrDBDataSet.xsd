@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<xs:schema id="AttendeeMgrDB_CodeFistDataSet" targetNamespace="http://tempuri.org/AttendeeMgrDB_CodeFistDataSet.xsd" xmlns:mstns="http://tempuri.org/AttendeeMgrDB_CodeFistDataSet.xsd" xmlns="http://tempuri.org/AttendeeMgrDB_CodeFistDataSet.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+<xs:schema id="AttendeeMgrDBDataSet" targetNamespace="http://tempuri.org/AttendeeMgrDBDataSet.xsd" xmlns:mstns="http://tempuri.org/AttendeeMgrDBDataSet.xsd" xmlns="http://tempuri.org/AttendeeMgrDBDataSet.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
   <xs:annotation>
     <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
       <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
         <Connections>
-          <Connection AppSettingsObjectName="Settings" AppSettingsPropertyName="AttendeeMgrDB_CodeFistConnectionString" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="AttendeeMgrDB_CodeFistConnectionString (Settings)" PropertyReference="ApplicationSettings.CAOGAttendeeManager.Properties.Settings.GlobalReference.Default.AttendeeMgrDB_CodeFistConnectionString" Provider="System.Data.OleDb" />
+          <Connection AppSettingsObjectName="Settings" AppSettingsPropertyName="AttendeeMgrDBConnectionString" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="AttendeeMgrDBConnectionString (Settings)" PropertyReference="ApplicationSettings.CAOGAttendeeManager.Properties.Settings.GlobalReference.Default.AttendeeMgrDBConnectionString" Provider="System.Data.OleDb" />
         </Connections>
         <Tables>
           <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="__MigrationHistoryTableAdapter" GeneratorDataComponentClassName="__MigrationHistoryTableAdapter" Name="__MigrationHistory" UserDataComponentName="__MigrationHistoryTableAdapter">
             <MainSource>
-              <DbSource ConnectionRef="AttendeeMgrDB_CodeFistConnectionString (Settings)" DbObjectName="__MigrationHistory" DbObjectType="Table" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="true" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
+              <DbSource ConnectionRef="AttendeeMgrDBConnectionString (Settings)" DbObjectName="__MigrationHistory" DbObjectType="Table" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="true" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
                 <DeleteCommand>
                   <DbCommand CommandType="Text" ModifiedByUser="false">
                     <CommandText>DELETE FROM `__MigrationHistory` WHERE ((`MigrationId` = ?) AND ((? = 1 AND `ProductVersion` IS NULL) OR (`ProductVersion` = ?)))</CommandText>
@@ -63,7 +63,7 @@
           </TableAdapter>
           <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="ActivitiesTableAdapter" GeneratorDataComponentClassName="ActivitiesTableAdapter" Name="Activities" UserDataComponentName="ActivitiesTableAdapter">
             <MainSource>
-              <DbSource ConnectionRef="AttendeeMgrDB_CodeFistConnectionString (Settings)" DbObjectName="Activities" DbObjectType="Table" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="true" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
+              <DbSource ConnectionRef="AttendeeMgrDBConnectionString (Settings)" DbObjectName="Activities" DbObjectType="Table" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="true" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
                 <DeleteCommand>
                   <DbCommand CommandType="Text" ModifiedByUser="false">
                     <CommandText>DELETE FROM `Activities` WHERE ((`ActivityId` = ?) AND ((? = 1 AND `AttendeeId` IS NULL) OR (`AttendeeId` = ?)) AND ((? = 1 AND `Date` IS NULL) OR (`Date` = ?)))</CommandText>
@@ -122,7 +122,7 @@
           </TableAdapter>
           <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="Attendance_InfoTableAdapter" GeneratorDataComponentClassName="Attendance_InfoTableAdapter" Name="Attendance_Info" UserDataComponentName="Attendance_InfoTableAdapter">
             <MainSource>
-              <DbSource ConnectionRef="AttendeeMgrDB_CodeFistConnectionString (Settings)" DbObjectName="Attendance_Info" DbObjectType="Table" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="true" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
+              <DbSource ConnectionRef="AttendeeMgrDBConnectionString (Settings)" DbObjectName="Attendance_Info" DbObjectType="Table" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="true" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
                 <DeleteCommand>
                   <DbCommand CommandType="Text" ModifiedByUser="false">
                     <CommandText>DELETE FROM `Attendance_Info` WHERE ((`Attendance_InfoId` = ?) AND ((? = 1 AND `AttendeeId` IS NULL) OR (`AttendeeId` = ?)) AND ((? = 1 AND `Date` IS NULL) OR (`Date` = ?)))</CommandText>
@@ -181,7 +181,7 @@
           </TableAdapter>
           <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="AttendeesTableAdapter" GeneratorDataComponentClassName="AttendeesTableAdapter" Name="Attendees" UserDataComponentName="AttendeesTableAdapter">
             <MainSource>
-              <DbSource ConnectionRef="AttendeeMgrDB_CodeFistConnectionString (Settings)" DbObjectName="Attendees" DbObjectType="Table" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="true" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
+              <DbSource ConnectionRef="AttendeeMgrDBConnectionString (Settings)" DbObjectName="Attendees" DbObjectType="Table" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="true" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
                 <DeleteCommand>
                   <DbCommand CommandType="Text" ModifiedByUser="false">
                     <CommandText>DELETE FROM `Attendees` WHERE ((`AttendeeId` = ?) AND ((? = 1 AND `Checked` IS NULL) OR (`Checked` = ?)))</CommandText>
@@ -236,10 +236,10 @@
       </DataSource>
     </xs:appinfo>
   </xs:annotation>
-  <xs:element name="AttendeeMgrDB_CodeFistDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="True" msprop:Generator_DataSetName="AttendeeMgrDB_CodeFistDataSet" msprop:Generator_UserDSName="AttendeeMgrDB_CodeFistDataSet">
+  <xs:element name="AttendeeMgrDBDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="True" msprop:Generator_DataSetName="AttendeeMgrDBDataSet" msprop:Generator_UserDSName="AttendeeMgrDBDataSet">
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element name="__MigrationHistory" msprop:Generator_TableClassName="__MigrationHistoryDataTable" msprop:Generator_TableVarName="table__MigrationHistory" msprop:Generator_RowChangedName="__MigrationHistoryRowChanged" msprop:Generator_TablePropName="__MigrationHistory" msprop:Generator_RowDeletingName="__MigrationHistoryRowDeleting" msprop:Generator_RowChangingName="__MigrationHistoryRowChanging" msprop:Generator_RowEvHandlerName="__MigrationHistoryRowChangeEventHandler" msprop:Generator_RowDeletedName="__MigrationHistoryRowDeleted" msprop:Generator_RowClassName="__MigrationHistoryRow" msprop:Generator_UserTableName="__MigrationHistory" msprop:Generator_RowEvArgName="__MigrationHistoryRowChangeEvent">
+        <xs:element name="__MigrationHistory" msprop:Generator_TableClassName="__MigrationHistoryDataTable" msprop:Generator_TableVarName="table__MigrationHistory" msprop:Generator_TablePropName="__MigrationHistory" msprop:Generator_RowDeletingName="__MigrationHistoryRowDeleting" msprop:Generator_RowChangingName="__MigrationHistoryRowChanging" msprop:Generator_RowEvHandlerName="__MigrationHistoryRowChangeEventHandler" msprop:Generator_RowDeletedName="__MigrationHistoryRowDeleted" msprop:Generator_UserTableName="__MigrationHistory" msprop:Generator_RowChangedName="__MigrationHistoryRowChanged" msprop:Generator_RowEvArgName="__MigrationHistoryRowChangeEvent" msprop:Generator_RowClassName="__MigrationHistoryRow">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="MigrationId" msprop:Generator_ColumnVarNameInTable="columnMigrationId" msprop:Generator_ColumnPropNameInRow="MigrationId" msprop:Generator_ColumnPropNameInTable="MigrationIdColumn" msprop:Generator_UserColumnName="MigrationId">
@@ -267,7 +267,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="Activities" msprop:Generator_TableClassName="ActivitiesDataTable" msprop:Generator_TableVarName="tableActivities" msprop:Generator_RowChangedName="ActivitiesRowChanged" msprop:Generator_TablePropName="Activities" msprop:Generator_RowDeletingName="ActivitiesRowDeleting" msprop:Generator_RowChangingName="ActivitiesRowChanging" msprop:Generator_RowEvHandlerName="ActivitiesRowChangeEventHandler" msprop:Generator_RowDeletedName="ActivitiesRowDeleted" msprop:Generator_RowClassName="ActivitiesRow" msprop:Generator_UserTableName="Activities" msprop:Generator_RowEvArgName="ActivitiesRowChangeEvent">
+        <xs:element name="Activities" msprop:Generator_TableClassName="ActivitiesDataTable" msprop:Generator_TableVarName="tableActivities" msprop:Generator_TablePropName="Activities" msprop:Generator_RowDeletingName="ActivitiesRowDeleting" msprop:Generator_RowChangingName="ActivitiesRowChanging" msprop:Generator_RowEvHandlerName="ActivitiesRowChangeEventHandler" msprop:Generator_RowDeletedName="ActivitiesRowDeleted" msprop:Generator_UserTableName="Activities" msprop:Generator_RowChangedName="ActivitiesRowChanged" msprop:Generator_RowEvArgName="ActivitiesRowChangeEvent" msprop:Generator_RowClassName="ActivitiesRow">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="ActivityId" msdata:AutoIncrement="true" msdata:AutoIncrementSeed="-1" msdata:AutoIncrementStep="-1" msprop:Generator_ColumnVarNameInTable="columnActivityId" msprop:Generator_ColumnPropNameInRow="ActivityId" msprop:Generator_ColumnPropNameInTable="ActivityIdColumn" msprop:Generator_UserColumnName="ActivityId" type="xs:int" />
@@ -290,7 +290,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="Attendance_Info" msprop:Generator_TableClassName="Attendance_InfoDataTable" msprop:Generator_TableVarName="tableAttendance_Info" msprop:Generator_RowChangedName="Attendance_InfoRowChanged" msprop:Generator_TablePropName="Attendance_Info" msprop:Generator_RowDeletingName="Attendance_InfoRowDeleting" msprop:Generator_RowChangingName="Attendance_InfoRowChanging" msprop:Generator_RowEvHandlerName="Attendance_InfoRowChangeEventHandler" msprop:Generator_RowDeletedName="Attendance_InfoRowDeleted" msprop:Generator_RowClassName="Attendance_InfoRow" msprop:Generator_UserTableName="Attendance_Info" msprop:Generator_RowEvArgName="Attendance_InfoRowChangeEvent">
+        <xs:element name="Attendance_Info" msprop:Generator_TableClassName="Attendance_InfoDataTable" msprop:Generator_TableVarName="tableAttendance_Info" msprop:Generator_TablePropName="Attendance_Info" msprop:Generator_RowDeletingName="Attendance_InfoRowDeleting" msprop:Generator_RowChangingName="Attendance_InfoRowChanging" msprop:Generator_RowEvHandlerName="Attendance_InfoRowChangeEventHandler" msprop:Generator_RowDeletedName="Attendance_InfoRowDeleted" msprop:Generator_UserTableName="Attendance_Info" msprop:Generator_RowChangedName="Attendance_InfoRowChanged" msprop:Generator_RowEvArgName="Attendance_InfoRowChangeEvent" msprop:Generator_RowClassName="Attendance_InfoRow">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="Attendance_InfoId" msdata:AutoIncrement="true" msdata:AutoIncrementSeed="-1" msdata:AutoIncrementStep="-1" msprop:Generator_ColumnVarNameInTable="columnAttendance_InfoId" msprop:Generator_ColumnPropNameInRow="Attendance_InfoId" msprop:Generator_ColumnPropNameInTable="Attendance_InfoIdColumn" msprop:Generator_UserColumnName="Attendance_InfoId" type="xs:int" />
@@ -313,7 +313,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="Attendees" msprop:Generator_TableClassName="AttendeesDataTable" msprop:Generator_TableVarName="tableAttendees" msprop:Generator_RowChangedName="AttendeesRowChanged" msprop:Generator_TablePropName="Attendees" msprop:Generator_RowDeletingName="AttendeesRowDeleting" msprop:Generator_RowChangingName="AttendeesRowChanging" msprop:Generator_RowEvHandlerName="AttendeesRowChangeEventHandler" msprop:Generator_RowDeletedName="AttendeesRowDeleted" msprop:Generator_RowClassName="AttendeesRow" msprop:Generator_UserTableName="Attendees" msprop:Generator_RowEvArgName="AttendeesRowChangeEvent">
+        <xs:element name="Attendees" msprop:Generator_TableClassName="AttendeesDataTable" msprop:Generator_TableVarName="tableAttendees" msprop:Generator_TablePropName="Attendees" msprop:Generator_RowDeletingName="AttendeesRowDeleting" msprop:Generator_RowChangingName="AttendeesRowChanging" msprop:Generator_RowEvHandlerName="AttendeesRowChangeEventHandler" msprop:Generator_RowDeletedName="AttendeesRowDeleted" msprop:Generator_UserTableName="Attendees" msprop:Generator_RowChangedName="AttendeesRowChanged" msprop:Generator_RowEvArgName="AttendeesRowChangeEvent" msprop:Generator_RowClassName="AttendeesRow">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="AttendeeId" msdata:AutoIncrement="true" msdata:AutoIncrementSeed="-1" msdata:AutoIncrementStep="-1" msprop:Generator_ColumnVarNameInTable="columnAttendeeId" msprop:Generator_ColumnPropNameInRow="AttendeeId" msprop:Generator_ColumnPropNameInTable="AttendeeIdColumn" msprop:Generator_UserColumnName="AttendeeId" type="xs:int" />
@@ -321,14 +321,14 @@
               <xs:element name="LastName" msprop:Generator_ColumnVarNameInTable="columnLastName" msprop:Generator_ColumnPropNameInRow="LastName" msprop:Generator_ColumnPropNameInTable="LastNameColumn" msprop:Generator_UserColumnName="LastName" minOccurs="0">
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
-                    <xs:maxLength value="1000" />
+                    <xs:maxLength value="536870910" />
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
               <xs:element name="FirstName" msprop:Generator_ColumnVarNameInTable="columnFirstName" msprop:Generator_ColumnPropNameInRow="FirstName" msprop:Generator_ColumnPropNameInTable="FirstNameColumn" msprop:Generator_UserColumnName="FirstName" minOccurs="0">
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
-                    <xs:maxLength value="1000" />
+                    <xs:maxLength value="536870910" />
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
@@ -357,8 +357,7 @@
   </xs:element>
   <xs:annotation>
     <xs:appinfo>
-      <msdata:Relationship name="FK_Activities_Attendees_AttendeeId" msdata:parent="Attendees" msdata:child="Activities" msdata:parentkey="AttendeeId" msdata:childkey="AttendeeId" msprop:Generator_UserChildTable="Activities" msprop:Generator_ChildPropName="GetActivitiesRows" msprop:Generator_UserRelationName="FK_Activities_Attendees_AttendeeId" msprop:Generator_ParentPropName="AttendeesRow" msprop:Generator_RelationVarName="relationFK_Activities_Attendees_AttendeeId" msprop:Generator_UserParentTable="Attendees" />
-      <msdata:Relationship name="FK_Attendance_Info_Attendees_AttendeeId" msdata:parent="Attendees" msdata:child="Attendance_Info" msdata:parentkey="AttendeeId" msdata:childkey="AttendeeId" msprop:Generator_UserChildTable="Attendance_Info" msprop:Generator_ChildPropName="GetAttendance_InfoRows" msprop:Generator_UserRelationName="FK_Attendance_Info_Attendees_AttendeeId" msprop:Generator_ParentPropName="AttendeesRow" msprop:Generator_RelationVarName="relationFK_Attendance_Info_Attendees_AttendeeId" msprop:Generator_UserParentTable="Attendees" />
+      <msdata:Relationship name="_x007B_728BFEC4-FF3D-4EFE-8F69-1B2B4C59E502_x007D_" msdata:parent="Attendees" msdata:child="Attendance_Info" msdata:parentkey="AttendeeId" msdata:childkey="AttendeeId" msprop:Generator_UserChildTable="Attendance_Info" msprop:Generator_ChildPropName="GetAttendance_InfoRows" msprop:Generator_UserRelationName="{728BFEC4-FF3D-4EFE-8F69-1B2B4C59E502}" msprop:Generator_RelationVarName="_relation_728BFEC4_FF3D_4EFE_8F69_1B2B4C59E502_" msprop:Generator_UserParentTable="Attendees" msprop:Generator_ParentPropName="AttendeesRow" />
     </xs:appinfo>
   </xs:annotation>
 </xs:schema>
