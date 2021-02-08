@@ -2636,12 +2636,10 @@ namespace CAOGAttendeeManager
                   else
                   {
                         // if this is a different activity than previous selected change the ActivityText of the activity
-                        if (m_currentSelected_Activity.ActivityText != path)
-                        {
-                            m_currentSelected_Activity.ActivityText = path;
-                        }
-                        else
-                            return;
+                       m_currentSelected_Activity.ActivityText = activity_name;
+                        m_currentSelected_Activity.ListName = listname;
+                   
+                      
                   }
                    
                    
