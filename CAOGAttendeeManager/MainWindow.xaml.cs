@@ -14,7 +14,7 @@ using System.Windows.Input;
 using System.Data.Entity;
 using System.Data;
 using System.Windows.Threading;
-
+using System.Text.RegularExpressions;
 
 namespace CAOGAttendeeManager
 {
@@ -2615,11 +2615,21 @@ namespace CAOGAttendeeManager
                 {
                     string path = firstNode.GetFullPath("->", false);
 
+                    Regex pattern = new Regex(@"^\(List:\s(.+)\)\s+(.+)");
+
+                    Match match = pattern.Match(path);
+                    GroupCollection groups = match.Groups;
+
+                    string listname = groups[1].Value;
+                    string activity_name = groups[2].Value;
+
+                                     
                     m_isActivityChecked = true;
+
                   if (m_currentSelected_Activity == null) //create an activity with activity text if non exist
                   {
 
-                        m_currentSelected_Activity = new Activity { ActivityText = path };
+                        m_currentSelected_Activity = new Activity { ActivityText = activity_name, ListName=listname};
 
                         
                   }
@@ -3426,7 +3436,7 @@ namespace CAOGAttendeeManager
             {
                 string strActivity = m_currentSelected_Activity.ActivityText;
 
-           
+                string listname = m_currentSelected_Activity.ListName;
 
 
 
@@ -3436,7 +3446,7 @@ namespace CAOGAttendeeManager
                     if (m_lstdefaultTableRowsCopy[i].ActivityList.Any() )
                     {
 
-                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityText == @0", strActivity);
+                        var query_activity = m_lstdefaultTableRowsCopy[i].ActivityList.AsQueryable().Where("ActivityText == @0 and ListName == @1", strActivity, listname);
 
                         if (query_activity.Any() )
                         {
