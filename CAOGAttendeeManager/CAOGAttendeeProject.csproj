@@ -185,6 +185,13 @@
       <DependentUpon>DeleteRecordWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="DynamicLinqLibrary\DynamicLibrary.cs" />
+    <Compile Include="FilterGrid\DataGridColumn.cs" />
+    <Compile Include="FilterGrid\FilterCommon.cs" />
+    <Compile Include="FilterGrid\FilterDataGrid.cs" />
+    <Compile Include="FilterGrid\FilterHelpers.cs" />
+    <Compile Include="FilterGrid\FilterItem.cs" />
+    <Compile Include="FilterGrid\Loc.cs" />
+    <Compile Include="FilterGrid\StringFormatConverter.cs" />
     <Compile Include="FollowUpWindow.xaml.cs">
       <DependentUpon>FollowUpWindow.xaml</DependentUpon>
     </Compile>
@@ -212,6 +219,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="DeleteRecordWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="FilterGrid\FilterDataGrid.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -347,6 +358,9 @@
     <EmbeddedResource Include="Migrations\202012142321596_InitialCreate.resx">
       <DependentUpon>202012142321596_InitialCreate.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="FilterGrid\Readme.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -35,7 +35,7 @@ namespace CAOGAttendeeManager
            
 
 
-            m_version_string = "v3.1.31";
+            m_version_string = "v3.1.31_Integrate_FilterGrid_1";
 
 
 
