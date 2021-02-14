@@ -1011,7 +1011,7 @@ namespace CAOGAttendeeManager
 
             dataGrid_prospect.DataContext = m_lstattendanceTableRows.OrderBy(rec => rec.LastName).ToList();
             dataGrid_prospect.Items.Refresh();
-            lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
+            // FIX ME lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
             dataGrid_prospect.IsReadOnly = false;
 
 
@@ -1030,7 +1030,7 @@ namespace CAOGAttendeeManager
 
 
             dataGrid.Items.Refresh();
-            lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
+           // FIX ME lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
             m_isQueryTableShown = false;
             dataGrid.IsReadOnly = false;
             btnDelete.IsEnabled = true;
@@ -1374,10 +1374,11 @@ namespace CAOGAttendeeManager
 
         private void Disable_Filters()
         {
-            cmbHeaderStatus.IsEnabled = false;
+            // FIX ME
+            //cmbHeaderStatus.IsEnabled = false;
             m_ctbActivity.Enabled = false;
-            dpChurchLastAttended.IsEnabled = false;
-            dpHeaderActivityLastAttended.IsEnabled = false;
+            //dpChurchLastAttended.IsEnabled = false;
+            //dpHeaderActivityLastAttended.IsEnabled = false;
 
             m_ctbActivityProspect.Enabled = false;
             dpChurchLastAttendedPr.IsEnabled = false;
@@ -1394,125 +1395,125 @@ namespace CAOGAttendeeManager
         {
             //if in followUp view, use query database else if in model list view filter table
 
-            string text = txtHeaderFirstName.Text.ToUpper();
+            //FIX ME string text = txtHeaderFirstName.Text.ToUpper();
 
 
-            if (txtHeaderFirstName.Text != "")
-            {
+            //if (txtHeaderFirstName.Text != "")
+            //{
 
-                Disable_Filters();
+            //    Disable_Filters();
 
 
             
 
 
-                if (m_AttendanceView)
-                {
+            //    if (m_AttendanceView)
+            //    {
 
-                    if (m_isQueryTableShown)
-                    {
-                        var filterQueryTable = m_lstQueryTableRows.Where(row => row.FirstName.ToUpper().Contains(text)).ToList();
-                        dataGrid.DataContext = filterQueryTable;
-                        lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
-                    }
-                    else
-                    {
-                        var filteredDefaultTable = m_lstdefaultTableRows.Where(row => row.FirstName.ToUpper().Contains(text)).ToList();
-                        dataGrid.DataContext = filteredDefaultTable;
-                        lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
+            //        if (m_isQueryTableShown)
+            //        {
+            //            var filterQueryTable = m_lstQueryTableRows.Where(row => row.FirstName.ToUpper().Contains(text)).ToList();
+            //            dataGrid.DataContext = filterQueryTable;
+            //            lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
+            //        }
+            //        else
+            //        {
+            //            var filteredDefaultTable = m_lstdefaultTableRows.Where(row => row.FirstName.ToUpper().Contains(text)).ToList();
+            //            dataGrid.DataContext = filteredDefaultTable;
+            //            lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
 
-                    }
+            //        }
 
 
-                }
+            //    }
             
 
 
 
 
-            }
-            else // txt = ""
-            {
+            //}
+            //else // txt = ""
+            //{
              
-                Enable_Filters();
-                if (m_isQueryTableShown)
-                {
-                    Display_Query_Table(m_lstQueryTableRows.AsQueryable());
+            //    Enable_Filters();
+            //    if (m_isQueryTableShown)
+            //    {
+            //        Display_Query_Table(m_lstQueryTableRows.AsQueryable());
 
-                }
-                else
-                {
-                    Display_DefaultTable_in_Grid();
-                }
-            }
+            //    }
+            //    else
+            //    {
+            //        Display_DefaultTable_in_Grid();
+            //    }
+            //}
         }
 
         private void txtSearch_TextChanged_LName(object sender, TextChangedEventArgs e)
         {
 
+            // FIX ME
+            //string text = txtHeaderLastName.Text.ToUpper();
 
-            string text = txtHeaderLastName.Text.ToUpper();
 
+            //if (txtHeaderLastName.Text != "")
+            //{
 
-            if (txtHeaderLastName.Text != "")
-            {
-
-                Disable_Filters();
+            //    Disable_Filters();
 
 
              
 
 
-                if (m_AttendanceView)
-                {
+            //    if (m_AttendanceView)
+            //    {
 
-                    if (m_isQueryTableShown)
-                    {
-                        var filterQueryTable = m_lstQueryTableRows.Where(row => row.LastName.ToUpper().Contains(text));
-                        dataGrid.DataContext = filterQueryTable;
-                        lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
-                    }
-                    else
-                    {
-                        var filteredDefaultTable = m_lstdefaultTableRows.Where(row => row.LastName.ToUpper().Contains(text));
-                        //if (filteredDefaultTable.Any())
-                        //{
-                        //    m_isQueryTableShown = true;
-                        //    //m_lstQueryTableRows = new List<DefaultTableRow>(filteredDefaultTable);
-                        //}
+            //        if (m_isQueryTableShown)
+            //        {
+            //            var filterQueryTable = m_lstQueryTableRows.Where(row => row.LastName.ToUpper().Contains(text));
+            //            dataGrid.DataContext = filterQueryTable;
+            //            lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
+            //        }
+            //        else
+            //        {
+            //            var filteredDefaultTable = m_lstdefaultTableRows.Where(row => row.LastName.ToUpper().Contains(text));
+            //            //if (filteredDefaultTable.Any())
+            //            //{
+            //            //    m_isQueryTableShown = true;
+            //            //    //m_lstQueryTableRows = new List<DefaultTableRow>(filteredDefaultTable);
+            //            //}
 
-                        dataGrid.DataContext = filteredDefaultTable;
-                        lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
+            //            dataGrid.DataContext = filteredDefaultTable;
+            //            lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
 
-                    }
-
-
-                }
-                else if (m_alistView)
-                {
-                    var filteredAttendeeListTable = m_lstattendanceTableRows.Where(row => row.LastName.ToUpper().Contains(text));
-                    dataGrid_prospect.DataContext = filteredAttendeeListTable;
-                    lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
-                }
+            //        }
 
 
+            //    }
+            //    else if (m_alistView)
+            //    {
+            //        var filteredAttendeeListTable = m_lstattendanceTableRows.Where(row => row.LastName.ToUpper().Contains(text));
+            //        dataGrid_prospect.DataContext = filteredAttendeeListTable;
+            //        lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
+            //    }
 
 
-            }
-            else //tx == ""
-            {
+
+
+            //}
+            //else //tx == ""
+            //{
                
-                Enable_Filters();
-                if (m_isQueryTableShown)
-                {
-                    Display_Query_Table(m_lstQueryTableRows.AsQueryable());
+            //    Enable_Filters();
+            //    if (m_isQueryTableShown)
+            //    {
+            //        Display_Query_Table(m_lstQueryTableRows.AsQueryable());
 
-                }
-                else
-                {
-                    Display_DefaultTable_in_Grid();
-                }
-            }
+            //    }
+            //    else
+            //    {
+            //        Display_DefaultTable_in_Grid();
+            //    }
+            //}
 
 
         }
@@ -2272,11 +2273,11 @@ namespace CAOGAttendeeManager
 
         private void Enable_Filters()
         {
-
-            cmbHeaderStatus.IsEnabled = true;
+            // FIX ME
+            //cmbHeaderStatus.IsEnabled = true;
             m_ctbActivity.Enabled = true;
-            dpChurchLastAttended.IsEnabled = true;
-            dpHeaderActivityLastAttended.IsEnabled = true;
+            //dpChurchLastAttended.IsEnabled = true;
+            //dpHeaderActivityLastAttended.IsEnabled = true;
 
             m_ctbActivityProspect.Enabled = true;
             dpChurchLastAttendedPr.IsEnabled = true;
@@ -2305,11 +2306,12 @@ namespace CAOGAttendeeManager
       
         private void Window_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            dpChurchLastAttended.DisplayDate = DateTime.Today;
+            //FIX ME
+           // dpChurchLastAttended.DisplayDate = DateTime.Today;
            // btnAddColumn.IsEnabled = false;
-            Add_Blackout_Dates(ref dpChurchLastAttended);
+           // Add_Blackout_Dates(ref dpChurchLastAttended);
             Add_Blackout_Dates(ref dpChurchLastAttendedPr);
-            Add_Blackout_Dates(ref dpHeaderActivityLastAttended);
+           // Add_Blackout_Dates(ref dpHeaderActivityLastAttended);
             Add_Blackout_Dates(ref dpHeaderActivityPr);
 
             // ComboTreeBox 1 and 2////////////////////////////////////////////////////////////////////////////////////////
@@ -2351,7 +2353,7 @@ namespace CAOGAttendeeManager
             WindowsFormsHost host = new WindowsFormsHost();
             host.Child = m_ctbActivity;
           //  host.KeyUp += Host_KeyUp;
-            spActivityHeader.Children.Add(host);
+          // FIX ME  spActivityHeader.Children.Add(host);
 
             WindowsFormsHost host2 = new WindowsFormsHost();
             host2.Child = m_ctbActivityProspect;
@@ -2391,7 +2393,7 @@ namespace CAOGAttendeeManager
             }
 
         
-            lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
+            // FIX ME lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
             m_loaded = true;
 
             
@@ -3468,7 +3470,7 @@ namespace CAOGAttendeeManager
             else
             {
                 dataGrid.DataContext = "";
-                lblAttendenceMetrics.Text = "0";
+                // FIX ME lblAttendenceMetrics.Text = "0";
             }
 
 
@@ -3486,7 +3488,7 @@ namespace CAOGAttendeeManager
         {
             dataGrid.DataContext = resultTable.OrderBy(rec => rec.LastName).ToList();
             dataGrid.Items.Refresh();
-            lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
+           //FIX ME lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
             dataGrid.IsReadOnly = true;
             m_isQueryTableShown = true;
             btnGenerateFollowUps.IsEnabled = false;
@@ -3499,7 +3501,7 @@ namespace CAOGAttendeeManager
         {
             dataGrid.DataContext = m_lstQueryTableRows.OrderBy(rec => rec.LastName).ToList();
             dataGrid.Items.Refresh();
-            lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
+           // FIX ME lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
             dataGrid.IsReadOnly = true;
             m_isQueryTableShown = true;
             btnGenerateFollowUps.IsEnabled = false;
@@ -3564,14 +3566,15 @@ namespace CAOGAttendeeManager
                     btnNewRec.IsEnabled = false;
                     btnDelete.IsEnabled = true;
 
-                    if (m_isAttendedChecked)
-                        cmbHeaderStatus.SelectedIndex = 1;
-                    else if (m_isFollowupChecked)
-                        cmbHeaderStatus.SelectedIndex = 2;
-                    else if (m_isRespondedChecked)
-                        cmbHeaderStatus.SelectedIndex = 3;
-                    else
-                        cmbHeaderStatus.SelectedIndex = 0;
+                    //FIX ME
+                    //if (m_isAttendedChecked)
+                    //    cmbHeaderStatus.SelectedIndex = 1;
+                    //else if (m_isFollowupChecked)
+                    //    cmbHeaderStatus.SelectedIndex = 2;
+                    //else if (m_isRespondedChecked)
+                    //    cmbHeaderStatus.SelectedIndex = 3;
+                    //else
+                    //    cmbHeaderStatus.SelectedIndex = 0;
 
                     if (m_isQueryTableShown)
                         Display_Query_Table();
@@ -4274,38 +4277,38 @@ namespace CAOGAttendeeManager
 
         private void TxtHeaderFirstName_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Back)
-            {
+            //FIX ME if (e.Key == Key.Back)
+            //{
 
-                if (txtHeaderFirstName.Text == "")
-                {
-                    if (m_isQueryTableShown)
-                    {
-                       // m_isFirstNamefiltered = false;
-                        Display_Query_Table(m_lstQueryTableRows.AsQueryable());
-                    }
-                    else
-                    {
-                        Display_DefaultTable_in_Grid();
-                    }
-                }
+            //    if (txtHeaderFirstName.Text == "")
+            //    {
+            //        if (m_isQueryTableShown)
+            //        {
+            //           // m_isFirstNamefiltered = false;
+            //            Display_Query_Table(m_lstQueryTableRows.AsQueryable());
+            //        }
+            //        else
+            //        {
+            //            Display_DefaultTable_in_Grid();
+            //        }
+            //    }
 
 
-            }
-            else if (e.Key == Key.Escape)
-            {
-                txtHeaderFirstName.Text = "";
-              //  m_isFirstNamefiltered = false;
-                if (m_isQueryTableShown)
-                {
-                    Display_Query_Table();
-                }
-                else
-                {
-                    Display_DefaultTable_in_Grid();
-                }
+            //}
+            //else if (e.Key == Key.Escape)
+            //{
+            //   // FIX ME txtHeaderFirstName.Text = "";
+            //  //  m_isFirstNamefiltered = false;
+            //    if (m_isQueryTableShown)
+            //    {
+            //        Display_Query_Table();
+            //    }
+            //    else
+            //    {
+            //        Display_DefaultTable_in_Grid();
+            //    }
 
-            }
+            //}
         }
 
         private void TxtHeaderLastName_KeyUp(object sender, KeyEventArgs e)
@@ -4313,7 +4316,7 @@ namespace CAOGAttendeeManager
 
             if (e.Key == Key.Escape)
             {
-                txtHeaderLastName.Text = "";
+               //FIX ME txtHeaderLastName.Text = "";
                //m_isLastNamefiltered = false;
                 if (m_isQueryTableShown)
                 {
@@ -4359,7 +4362,7 @@ namespace CAOGAttendeeManager
 
                 if (ret_error == 1)
                 {
-                    dpChurchLastAttended.Text = "";
+                   // FIX ME dpChurchLastAttended.Text = "";
                     return;
                 }
                     
@@ -4456,7 +4459,7 @@ namespace CAOGAttendeeManager
             if (e.Key == Key.Escape)
             {
                 Uncheck_all_status();
-                cmbHeaderStatus.SelectedIndex = 0; //Set combobox to display "Status"
+                //FIX ME cmbHeaderStatus.SelectedIndex = 0; //Set combobox to display "Status"
 
                 BuildQuery_and_UpdateGrid();
 
@@ -4645,7 +4648,7 @@ namespace CAOGAttendeeManager
 
                 if (ret_error == 1)
                 {
-                    dpHeaderActivityLastAttended.Text = "";
+                   //FIX ME dpHeaderActivityLastAttended.Text = "";
                     return;
 
                 }
@@ -4705,7 +4708,7 @@ namespace CAOGAttendeeManager
                 var filterQueryTable = m_lstattendanceTableRows.Where(row => row.LastName.ToUpper().Contains(text)).ToList();
                 dataGrid_prospect.DataContext = filterQueryTable;
                 dataGrid_prospect.Items.Refresh();
-                lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
+                //FIX ME lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
 
 
 
@@ -4759,7 +4762,7 @@ namespace CAOGAttendeeManager
                 var filterQueryTable = m_lstattendanceTableRows.Where(row => row.FirstName.ToUpper().Contains(text)).ToList();
                 dataGrid_prospect.DataContext = filterQueryTable;
                 dataGrid_prospect.Items.Refresh();
-                lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
+              // FIX ME  lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
                   
 
             }

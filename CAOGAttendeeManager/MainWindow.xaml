@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:control="clr-namespace:FilterDataGrid"
         Icon="Resources\checklist.png"
         mc:Ignorable="d"
         Title="Attendee Manager" Height="913" Width="1513"
@@ -130,16 +131,16 @@
 
 
                     <StackPanel Orientation="Vertical" Margin="10,0,0,0" Width="280" Height="68">
-                        <StackPanel Orientation="Horizontal">
+                        <!--<StackPanel Orientation="Horizontal">
                             <Label HorizontalAlignment="Left" Width="69" Content="Active:"/>
                             <TextBlock Margin ="20,0,0,0" x:Name="lblAttendenceMetrics" 
                                    TextAlignment="Left" VerticalAlignment="Center"/>
 
-                        </StackPanel>
+                        </StackPanel>-->
                         <StackPanel Orientation="Horizontal">
-                            <Label x:Name="lblActivityListName" Content="Activity list:" HorizontalAlignment="Left" Width="69"/>
+                            <Label x:Name="lblActivityListName" Content="Activity list:" HorizontalAlignment="Left" Width="69" Height="40"/>
                             <TextBlock Margin="20,0,0,0" x:Name="txtbActivityListName" 
-                                   TextAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" Height="40"/>
+                                   TextAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" Height="28" Width="173"/>
 
                         </StackPanel>
 
@@ -187,8 +188,152 @@
                         </Grid.ColumnDefinitions>
 
 
-                        <!--<control:FilterDataGrid FilterLanguage="English" DateFormatString="d" ShowStatusBar="True" ShowElapsedTime="False"/>-->
-                        <DataGrid x:Name="dataGrid"
+                        <control:FilterDataGrid
+                            x:Name="dataGrid"
+                            FilterLanguage="English" 
+                            DateFormatString="d" 
+                            ShowStatusBar="True" 
+                            ShowElapsedTime="False"
+                            AutoGenerateColumns="False"
+                            LoadingRowDetails="dataGrid_LoadingRowDetails"
+                            RowDetailsVisibilityMode="Collapsed"
+                            CanUserAddRows="False" 
+                            CanUserDeleteRows="False"
+                            CanUserReorderColumns="False"
+                            CanUserSortColumns="True"
+                            CanUserResizeColumns="True"
+                            SelectedCellsChanged="dataGrid_SelectedCellsChanged"
+                            ColumnWidth="120"
+                            ItemsSource="{Binding}"
+                            CanUserResizeRows="False" 
+                            ColumnHeaderHeight="30"
+                            GridLinesVisibility="Horizontal"
+                            HorizontalGridLinesBrush="LightGray"
+                            RowHeight="25" 
+                            FontSize="13" 
+                            Margin="0,0,0,5">
+
+
+                            <control:FilterDataGrid.RowStyle >
+                                <Style TargetType="DataGridRow">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="DarkGray"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="DarkGray"/>
+                                        </Trigger>
+
+                                    </Style.Triggers>
+                                </Style>
+
+                            </control:FilterDataGrid.RowStyle>
+
+
+                            <control:FilterDataGrid.Columns>
+                                <control:DataGridTemplateColumn IsColumnFiltered="False" Width="8" FieldName="" >
+                                    <control:DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Width="14" 
+                                                    RenderOptions.BitmapScalingMode="NearestNeighbor" 
+                                                    Name="btnExpandHistory"
+                                                    Content="+"
+                                                    Margin="1,1,1,1"
+                                                    Click="btnExpandHistory_Click"
+                                                    BorderThickness="0" 
+                                                    Background="White"
+                                                    ToolTip="View Profile">
+
+
+
+                                            </Button>
+                                        </DataTemplate>
+                                    </control:DataGridTemplateColumn.CellTemplate>
+                                </control:DataGridTemplateColumn>
+
+                                <control:DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" IsColumnFiltered="True"/>
+                                <control:DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" IsColumnFiltered="True"/>
+                                <control:DataGridTextColumn Header="Church attended" Binding="{Binding Church_Last_Attended}" Width="130" IsColumnFiltered="True" />
+                                <control:DataGridTextColumn Header="Chruch Status" Binding="{Binding ChurchStatus}" Width="110" IsColumnFiltered="True"/>
+                                <control:DataGridTextColumn Header="Activity" Binding="{Binding ActivityText}" Width="250" IsColumnFiltered="True" />
+                                <control:DataGridTextColumn Header="Activity attended" Binding="{Binding Activity_Last_Attended}" Width="140"  IsColumnFiltered="True" />
+
+                            </control:FilterDataGrid.Columns>
+
+                            <control:FilterDataGrid.RowDetailsTemplate>
+                                <DataTemplate>
+
+                                    <StackPanel Margin="10,5,10,5" Name="spAttendeeProfile">
+                                        <ToolBar Name="tbarProfileAttendanceList" MinHeight="33">
+                                            <!--<Button Name="btnAddColumn" 
+                                                    Click="BtnAddColumn_Click"
+                                                    ToolTip="Add a custom coulmn to the attendee profile">
+
+                                                <Image Source="Resources\AddTableColums.ico" Height="20"/>
+                                            </Button>-->
+
+                                            <Button Name="btnDelete"
+                                                        Click="BtnDeleteInfo_Click"
+                                                        ToolTip="Delete multiple selected attendee records from the table below.">
+                                                <Image Height="20" Source="Resources\Delete.ico"/>
+                                            </Button>
+
+                                        </ToolBar>
+
+                                        <TextBlock Name="txtblkAttendanceList" Text="Attendance list" MinHeight="16"/>
+
+                                        <control:FilterDataGrid Height="200"  x:Name="GrdAttendee_InfoList" ItemsSource="{Binding}"
+                                                        MinHeight="200"
+                                                        AutoGenerateColumns="False"
+                                                        SelectionMode="Extended"
+                                                        CanUserDeleteRows="False"
+                                                        IsReadOnly="True"
+                                                        GridLinesVisibility="Horizontal"
+                                                        HorizontalGridLinesBrush="LightGray"
+                                                        RowHeight="25" FontSize="13" >
+
+                                            <control:FilterDataGrid.Columns>
+                                                <control:DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}" />
+                                                <control:DataGridTextColumn Header="Date" Binding="{Binding DateString}" IsColumnFiltered="True"/>
+                                                <control:DataGridTextColumn Header="Status" Binding="{Binding Status}" IsColumnFiltered="True"/>
+                                            </control:FilterDataGrid.Columns>
+
+                                        </control:FilterDataGrid>
+
+                                        <TextBlock Name="txtblkActivities" Text="Activities list"/>
+
+                                        <control:FilterDataGrid Height="200" x:Name="GrdAttendee_ActivityList" ItemsSource="{Binding}"
+                                                        MinHeight="200"
+                                                        AutoGenerateColumns="False"
+                                                        SelectionMode="Extended"
+                                                        CanUserDeleteRows="False"
+                                                        IsReadOnly="True"
+                                                        GridLinesVisibility="Horizontal"
+                                                        HorizontalGridLinesBrush="LightGray"
+                                                        RowHeight="45" FontSize="13" >
+
+                                            <control:FilterDataGrid.Columns>
+                                                <control:DataGridTextColumn Header="AttendeeId" Binding="{Binding AttendeeId}"/>
+                                                <control:DataGridTextColumn Header="Date" Binding="{Binding DateString}" IsColumnFiltered="True"/>
+                                                <control:DataGridTextColumn Header="Activity" Width="200" Binding="{Binding ActivityText}" IsColumnFiltered="True"/>
+                                                <control:DataGridTextColumn Header="Activity List" Binding="{Binding ListName}" IsColumnFiltered="True"/>
+
+
+
+                                            </control:FilterDataGrid.Columns>
+                                        </control:FilterDataGrid>
+
+                                    </StackPanel>
+
+                                </DataTemplate>
+                            </control:FilterDataGrid.RowDetailsTemplate>
+
+                        </control:FilterDataGrid>
+
+
+
+
+                        <!--<DataGrid x:Name="dataGrid"
                                 LoadingRowDetails="dataGrid_LoadingRowDetails"
                                 RowDetailsVisibilityMode="Collapsed"
                                 AutoGenerateColumns="False"
@@ -498,12 +643,14 @@
 
                                     <StackPanel Margin="10,5,10,5" Name="spAttendeeProfile">
                                         <ToolBar Name="tbarProfileAttendanceList" MinHeight="33">
-                                            <!--<Button Name="btnAddColumn" 
+                                            -->
+                        <!--<Button Name="btnAddColumn" 
                                                     Click="BtnAddColumn_Click"
                                                     ToolTip="Add a custom coulmn to the attendee profile">
 
                                                 <Image Source="Resources\AddTableColums.ico" Height="20"/>
                                             </Button>-->
+                        <!--
 
                                             <Button Name="btnDelete"
                                                         Click="BtnDeleteInfo_Click"
@@ -560,7 +707,7 @@
 
                                 </DataTemplate>
                             </DataGrid.RowDetailsTemplate>
-                        </DataGrid>
+                        </DataGrid>-->
 
 
 
