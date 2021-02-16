@@ -176,8 +176,8 @@ namespace CAOGAttendeeManager
         private DataSet m_DataSet = new DataSet();
 
 
-        bool m_ActivityTreeChanged = false; //check if the user changed the Activity tree
-
+        private bool m_ActivityTreeChanged = false; //check if the user changed the Activity tree
+        private bool m_alist_tree_changed = false;
         // current selected row in the data tables
 
         private DefaultTableRow m_default_row_selected;
@@ -631,30 +631,44 @@ namespace CAOGAttendeeManager
 
             Dispatcher.Invoke(() =>
            {
-               if (m_currentAdded_Activity != null && m_ActivityDateSelectedPr != null && m_MultiAttendanceRow_Selected != null)
-               {
-
-                   btnPanelAddActivity.IsEnabled = true;
-               }
-               else
-               {
-                   btnPanelAddActivity.IsEnabled = false;
-               }
+              
 
                foreach (AttendanceTableRow dr in m_lstattendanceTableRows)
                {
                    if (dr.Attended == "1" && m_alistdateIsValid)
                    {
                        btnImport.IsEnabled = true;
+                      
                        break;
                    }
                    else
                    {
                        btnImport.IsEnabled = false;
+                      
+                      
                    }
+
+
+                   if (dr.ActivityChecked == "1" && m_ActivityDateSelectedPr != null && m_currentAdded_Activity != null)
+                   {
+                       btnPanelAddActivity.IsEnabled = true;
+                      
+                       break;
+                   }
+                   else
+                   {
+                       btnPanelAddActivity.IsEnabled = false;
+                      
+
+                   }
+
+                  
+                   
                }
 
-               if (m_dbContext.ChangeTracker.HasChanges() || m_ActivityTreeChanged)
+
+               
+               if (m_dbContext.ChangeTracker.HasChanges() || m_ActivityTreeChanged || m_alist_tree_changed )
                {
                    btnSave.IsEnabled = true;
 
@@ -1028,6 +1042,9 @@ namespace CAOGAttendeeManager
             if (m_lstdefaultTableRows.Any() )
                 dataGrid.DataContext = m_lstdefaultTableRows.OrderBy(rec => rec.LastName).ToList();
 
+            // change column header 'follow-up last generated' to 'church last attended' to reflect default header for the table
+            if (lblChurchLastAttended.Content == "Follow-Up last generated")
+                lblChurchLastAttended.Content = "Church last attended";
 
             dataGrid.Items.Refresh();
             lblAttendenceMetrics.Text = dataGrid.Items.Count.ToString();
@@ -1074,7 +1091,7 @@ namespace CAOGAttendeeManager
 
                 int i = 0;
 
-
+                bool hasActivityPlaceholder = false;
 
                 foreach (var AttendeeRec in m_dbContext.Attendees)
                 {
@@ -1084,11 +1101,14 @@ namespace CAOGAttendeeManager
                                          select DateRec).ToList().LastOrDefault();
 
                     var queryActivityLastDate = (from ActivityDateRec in AttendeeRec.ActivityList
+                                                 where ActivityDateRec.ActivityText != "1"
                                                  orderby ActivityDateRec.Date ascending
                                                  select ActivityDateRec).ToList().LastOrDefault();
 
-                
+                    var queryAttendeeActivityPlaceholder = AttendeeRec.ActivityList.SingleOrDefault(r => r.ActivityText == "1");
 
+                    if (queryAttendeeActivityPlaceholder != null)
+                        hasActivityPlaceholder = true;
 
                     if (queryLastDate != null)
                     {
@@ -1105,7 +1125,7 @@ namespace CAOGAttendeeManager
                             DateString = "Date Not Valid",
                             Attended = AttendeeRec.Checked ? "1" : "",
                             IsModifiedrow = AttendeeRec.Checked,
-
+                            ActivityChecked = hasActivityPlaceholder ? "1" : "",
 
                         };
 
@@ -1156,7 +1176,8 @@ namespace CAOGAttendeeManager
                         m_lstattendanceTableRows.Add(AttendanceTabledr);
                         m_lstdefaultTableRows.Add(DefaultTabledr);
 
-
+                        if (hasActivityPlaceholder)
+                            hasActivityPlaceholder = false;
 
                     }
                     else // There are no Attended status for attendee, look for any follow-up statuses
@@ -1165,6 +1186,8 @@ namespace CAOGAttendeeManager
                                                      where DateRec.Status == "Follow-Up"
                                                      orderby DateRec.Date ascending
                                                      select DateRec).ToList().LastOrDefault();
+
+                       
 
                         if (queryLastDateFollowUp != null)
                         {
@@ -1181,7 +1204,7 @@ namespace CAOGAttendeeManager
                                 DateString = "Date Not Valid",
                                 Attended = AttendeeRec.Checked ? "1" : "",
                                 IsModifiedrow = AttendeeRec.Checked,
-
+                                ActivityChecked = hasActivityPlaceholder ? "1" : "",
 
                             };
                             DefaultTableRow DefaultTabledr = new DefaultTableRow
@@ -1227,6 +1250,9 @@ namespace CAOGAttendeeManager
                             //Add to the rows to the datagirds
                             m_lstattendanceTableRows.Add(AttendanceTabledr);
                             m_lstdefaultTableRows.Add(DefaultTabledr);
+
+                            if (hasActivityPlaceholder)
+                                hasActivityPlaceholder = false;
                         }
 
 
@@ -1379,12 +1405,12 @@ namespace CAOGAttendeeManager
             dpChurchLastAttended.IsEnabled = false;
             dpHeaderActivityLastAttended.IsEnabled = false;
 
-            m_ctbActivityProspect.Enabled = false;
-            dpChurchLastAttendedPr.IsEnabled = false;
-            dpHeaderActivityPr.IsEnabled = false;
-            btnPanelAddActivity.IsEnabled = false;
-            dpHeaderActivityPr.IsEnabled = false;
-            btnPanelNewActivity.IsEnabled = false;
+            //m_ctbActivityProspect.Enabled = false;
+            //dpChurchLastAttendedPr.IsEnabled = false;
+            //dpHeaderActivityPr.IsEnabled = true;
+            //btnPanelAddActivity.IsEnabled = true;
+            //dpHeaderActivityPr.IsEnabled = true;
+            //btnPanelNewActivity.IsEnabled = true;
 
 
 
@@ -1551,9 +1577,13 @@ namespace CAOGAttendeeManager
             //  // save last change to list and check for any checked attendees  
 
             List<AttendanceTableRow> Checklist = new List<AttendanceTableRow>() { };
+            List<AttendanceTableRow> ActivityCheckList = new List<AttendanceTableRow>() { };
 
 
-            Checklist = getListOfCheckedAttendees();
+
+            Checklist = getListOfCheckedAttendees("Attended");
+            ActivityCheckList = getListOfCheckedAttendees("Activity");
+
             // Mark each attendee that has a checkmark next to it as checked in the dbcontext
             foreach (AttendanceTableRow dr in Checklist)
             {
@@ -1561,22 +1591,39 @@ namespace CAOGAttendeeManager
                 Attendee queryAttendeeInContext = m_dbContext.Attendees.Local.SingleOrDefault(rec => rec.AttendeeId == dr.AttendeeId);
                 queryAttendeeInContext.Checked = true;
             }
-
-            //if there is no attendees checked then make sure all attendees in the dbcontext is not checked (ie checked = false)
-            if (Checklist.Any() )
+            foreach (AttendanceTableRow adr in ActivityCheckList)
             {
-                foreach (Attendee at in m_dbContext.Attendees)
-                {
-                    if (at.Checked == true)
+               
+                    Activity new_activity = new Activity
                     {
-                        at.Checked = false;
-                    }
-                }
+                        AttendeeId = adr.AttendeeId,
+                        ActivityText = "1",
+                        Date = null,
+                        ListName = "",
+                    };
+
+                    m_dbContext.Activities.Add(new_activity);
+              
+
             }
+
+            ////if there is no attendees checked then make sure all attendees in the dbcontext is not checked (ie checked = false)
+            //if (Checklist.Any() )
+            //{
+            //    foreach (Attendee at in m_dbContext.Attendees)
+            //    {
+            //        if (at.Checked == true)
+            //        {
+            //            at.Checked = false;
+            //        }
+            //    }
+            //}
 
             // save change to db
             SaveActiveList();
             m_ActivityTreeChanged = false;
+            m_alist_tree_changed = false;
+
             Cursor = Cursors.Arrow;
 
         }
@@ -1606,7 +1653,8 @@ namespace CAOGAttendeeManager
             return isAttendedStatusChecked;
         }
 
-        List<AttendanceTableRow> getListOfCheckedAttendees()
+        
+        List<AttendanceTableRow> getListOfCheckedAttendees(string Column_Header)
         {
 
             //end all edits and update the datagrid with changes
@@ -1615,19 +1663,35 @@ namespace CAOGAttendeeManager
 
             List<AttendanceTableRow> lstOfCheckedAttendees = new List<AttendanceTableRow>() { };
 
-
-
-            foreach (AttendanceTableRow dr in m_lstattendanceTableRows)
+            if (Column_Header == "Attended")
             {
-                if (dr.Attended == "1")
+                foreach (AttendanceTableRow dr in m_lstattendanceTableRows)
                 {
+                    if (dr.Attended == "1")
+                    {
 
 
-                    lstOfCheckedAttendees.Add(dr);
+                        lstOfCheckedAttendees.Add(dr);
+
+                    }
 
                 }
-                
             }
+            else if (Column_Header == "Activity")
+            {
+                foreach (AttendanceTableRow dr in m_lstattendanceTableRows)
+                {
+                    if (dr.ActivityChecked == "1")
+                    {
+
+
+                        lstOfCheckedAttendees.Add(dr);
+
+                    }
+
+                }
+            }
+            
 
             return lstOfCheckedAttendees;
         }
@@ -1868,6 +1932,7 @@ namespace CAOGAttendeeManager
 
         }
 
+
         private bool Check_for_dup_AttendeeInfo_inDbase(AttendanceTableRow atr)
         {
 
@@ -1938,7 +2003,7 @@ namespace CAOGAttendeeManager
                 List<AttendanceTableRow> Checklist = new List<AttendanceTableRow>() { };
 
                 // get checked attendees
-                Checklist = getListOfCheckedAttendees();
+                Checklist = getListOfCheckedAttendees("Attended");
 
 
 
@@ -2083,7 +2148,7 @@ namespace CAOGAttendeeManager
                         Attendance_Info newAttInfoRec = new Attendance_Info();
                         // make new row in Default Table
                         //build default table row to import
-                        dynamic Defaultdr = new DefaultTableRow();
+                        DefaultTableRow Defaultdr = new DefaultTableRow();
 
 
 
@@ -2110,7 +2175,7 @@ namespace CAOGAttendeeManager
 
                         Defaultdr.ChurchStatus = newAttInfoRec.Status;
                         Defaultdr.Church_Last_Attended = newAttInfoRec.Date?.ToString("MM-dd-yyyy");
-                        Defaultdr.Activity = "n/a";
+                        Defaultdr.ActivityText = "n/a";
                         Defaultdr.Activity_Last_Attended = "n/a";
 
                         // add new rows to the default tables
@@ -3372,8 +3437,8 @@ namespace CAOGAttendeeManager
 
 
                         }
-
-
+                        // change column header(church last attended) to reflect the last date a follow-up was generated for attendee
+                        lblChurchLastAttended.Content = "Follow-Up last generated";
 
                     }
 
@@ -3665,25 +3730,21 @@ namespace CAOGAttendeeManager
         private void DeleteRecordFromActivitiesTable(IEnumerable<Activity> row_select)
         {
             List<Activity> rowsToBeDeleted = new List<Activity>(row_select);
+            //Activity queryActivity, AttActivityInforec;
 
             foreach (Activity dr in rowsToBeDeleted)
             {
 
-                var AttActivityInforec = m_dbContext.Activities.Local.SingleOrDefault(id => id.ActivityId == dr.ActivityId);
-                if (AttActivityInforec != null)
-                {
-                    m_dbContext.Activities.Remove(AttActivityInforec);
-                }
-
+                m_dbContext.Activities.Local.Remove(dr);
                 m_default_row_selected.ActivityList.Remove(dr);
-
-                // find the activity state as deleted and get the ActivityText from it.
-               
-
+            }
                 
             
-            }
 
+              
+
+                // find the activity state as deleted and get the ActivityText from it.
+           
 
             m_lstContextActivities = AddALLActivitiesFromContextToActivityTree();
 
@@ -3878,77 +3939,142 @@ namespace CAOGAttendeeManager
             
         }
 
-      
 
+        bool Check_for_dub_ActivityRec_inDBase(AttendanceTableRow dr)
+        {
+            var queryifActivityExistList = m_default_row_selected.ActivityList.SingleOrDefault(rec => rec.ActivityText == m_currentAdded_Activity.ActivityText && rec.Date == m_ActivityDateSelectedPr);
+            if (queryifActivityExistList != null)
+            {
+
+                    dataGrid_prospect.Focus();
+                    int id = dr.AttendeeId;
+                    int gridrowIdx = 0;
+                    foreach (AttendanceTableRow gridrow in dataGrid_prospect.Items)
+                    {
+
+                        if (gridrow.AttendeeId == id)
+                        {
+                            dataGrid_prospect.SelectedIndex = gridrowIdx;
+                            break;
+                        }
+                        gridrowIdx++;
+                    }
+                    dataGrid_prospect.ScrollIntoView(dataGrid_prospect.Items[gridrowIdx]);
+                    Cursor = Cursors.Arrow;
+
+                    return true;
+
+            }
+            else
+                return false;
+
+        }
         private void btnPanelAddActivity_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             Cursor = Cursors.Wait;
 
-           
+            List<AttendanceTableRow> Checklist = new List<AttendanceTableRow>() { };
+
+            // get checked mark in activity column
+            Checklist = getListOfCheckedAttendees("Activity");
+
+
             if (m_currentAdded_Activity != null)
             {
-                foreach (AttendanceTableRow dr in m_MultiAttendanceRow_Selected)
+                foreach (AttendanceTableRow dr in Checklist)
                 {
-
-                    Activity new_ap = new Activity();
-
-                    new_ap.Date = m_ActivityDateSelectedPr;
-                    new_ap.AttendeeId = dr.AttendeeId;
-                    new_ap.ActivityText = m_currentAdded_Activity.ActivityText;
-                    new_ap.ListName = m_currentAdded_Activity.ListName;
-
-                   
-
                     // Find defaultrow that correspond to the attendance row attendeeID
                     m_default_row_selected = m_lstdefaultTableRows.SingleOrDefault(x => x.AttendeeId == dr.AttendeeId);
 
-                    //if activity and date do not already exist in dbContext then add to attendee's activitylist
-                    var queryifActivityExistList = m_default_row_selected.ActivityList.SingleOrDefault(rec => rec.ActivityText == new_ap.ActivityText && rec.Date == new_ap.Date);
-                    if (queryifActivityExistList == null)
+                    bool bcheckdupInfo = Check_for_dub_ActivityRec_inDBase(dr);
+                    if (bcheckdupInfo)
                     {
-                        //modify activity text before written to database context
-                        string tmp_text = FormatActivityText(new_ap.ActivityText);
-                        new_ap.ActivityText = tmp_text;
-                       
-                        m_dbContext.Activities.Add(new_ap); // add activity to database context
-
-                        // change activity string back to original string
-                        new_ap.ActivityText = m_currentAdded_Activity.ActivityText;
-                        if (!m_default_row_selected.ActivityList.Contains(new_ap) )
-                            m_default_row_selected.ActivityList.Add(new_ap); //add activtiy to attendee Activity list
-
-                        //Make the activity searchable in the activity dropdown
-                        m_lstContextActivities = AddALLActivitiesFromContextToActivityTree();
-                       
-                        
-
-                                var lastActivity = (from rec in m_default_row_selected.ActivityList
-                                            orderby rec.Date descending
-                                            select rec).ToList().FirstOrDefault();
-                     
-
-
-                        //UpdateAttendeeListTableWithDateFilter ActivityText property for Overview
-                        if (lastActivity != null)
-                        {
-                            m_default_row_selected.ActivityText = lastActivity.ActivityText;
-                            m_default_row_selected.Activity_Last_Attended = lastActivity.DateString;
-                        }
-                        else
-                        {
-                            m_default_row_selected.ActivityText = new_ap.ActivityText;
-                            m_default_row_selected.Activity_Last_Attended = new_ap.DateString;
-                        }
-
+                        MessageBox.Show("A record with the same date already exist in the database, choose a difference date.", "Duplicate date record found", MessageBoxButton.OK, MessageBoxImage.Stop);
+                        return;
                     }
                     else
                     {
-                        MessageBox.Show("Activity already exist for this attendee, please choose another activity or date.", "Duplicate activity", MessageBoxButton.OK, MessageBoxImage.Error);
-                        Cursor = Cursors.Arrow;
-                        return;
+                      
+
+                        //if activity and date do not already exist in dbContext then add to attendee's activitylist
+
+
+                        // Is there a placeholder activity in this attendee's list? if there is then replace the placeholder
+                        // activity with this new activity otherwise create new activity 
+                        var PlaceholderActivity = m_default_row_selected.ActivityList.SingleOrDefault(r => r.ActivityText == "1");
+
+                        if (PlaceholderActivity != null) // has placeholder activity
+                        {
+                            PlaceholderActivity.ActivityText = m_currentAdded_Activity.ActivityText;
+                            PlaceholderActivity.Date = m_ActivityDateSelectedPr;
+                            PlaceholderActivity.ListName = m_currentAdded_Activity.ListName;
+
+                            var lastActivity = (from rec in m_default_row_selected.ActivityList
+                                                orderby rec.Date descending
+                                                select rec).ToList().FirstOrDefault();
+
+                            //Show Attendee's latest activity under the Activity in the Default Table
+                            if (lastActivity != null)
+                            {
+                                m_default_row_selected.ActivityText = lastActivity.ActivityText;
+                                m_default_row_selected.Activity_Last_Attended = lastActivity.DateString;
+                            }
+                            else
+                            {
+                                m_default_row_selected.ActivityText = PlaceholderActivity.ActivityText;
+                                m_default_row_selected.Activity_Last_Attended = PlaceholderActivity.DateString;
+                            }
+                        }
+                        else //has no placeholder activity
+                        {
+                            // create new activity
+                            Activity new_ap = new Activity();
+
+                            new_ap.Date = m_ActivityDateSelectedPr;
+                            new_ap.AttendeeId = dr.AttendeeId;
+                            new_ap.ActivityText = m_currentAdded_Activity.ActivityText;
+                            new_ap.ListName = m_currentAdded_Activity.ListName;
+
+                            //modify activity text before written to database context
+                            string tmp_text = FormatActivityText(new_ap.ActivityText);
+                            new_ap.ActivityText = tmp_text;
+
+                            m_dbContext.Activities.Add(new_ap); // add activity to database context
+
+                            // change activity string back to original string
+                            new_ap.ActivityText = m_currentAdded_Activity.ActivityText;
+
+                            if (!m_default_row_selected.ActivityList.Contains(new_ap))
+                                m_default_row_selected.ActivityList.Add(new_ap); //add activtiy to attendee Activity list
+
+                            var lastActivity = (from rec in m_default_row_selected.ActivityList
+                                                orderby rec.Date descending
+                                                select rec).ToList().FirstOrDefault();
+
+                                                        //Show Attendee's latest activity under the Activity in the Default Table
+                            if (lastActivity != null)
+                            {
+                                m_default_row_selected.ActivityText = lastActivity.ActivityText;
+                                m_default_row_selected.Activity_Last_Attended = lastActivity.DateString;
+                            }
+                            else
+                            {
+                                m_default_row_selected.ActivityText = new_ap.ActivityText;
+                                m_default_row_selected.Activity_Last_Attended = new_ap.DateString;
+                            }
+                        }
+
+
+                     
                     }
 
-                }
+
+                    //clean up all placeholders
+                    dr.ActivityChecked = "";
+                    //Add any new activities not in the current activity tree
+                    m_lstContextActivities = AddALLActivitiesFromContextToActivityTree();
+
+                } // end foreach
 
 
                 m_ctbActivityProspect.UncheckAll();
@@ -3959,7 +4085,7 @@ namespace CAOGAttendeeManager
 
                 MessageBox.Show("Activity successfully added to selected attendee(s) profile", "Activity Added", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
-                
+                Display_AttendeeListTable_in_Grid();
             }
 
             
@@ -4914,6 +5040,11 @@ namespace CAOGAttendeeManager
 
             }
 
+        }
+
+        private void dataGrid_prospect_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
+        {
+            m_alist_tree_changed = true;
         }
     }
 

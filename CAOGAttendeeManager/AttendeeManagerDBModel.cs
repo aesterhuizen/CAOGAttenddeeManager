@@ -235,7 +235,12 @@ namespace CAOGAttendeeManager
                 if (_date != value)
                 {
                     _date = value;
-                    DateString = _date?.ToString("MM-dd-yyyy");
+                    if (_date ==null)
+                    {
+                        DateString = "";
+                    }
+                    else
+                        DateString = _date?.ToString("MM-dd-yyyy");
 
                     NotifyPropertyChanged("DateString");
                 }
@@ -696,7 +701,9 @@ namespace CAOGAttendeeManager
             }
         }
 
-        //private string _activity = "";
+        public string ActivityChecked { get; set; }
+
+       
 
 
 

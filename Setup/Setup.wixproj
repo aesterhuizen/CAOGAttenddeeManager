@@ -15,7 +15,7 @@
     <DefineConstants>Debug</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <OutputPath>bin\$(Configuration)\v3.1.31\</OutputPath>
+    <OutputPath>bin\$(Configuration)\v3.1.31a\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <SuppressAllWarnings>True</SuppressAllWarnings>
     <Pedantic>False</Pedantic>

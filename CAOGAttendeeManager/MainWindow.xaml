@@ -137,9 +137,9 @@
 
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Label x:Name="lblActivityListName" Content="Activity list:" HorizontalAlignment="Left" Width="69"/>
-                            <TextBlock Margin="20,0,0,0" x:Name="txtbActivityListName" 
-                                   TextAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" Height="40"/>
+                            <Label x:Name="lblActivityListName" Content="Activity list:" HorizontalAlignment="Left" Width="69" Height="25"/>
+                            <TextBlock Margin="20,2,0,0" x:Name="txtbActivityListName" 
+                                   TextAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" Height="16" RenderTransformOrigin="-0.571,1.389"/>
 
                         </StackPanel>
 
@@ -201,7 +201,7 @@
                                 ColumnWidth="120"
                                 ItemsSource="{Binding}"
                                 CanUserResizeRows="False" 
-                                ColumnHeaderHeight="60"
+                                ColumnHeaderHeight="63"
                                 GridLinesVisibility="Horizontal"
                                 HorizontalGridLinesBrush="LightGray"
                                 RowHeight="25" FontSize="13" Margin="0,0,0,5"  >
@@ -261,7 +261,7 @@
                                                 <RowDefinition Height="25"/>
                                             </Grid.RowDefinitions>
 
-                                            <Label Margin="-5,0,0,0" Grid.Row="0" Content="Lastname" Height="23" FontSize="12"/>
+                                            <Label Margin="-5,0,0,0" Grid.Row="0"  Content="Lastname" Height="23" FontSize="12" />
 
                                             <TextBox Margin="0,0,0,0" Grid.Column="0"  Grid.Row="1" Name="txtHeaderLastName" Text=""
                                                     KeyUp="TxtHeaderLastName_KeyUp" 
@@ -325,7 +325,7 @@
                                     </DataGridTextColumn.Header>
                                 </DataGridTextColumn>
 
-                                <DataGridTextColumn Binding="{Binding Church_Last_Attended}" Width="130">
+                                <DataGridTextColumn Binding="{Binding Church_Last_Attended}" Width="150">
                                     <DataGridTextColumn.Header>
                                         <Grid >
                                             <Grid.ColumnDefinitions>
@@ -337,7 +337,7 @@
                                                 <RowDefinition Height="25"/>
                                             </Grid.RowDefinitions>
 
-                                            <Label Margin="-5,0,0,0" Grid.Row="0" Content="Church last attended" Height="23" FontSize="12"/>
+                                            <Label x:Name="lblChurchLastAttended" Margin="-5,-2,0,0" Grid.Row="0" Content="Church last attended" FontSize="12"/>
 
                                             <DatePicker Grid.Row="1" Height="22" Width="100" Name="dpChurchLastAttended"
                                                     SelectedDateChanged="dpChurchLastAttended_SelectedDateChanged"
@@ -595,7 +595,8 @@
                                 ColumnHeaderHeight="60"
                                 GridLinesVisibility="Horizontal"
                                 HorizontalGridLinesBrush="LightGray"
-                                RowHeight="25" FontSize="13" SelectionChanged="dataGrid_prospect_SelectionChanged" Margin="1,1,-1,-1"  >
+                                RowHeight="25" FontSize="13" SelectionChanged="dataGrid_prospect_SelectionChanged" Margin="1,1,-1,-1"  
+                                 BeginningEdit="dataGrid_prospect_BeginningEdit" >
 
                             <DataGrid.Columns>
 
@@ -693,7 +694,7 @@
 
                                 <DataGridTextColumn Binding="{Binding Attended}" Width="70">
                                     <DataGridTextColumn.Header>
-                                        <Grid ToolTipService.ShowDuration="60000" 
+                                        <Grid ToolTipService.ShowDuration="6000" 
                                               ToolTip="Add church last attened date to all attendee's profile marked with a '1' in this column.">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
@@ -717,7 +718,7 @@
 
 
 
-                                <DataGridTextColumn x:Name="ActivityPr" Width="290" Binding="{Binding Activity}">
+                                <DataGridTextColumn x:Name="ActivityPr" Width="290" Binding="{Binding ActivityChecked}">
                                     <DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="{x:Type DataGridColumnHeader}">
                                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
