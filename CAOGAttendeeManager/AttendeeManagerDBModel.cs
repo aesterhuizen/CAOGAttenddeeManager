@@ -53,6 +53,9 @@ namespace CAOGAttendeeManager
 
         public bool Checked { get; set; }
 
+
+        public bool IsActivityChecked { get; set; }
+
         public int AttendeeId { get; set; }
         private string _lastname = "";
         public string LastName

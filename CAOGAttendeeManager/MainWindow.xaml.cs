@@ -1091,8 +1091,7 @@ namespace CAOGAttendeeManager
 
                 int i = 0;
 
-                bool hasActivityPlaceholder = false;
-
+             
                 foreach (var AttendeeRec in m_dbContext.Attendees)
                 {
                     var queryLastDate = (from DateRec in AttendeeRec.AttendanceList
@@ -1105,10 +1104,7 @@ namespace CAOGAttendeeManager
                                                  orderby ActivityDateRec.Date ascending
                                                  select ActivityDateRec).ToList().LastOrDefault();
 
-                    var queryAttendeeActivityPlaceholder = AttendeeRec.ActivityList.SingleOrDefault(r => r.ActivityText == "1");
-
-                    if (queryAttendeeActivityPlaceholder != null)
-                        hasActivityPlaceholder = true;
+                    
 
                     if (queryLastDate != null)
                     {
@@ -1125,7 +1121,7 @@ namespace CAOGAttendeeManager
                             DateString = "Date Not Valid",
                             Attended = AttendeeRec.Checked ? "1" : "",
                             IsModifiedrow = AttendeeRec.Checked,
-                            ActivityChecked = hasActivityPlaceholder ? "1" : "",
+                            ActivityChecked = AttendeeRec.IsActivityChecked ? "1" : "",
 
                         };
 
@@ -1176,9 +1172,7 @@ namespace CAOGAttendeeManager
                         m_lstattendanceTableRows.Add(AttendanceTabledr);
                         m_lstdefaultTableRows.Add(DefaultTabledr);
 
-                        if (hasActivityPlaceholder)
-                            hasActivityPlaceholder = false;
-
+                      
                     }
                     else // There are no Attended status for attendee, look for any follow-up statuses
                     {
@@ -1204,7 +1198,7 @@ namespace CAOGAttendeeManager
                                 DateString = "Date Not Valid",
                                 Attended = AttendeeRec.Checked ? "1" : "",
                                 IsModifiedrow = AttendeeRec.Checked,
-                                ActivityChecked = hasActivityPlaceholder ? "1" : "",
+                                ActivityChecked = AttendeeRec.IsActivityChecked ? "1" : "",
 
                             };
                             DefaultTableRow DefaultTabledr = new DefaultTableRow
@@ -1251,8 +1245,7 @@ namespace CAOGAttendeeManager
                             m_lstattendanceTableRows.Add(AttendanceTabledr);
                             m_lstdefaultTableRows.Add(DefaultTabledr);
 
-                            if (hasActivityPlaceholder)
-                                hasActivityPlaceholder = false;
+                         
                         }
 
 
@@ -1593,16 +1586,17 @@ namespace CAOGAttendeeManager
             }
             foreach (AttendanceTableRow adr in ActivityCheckList)
             {
-               
-                    Activity new_activity = new Activity
-                    {
-                        AttendeeId = adr.AttendeeId,
-                        ActivityText = "1",
-                        Date = null,
-                        ListName = "",
-                    };
+                Attendee queryActivityinContext = m_dbContext.Attendees.Local.SingleOrDefault(rec => rec.AttendeeId == adr.AttendeeId);
+                queryActivityinContext.IsActivityChecked = true;
+                    //Activity new_activity = new Activity
+                    //{
+                    //    AttendeeId = adr.AttendeeId,
+                    //    ActivityText = "1",
+                    //    Date = null,
+                    //    ListName = "",
+                    //};
 
-                    m_dbContext.Activities.Add(new_activity);
+                    //m_dbContext.Activities.Add(new_activity);
               
 
             }
@@ -2302,7 +2296,7 @@ namespace CAOGAttendeeManager
             {
                 rec.Checked = false;
             }
-            Display_AttendeeListTable_in_Grid();
+           
         }
 
         private void UpdateAttendeeListTableWithDateFilter()
@@ -3996,37 +3990,6 @@ namespace CAOGAttendeeManager
                     {
                       
 
-                        //if activity and date do not already exist in dbContext then add to attendee's activitylist
-
-
-                        // Is there a placeholder activity in this attendee's list? if there is then replace the placeholder
-                        // activity with this new activity otherwise create new activity 
-                        var PlaceholderActivity = m_default_row_selected.ActivityList.SingleOrDefault(r => r.ActivityText == "1");
-
-                        if (PlaceholderActivity != null) // has placeholder activity
-                        {
-                            PlaceholderActivity.ActivityText = m_currentAdded_Activity.ActivityText;
-                            PlaceholderActivity.Date = m_ActivityDateSelectedPr;
-                            PlaceholderActivity.ListName = m_currentAdded_Activity.ListName;
-
-                            var lastActivity = (from rec in m_default_row_selected.ActivityList
-                                                orderby rec.Date descending
-                                                select rec).ToList().FirstOrDefault();
-
-                            //Show Attendee's latest activity under the Activity in the Default Table
-                            if (lastActivity != null)
-                            {
-                                m_default_row_selected.ActivityText = lastActivity.ActivityText;
-                                m_default_row_selected.Activity_Last_Attended = lastActivity.DateString;
-                            }
-                            else
-                            {
-                                m_default_row_selected.ActivityText = PlaceholderActivity.ActivityText;
-                                m_default_row_selected.Activity_Last_Attended = PlaceholderActivity.DateString;
-                            }
-                        }
-                        else //has no placeholder activity
-                        {
                             // create new activity
                             Activity new_ap = new Activity();
 
@@ -4039,6 +4002,7 @@ namespace CAOGAttendeeManager
                             string tmp_text = FormatActivityText(new_ap.ActivityText);
                             new_ap.ActivityText = tmp_text;
 
+                           if (!m_dbContext.Activities.Contains(new_ap))
                             m_dbContext.Activities.Add(new_ap); // add activity to database context
 
                             // change activity string back to original string
@@ -4062,7 +4026,7 @@ namespace CAOGAttendeeManager
                                 m_default_row_selected.ActivityText = new_ap.ActivityText;
                                 m_default_row_selected.Activity_Last_Attended = new_ap.DateString;
                             }
-                        }
+                        
 
 
                      
@@ -4071,6 +4035,11 @@ namespace CAOGAttendeeManager
 
                     //clean up all placeholders
                     dr.ActivityChecked = "";
+                    foreach (Attendee at in m_dbContext.Attendees.Local)
+                    {
+                        if (at.IsActivityChecked == true)
+                            at.IsActivityChecked = false;
+                    }
                     //Add any new activities not in the current activity tree
                     m_lstContextActivities = AddALLActivitiesFromContextToActivityTree();
 
