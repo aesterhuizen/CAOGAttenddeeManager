@@ -1561,6 +1561,55 @@ namespace CAOGAttendeeManager
             }
         }
 
+        void SaveProspectCheckmarks()
+        {
+            List<AttendanceTableRow> AttendedChecklist = getListOfCheckedAttendees("Attended");
+            List<AttendanceTableRow> ActivityCheckList = getListOfCheckedAttendees("Activity");
+
+            // Mark each attendee that has a checkmark next to it as checked in the dbcontext
+
+            if (AttendedChecklist.Any() )
+            {
+                foreach (AttendanceTableRow dr in AttendedChecklist)
+                {
+
+                    Attendee queryAttendeeInContext = m_dbContext.Attendees.Local.SingleOrDefault(rec => rec.AttendeeId == dr.AttendeeId);
+                    if ( queryAttendeeInContext != null)
+                        queryAttendeeInContext.Checked = true;
+                }
+            }
+            else
+            {
+                var querySelectAttendees = m_dbContext.Attendees.Local.Where(rec => rec.Checked == true);
+                foreach (Attendee at in querySelectAttendees)
+                {
+                    at.Checked = false;
+                }
+            }
+    
+            if (ActivityCheckList.Any() )
+            {
+                foreach (AttendanceTableRow adr in ActivityCheckList)
+                {
+                    Attendee queryActivityinContext = m_dbContext.Attendees.Local.SingleOrDefault(rec => rec.AttendeeId == adr.AttendeeId);
+                    if (queryActivityinContext != null)
+                        queryActivityinContext.IsActivityChecked = true;
+
+
+                }
+            }
+           else
+           {
+                var querySelectedActivities = m_dbContext.Attendees.Local.Where(rec => rec.IsActivityChecked == true);
+                foreach (Attendee at in querySelectedActivities)
+                {
+                    at.IsActivityChecked = false;
+                }
+           }
+            
+
+
+        }
         void Save_Changes(object sender, System.Windows.RoutedEventArgs e)
         {
 
@@ -1569,37 +1618,9 @@ namespace CAOGAttendeeManager
 
             //  // save last change to list and check for any checked attendees  
 
-            List<AttendanceTableRow> Checklist = new List<AttendanceTableRow>() { };
-            List<AttendanceTableRow> ActivityCheckList = new List<AttendanceTableRow>() { };
 
 
-
-            Checklist = getListOfCheckedAttendees("Attended");
-            ActivityCheckList = getListOfCheckedAttendees("Activity");
-
-            // Mark each attendee that has a checkmark next to it as checked in the dbcontext
-            foreach (AttendanceTableRow dr in Checklist)
-            {
-
-                Attendee queryAttendeeInContext = m_dbContext.Attendees.Local.SingleOrDefault(rec => rec.AttendeeId == dr.AttendeeId);
-                queryAttendeeInContext.Checked = true;
-            }
-            foreach (AttendanceTableRow adr in ActivityCheckList)
-            {
-                Attendee queryActivityinContext = m_dbContext.Attendees.Local.SingleOrDefault(rec => rec.AttendeeId == adr.AttendeeId);
-                queryActivityinContext.IsActivityChecked = true;
-                    //Activity new_activity = new Activity
-                    //{
-                    //    AttendeeId = adr.AttendeeId,
-                    //    ActivityText = "1",
-                    //    Date = null,
-                    //    ListName = "",
-                    //};
-
-                    //m_dbContext.Activities.Add(new_activity);
-              
-
-            }
+            SaveProspectCheckmarks();
 
             ////if there is no attendees checked then make sure all attendees in the dbcontext is not checked (ie checked = false)
             //if (Checklist.Any() )
@@ -2292,10 +2313,7 @@ namespace CAOGAttendeeManager
                 atr.IsModifiedrow = false;
                 atr.IsNewrow = false;
             }
-            foreach (Attendee rec in m_dbContext.Attendees.Local)
-            {
-                rec.Checked = false;
-            }
+           
            
         }
 
@@ -2902,6 +2920,7 @@ namespace CAOGAttendeeManager
                     if (res == MessageBoxResult.Yes)
                     {
                         Cursor = Cursors.Wait;
+                        SaveProspectCheckmarks();
                         SaveActiveList();
                         SaveSettings();
                         StopTimer();

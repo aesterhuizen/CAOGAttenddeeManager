@@ -111,9 +111,8 @@
   <PropertyGroup />
   <PropertyGroup />
   <ItemGroup>
-    <Reference Include="DropDownControls, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\DropDownControls-1.1.4\bin\Release\DropDownControls.dll</HintPath>
+    <Reference Include="DropDownControls">
+      <HintPath>..\DropDownControls.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
@@ -140,7 +139,7 @@
     <Reference Include="System.Security" />
     <Reference Include="system.windows.controls.datavisualization.toolkit, Version=3.5.40128.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\x86\Debug\system.windows.controls.datavisualization.toolkit.dll</HintPath>
+      <HintPath>..\system.windows.controls.datavisualization.toolkit.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Controls.Ribbon" />
     <Reference Include="System.Windows.Forms" />
@@ -158,7 +157,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
     <Reference Include="WPFToolkit">
-      <HintPath>bin\Release\v3.1.24\WPFToolkit.dll</HintPath>
+      <HintPath>..\WPFToolkit.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -363,9 +362,9 @@
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>xcopy /y $(ProjectDir)\bin\x86\Debug\settings.xml $(TargetDir)
-xcopy /y $(ProjectDir)\bin\x86\Debug\AttendeeMgrDB.accdb $(TargetDir)
-xcopy /y G:\dev\Git\AttendeeManager\accessdatabaseengine.exe $(TargetDir)</PreBuildEvent>
+    <PreBuildEvent>xcopy /y /D $(SolutionDir)\settings.xml $(TargetDir)
+xcopy /y /D $(SolutionDir)\AttendeeMgrDB.accdb $(TargetDir)
+xcopy /y /D $(SolutionDir)\accessdatabaseengine.exe $(TargetDir)</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
