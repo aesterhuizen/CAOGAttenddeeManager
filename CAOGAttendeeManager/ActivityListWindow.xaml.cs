@@ -426,7 +426,7 @@ namespace CAOGAttendeeManager
 
             if (selected_node != null)
             {
-                if (selected_node.Parent.GetType() == typeof(TreeView)) // is a toplevel node
+                if (selected_node.Parent == null) // is a toplevel node
                 {
                     int idx = trvActivities.Items.IndexOf(selected_node);
 
@@ -665,7 +665,7 @@ namespace CAOGAttendeeManager
             //Print goodies
 
 
-            string node_header_string = (string)node.Header + "_" + listname;
+            string node_header_string = (string)node.Header + "|" + listname;
             int node_level = node.Level;
 
            //node.Parent;
@@ -773,7 +773,7 @@ namespace CAOGAttendeeManager
 
 
 
-                                        string[] ary_nodeHeader = node_header.Split('_');
+                                        string[] ary_nodeHeader = node_header.Split('|');
                                         string activityName = ary_nodeHeader[0];
                                         string listname = ary_nodeHeader[1];
 
@@ -796,7 +796,7 @@ namespace CAOGAttendeeManager
 
 
                                             node.rtbDescriptionMStream = payload_data;
-                                            string data = Encoding.UTF8.GetString(payload_data.GetBuffer(),0,payload_length);
+                                            //string data = Encoding.UTF8.GetString(payload_data.GetBuffer(),0,payload_length);
                                         }
 
                                         tree_array.Add(node);
@@ -815,7 +815,7 @@ namespace CAOGAttendeeManager
                             {
                                 // if this is the last byte in the buffer and we have not found an ETX symbol
                                
-                                    //cal new size of offset into read_buffer where the new data will go
+                                    //calc new size of offset into read_buffer where the new data will go
                                     offset_size = (read_buffer.Length - 1) - STXidx;
 
 

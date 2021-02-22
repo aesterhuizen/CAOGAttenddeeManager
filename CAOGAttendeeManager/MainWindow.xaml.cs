@@ -286,10 +286,11 @@ namespace CAOGAttendeeManager
             foreach (ComboTreeNode header in list)
             {
                 global::ComboTreeNode node = new global::ComboTreeNode();
-                node.Text = $"(List: {header.activityList})" + " " + (string)header.Header;
+                node.Text = $"(List: {header.activityList}) " + "| " + (string)header.Header;
 
 
-                global::ComboTreeNode parent2 = m_ctbActivity.Nodes.Add(node.Text);
+
+            global::ComboTreeNode parent2 = m_ctbActivity.Nodes.Add(node.Text);
                 parent2.Expanded = true;
                 
                 //ActivityGroups
@@ -344,15 +345,42 @@ namespace CAOGAttendeeManager
 
 
                         string alist = a.Entity.ListName;
+                        string activity = a.Entity.ActivityText;
 
-                        var activity = new string(
+                        string str = "";
 
-                                       (from c in a.Entity.ActivityText
-                                        where char.IsWhiteSpace(c) || char.IsLetterOrDigit(c) || !char.IsSymbol(c)
-                                        select c).ToArray());
-                        string[] split_str = activity.Split('-');
+                   
+                        string[] split_str = activity.Split('>');
 
+
+                        // 1. Iterate throuh split array and remove the last '-' characther at the end of each activity boundary
                         for (int i = 0; i <= split_str.Length - 1; i++)
+                        {
+                            // This is a activity boundary
+                            if (split_str[i].LastOrDefault() == '-')
+                            {
+                                foreach (char c in split_str[i])
+                                {
+                                    if (c == '-') break;
+
+                                    str += c;
+
+                                }
+
+                                split_str[i] = str;
+                                str = "";
+                            }
+                        }
+
+
+
+
+                            //Get ris od the 'blanks' in the array
+                            // var st = split_str.Where(s => !string.IsNullOrEmpty(s)).ToArray();
+
+
+
+                        for (int i = 0; i <= split_str.Length-1;i++)
                         {
                             ComboTreeNode new_node = new ComboTreeNode
                             {
@@ -361,7 +389,10 @@ namespace CAOGAttendeeManager
                                 activityList = alist
                             };
                             tmp_listNodes.Add(new_node);
+                          
                         }
+                            
+                       
 
                     }
                    
@@ -378,7 +409,7 @@ namespace CAOGAttendeeManager
 
             /*
              * Input: tree - this is all the activities in an array form that is in the context. The idea is to put this in tree form
-             * 1. Iterate through the passed in tree
+             * 1. Iterate through the passed in array
              * 2. Build tmp_tree from passed in tree 
              * 3. If a node already exist in the tmp_tree and the node level is '0' then add the node to the tmp_tree and set the root_ptr to tree[i]
              * 4. If the node already exist in the tmp_tree and the level is NOT '0' then do not add the node to the tmp_tree and just set the    
@@ -443,7 +474,12 @@ namespace CAOGAttendeeManager
 
                     }
                     else /* root_ptr is null point it too the current tree node that is iterated */
+                    {
                         root_ptr = tree[i];
+                        //parent_ptr = root_ptr;
+                        //child_ptr = parent_ptr;
+                    }
+                        
 
 
                 }
@@ -1615,24 +1651,10 @@ namespace CAOGAttendeeManager
 
             Cursor = Cursors.Wait;
 
-
-            //  // save last change to list and check for any checked attendees  
-
-
-
+            // save any prospect checkmarks to dbcontext
             SaveProspectCheckmarks();
 
-            ////if there is no attendees checked then make sure all attendees in the dbcontext is not checked (ie checked = false)
-            //if (Checklist.Any() )
-            //{
-            //    foreach (Attendee at in m_dbContext.Attendees)
-            //    {
-            //        if (at.Checked == true)
-            //        {
-            //            at.Checked = false;
-            //        }
-            //    }
-            //}
+          
 
             // save change to db
             SaveActiveList();
@@ -2554,7 +2576,7 @@ namespace CAOGAttendeeManager
 
                                         node_header = Encoding.UTF8.GetString(read_buffer, STXidx + 3 /*beggining offset of node header*/, header_size);
 
-                                        string[] ary_nodeHeader = node_header.Split('_');
+                                        string[] ary_nodeHeader = node_header.Split('|');
                                         string activityName = ary_nodeHeader[0];
                                         string listname = ary_nodeHeader[1];
 
@@ -2575,7 +2597,7 @@ namespace CAOGAttendeeManager
 
 
                                             node.rtbDescriptionMStream = payload_data;
-                                            string data = Encoding.UTF8.GetString(payload_data.GetBuffer(), 0, payload_length);
+                                            //string data = Encoding.UTF8.GetString(payload_data.GetBuffer(), 0, payload_length);
                                         }
 
                                         tree_array.Add(node);
@@ -2683,6 +2705,7 @@ namespace CAOGAttendeeManager
         {
             _ = Cursors.Wait;
 
+            string str = "";
             ComboTreeBox ctb = sender as ComboTreeBox;
             IEnumerable<global::ComboTreeNode> chkNodes = ctb.CheckedNodes;
             if (chkNodes.Any() )
@@ -2692,37 +2715,42 @@ namespace CAOGAttendeeManager
                 {
                     string path = firstNode.GetFullPath("->", false);
 
-                    Regex pattern = new Regex(@"^\(List:\s(.+)\)\s+(.+)");
 
-                    Match match = pattern.Match(path);
-                    GroupCollection groups = match.Groups;
+                    string[] split_str = path.Split('|');
 
-                    string listname = groups[1].Value;
-                    string activity_name = groups[2].Value;
 
-                                     
+                    string listname = split_str[0].Trim();
+
+                    Regex pattern = new Regex(@"[^\(List: ](.+)[^\)]");
+                    Match match = pattern.Match(listname);
+                    listname = match.Value;
+
+                    string activity_name = split_str[1].Trim();
+
+                 
+
                     m_isActivityChecked = true;
 
-                  if (m_currentSelected_Activity == null) //create an activity with activity text if non exist
-                  {
+                    if (m_currentSelected_Activity == null) //create an activity with activity text if non exist
+                    {
 
-                        m_currentSelected_Activity = new Activity { ActivityText = activity_name, ListName=listname};
+                        m_currentSelected_Activity = new Activity { ActivityText = activity_name, ListName = listname };
 
-                        
-                  }
-                  else
-                  {
+
+                    }
+                    else
+                    {
                         // if this is a different activity than previous selected change the ActivityText of the activity
-                       m_currentSelected_Activity.ActivityText = activity_name;
+                        m_currentSelected_Activity.ActivityText = activity_name;
                         m_currentSelected_Activity.ListName = listname;
-                   
-                      
-                  }
-                   
-                   
-                   
-                    
-                    
+
+
+                    }
+
+
+
+
+
                     BuildQuery_and_UpdateGrid();
                    
                 }
@@ -3953,7 +3981,7 @@ namespace CAOGAttendeeManager
         }
 
 
-        bool Check_for_dub_ActivityRec_inDBase(AttendanceTableRow dr)
+        bool Check_for_dub_ActivityRec_inActivityList(AttendanceTableRow dr)
         {
             var queryifActivityExistList = m_default_row_selected.ActivityList.SingleOrDefault(rec => rec.ActivityText == m_currentAdded_Activity.ActivityText && rec.Date == m_ActivityDateSelectedPr);
             if (queryifActivityExistList != null)
@@ -3999,7 +4027,7 @@ namespace CAOGAttendeeManager
                     // Find defaultrow that correspond to the attendance row attendeeID
                     m_default_row_selected = m_lstdefaultTableRows.SingleOrDefault(x => x.AttendeeId == dr.AttendeeId);
 
-                    bool bcheckdupInfo = Check_for_dub_ActivityRec_inDBase(dr);
+                    bool bcheckdupInfo = Check_for_dub_ActivityRec_inActivityList(dr);
                     if (bcheckdupInfo)
                     {
                         MessageBox.Show("A record with the same date already exist in the database, choose a difference date.", "Duplicate date record found", MessageBoxButton.OK, MessageBoxImage.Stop);
@@ -4017,15 +4045,10 @@ namespace CAOGAttendeeManager
                             new_ap.ActivityText = m_currentAdded_Activity.ActivityText;
                             new_ap.ListName = m_currentAdded_Activity.ListName;
 
-                            //modify activity text before written to database context
-                            string tmp_text = FormatActivityText(new_ap.ActivityText);
-                            new_ap.ActivityText = tmp_text;
+                          if(!m_dbContext.Activities.Local.Contains(new_ap))
+                             m_dbContext.Activities.Add(new_ap); // add activity to database context
 
-                           if (!m_dbContext.Activities.Contains(new_ap))
-                            m_dbContext.Activities.Add(new_ap); // add activity to database context
-
-                            // change activity string back to original string
-                            new_ap.ActivityText = m_currentAdded_Activity.ActivityText;
+                        
 
                             if (!m_default_row_selected.ActivityList.Contains(new_ap))
                                 m_default_row_selected.ActivityList.Add(new_ap); //add activtiy to attendee Activity list
@@ -4054,11 +4077,7 @@ namespace CAOGAttendeeManager
 
                     //clean up all placeholders
                     dr.ActivityChecked = "";
-                    foreach (Attendee at in m_dbContext.Attendees.Local)
-                    {
-                        if (at.IsActivityChecked == true)
-                            at.IsActivityChecked = false;
-                    }
+
                     //Add any new activities not in the current activity tree
                     m_lstContextActivities = AddALLActivitiesFromContextToActivityTree();
 
@@ -4081,36 +4100,6 @@ namespace CAOGAttendeeManager
             Cursor = Cursors.Arrow;
         }
 
-        private List<ComboTreeNode> GetListOfTreeNodesFromAttendeeActivityList(DefaultTableRow attendee)
-        {
-            List<ComboTreeNode> tmp_listNodes = new List<ComboTreeNode>();
-
-            foreach (Activity dc_activity in attendee.ActivityList)
-            {
-                if (dc_activity.ActivityText != "")
-                {
-
-
-                    string tmp_text = FormatActivityText(dc_activity.ActivityText);
-
-                    string new_str = tmp_text.Split('-').LastOrDefault();
-
-                    ComboTreeNode new_node = new ComboTreeNode
-                        {
-                            Header = new_str,
-                            
-                        };
-
-                        tmp_listNodes.Add(new_node);
-
-                   
-
-                }
-            }
-
-
-            return tmp_listNodes;
-        }
         private void FindandAddRecursively(ComboTreeNode node, IEnumerable<global::ComboTreeNode> node_to_find)
         {
             var lst = new List<global::ComboTreeNode>(node_to_find);
