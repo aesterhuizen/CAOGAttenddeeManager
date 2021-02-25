@@ -20,6 +20,7 @@
 
     
 		<Feature Id="ProductFeature" Title="Attendee Manager" Level="1">
+      
 			<ComponentGroupRef Id="ProductComponents" />
       <ComponentRef Id="ApplicationShortcut"/>
       
@@ -43,19 +44,35 @@
      
     </PackageGroup>-->
 
-    
-      
-      
-    
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      	<Directory Id="ProgramFilesFolder">
-			  	<Directory Id="INSTALLFOLDER" Name="Attendee Manager" />
-			  </Directory>
+    <!--<CustomAction
+         Id='SpecifyUserFolder'
+         Directory='UserFolder'
+         Value="[%HOME]" />
 
-      <Directory Id="ProgramMenuFolder">
-         <Directory Id="ApplicationProgramsFolder" Name="Attendee Manager"/>
-      </Directory>
-    </Directory>
+    --><!-- put this before installation process --><!--
+    <InstallExecuteSequence>
+      <Custom Action='SpecifyUserFolder' Before="InstallFiles" />
+    </InstallExecuteSequence>-->
+
+   
+
+
+
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+        <Directory Id="LocalAppFolder">
+          <Directory Id="INSTALLFOLDER" Name="Attendee Manager" />
+          
+        </Directory>
+        
+        <Directory Id="ProgramMenuFolder">
+          <Directory Id="ApplicationProgramsFolder" Name="Attendee Manager"/>
+        </Directory>
+
+      
+      </Directory>  
+      
+  
 
     <DirectoryRef Id="ApplicationProgramsFolder">
       <Component Id="ApplicationShortcut" Guid="{7187BE73-C871-4096-9DE2-5A129C2EC868}">
@@ -66,8 +83,10 @@
                   Icon="icon.ico"
                   WorkingDirectory="INSTALLFOLDER"
                   Advertise="no"/>
-                  
+
+       
         <RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall"/>
+       
         <RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]' Name='installed' Type='integer' Value='1' KeyPath='yes' />
       </Component>
      </DirectoryRef>

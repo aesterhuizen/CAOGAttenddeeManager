@@ -124,22 +124,19 @@ namespace CAOGAttendeeManager
                         LoadActivityProspectComboTree(m_lstCurrActivityListNodes); // load tree into prospect tab's dropdown
 
                         txtbActivityListName.Text = GetListName();
+                   }
+                   else
+                    {
+                        m_ActivityListPath = ""; //set path to 'blank' "" when the path does not exist.
                     }
+
                         
                     
                 }
 
-                
-
-
-
+       
                 if (txtbActivityListName.Text == "")
                     txtbActivityListName.Text = "No list";
-
-
-
-
-
 
                 m_lstContextActivities = AddALLActivitiesFromContextToActivityTree(); 
               
@@ -150,16 +147,6 @@ namespace CAOGAttendeeManager
 
                 MessageBox.Show($"Exception occurred when performing database initialization { ex}!\n","Database Error", MessageBoxButton.OK, MessageBoxImage.Error );
             }
-
-
-
-
-
-
-
-
-
-
 
 
         }
@@ -252,6 +239,7 @@ namespace CAOGAttendeeManager
       
      
         private bool m_dateIsValid = false;
+       
         private bool m_alistdateIsValid = false;
 
         private bool m_loaded = false;
@@ -413,7 +401,7 @@ namespace CAOGAttendeeManager
              * 2. Build tmp_tree from passed in tree 
              * 3. If a node already exist in the tmp_tree and the node level is '0' then add the node to the tmp_tree and set the root_ptr to tree[i]
              * 4. If the node already exist in the tmp_tree and the level is NOT '0' then do not add the node to the tmp_tree and just set the    
-             * 5. If a node do not exist in the tmp_tree being built then ADD the node to tmp_tree being built
+             * 5. If a node do not exist in the tmp_tree being built then ADD the node to tmp_tree being built and set the root_ptr to it
              */
             ComboTreeNode parent_ptr = null;
             ComboTreeNode root_ptr = null;
@@ -433,62 +421,30 @@ namespace CAOGAttendeeManager
 
                 if (tree[i].Level == 0)
                 {
-                    if (root_ptr != null)
-                    {
-
-                        // there is already a node with the same name as tree[i] node so dont add the node
-                        if ((string)root_ptr.Header == (string)tree[i].Header)
-                        {
-
-                            // do nothing
-
-                        }
-                        else /* tree[i].Header is different than root_ptr.Header */
-                        {
-                           
-                            ctn = tmp_tree.SingleOrDefault(f => (string)f.Header == (string)root_ptr.Header);
-                          
-                            if (ctn == null) /*node does not exist*/
-                            {
-                                tmp_tree.Add(root_ptr);
-                                node_found = false;
-
-                                /* if tree[i] has the same name as an element already in the list then the new root becomes the list item with Header=tree[i] header
-                                 * else root_ptr = tree[i]*/
-
-                                find_node = tmp_tree.SingleOrDefault(f => (string)f.Header == (string)tree[i].Header);
-                                if (find_node !=null) /*node found */
-                                {
-                                    root_ptr = find_node;
-                                }
-                                else
-                                  root_ptr = tree[i];
-                            }
-                            else 
-                            {
-                                root_ptr = ctn;
-                                NodeExist = false;
-                            }
-
-                        }
-
-                    }
-                    else /* root_ptr is null point it too the current tree node that is iterated */
-                    {
+                   
                         root_ptr = tree[i];
-                        //parent_ptr = root_ptr;
-                        //child_ptr = parent_ptr;
-                    }
+
                         
 
+                        find_node = tmp_tree.SingleOrDefault(f => (string)f.Header == (string)tree[i].Header);
+                        if (find_node == null) /*node not found */
+                        {
+                            tmp_tree.Add(tree[i]); //add tree[i] to tmp_tree root
+                            root_ptr = tree[i]; 
+                            
+                        }
+                        else
+                        {
+                            root_ptr = find_node;
+                        }
+                            
 
                 }
-
                 /* This node is a child of the root node pointed to by root_ptr */
                 else if (tree[i].Level == root_ptr.Level + 1)
                 {
 
-                    if (tree[i].Parent == null)
+                    if (tree[i].Parent == null) //Ensure that you don't add this node to another node that has a parent already
                     {
 
                         
@@ -498,7 +454,7 @@ namespace CAOGAttendeeManager
                             if ((string)node.Header == (string)tree[i].Header)
                             {
                                 NodeExist = true;
-                                //parent_ptr = tree[i];
+                               
                                 
                                 break;
 
@@ -526,7 +482,7 @@ namespace CAOGAttendeeManager
                 /* This node is a child of a parent node pointed to by parent_ptr */
                 else if (tree[i].Level == parent_ptr.Level + 1)
                 {
-                    if (tree[i].Parent == null)
+                    if (tree[i].Parent == null) //Ensure that you don't change a previous relationship
                     {
 
                         foreach (ComboTreeNode node in parent_ptr.Items)
@@ -569,7 +525,7 @@ namespace CAOGAttendeeManager
                  */
                 else if (tree[i].Level == child_ptr.Level + 1)
                 {
-                    if (tree[i].Parent == null)
+                    if (tree[i].Parent == null) //Ensure that you don't change a previous relationship
                     {
                         foreach (ComboTreeNode node in child_ptr.Items)
                         {
@@ -674,7 +630,7 @@ namespace CAOGAttendeeManager
                    if (dr.Attended == "1" && m_alistdateIsValid)
                    {
                        btnImport.IsEnabled = true;
-                      
+
                        break;
                    }
                    else
@@ -684,26 +640,26 @@ namespace CAOGAttendeeManager
                       
                    }
 
+              
+               }
 
+               foreach (AttendanceTableRow dr in m_lstattendanceTableRows)
+               {
                    if (dr.ActivityChecked == "1" && m_ActivityDateSelectedPr != null && m_currentAdded_Activity != null)
                    {
                        btnPanelAddActivity.IsEnabled = true;
-                      
                        break;
+
                    }
                    else
                    {
                        btnPanelAddActivity.IsEnabled = false;
-                      
+
 
                    }
 
-                  
-                   
                }
 
-
-               
                if (m_dbContext.ChangeTracker.HasChanges() || m_ActivityTreeChanged || m_alist_tree_changed )
                {
                    btnSave.IsEnabled = true;
@@ -1136,7 +1092,6 @@ namespace CAOGAttendeeManager
                                          select DateRec).ToList().LastOrDefault();
 
                     var queryActivityLastDate = (from ActivityDateRec in AttendeeRec.ActivityList
-                                                 where ActivityDateRec.ActivityText != "1"
                                                  orderby ActivityDateRec.Date ascending
                                                  select ActivityDateRec).ToList().LastOrDefault();
 
@@ -1597,34 +1552,42 @@ namespace CAOGAttendeeManager
             }
         }
 
+        private void ClearAllContextCheckmarks()
+        {
+            //clear all attendee check marks
+            foreach (Attendee adr in m_dbContext.Attendees.Local)
+            {
+                adr.Checked = false;
+                adr.IsActivityChecked = false;
+            }
+        }
+
         void SaveProspectCheckmarks()
         {
             List<AttendanceTableRow> AttendedChecklist = getListOfCheckedAttendees("Attended");
             List<AttendanceTableRow> ActivityCheckList = getListOfCheckedAttendees("Activity");
 
-            // Mark each attendee that has a checkmark next to it as checked in the dbcontext
-
+         
             if (AttendedChecklist.Any() )
             {
+             //check new checkmarks
                 foreach (AttendanceTableRow dr in AttendedChecklist)
                 {
 
                     Attendee queryAttendeeInContext = m_dbContext.Attendees.Local.SingleOrDefault(rec => rec.AttendeeId == dr.AttendeeId);
                     if ( queryAttendeeInContext != null)
                         queryAttendeeInContext.Checked = true;
+
+
                 }
+      
             }
-            else
-            {
-                var querySelectAttendees = m_dbContext.Attendees.Local.Where(rec => rec.Checked == true);
-                foreach (Attendee at in querySelectAttendees)
-                {
-                    at.Checked = false;
-                }
-            }
-    
+     
             if (ActivityCheckList.Any() )
             {
+               
+
+                //check new checkmarks
                 foreach (AttendanceTableRow adr in ActivityCheckList)
                 {
                     Attendee queryActivityinContext = m_dbContext.Attendees.Local.SingleOrDefault(rec => rec.AttendeeId == adr.AttendeeId);
@@ -1634,23 +1597,14 @@ namespace CAOGAttendeeManager
 
                 }
             }
-           else
-           {
-                var querySelectedActivities = m_dbContext.Attendees.Local.Where(rec => rec.IsActivityChecked == true);
-                foreach (Attendee at in querySelectedActivities)
-                {
-                    at.IsActivityChecked = false;
-                }
-           }
-            
-
-
+       
         }
         void Save_Changes(object sender, System.Windows.RoutedEventArgs e)
         {
 
             Cursor = Cursors.Wait;
 
+            ClearAllContextCheckmarks();
             // save any prospect checkmarks to dbcontext
             SaveProspectCheckmarks();
 
@@ -2679,6 +2633,10 @@ namespace CAOGAttendeeManager
 
         private void M_ctbActivityProspect_DropDownClosed(object sender, System.EventArgs e)
         {
+            // Update the layout of the prospect datagrid so that all edits are accounted for
+            dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
+            dataGrid_prospect.UpdateLayout();
+
             ComboTreeBox ctb = sender as ComboTreeBox;
             IEnumerable<global::ComboTreeNode> chkNodes = ctb.CheckedNodes;
 
@@ -2928,6 +2886,7 @@ namespace CAOGAttendeeManager
           
                 dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
                 dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+               
                 dataGrid.UpdateLayout();
                 dataGrid_prospect.UpdateLayout();
 
@@ -2939,7 +2898,7 @@ namespace CAOGAttendeeManager
 
             
 #if (init_db)
-                if (m_dbContext.ChangeTracker.HasChanges() || m_ActivityTreeChanged)
+                if (m_dbContext.ChangeTracker.HasChanges() || m_ActivityTreeChanged || btnSave.IsEnabled)
                 {
 
 
@@ -2948,6 +2907,7 @@ namespace CAOGAttendeeManager
                     if (res == MessageBoxResult.Yes)
                     {
                         Cursor = Cursors.Wait;
+                        ClearAllContextCheckmarks();
                         SaveProspectCheckmarks();
                         SaveActiveList();
                         SaveSettings();
@@ -4014,10 +3974,10 @@ namespace CAOGAttendeeManager
         {
             Cursor = Cursors.Wait;
 
-            List<AttendanceTableRow> Checklist = new List<AttendanceTableRow>() { };
+           
 
             // get checked mark in activity column
-            Checklist = getListOfCheckedAttendees("Activity");
+            List<AttendanceTableRow> Checklist = getListOfCheckedAttendees("Activity");
 
 
             if (m_currentAdded_Activity != null)
@@ -4046,7 +4006,7 @@ namespace CAOGAttendeeManager
                             new_ap.ListName = m_currentAdded_Activity.ListName;
 
                           if(!m_dbContext.Activities.Local.Contains(new_ap))
-                             m_dbContext.Activities.Add(new_ap); // add activity to database context
+                             m_dbContext.Activities.Local.Add(new_ap); // add activity to database context
 
                         
 
@@ -4077,18 +4037,19 @@ namespace CAOGAttendeeManager
 
                     //clean up all placeholders
                     dr.ActivityChecked = "";
-
-                    //Add any new activities not in the current activity tree
-                    m_lstContextActivities = AddALLActivitiesFromContextToActivityTree();
-
+                  
+                   
                 } // end foreach
 
+                //Add any new activities not in the current activity tree
+                m_lstContextActivities = AddALLActivitiesFromContextToActivityTree();
 
                 m_ctbActivityProspect.UncheckAll();
                 dpHeaderActivityPr.Text = "";
                 btnPanelAddActivity.IsEnabled = false;
                 m_currentAdded_Activity = null;
                 m_ActivityDateSelectedPr = null;
+            
 
                 MessageBox.Show("Activity successfully added to selected attendee(s) profile", "Activity Added", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
@@ -4186,146 +4147,8 @@ namespace CAOGAttendeeManager
          
 
         }
-        private string FormatActivityText(string activityText)
-        {
-             string new_str = "";
-          
-
-            new_str = new string((from c in activityText
-                              where char.IsWhiteSpace(c) || char.IsLetterOrDigit(c) || !char.IsSymbol(c)
-                              select c
-                             ).ToArray());
-          
-
-            return new_str;
-        }
-            
-
-        private void MenuItem_AddNewActivity_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-          
-
-
-
-        }
-
-        private void MenuItem_DeleteActivity_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            //Cursor = Cursors.Wait;
-            //FIX ME
-            //if (m_currentSelected_ActivityPair !=null)
-            //{
-            //    string childtask = m_currentSelected_ActivityPair.ChildTaskName;
-            //    string activityGroup = m_currentSelected_ActivityPair.ActivityGroup;
-            //    string parenttask = m_currentSelected_ActivityPair.ParentTaskName;
-
-            //    var a_group = m_lstActivities.SingleOrDefault(at => at.ActivityName == activityGroup);
-            //    var task = a_group.lstActivityTasks.SingleOrDefault(at => at.TaskName == parenttask);
-            //    int task_idx = a_group.lstActivityTasks.IndexOf(task);
-
-            //    ActivityTask subtask = null;
-
-            //   if (task != null)
-            //    {
-            //       subtask = task.lstsubTasks.SingleOrDefault(st => st.TaskName == childtask);
-            //    }
-
-
-
-
-
-
-            //    // user selected a task with child tasks
-
-            //    if (activityGroup != "" && parenttask != "" && childtask != "")
-            //    {
-
-            //        if (subtask != null)
-            //        {
-
-            //            a_group.lstActivityTasks[task_idx].lstsubTasks.Remove(subtask);
-            //        }
-            //    }
-            //    // user selected a task with no child tasks
-            //    else if (activityGroup != "" && parenttask != "" && childtask == "") 
-            //    {
-            //        if (task != null)
-            //        {
-            //            a_group.lstActivityTasks.Remove(task);
-            //        }
-            //    }
-            //    //user selected a group
-            //    else if (activityGroup != "" && parenttask == "") 
-            //    {
-            //        if (a_group != null)
-            //        {
-            //            m_lstActivities.Remove(a_group);
-            //        }
-
-            //    }
-
-
-
-
-            //    ClearTreeView();
-
-            //    m_newlstActivitiesCount = m_lstActivitiesCount + 1;
-            //    trvActivities.Items.Refresh();
-            //    Cursor = Cursors.Arrow;
-
-
-
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Must select an activity first.", "Delete Activity", MessageBoxButton.OK, MessageBoxImage.Stop);
-            //    Cursor = Cursors.Arrow;
-            //}
-        }
-
-
-
-        private void MenuItem_DeleteActivityGroup_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            //Cursor = Cursors.Wait;
-
-
-            if (m_currentSelected_Activity != null)
-            {
-
-                //FIX ME
-                //var deleteActivityGroup = m_lstActivityHeaders[idx].Groups.SingleOrDefault(ag => ag.ActivityName == m_ActivityName);
-                //if (deleteActivityGroup != null)
-                //{
-                //    m_lstActivityHeaders[idx].Groups.Remove(deleteActivityGroup);
-                //    m_newlstActivitiesCount = m_lstActivitiesCount + 1;
-                //    trvActivities.Items.Refresh();
-                //}
-                //Cursor = Cursors.Arrow;
-            }
-            else
-            {
-                Cursor = Cursors.Arrow;
-                MessageBox.Show("Must select an activity to delete first.", "Delete Activity", MessageBoxButton.OK, MessageBoxImage.Stop);
-
-            }
-
-
-        }
-
-        private void BtnAddColumn_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            AddColumnWindow AddColumnWindow = new AddColumnWindow();
-
-            AddColumnWindow.ShowDialog();
-
-            if (AddColumnWindow.GetColumnNames.Count > 0)
-            {
-                List<string> lst = AddColumnWindow.GetColumnNames;
-            }
-                
-
-        }
+      
+      
 
         private void DataGridCell_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -4362,16 +4185,6 @@ namespace CAOGAttendeeManager
 
 
             }
-
-        }
-
-        private void MenuItem_AddNewColumn_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-
-        }
-
-        private void MenuItem_DeleteColumn_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
 
         }
 
@@ -4504,7 +4317,7 @@ namespace CAOGAttendeeManager
                     m_isFollowupChecked = false;
                     m_isRespondedChecked = false;
 
-
+                    lblChurchLastAttended.Content = "Church last attended";
                     BuildQuery_and_UpdateGrid();
 
 
@@ -4515,6 +4328,7 @@ namespace CAOGAttendeeManager
                     m_isFollowupChecked = true;
                     m_isRespondedChecked = false;
 
+                    lblChurchLastAttended.Content = "Follow-Up last generated";
                     BuildQuery_and_UpdateGrid();
 
                     break;
@@ -4523,6 +4337,8 @@ namespace CAOGAttendeeManager
                     m_isAttendedChecked = false;
                     m_isFollowupChecked = false;
                     m_isRespondedChecked = true;
+
+                    lblChurchLastAttended.Content = "Church last attended";
 
                     BuildQuery_and_UpdateGrid();
 
@@ -4946,6 +4762,10 @@ namespace CAOGAttendeeManager
 
         private void DpHeaderActivityPr_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Update the layout of the prospect datagrid so that all edits are accounted for
+            dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
+            dataGrid_prospect.UpdateLayout();
+
             var calender = sender as DatePicker;
             if (calender.SelectedDate != null)
             {
@@ -4964,17 +4784,13 @@ namespace CAOGAttendeeManager
                 if (date.DayOfWeek == DayOfWeek.Sunday)
                 {
 
-                    m_dateIsValid = true;
+
                     m_ActivityDateSelectedPr = date;
 
 
 
                 }
-                else
-                {
-                    m_dateIsValid = false;
-
-                }
+                else { }
             }
         }
 

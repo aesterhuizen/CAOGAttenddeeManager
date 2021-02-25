@@ -80,10 +80,10 @@
                                   SmallImageSource="Resources\open-file-icon.png"/>
 
                 </RibbonGroup>
-                <RibbonGroup Header="Current List" Margin="0,1" Width="194">
+                <RibbonGroup Header="Current List" Width="330" Margin="0,1">
                     <StackPanel  Orientation="Horizontal">
                         <Label x:Name="lblListname" Content="Name:"/>
-                        <Label x:Name="lblListFilename" Content="" BorderBrush="{x:Null}" Width="135"/>
+                        <Label x:Name="lblListFilename" Content="" BorderBrush="{x:Null}" />
 
                     </StackPanel>
 

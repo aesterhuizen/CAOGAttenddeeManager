@@ -54,7 +54,7 @@ namespace CAOGAttendeeManager
         public bool Checked { get; set; }
 
 
-        public bool IsActivityChecked { get; set; }
+        public bool IsActivityChecked { get; set; } = false;
 
         public int AttendeeId { get; set; }
         private string _lastname = "";
@@ -624,6 +624,7 @@ namespace CAOGAttendeeManager
             Attended = "";
             IsNewrow = false;
             IsModifiedrow = false;
+            ActivityChecked = "";
 
         }
 
@@ -704,7 +705,7 @@ namespace CAOGAttendeeManager
             }
         }
 
-        public string ActivityChecked { get; set; }
+        public string ActivityChecked { get; set; } = "";
 
        
 

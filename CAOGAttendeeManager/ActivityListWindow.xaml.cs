@@ -576,28 +576,6 @@ namespace CAOGAttendeeManager
 
         }
 
-        private void ActivitymnuAdd_Click(object sender, RoutedEventArgs e)
-        {
-            _ = System.Windows.Forms.Cursors.WaitCursor;
-
-
-         
-
-            _ = System.Windows.Forms.Cursors.Arrow;
-
-        }
-
-        private void ActivitymnuEdit_Click(object sender, RoutedEventArgs e)
-        {
-           
-
-        }
-
-        private void ActivitymnuDelete_Click(object sender, RoutedEventArgs e)
-        {
-            
-        }
-
 
         private byte[] FormatByteArray(byte[] payload, string node_header,int header_level )
         {
