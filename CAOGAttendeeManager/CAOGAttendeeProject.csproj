@@ -362,9 +362,9 @@
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>xcopy /y /D $(SolutionDir)\settings.xml $(TargetDir)
-xcopy /y /D $(SolutionDir)\AttendeeMgrDB.accdb $(TargetDir)
-xcopy /y /D $(SolutionDir)\accessdatabaseengine.exe $(TargetDir)</PreBuildEvent>
+    <PreBuildEvent>xcopy /y /D "$(SolutionDir)$(TargetName)\build files\settings.xml" $(TargetDir)
+xcopy /y /D "$(SolutionDir)$(TargetName)\build files\AttendeeMgrDB.accdb" $(TargetDir)
+xcopy /y /D "$(SolutionDir)$(TargetName)\build files\accessdatabaseengine.exe" $(TargetDir)</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
