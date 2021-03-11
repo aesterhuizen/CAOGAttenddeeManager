@@ -19,20 +19,22 @@
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <PublishUrl>publish\</PublishUrl>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>C:\Users\aeste\OneDrive\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateEnabled>true</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
+    <UpdateUrl>http://localhost/CAOGAttendeeManager/</UpdateUrl>
+    <ApplicationRevision>2</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -110,6 +112,18 @@
   <PropertyGroup />
   <PropertyGroup />
   <PropertyGroup />
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>9CC5D9B995F7E58B0C9E088B01F50DC7261C916E</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>CAOGAttendeeProject_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DropDownControls">
       <HintPath>..\DropDownControls.dll</HintPath>
@@ -172,11 +186,6 @@
       <DependentUpon>AddColumn.xaml</DependentUpon>
     </Compile>
     <Compile Include="AttendeeManagerDBModel.cs" />
-    <Compile Include="AttendeeMgrDBDataSet.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>AttendeeMgrDBDataSet.xsd</DependentUpon>
-    </Compile>
     <Compile Include="ChartWindow.xaml.cs">
       <DependentUpon>ChartWindow.xaml</DependentUpon>
     </Compile>
@@ -250,17 +259,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </Resource>
-    <None Include="AttendeeMgrDBDataSet.xsc">
-      <DependentUpon>AttendeeMgrDBDataSet.xsd</DependentUpon>
-    </None>
-    <None Include="AttendeeMgrDBDataSet.xsd">
-      <Generator>MSDataSetGenerator</Generator>
-      <LastGenOutput>AttendeeMgrDBDataSet.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="AttendeeMgrDBDataSet.xss">
-      <DependentUpon>AttendeeMgrDBDataSet.xsd</DependentUpon>
-    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

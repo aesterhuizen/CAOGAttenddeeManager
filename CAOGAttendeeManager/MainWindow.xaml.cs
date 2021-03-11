@@ -2007,6 +2007,7 @@ namespace CAOGAttendeeManager
                     {
                         int attid = dr.AttendeeId;
 
+                       
 
                         //check for duplicate attendance record
                         bool bcheckdupInfo = Check_for_dup_AttendeeInfo_inDbase(dr);
@@ -2087,6 +2088,12 @@ namespace CAOGAttendeeManager
 
                                 }
 
+                                ////FIX ME this attendee has a activity
+                                //if (dr.ActivityChecked == "1")
+                                //{
+                                //    bool bcheckActivity = Check_for_dub_ActivityRec_inActivityList(dr);
+                                //}
+                                    
 
                             }
 
@@ -2149,6 +2156,7 @@ namespace CAOGAttendeeManager
                         newAttendeeRec.FirstName = dr.FirstName.ToString().Trim();
                         newAttendeeRec.LastName = dr.LastName.ToString().Trim();
                         newAttendeeRec.Checked = false;
+                        
 
                         string flname = newAttendeeRec.FirstName.ToUpper() + " " + newAttendeeRec.LastName.ToUpper();
                      
@@ -2171,11 +2179,12 @@ namespace CAOGAttendeeManager
 
                         // add new rows to the default tables
                         m_lstdefaultTableRows.Add(Defaultdr);
+                        // Update last row of AttendeeInfo with new AttendeeId
+                        m_lstattendanceTableRows.Last().AttendeeId = m_NewAttendeeId;
 
-                        // add new attendee info to db context
-                        //m_dbContext.Attendance_Info.Add(newAttInfoRec);
+                      
                         attendanceList.Add(newAttInfoRec);
-                        //m_dbContext.Attendees.Add(newAttendeeRec);
+                    
                         attendeeList.Add(newAttendeeRec);
                         haschanges = true;
                     }
@@ -2186,12 +2195,12 @@ namespace CAOGAttendeeManager
                 {
                     if (attendeeList.Any())
                     {
-                        m_dbContext.Attendees.AddRange(attendeeList);
+                        m_dbContext.Attendees.AddRange(attendeeList); // Add the new Attendee record to the database context
                     }
                     if (attendanceList.Any())
                     {
 
-                        m_dbContext.Attendance_Info.AddRange(attendanceList);
+                        m_dbContext.Attendance_Info.AddRange(attendanceList); //Add new attendance to the database context
                     }
                     ClearAttendeeListStatus(); // set checked status to false for all attendees;
 
@@ -3756,21 +3765,21 @@ namespace CAOGAttendeeManager
           
 
             //update default row with new latest activity
-            if (lastActivity != null)
+            if (m_default_row_selected.ActivityList.Any())
             {
                 m_default_row_selected.Activity_Last_Attended = lastActivity.DateString;
                 m_default_row_selected.ActivityText = lastActivity.ActivityText;
             }
-            
-
-            if (!m_default_row_selected.ActivityList.Any())
+            else 
             {
-                m_default_row_selected.ActivityText = "n/a";
                 m_default_row_selected.Activity_Last_Attended = "n/a";
+                m_default_row_selected.ActivityText = "n/a";
             }
 
+
+
             Display_ActivityList_in_Grid();
-         
+          
           
 
         }
@@ -3800,17 +3809,21 @@ namespace CAOGAttendeeManager
                                     orderby last_date.Date descending
                                     select last_date).FirstOrDefault();
 
-                m_default_row_selected.Church_Last_Attended = latestAttRec.DateString;
-                m_default_row_selected.ChurchStatus = latestAttRec.Status;
+                if (m_default_row_selected.AttendanceList.Any() )
+                {
+                    m_default_row_selected.Church_Last_Attended = latestAttRec.DateString;
+                    m_default_row_selected.ChurchStatus = latestAttRec.Status;
+                }
+                else
+                {
+                    m_default_row_selected.Church_Last_Attended = "n/a";
+                    m_default_row_selected.ChurchStatus = "n/a";
+                }
+                
             }
 
-            if (!m_default_row_selected.AttendanceList.Any())
-            {
-                m_default_row_selected.ChurchStatus = "n/a";
-                m_default_row_selected.Church_Last_Attended = "n/a";
-            }
             Display_AttendanceList_in_Grid();
-
+          
         }
 
         private void Display_ActivityList_in_Grid()
@@ -3973,8 +3986,11 @@ namespace CAOGAttendeeManager
         private void btnPanelAddActivity_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             Cursor = Cursors.Wait;
+            bool bcheckdupInfo = false;
 
-           
+            //end all edits and update the datagrid with changes
+            dataGrid_prospect.CommitEdit(DataGridEditingUnit.Row, true);
+            dataGrid_prospect.UpdateLayout();
 
             // get checked mark in activity column
             List<AttendanceTableRow> Checklist = getListOfCheckedAttendees("Activity");
@@ -3984,10 +4000,14 @@ namespace CAOGAttendeeManager
             {
                 foreach (AttendanceTableRow dr in Checklist)
                 {
+                    
+                    // If the row is a new row then 
                     // Find defaultrow that correspond to the attendance row attendeeID
                     m_default_row_selected = m_lstdefaultTableRows.SingleOrDefault(x => x.AttendeeId == dr.AttendeeId);
+                    if (m_default_row_selected !=null)
+                        bcheckdupInfo = Check_for_dub_ActivityRec_inActivityList(dr);
 
-                    bool bcheckdupInfo = Check_for_dub_ActivityRec_inActivityList(dr);
+
                     if (bcheckdupInfo)
                     {
                         MessageBox.Show("A record with the same date already exist in the database, choose a difference date.", "Duplicate date record found", MessageBoxButton.OK, MessageBoxImage.Stop);

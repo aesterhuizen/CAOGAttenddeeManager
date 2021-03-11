@@ -51,7 +51,7 @@ namespace CAOGAttendeeManager
 
         }
 
-        public bool Checked { get; set; }
+        public bool Checked { get; set; } = false;
 
 
         public bool IsActivityChecked { get; set; } = false;
