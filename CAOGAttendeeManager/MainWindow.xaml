@@ -165,15 +165,15 @@
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1501"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
 
 
             <!-- Tab control ############################################################################################################################################## -->
-            <TabControl Name="GridsTabControl" SelectionChanged="GridsTabControl_SelectionChanged"  >
+            <TabControl Name="GridsTabControl" SelectionChanged="GridsTabControl_SelectionChanged" Margin="0,2" HorizontalAlignment="Left" >
                 <!-- Active Tab################################################################################################################################################ -->
-                <TabItem Header="Overview" Name="Overview">
+                <TabItem Header="Active" Name="Active" Width="47">
                     <Grid>
                         <Grid.Resources>
                             <Style TargetType="{x:Type ScrollViewer}">
@@ -183,7 +183,7 @@
 
                         </Grid.Resources>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
 
@@ -202,25 +202,11 @@
                                 ItemsSource="{Binding}"
                                 CanUserResizeRows="False" 
                                 ColumnHeaderHeight="63"
-                                GridLinesVisibility="Horizontal"
+                                GridLinesVisibility="All"
                                 HorizontalGridLinesBrush="LightGray"
-                                RowHeight="25" FontSize="13" Margin="0,0,0,5"  >
-                            <DataGrid.RowStyle >
-                                <Style TargetType="DataGridRow">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="DarkGray"/>
-                                        </Trigger>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="Background" Value="DarkGray"/>
-                                        </Trigger>
-
-                                    </Style.Triggers>
-                                </Style>
-
-                            </DataGrid.RowStyle>
-
-
+                                VerticalGridLinesBrush="LightGray"
+                                RowHeight="25" FontSize="13">
+                           
 
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Width="8" >
@@ -412,7 +398,7 @@
 
 
 
-                                <DataGridTextColumn x:Name="ActivityCol" Width="250" Binding="{Binding ActivityText}">
+                                <DataGridTextColumn x:Name="ActivityCol" Width="300" Binding="{Binding ActivityText}">
                                     <DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="{x:Type DataGridColumnHeader}">
                                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -445,7 +431,7 @@
                                     </DataGridTextColumn.Header>
                                 </DataGridTextColumn>
 
-                                <DataGridTextColumn Binding="{Binding Activity_Last_Attended}" Width="140">
+                                <DataGridTextColumn Binding="{Binding Activity_Last_Attended}" Width="*">
                                     <DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="{x:Type DataGridColumnHeader}">
                                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -567,7 +553,7 @@
                     </Grid>
                 </TabItem>
                 <!-- Prospect Tab ####################################################################################################################################################-->
-                <TabItem Header="Prospect List" Name="ProspectListTab">
+                <TabItem Header="Prospect List" Name="ProspectListTab" >
                     <Grid>
                         <Grid.Resources>
                             <Style TargetType="{x:Type ScrollViewer}">
@@ -575,11 +561,8 @@
                             </Style>
                         </Grid.Resources>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
-
-
 
                         <DataGrid x:Name="dataGrid_prospect"
                                 SelectedCellsChanged="dataGrid_prospect_SelectedCellsChanged"
@@ -589,15 +572,14 @@
                                 CanUserReorderColumns="False"
                                 CanUserSortColumns="True"
                                 CanUserResizeColumns="True"
-                                ColumnWidth="120"
                                 CanUserResizeRows="False" 
                                 ItemsSource="{Binding}" 
                                 ColumnHeaderHeight="60"
-                                GridLinesVisibility="Horizontal"
+                                GridLinesVisibility="All"
                                 HorizontalGridLinesBrush="LightGray"
-                                RowHeight="25" FontSize="13" SelectionChanged="dataGrid_prospect_SelectionChanged" Margin="1,1,-1,-1"  
-                                 BeginningEdit="dataGrid_prospect_BeginningEdit" >
-
+                                VerticalGridLinesBrush="LightGray"
+                                RowHeight="25" FontSize="13" SelectionChanged="dataGrid_prospect_SelectionChanged"  
+                                 BeginningEdit="dataGrid_prospect_BeginningEdit" HorizontalAlignment="Left">
                             <DataGrid.Columns>
 
                                 <DataGridTextColumn Binding="{Binding LastName}">
@@ -697,7 +679,7 @@
                                         <Grid ToolTipService.ShowDuration="6000" 
                                               ToolTip="Add church last attened date to all attendee's profile marked with a '1' in this column.">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition />
 
                                             </Grid.ColumnDefinitions>
                                             <Grid.RowDefinitions>
@@ -718,7 +700,7 @@
 
 
 
-                                <DataGridTextColumn x:Name="ActivityPr" Width="290" Binding="{Binding ActivityChecked}">
+                                <DataGridTextColumn x:Name="ActivityPr" Width="*" Binding="{Binding ActivityChecked}">
                                     <DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="{x:Type DataGridColumnHeader}">
                                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -770,6 +752,9 @@
                                 </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
+
+
+
                     </Grid>
                 </TabItem>
 
