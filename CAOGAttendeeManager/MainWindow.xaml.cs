@@ -15,6 +15,7 @@ using System.Data.Entity;
 using System.Data;
 using System.Windows.Threading;
 using System.Text.RegularExpressions;
+using MUXC = Microsoft.UI.Xaml.Controls;
 
 namespace CAOGAttendeeManager
 {

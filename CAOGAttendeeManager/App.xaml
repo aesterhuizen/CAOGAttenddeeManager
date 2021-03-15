@@ -3,11 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <!--<ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="FilterDataGrid/FilterDataGrid.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>-->
-
-    </Application.Resources>
+          <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <!-- Other merged dictionaries here -->
+        </Application.Resources>
 </Application>
