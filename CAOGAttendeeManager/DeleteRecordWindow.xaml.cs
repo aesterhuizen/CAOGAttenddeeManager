@@ -12,21 +12,31 @@ namespace CAOGAttendeeManager
     /// </summary>
     public partial class DeleteRecordWindow : Window
     {
-        bool m_delete_click = false;
-        public bool getDeleteRecs
+      
+
+        public bool getUserSpecificRec_click { get; private set; } = false;
+
+        public bool getUserSelectedRecs_click { get; private set; } = false;
+
+
+      
+        private DateTime? _dateToDelete = null;
+
+        public string getStringDate
         {
             get
             {
-                return m_delete_click;
+                if (_dateToDelete == null)
+                {
+                    return "any date";
+                }
+                else
+                {
+                    return "date " + "'" + _dateToDelete?.ToString("MM-dd-yyyy") + "'";
+                }
+                
             }
-            set
-            {
-                if (m_delete_click != value)
-                    m_delete_click = true;
-            }
-
         }
-        private DateTime? _dateToDelete = null;
         public DateTime? getDateToDelete
         {
             get
@@ -42,7 +52,10 @@ namespace CAOGAttendeeManager
             }
 
         }
-       
+        public bool CancelClicked { get; set; } = false;
+
+        public string getStatusToDelete { get; set; }
+
 
         public DeleteRecordWindow(System.Collections.IList selectedRows)
         {
@@ -62,7 +75,7 @@ namespace CAOGAttendeeManager
        
         private void BtnDeleteSelectedRecords_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            m_delete_click = true;
+          getUserSelectedRecs_click = true;
             Close();
         }
 
@@ -71,9 +84,18 @@ namespace CAOGAttendeeManager
         private void BtnDeleteDateRecords_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
-            m_delete_click = true;
+            MessageBoxResult result = MessageBox.Show($"Are you sure you want to delete '{getStatusToDelete}' records of {getStringDate}?","Verify delete records",MessageBoxButton.OKCancel,MessageBoxImage.Warning);
+            if (result == MessageBoxResult.Cancel)
+            {
+                return;
+            }
+            else
+            {
+                getUserSpecificRec_click = true;
+
+                Close();
+            }
             
-            Close();
 
             
 
@@ -170,30 +192,76 @@ namespace CAOGAttendeeManager
             {
                 dp_cal.BlackoutDates.Add(new CalendarDateRange(d, d));
             }
+
+            
         }
         private void Window_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
             Add_Blackout_Dates(ref dpChurchDate);
 
-            m_delete_click = false;
-            btnDeleteDateRecords.IsEnabled = false;
             
+            btnDeleteDateRecords.IsEnabled = false;
+          
         }
 
         private void Window_Closed(object sender, System.EventArgs e)
         {
-            if (m_delete_click == true)
-            {
-                // do nothing
-            }
-            else
-                m_delete_click = false;
+
+            
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            m_delete_click = false;
+            CancelClicked = true;
             Close();
+        }
+
+
+        private void cmbStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cmbStatus = (ComboBox)sender;
+
+            int status_idx = cmbStatus.SelectedIndex;
+
+            switch (status_idx)
+            {
+                case 0: //All
+                    getStatusToDelete = "All";
+                  
+                    break;
+                case 1:
+                    //Attended filter
+                    getStatusToDelete = "Attended";
+                    if (dpChurchDate.SelectedDate != null)
+                        btnDeleteDateRecords.IsEnabled = true;
+
+                    break;
+                case 2:
+                    // Follow-Up filter
+                    getStatusToDelete = "Follow-Up";
+                    if (dpChurchDate.SelectedDate != null)
+                        btnDeleteDateRecords.IsEnabled = true;
+                    break;
+                case 3:
+                    //Responded filter
+                    getStatusToDelete = "Responded";
+                    if (dpChurchDate.SelectedDate != null)
+                        btnDeleteDateRecords.IsEnabled = true;
+                    break;
+
+                default: // Status no filter
+                    getStatusToDelete = "All";
+                    if (dpChurchDate.SelectedDate != null)
+                        btnDeleteDateRecords.IsEnabled = true;
+
+
+
+
+
+                    break;
+
+
+            }
         }
     }
 

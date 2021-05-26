@@ -35,7 +35,7 @@ namespace CAOGAttendeeManager
            
 
 
-            m_version_string = "v3.1.31";
+            m_version_string = "v3.1.32";
 
 
 
@@ -611,7 +611,7 @@ namespace CAOGAttendeeManager
         }
         private void SetTimer()
         {
-            aTimer = new Timer(500);
+            aTimer = new Timer(200);
             // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = true;
@@ -640,11 +640,6 @@ namespace CAOGAttendeeManager
                       
                    }
 
-              
-               }
-
-               foreach (AttendanceTableRow dr in m_lstattendanceTableRows)
-               {
                    if (dr.ActivityChecked == "1" && m_ActivityDateSelectedPr != null && m_currentAdded_Activity != null)
                    {
                        btnPanelAddActivity.IsEnabled = true;
@@ -657,8 +652,9 @@ namespace CAOGAttendeeManager
 
 
                    }
-
                }
+
+              
 
                if (m_dbContext.ChangeTracker.HasChanges() || m_ActivityTreeChanged || m_alist_tree_changed )
                {
@@ -1019,7 +1015,7 @@ namespace CAOGAttendeeManager
             dataGrid_prospect.Items.Refresh();
             lblAttendenceMetrics.Text = dataGrid_prospect.Items.Count.ToString();
             dataGrid_prospect.IsReadOnly = false;
-
+            dataGrid_prospect.CanUserSortColumns = false;
 
 
 
@@ -1047,6 +1043,7 @@ namespace CAOGAttendeeManager
 
 
             dataGrid.IsReadOnly = false;
+            dataGrid.CanUserSortColumns = false;
 
 
 
@@ -1748,97 +1745,150 @@ namespace CAOGAttendeeManager
 
             DeleteRecordWindow delrec_win = new DeleteRecordWindow(selectedRows);
             delrec_win.ShowDialog();
-            DateTime? date_to_be_deleted = delrec_win.getDateToDelete;
-            List<Attendance_Info> lstDeleteRecs = new List<Attendance_Info>() { };
-
-            Cursor = Cursors.Wait;
-
-
-            var default_row_selected = selectedRows.Cast<DefaultTableRow>();
-            int idx = 0;
-
-            if (date_to_be_deleted != null && delrec_win.getDeleteRecs == true)
-            {
-                //find all date records with the 'date_to_be_deleted' date in all attendee's attendance_info history
-
-                for (int i = 0; i <= m_lstdefaultTableRows.Count -1; i++)
-                {
-                   m_lstdefaultTableRows[i].PropertyChanged -= DefaultTabledr_PropertyChanged;  // temporary de-register property changed event
-
-                    var attinforec = m_lstdefaultTableRows[i].AttendanceList.SingleOrDefault(x => x.Date == date_to_be_deleted);
-                   
-
-                    if (attinforec != null)
-                    {
-                        idx = m_lstdefaultTableRows[i].AttendanceList.IndexOf(attinforec);
-                        // remove attendance_info recs from the attendee's attendance_info history
-                        m_lstdefaultTableRows[i].AttendanceList.RemoveAt(idx);
-
-                        // get the next latest attended date
-                        var latestAttRec = (from rec in m_lstdefaultTableRows[i].AttendanceList
-                                            where rec.Status == "Attended" || rec.Status == "Responded"
-                                            orderby rec.Date descending
-                                            select rec).FirstOrDefault();
-
-                        if (latestAttRec !=null)
-                        {
-                            m_lstdefaultTableRows[i].Church_Last_Attended = latestAttRec.DateString;
-                            m_lstdefaultTableRows[i].ChurchStatus = latestAttRec.Status;
-                        }
-                        else
-                        {
-                            m_lstdefaultTableRows[i].ChurchStatus = "n/a";
-                            m_lstdefaultTableRows[i].Church_Last_Attended = "n/a";
-                            // attendee does not have any attendance records
-                            if (!m_lstdefaultTableRows[i].AttendanceList.Any())
-                            {
-                                m_lstdefaultTableRows[i].ChurchStatus = "n/a";
-                                m_lstdefaultTableRows[i].Church_Last_Attended = "n/a";
-                            }
-                        }
-
-                        
-                        lstDeleteRecs.Add(attinforec);
-                        
-                    }
-                   
-                } //end for loop
-                // remove all attendance_info records from the datastructure
-                if (lstDeleteRecs.Any() )
-                {
-                    m_dbContext.Attendance_Info.RemoveRange(lstDeleteRecs);
-                    MessageBox.Show("Records successfully deleted!", "Records deleted...", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else
-                {
-                    MessageBox.Show("No records found!, No records were deleted", "No records deleted...", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-
-
-            }
+            if (delrec_win.CancelClicked)
+                return;
             else
             {
 
-               if (selectedRows.Count != 0 && delrec_win.getDeleteRecs == true)
+
+                DateTime? date_to_be_deleted = delrec_win.getDateToDelete; // get the date records to delete
+                string strStatus = delrec_win.getStatusToDelete;  // get the status records to delete
+
+
+                List<Attendance_Info> lstDeleteRecs = new List<Attendance_Info>() { };
+                Attendance_Info attinforec = null;
+                Cursor = Cursors.Wait;
+
+
+               
+                int idx = 0;
+
+                if (delrec_win.getUserSpecificRec_click)
                 {
-                    DeleteRecordInDefaultTable(selectedRows);
+                    //find all date records with the 'date_to_be_deleted' date in all attendee's attendance_info history
 
-                    m_lstContextActivities = AddALLActivitiesFromContextToActivityTree(); // rebuild activity dropdown
+                    for (int i = 0; i <= m_lstdefaultTableRows.Count - 1; i++)
+                    {
+                        m_lstdefaultTableRows[i].PropertyChanged -= DefaultTabledr_PropertyChanged;  // temporary de-register property changed event
 
-                    DeleteRecordInAttendeeListTable(selectedRows);
-                    Display_DefaultTable_in_Grid();
-                    MessageBox.Show("Records successfully deleted!", "Records deleted...", MessageBoxButton.OK, MessageBoxImage.Information);
+                        if (date_to_be_deleted != null && strStatus != "All") // delete strStatus records with specific date
+                        {
+                            attinforec = m_lstdefaultTableRows[i].AttendanceList.SingleOrDefault(x => x.Date == date_to_be_deleted && x.Status == strStatus);
+
+                            if (attinforec != null)
+                            {
+                                idx = m_lstdefaultTableRows[i].AttendanceList.IndexOf(attinforec);
+                                // remove attendance_info recs from the attendee's attendance_info history
+                                m_lstdefaultTableRows[i].AttendanceList.RemoveAt(idx);
+
+                                // get the next latest attended date
+                                var latestAttRec = (from rec in m_lstdefaultTableRows[i].AttendanceList
+                                                    where rec.Status == "Attended" || rec.Status == "Responded"
+                                                    orderby rec.Date descending
+                                                    select rec).FirstOrDefault();
+
+                                if (latestAttRec != null)
+                                {
+                                    m_lstdefaultTableRows[i].Church_Last_Attended = latestAttRec.DateString;
+                                    m_lstdefaultTableRows[i].ChurchStatus = latestAttRec.Status;
+                                }
+                                else
+                                {
+                                    m_lstdefaultTableRows[i].ChurchStatus = "n/a";
+                                    m_lstdefaultTableRows[i].Church_Last_Attended = "n/a";
+                                    // attendee does not have any attendance records
+                                    if (!m_lstdefaultTableRows[i].AttendanceList.Any())
+                                    {
+                                        m_lstdefaultTableRows[i].ChurchStatus = "n/a";
+                                        m_lstdefaultTableRows[i].Church_Last_Attended = "n/a";
+                                    }
+                                }
+
+
+                                lstDeleteRecs.Add(attinforec);
+
+                            }
+
+                        }
+                        else if (date_to_be_deleted != null && strStatus == "All") //delete all records with specific date
+
+                        {
+
+                            attinforec = m_lstdefaultTableRows[i].AttendanceList.SingleOrDefault(x => x.Date == date_to_be_deleted);
+
+                            if (attinforec != null)
+                            {
+                                idx = m_lstdefaultTableRows[i].AttendanceList.IndexOf(attinforec);
+                                // remove attendance_info recs from the attendee's attendance_info history
+                                m_lstdefaultTableRows[i].AttendanceList.RemoveAt(idx);
+
+                                // get the next latest attended date
+                                var latestAttRec = (from rec in m_lstdefaultTableRows[i].AttendanceList
+                                                    where rec.Status == "Attended" || rec.Status == "Responded"
+                                                    orderby rec.Date descending
+                                                    select rec).FirstOrDefault();
+
+                                if (latestAttRec != null)
+                                {
+                                    m_lstdefaultTableRows[i].Church_Last_Attended = latestAttRec.DateString;
+                                    m_lstdefaultTableRows[i].ChurchStatus = latestAttRec.Status;
+                                }
+                                else
+                                {
+                                    m_lstdefaultTableRows[i].ChurchStatus = "n/a";
+                                    m_lstdefaultTableRows[i].Church_Last_Attended = "n/a";
+                                    // attendee does not have any attendance records
+                                    if (!m_lstdefaultTableRows[i].AttendanceList.Any())
+                                    {
+                                        m_lstdefaultTableRows[i].ChurchStatus = "n/a";
+                                        m_lstdefaultTableRows[i].Church_Last_Attended = "n/a";
+                                    }
+                                }
+
+
+                                lstDeleteRecs.Add(attinforec);
+
+                            }
+                        }
+                       
+
+                    } //end for loop
+
+                    // remove all attendance_info records from the datastructure
+                    if (lstDeleteRecs.Any())
+                    {
+                        m_dbContext.Attendance_Info.RemoveRange(lstDeleteRecs);
+                        MessageBox.Show("Records successfully deleted!", "Records deleted...", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("No records found!, No records were deleted", "No records deleted...", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+
+                    Cursor = Cursors.Arrow;
+
                 }
-                
-            }
+                else if (delrec_win.getUserSelectedRecs_click)
+                {
+                    var default_row_selected = selectedRows.Cast<DefaultTableRow>();
+                    if (selectedRows.Count != 0)
+                    {
+                        DeleteRecordInDefaultTable(selectedRows);
+
+                        m_lstContextActivities = AddALLActivitiesFromContextToActivityTree(); // rebuild activity dropdown
+
+                        DeleteRecordInAttendeeListTable(selectedRows);
+                        Display_DefaultTable_in_Grid();
+                        MessageBox.Show("Records successfully deleted!", "Records deleted...", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+
+                }
 
 
-          
+             
 
-            Cursor = Cursors.Arrow;
 
-           
-
+            } // end cancell clicked
 
         }
 
@@ -2013,7 +2063,7 @@ namespace CAOGAttendeeManager
                         bool bcheckdupInfo = Check_for_dup_AttendeeInfo_inDbase(dr);
                         if (bcheckdupInfo)
                         {
-                            MessageBox.Show("A record with the same date already exist in the database, choose a difference date.", "Duplicate date record found", MessageBoxButton.OK, MessageBoxImage.Stop);
+                            MessageBox.Show("A record with the same date already exist in the database, choose a different date.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
                             return;
                         }
                         else
@@ -2114,7 +2164,7 @@ namespace CAOGAttendeeManager
                         bool bcheckdup = Check_for_dup_Attendee_inDbase(dr);
                         if (bcheckdup)
                         {
-                            MessageBox.Show("A record with the same date already exist in the database, choose a difference date.", "Duplicate date record found", MessageBoxButton.OK, MessageBoxImage.Stop);
+                            MessageBox.Show("A record with the same attendee firstname and lastname already exist in the database, choose a difference firstname or lastname.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
                             return;
                         }
 
@@ -3566,7 +3616,7 @@ namespace CAOGAttendeeManager
             m_isQueryTableShown = true;
             btnGenerateFollowUps.IsEnabled = false;
             btnDelete.IsEnabled = false;
-
+            dataGrid.CanUserSortColumns = false;
 
 
         }
@@ -3607,7 +3657,7 @@ namespace CAOGAttendeeManager
             }
 
 
-            if ((GridsTabControl.SelectedItem as TabItem).Name == "Overview")
+            if ((GridsTabControl.SelectedItem as TabItem).Name == "Active")
             {
 
 
@@ -3651,7 +3701,7 @@ namespace CAOGAttendeeManager
                     if (m_isQueryTableShown)
                         Display_Query_Table();
                     else
-                       Display_DefaultTable_in_Grid();
+                        Display_DefaultTable_in_Grid();
 
                 }
             }
@@ -3683,9 +3733,9 @@ namespace CAOGAttendeeManager
                     btnDelete.IsEnabled = false;
 
 
-                    if (m_isQueryTableShown)
-                        Display_Query_Table();
-                    else
+                    //if (m_isQueryTableShown)
+                    //    Display_Query_Table();
+                    //else
                         Display_AttendeeListTable_in_Grid();
 
 
@@ -4010,7 +4060,7 @@ namespace CAOGAttendeeManager
 
                     if (bcheckdupInfo)
                     {
-                        MessageBox.Show("A record with the same date already exist in the database, choose a difference date.", "Duplicate date record found", MessageBoxButton.OK, MessageBoxImage.Stop);
+                        MessageBox.Show("A record with the same activity and date already exist for the attendee, choose a difference date or activity.", "Duplicate record found", MessageBoxButton.OK, MessageBoxImage.Stop);
                         return;
                     }
                     else
